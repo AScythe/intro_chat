@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - IntroChat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="chat-header">
+            <h1>💬 Micro-Chat</h1>
+            <div class="timer-container">
+                <div class="timer" id="timer">
+                    <span id="timerMinutes">2</span>:<span id="timerSeconds">00</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="chat-content">
+            <div class="card" id="loadingCard">
+                <h2>⏳ Setting up your chat...</h2>
+                <div class="loading-animation">
+                    <div class="pulse-dot"></div>
+                    <p>Getting everything ready for your 2-minute conversation</p>
+                </div>
+            </div>
+
+            <div class="card" id="chatCard" style="display: none;">
+                <div class="chat-partner">
+                    <h2>Chatting with <span id="partnerUsername"></span></h2>
+                    <p class="chat-instruction">Use the prompts below to guide your conversation</p>
+                </div>
+
+                <div class="prompts-container">
+                    <h3>💡 Conversation Prompts</h3>
+                    <div class="prompts-scroll" id="promptsScroll">
+                        <!-- Prompts will be populated here -->
+                    </div>
+                    <button id="nextPromptBtn" class="btn btn-secondary">Next Prompt</button>
+                </div>
+
+                <div class="chat-timer-info">
+                    <p>⏰ <strong>2 minutes</strong> to connect and chat</p>
+                    <p>No pressure — just be yourself!</p>
+                </div>
+            </div>
+
+            <div class="card" id="timeUpCard" style="display: none;">
+                <h2>⏰ Time's Up!</h2>
+                <div class="time-up-content">
+                    <p>Great chat! How would you like to continue?</p>
+                    <div class="conversation-options">
+                        <button id="extend2MinBtn" class="btn btn-primary">Extend for 2 more minutes</button>
+                        <button id="extendIndefiniteBtn" class="btn btn-primary">Continue indefinitely</button>
+                        <button id="endChatBtn" class="btn btn-secondary">End chat and connect on Slack</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="extendedChatCard" style="display: none;">
+                <h2>🔄 Extended Chat</h2>
+                <div class="extended-chat-content">
+                    <p>Chat extended! Enjoy your continued conversation with <span id="extendedPartnerName"></span></p>
+                    <div class="extended-timer-info">
+                        <p id="extendedTimerText">⏰ <strong id="extendedTimeLeft">2:00</strong> remaining</p>
+                        <p>No pressure — just be yourself!</p>
+                    </div>
+                    <div class="extended-actions">
+                        <button id="endExtendedChatBtn" class="btn btn-secondary">End chat and connect on Slack</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="slackConnectionCard" style="display: none;">
+                <h2>💬 Connect on Slack</h2>
+                <div class="slack-connection-content">
+                    <p>Would you like to exchange usernames to connect on Slack?</p>
+                    <div class="connection-options">
+                        <button id="yesConnectBtn" class="btn btn-primary">Yes, let's connect!</button>
+                        <button id="noConnectBtn" class="btn btn-secondary">No thanks</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="connectionResultCard" style="display: none;">
+                <h2 id="connectionResultTitle">Connection Result</h2>
+                <div id="connectionResultContent">
+                    <!-- Result content will be populated here -->
+                </div>
+                <button id="newChatBtn" class="btn btn-primary">Start New Chat</button>
+            </div>
+        </main>
+
+        <footer class="chat-footer">
+            <p>💡 <strong>Remember:</strong> This is a safe space. Be kind, be curious, and enjoy the conversation!</p>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script>
+        // Pass Flask template variables to JavaScript
+        window.chatMatchId = '{{ match_id }}';
+    </script>
+</body>
+</html>

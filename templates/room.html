@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Room - IntroChat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <h1>📍 Select Your Location</h1>
+            <p>Choose where you're sitting to find nearby chat partners</p>
+        </header>
+
+        <main class="main-content">
+            <div class="card">
+                <h2>Where are you?</h2>
+                <div class="room-selection">
+                    <select id="roomSelect" class="room-dropdown">
+                        <option value="">Select a room or table...</option>
+                    </select>
+                    <button id="selectRoomBtn" class="btn btn-primary" disabled>Select Room</button>
+                </div>
+            </div>
+
+            <div class="card" id="roomSelectedCard" style="display: none;">
+                <h2>✅ Room Selected: <span id="selectedRoomName"></span></h2>
+                <div class="room-info">
+                    <p>You're now in <strong id="currentRoomName"></strong></p>
+                    <div class="nearby-users" id="nearbyUsers">
+                        <h3>👥 Nearby Users</h3>
+                        <div class="user-dots" id="userDots">
+                            <!-- User dots will be populated here -->
+                        </div>
+                        <p class="user-count">Looking for people in your room...</p>
+                    </div>
+                </div>
+                
+                <div class="action-section">
+                    <div id="selectPersonSection" style="display: none;">
+                        <h3>👤 Select someone to chat with:</h3>
+                        <div id="availablePeople" class="available-people">
+                            <!-- Available people will be populated here -->
+                        </div>
+                        <button id="requestChatBtn" class="btn btn-chat" disabled>
+                            💬 Request 2-min chat with selected person
+                        </button>
+                    </div>
+                    <div id="waitingForResponse" style="display: none;">
+                        <h3>⏳ Waiting for response...</h3>
+                        <p>You requested to chat with <strong id="requestedPerson"></strong></p>
+                        <p>They'll respond in a moment...</p>
+                        <button id="cancelRequestBtn" class="btn btn-secondary">Cancel Request</button>
+                    </div>
+                    <button id="changeRoomBtn" class="btn btn-secondary">Change Room</button>
+                    <button id="testBtn" class="btn btn-secondary" onclick="testFunction()">Test JavaScript</button>
+                </div>
+            </div>
+
+            <div class="card" id="waitingCard" style="display: none;">
+                <h2>⏳ Looking for a Chat Partner...</h2>
+                <div class="waiting-animation">
+                    <div class="pulse-dot"></div>
+                    <p>We're finding someone nearby who's also ready to chat</p>
+                </div>
+                <button id="cancelWaitingBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+
+            <div class="card" id="matchFoundCard" style="display: none;">
+                <h2>🎉 Match Found!</h2>
+                <div class="match-info">
+                    <p>You've been matched with <strong id="matchUsername"></strong>!</p>
+                    <p class="match-instruction">Meet at <strong id="matchRoomName"></strong> in 60 seconds</p>
+                </div>
+                <div class="countdown" id="countdown">
+                    <span id="countdownNumber">60</span>
+                </div>
+                <button id="goToChatBtn" class="btn btn-primary">Go to Chat</button>
+            </div>
+        </main>
+
+        <footer class="page-footer">
+            <p>💡 <strong>Tip:</strong> Make sure you're physically in the room you select for the best matches!</p>
+            <button id="backToHomeBtn" class="btn btn-secondary" style="margin-top: 10px;">🏠 Back to Home</button>
+        </footer>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='room.js') }}"></script>
+    <script>
+        // Pass Flask template variables to JavaScript
+        window.roomEventId = '{{ event_id }}';
+    </script>
+</body>
+</html>
