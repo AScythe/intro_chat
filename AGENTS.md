@@ -13,6 +13,26 @@ IntroChat is an anonymous 2-minute micro-chat matching at events. Organizers cre
 - **In-memory state** (reset on restart): `active_users`, `active_matches`, `waiting_queue`
 
 ---
+
+## Environment
+- **Python:** 3.10+
+- **Setup:** `python -m venv venv && source venv/bin/activate` (Windows: `venv\Scripts\activate`)
+- **Production env vars:** `FLASK_ENV=production`, `SECRET_KEY=<strong-random-key>`, `CORS_ORIGINS=https://yourdomain.com`
+
+---
+
+## File Ownership
+
+| Location | Role | Agent Policy |
+|----------|------|--------------|
+| `app.py` | Routes, matching logic, cleanup thread | ✅ Safe to edit |
+| `templates/*.html` | Jinja2 UI pages | ✅ Safe to edit |
+| `static/*.js` | Client logic (`utils.js`, `room.js`, `chat.js`) | ✅ Safe to edit |
+| `introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
+| `test_*.py` | Regression tests | ⚠️ Run only — do not modify unless asked |
+
+---
+
 ## Core Commands
 ```bash
 # Setup
@@ -30,16 +50,18 @@ python test_js_modules.py   # JS module validation
 These rules are non-negotiable. Follow them on every task without exception.
 
 ### Always
-- Run tests after changes to codes or database logic
+- Run `python test_app.py` after changes to `app.py` or database logic
+- Run `python test_js_modules.py` after changes to `static/*.js`
+- **A task is not complete until both test files pass with 0 errors**
 - Search by identifier **name**, not line number
 - Preserve double opt-in for connection exchange
 - Keep WebSocket events consistent between backend and frontend
 
 ### Never
-- Delete codes or database without explicit user confirmation
+- Delete any codes or database (`introchat.db`) without explicit user confirmation
 - Log/store chat message content or raw IPs (use UUIDs only)
 - Add authentication/accounts unless explicitly requested
-- Modify test files unless asked
+- Modify `test_*.py` files unless asked
 - Use `cors_allowed_origins="*"` in production
 
 ---
