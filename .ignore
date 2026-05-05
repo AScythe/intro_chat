@@ -1,0 +1,33 @@
+# OpenCode Watcher Ignore File
+# Prevents OpenCode from tracking changes in these files/directories
+
+# Git internals
+.git/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+.conda/
+
+# Database files (frequently updated, noisy)
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE/Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
