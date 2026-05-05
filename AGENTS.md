@@ -1,233 +1,118 @@
 # AGENTS.md - IntroChat
 
 ## Project Overview
-
-IntroChat is a lightweight Flask+SQLite web app for anonymous, 2-minute micro-chat matching at events. Users create events, join via QR code or event code, select rooms, and get real-time matched with nearby available users. No accounts, no persistent messages, no stored identity.
-
----
-
-## Architecture
-
-| Layer | Technology | Details |
-|-------|------------|---------|
-| **Backend** | Flask + Flask-SocketIO | Single-file `app.py` — routes, matching logic, cleanup thread |
-| **Database** | SQLite (`introchat.db`) | Auto-created on first run; 4 tables: `events`, `rooms`, `users`, `matches` |
-| **Frontend** | Vanilla JS + Jinja2 | Pages in `templates/`; logic in `static/` |
-| **Real-time** | WebSocket via SocketIO | Room-based broadcasting; in-memory state dicts |
-| **QR Codes** | Python `qrcode` library | Generated on-the-fly at `/api/qr/<event_id>` |
-
-**In-memory state** (lost on restart, non-persistent by design):
-- `active_users` — currently online users
-- `active_matches` — live match pairs
-- `waiting_queue` — users waiting to be matched
+IntroChat is an anonymous 2-minute micro-chat matching at events. Organizers create events and set up rooms. Users join via QR code or event code, select rooms, and get real-time matched with nearby available users. No accounts needed, no persistent messages, no stored identity.
 
 ---
 
-## Environment
-
-- **Python:** 3.10+
-- **Virtual environment** (recommended):
-  ```bash
-  python -m venv venv
-  source venv/bin/activate      # Linux/macOS
-  venv\Scripts\activate         # Windows
-  ```
-- **No `.env` file required** for development
-- **Production environment variables:**
-  ```
-  FLASK_ENV=production
-  SECRET_KEY=<generate a strong random key>
-  CORS_ORIGINS=https://yourdomain.com
-  ```
+## Architechture
+- **Backend:** Flask + Flask-SocketIO (`app.py`)
+- **Database:** SQLite (`introchat.db`) — 4 tables: `events`, `rooms`, `users`, `matches`
+- **Frontend:** Vanilla JS + Jinja2 (`templates/`, `static/`)
+- **Real-time:** WebSocket via SocketIO with room-based broadcasting
+- **In-memory state** (reset on restart): `active_users`, `active_matches`, `waiting_queue`
 
 ---
-
-## File Ownership
-
-| Location | Role | Agent Policy |
-|----------|------|--------------|
-| `app.py` | Routes, matching logic, cleanup thread | ✅ Safe to edit |
-| `templates/*.html` | Jinja2 UI pages | ✅ Safe to edit |
-| `static/utils.js` | Shared utilities (imported by all pages) | ✅ Safe to edit |
-| `static/room.js` | Room page logic | ✅ Safe to edit |
-| `static/chat.js` | Chat page logic | ✅ Safe to edit |
-| `introchat.db` | Persistent SQLite data store | ⚠️ Never delete without explicit user confirmation |
-| `test_app.py` | Backend/database regression tests | ⚠️ Run only — do not modify unless asked |
-| `test_js_modules.py` | JS module validation tests | ⚠️ Run only — do not modify unless asked |
-| `requirements.txt` | Python dependencies | ⚠️ Only modify if adding a justified dependency |
-
----
-
-## Core Development Commands
-
-### Setup
+## Core Commands
 ```bash
+# Setup
 pip install -r requirements.txt
 python app.py
-```
 
-### Test
-```bash
+# Test (run after every change)
 python test_app.py          # Backend and database checks
 python test_js_modules.py   # JS module validation
-```
-
-### Deploy to Render / Railway
-```bash
-# Build command
-pip install -r requirements.txt
-
-# Start command
-python app.py
 ```
 
 ---
 
 ## Agent Rules
-
 These rules are non-negotiable. Follow them on every task without exception.
 
-### ✅ Always
-- Run `python test_app.py` after any change to `app.py` or database logic
-- Run `python test_js_modules.py` after any change to `static/*.js`
-- Search for identifiers by **name**, not by line number (line numbers drift)
-- Preserve the double opt-in flow for connection exchange — never simplify it
-- Keep all WebSocket events consistent between `app.py` and frontend JS
+### Always
+- Run tests after changes to codes or database logic
+- Search by identifier **name**, not line number
+- Preserve double opt-in for connection exchange
+- Keep WebSocket events consistent between backend and frontend
 
-### ❌ Never
-- Delete or reset `introchat.db` without explicit user confirmation
-- Log, store, or expose chat message content anywhere
-- Expose or log raw user IPs — UUIDs only
-- Add authentication or user accounts unless explicitly requested
-- Change CORS settings without confirming the deployment target first
-- Modify `test_*.py` files unless the user explicitly asks
-- Reference code by line number — use named identifiers instead
+### Never
+- Delete codes or database without explicit user confirmation
+- Log/store chat message content or raw IPs (use UUIDs only)
+- Add authentication/accounts unless explicitly requested
+- Modify test files unless asked
+- Use `cors_allowed_origins="*"` in production
 
 ---
 
-## Verification (Required After Every Change)
+## Critical Implementation Details
 
-Run these in order before considering any task complete:
+### Match Expiry
+- **Initial expiry:** 2 minutes (set in `create_match()` function)
+- **Cleanup threshold:** 5 minutes (cleanup thread runs every 60 seconds)
+- Cleanup thread is daemonized and starts automatically
 
-```bash
-python test_app.py          # Must pass with 0 errors
-python test_js_modules.py   # Must pass with 0 errors
+### Default Rooms
+Defined inline in `app.py` (not a constant):
+```python
+['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Quiet Corner', 'Coffee Area']
 ```
 
-If matching logic or WebSocket events were changed, also manually verify:
-1. Two users in the same room can match
-2. `match_found` event fires on both clients
-3. Countdown and redirect to chat work correctly
-4. Connection exchange requires both users to opt in
+### Conversation Prompts
+Constant `CONVERSATION_PROMPTS` exists in `app.py` — safe to edit
+
+### Websocket Configuration
+- **Development:** `cors_allowed_origins="*"` (line 15)
+- **Production:** Change to explicit origins and add `async_mode='eventlet'`
+
+### Frontend Module Rules
+- No inline `<script>` in templates — all logic in `static/*.js`
+- Pass Jinja2 data to JS via `window` globals only
+- Shared utilities go in `utils.js`
 
 ---
 
-## Critical Gotchas
-
-### ⚠️ WebSocket — Development
-- Use `http://` only in development — SocketIO requires unencrypted connections locally
-- Do not test WebSocket features over `https://` on localhost
-
-### ⚠️ WebSocket — Production
-- Use `eventlet` or `gevent` as the async mode:
-  ```python
-  socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins=CORS_ORIGINS)
-  ```
-- Set allowed origins explicitly — do not use `"*"` in production
-- Install the async backend: `pip install eventlet`
-
-### ⚠️ Database Persistence
-- `introchat.db` persists across restarts — do not delete it casually
-- In-memory dicts (`active_users`, `active_matches`, `waiting_queue`) reset on restart — this is intentional
-- Always run `test_app.py` after schema or query changes to verify data integrity
-
-### ⚠️ Frontend Module Rules
-- No inline `<script>` blocks in `templates/` — all logic lives in `static/*.js`
-- Pass data from Jinja2 to JS via `window` globals only:
-  ```javascript
-  window.roomEventId = "{{ event_id }}";
-  window.chatMatchId = "{{ match_id }}";
-  ```
-- All shared utilities must go through `utils.js` — page scripts import from there
-
----
-
-## API Quick Reference
-
-### Event Management
+## API Endpoints
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | `POST` | `/api/events` | Create event + 8 default rooms |
-| `GET` | `/api/events/<id>/rooms` | List rooms for an event |
-| `POST` | `/api/events/<id>/join` | Join event → receive user ID |
-| `GET` | `/api/qr/<event_id>` | Generate QR code (base64 PNG) |
-
-### User Management
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
+| `GET` | `/api/events/<id>/rooms` | List rooms |
+| `POST` | `/api/events/<id>/join` | Join event (optional: `username`) |
+| `GET` | `/api/qr/<event_id>` | Generate QR code |
 | `POST` | `/api/users/<id>/room` | Select room |
 | `POST` | `/api/users/<id>/available` | Toggle availability |
-
-### Match Management
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
 | `GET` | `/api/matches/<id>` | Get match details |
-| `POST` | `/api/matches/<id>/connect` | Submit connection preference (double opt-in) |
+| `POST` | `/api/matches/<id>/connect` | Submit connection preference |
+| `GET` | `/api/prompts` | Get conversation prompts |
 
-### Content
+### WebSocket Events
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| `GET` | `/api/prompts` | Get 10 conversation prompts |
-
-### WebSocket Events (Socket.IO)
-
-| Event | Direction | Payload | Description |
-|-------|-----------|---------|-------------|
-| `connect` | Client → Server | — | Client connects |
-| `disconnect` | Client → Server | — | Client disconnects, cleans up state |
-| `join_room` | Client → Server | `{room_id}` | Subscribe to room channel |
-| `match_found` | Server → Client | `{match_id, room_id, user1_username, user2_username}` | Match notification |
-| `connection_exchanged` | Server → Client | `{user1_username, user2_username}` | Both users opted in |
-| `connection_declined` | Server → Client | — | One or both users declined |
-
----
-
-## Customization
-
-- **Room defaults:** Find `DEFAULT_ROOMS` list in `app.py` and edit the entries
-- **Conversation prompts:** Find `CONVERSATION_PROMPTS` list in `app.py` and edit the entries
-- **Match expiry duration:** Find `MATCH_EXPIRY_SECONDS` in `app.py`
-- **Cleanup interval:** Find `CLEANUP_INTERVAL_SECONDS` in `app.py`
-
-> Always search by identifier name — never by line number.
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| `join_room` | Client → Server | `{room_id}` |
+| `match_found` | Server → Client | `{match_id, room_id, user1_username, user2_username}` |
+| `connection_exchanged` | Server → Client | `{user1_username, user2_username}` |
+| `connection_declined` | Server → Client | — |
 
 ---
 
 ## Out of Scope
-
 Do not implement any of the following unless the user explicitly requests it:
-
-- User authentication or persistent accounts
-- Swapping SQLite for PostgreSQL, MySQL, or any other database
-- Rewriting the frontend in React, Vue, or any JS framework
-- Storing or logging chat message content
-- GPS or Bluetooth-based proximity detection (current design uses manual room selection)
-- Push notifications or background sync
-- Admin dashboards or moderation tools
+- User authentication or accounts
+- Database swaps (PostgreSQL, MySQL, etc.)
+- Frontend frameworks (React, Vue, etc.)
+- Chat message storage
+- GPS/Bluetooth proximity detection
+- Push notifications
+- Admin dashboards
 
 ---
 
-## Privacy Constraints
-
+## Privacy Requirements
 These are hard requirements — not optional:
-
-- 🚫 **No message storage** — chat content must never be written to the database or logs
-- 🚫 **No identity exposure** — usernames are auto-generated; never collect or store real names, emails, or photos
-- 🚫 **No single opt-in** — connection exchange requires both users to confirm; never weaken this to one-sided
-- 🚫 **No IP logging** — use UUID-based user IDs exclusively
-- ✅ **Match expiry** — matches must auto-expire after 5 minutes; cleanup thread must remain active
-- ✅ **Session reset** — refreshing the page must produce a new anonymous session
+- No message storage
+- No identity exposure (auto-generated usernames only)
+- No single opt-in (double opt-in required)
+- No IP logging (UUIDs only)
+- Match expiry enforced (2-min initial, 5-min cleanup)
+- Session reset on page refresh
