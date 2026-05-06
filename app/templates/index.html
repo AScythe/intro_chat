@@ -1,68 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IntroChat - The Secret Icebreaker for Introverts</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- REVISED: Using css/ subdirectory -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <header class="hero">
-            <div class="hero-content">
-                <h1 class="hero-title">🌟 IntroChat</h1>
-                <p class="hero-subtitle">The Secret Icebreaker for Introverts at Events</p>
-                <p class="hero-description">
-                    "IntroChat doesn't make introverts talk more — it makes them feel safe enough to talk once. 
-                    And sometimes, that one conversation changes everything."
-                </p>
-            </div>
+            <h1 class="hero-title">🌟 IntroChat</h1>
+            <p class="hero-subtitle">The Secret Icebreaker for Introverts at Events</p>
+            <p class="hero-description">
+                "IntroChat doesn't make introverts talk more — it makes them feel safe enough to talk once.
+                And sometimes, that one conversation changes everything."
+            </p>
         </header>
 
         <main class="main-content">
             <div class="card">
                 <h2>Join an Event</h2>
                 <p class="card-description">Enter an event code or scan the QR code to get started</p>
-                
+
                 <div class="input-group">
                     <input type="text" id="eventCode" placeholder="Enter event code (e.g., ABC123)" maxlength="8">
                     <button id="joinEventBtn" class="btn btn-primary">Join Event</button>
                 </div>
-                
+
                 <div class="divider">
                     <span>or</span>
                 </div>
-                
+
                 <div class="qr-section">
                     <button id="scanQRBtn" class="btn btn-secondary">📱 Scan QR Code</button>
-                    <input type="file" id="qrFileInput" accept="image/*" style="display: none;">
+                    <input type="file" id="qrFileInput" accept="image/*" class="hidden">
                 </div>
             </div>
 
-            <div class="card" id="createEventCard" style="display: none;">
+            <div class="card hidden" id="createEventCard">
                 <h2>Create New Event</h2>
                 <p class="card-description">Set up a new IntroChat event for your venue</p>
-                
+
                 <div class="input-group">
                     <input type="text" id="eventName" placeholder="Event name (e.g., Hackathon 2024)" maxlength="50">
                     <button id="createEventBtn" class="btn btn-primary">Create Event</button>
                 </div>
             </div>
 
-            <div class="card" id="eventCreatedCard" style="display: none;">
+            <div class="card hidden" id="eventCreatedCard">
                 <h2>✅ Event Created!</h2>
                 <p class="card-description">Share this QR code with attendees</p>
-                
+
                 <div class="qr-display">
-                    <img id="qrCodeImage" src="" alt="QR Code" style="display: none;">
+                    <img id="qrCodeImage" src="" alt="QR Code" class="hidden">
                 </div>
-                
+
                 <div class="event-info">
                     <p><strong>Event Code:</strong> <span id="createdEventCode"></span></p>
                     <p><strong>Event Name:</strong> <span id="createdEventName"></span></p>
                 </div>
-                
+
                 <button id="joinCreatedEventBtn" class="btn btn-primary">Join This Event</button>
             </div>
 
@@ -104,7 +105,13 @@
         </main>
     </div>
 
+    <!-- REVISED: Added config.js for configurable timer values -->
+    <!-- Load this BEFORE other JS files so CONFIG object is available -->
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='home.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
+
 </html>

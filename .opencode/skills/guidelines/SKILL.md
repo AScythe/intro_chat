@@ -1,11 +1,19 @@
-# GUIDELINES.md
+---
+name: guidelines
+description: Apply strict coding behavioral guidelines for the session — think before coding, when to implement, implement surgically and concisely, define success criteria based on goals. Auto-apply when the user starts a new session or references guidelines.
+---
 
-> This file defines *how* I should work; `AGENTS.md` defines *what* I'm working on.
-> For Project context: See `AGENTS.md` for tech stack, commands, and file boundaries.
+## What I do
+- Read and apply the behavioral coding guidelines below for the entire session
+- Trigger at session start if the user's first message references starting a new session. 
+- Use when the user says "read the guidelines", "remember the guidelines", "load guidelines", "you forgot the guidelines" or similar
 
-Behavioral guidelines to reduce LLM coding mistakes. Merge with project-specific instructions as needed.
+## Guideline Skill Scope
+The `guidelines` skill defines *how* agents should work — behavioral rules for thinking, implementing, and verifying. `AGENTS.md` defines *what* agents work on — project context, tech stack, commands, and file boundaries. The guidelines are layered on top of `AGENTS.md` and take precedence when there is conflict.
 
-## 1. Think Before Coding
+## Guidelines
+
+### 1. Think Before Coding
 **Understand context and requirements. Don't assume. Don't hide confusion.**
 
 Before implementing:
@@ -17,7 +25,7 @@ Before implementing:
 - If something is unclear, state what's confusing and ask.
 - Check if the logic of the proposal is sound, and satisfies the intended functionalities.
 
-## 2. Implementation signal
+### 2. Implementation signal
 **Only write code when all gates are clear.**
 
 Proceed to implementation only when:
@@ -26,18 +34,19 @@ Proceed to implementation only when:
 - Ambiguities are resolved.
 - The proposed approach is logically sound and functionality will work as intended.
 
-## 3. Simplicity First
+### 3. Simplicity First
 **Minimum code that solves the problem. Nothing speculative.**
 
 - No features beyond what was asked.
 - No abstractions for single-use code.
 - No "flexibility" or "configurability" that wasn't requested.
 - No error handling for impossible scenarios.
+- Make it concise and straightforward. Prioritize readability and maintainability.
 - If you write 200 lines and it could be 50, rewrite it.
 
 Ask: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-## 4. Surgical Changes
+### 4. Surgical Changes
 **Touch only what you must. Clean up only your own mess.**
 
 When editing existing code:
@@ -53,7 +62,16 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## 5. Goal-Driven Execution
+### 5. Easy to Review
+**Make it easy for the user to verify your changes.**
+- Write clear and concise comments on the changes you made.
+- Put flags like `# REVISED` or `# ADDED`  or `# REMOVED`  or `# FIXED` on the comments for changed lines.
+- Explain the purpose of the changes on your comments.
+- If you add a function, add a docstring.
+- If you write a constant, add a comment explaining what it does.
+- Don't comment on unchanged code or code you didn't write.
+
+### 6. Goal-Driven Execution
 **Define success criteria. Loop until verified.**
 
 Transform tasks into verifiable goals:
@@ -62,7 +80,6 @@ Transform tasks into verifiable goals:
 - "Refactor X" → "Ensure tests pass before and after"
 
 For multi-step tasks, state a brief plan:
-For multi-step tasks, state a brief plan:
 ```
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
@@ -70,4 +87,4 @@ For multi-step tasks, state a brief plan:
 ```
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-**Final Check:** Review your implementation to ensure logic is sound, functionality works as intended, and all success criteria are met.
+**Final Check:** Review your implementation to ensure logic is sound, functionalities work as intended, and all success criteria are met.

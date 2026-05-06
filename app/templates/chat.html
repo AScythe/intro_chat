@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - IntroChat</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- REVISED: Using css/ subdirectory -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <header class="chat-header">
@@ -18,16 +21,16 @@
             </div>
         </header>
 
-        <main class="chat-content">
+        <main class="main-content">
             <div class="card" id="loadingCard">
                 <h2>⏳ Setting up your chat...</h2>
-                <div class="loading-animation">
+                <div class="waiting-animation">
                     <div class="pulse-dot"></div>
                     <p>Getting everything ready for your 2-minute conversation</p>
                 </div>
             </div>
 
-            <div class="card" id="chatCard" style="display: none;">
+            <div class="card hidden" id="chatCard">
                 <div class="chat-partner">
                     <h2>Chatting with <span id="partnerUsername"></span></h2>
                     <p class="chat-instruction">Use the prompts below to guide your conversation</p>
@@ -47,7 +50,7 @@
                 </div>
             </div>
 
-            <div class="card" id="timeUpCard" style="display: none;">
+            <div class="card hidden" id="timeUpCard">
                 <h2>⏰ Time's Up!</h2>
                 <div class="time-up-content">
                     <p>Great chat! How would you like to continue?</p>
@@ -59,7 +62,7 @@
                 </div>
             </div>
 
-            <div class="card" id="extendedChatCard" style="display: none;">
+            <div class="card hidden" id="extendedChatCard">
                 <h2>🔄 Extended Chat</h2>
                 <div class="extended-chat-content">
                     <p>Chat extended! Enjoy your continued conversation with <span id="extendedPartnerName"></span></p>
@@ -73,7 +76,7 @@
                 </div>
             </div>
 
-            <div class="card" id="slackConnectionCard" style="display: none;">
+            <div class="card hidden" id="slackConnectionCard">
                 <h2>💬 Connect on Slack</h2>
                 <div class="slack-connection-content">
                     <p>Would you like to exchange usernames to connect on Slack?</p>
@@ -84,7 +87,7 @@
                 </div>
             </div>
 
-            <div class="card" id="connectionResultCard" style="display: none;">
+            <div class="card hidden" id="connectionResultCard">
                 <h2 id="connectionResultTitle">Connection Result</h2>
                 <div id="connectionResultContent">
                     <!-- Result content will be populated here -->
@@ -93,17 +96,24 @@
             </div>
         </main>
 
-        <footer class="chat-footer">
+        <footer class="page-footer">
             <p>💡 <strong>Remember:</strong> This is a safe space. Be kind, be curious, and enjoy the conversation!</p>
         </footer>
     </div>
 
+    <!-- REVISED: Added config.js for configurable timer values -->
+    <!-- Load this BEFORE other JS files so CONFIG object is available -->
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dom-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timer-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
     <script>
         // Pass Flask template variables to JavaScript
         window.chatMatchId = '{{ match_id }}';
     </script>
 </body>
+
 </html>

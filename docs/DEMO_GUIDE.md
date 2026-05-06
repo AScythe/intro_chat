@@ -133,7 +133,7 @@ python app.py
 1. **Start with the problem**: "At every tech event, introverts struggle to connect..."
 2. **Show the solution**: "IntroChat makes it safe and easy with just one button"
 3. **Demonstrate the flow**: Create event → Join → Match → Chat
-4. **Highlight the tech**: "Built with Python Flask, real-time WebSockets, and zero frameworks"
+4. **Highlight the tech**: "Built with Python Flask (modular `app/` package), real-time WebSockets, and zero frameworks"
 5. **Emphasize impact**: "This could help thousands of introverts at every event"
 
 ### For Users

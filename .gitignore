@@ -52,5 +52,6 @@ dist/
 build/
 *.egg-info/
 
-# Cursor folders
-.cursor/
+# Opencode folders
+# .opencode/
+.opencode/node_modules/

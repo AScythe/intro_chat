@@ -61,21 +61,16 @@ document.addEventListener('DOMContentLoaded', function() {
         createEventBtn.disabled = true;
         createEventBtn.textContent = 'Creating...';
 
-        fetch('/api/events', {
+        fetchJSON('/api/events', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                name: eventName
-            })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name: eventName})
         })
-        .then(response => response.json())
         .then(data => {
             if (data.event_id) {
                 // Store event info
-                localStorage.setItem('created_event_id', data.event_id);
-                localStorage.setItem('created_event_name', eventName);
+                storeData('created_event_id', data.event_id);
+                storeData('created_event_name', eventName);
                 
                 // Generate QR code
                 generateQRCode(data.event_id);
@@ -98,8 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function generateQRCode(eventId) {
-        fetch(`/api/qr/${eventId}`)
-        .then(response => response.json())
+        fetchJSON(`/api/qr/${eventId}`)
         .then(data => {
             const qrImage = document.getElementById('qrCodeImage');
             qrImage.src = data.qr_code;
@@ -111,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function joinCreatedEvent() {
-        const eventId = localStorage.getItem('created_event_id');
+        const eventId = getData('created_event_id');
         if (eventId) {
             window.location.href = `/room/${eventId}`;
         } else {
@@ -131,10 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
         event.target.value = '';
     }
 
-    function showError(message) {
-        // Simple error display for MVP
-        alert(message);
-    }
 
     // Auto-focus on event code input
     eventCodeInput.focus();

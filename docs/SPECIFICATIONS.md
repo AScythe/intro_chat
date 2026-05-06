@@ -94,7 +94,7 @@ Think of it as *Tinder for 120-second conversations* — but only when you’re 
 
 > ✅ **You can build a fully working prototype in 8–12 hours:**  
 > - Frontend: 3 HTML files (Home, Match, Chat)  
-> - Backend: One `app.py` with Flask + simple match logic  
+> - Backend: `app/` package with Flask + modular match logic  
 > - Demo: Use two phones on the same Wi-Fi → test locally!
 
 ---

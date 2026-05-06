@@ -22,6 +22,10 @@ body {
     flex-direction: column;
 }
 
+.main-content {
+    flex: 1;
+}
+
 /* Header Styles */
 .hero {
     text-align: center;
@@ -409,10 +413,12 @@ body {
     0% {
         box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
     }
+
     50% {
         box-shadow: 0 4px 16px rgba(72, 187, 120, 0.6);
         transform: scale(1.05);
     }
+
     100% {
         box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
     }
@@ -422,9 +428,11 @@ body {
     0% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.2);
     }
+
     100% {
         transform: scale(1);
     }
@@ -613,10 +621,12 @@ body {
         transform: scale(1);
         opacity: 1;
     }
+
     50% {
         transform: scale(1.1);
         opacity: 0.7;
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
@@ -817,18 +827,9 @@ body {
     padding: 20px 0;
 }
 
-.chat-footer {
-    margin-top: auto;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.9rem;
-    padding: 20px 0;
-}
-
-/* Loading States */
-.loading-animation {
-    text-align: center;
-    padding: 40px 20px;
+/* Hidden Utility */
+.hidden {
+    display: none;
 }
 
 /* Responsive Design */
@@ -836,38 +837,38 @@ body {
     .container {
         padding: 15px;
     }
-    
+
     .hero-title {
         font-size: 2.5rem;
     }
-    
+
     .hero-subtitle {
         font-size: 1.1rem;
     }
-    
+
     .input-group {
         flex-direction: column;
     }
-    
+
     .feature-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .connection-options {
         flex-direction: column;
         align-items: center;
     }
-    
+
     .chat-header {
         flex-direction: column;
         gap: 20px;
         text-align: center;
     }
-    
+
     .timer {
         padding: 10px 20px;
     }
-    
+
     .timer span {
         font-size: 1.5rem;
     }
@@ -877,19 +878,19 @@ body {
     .hero {
         padding: 30px 15px;
     }
-    
+
     .hero-title {
         font-size: 2rem;
     }
-    
+
     .card {
         padding: 20px;
     }
-    
+
     .feature-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .btn {
         padding: 12px 20px;
         font-size: 0.9rem;

@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Room - IntroChat</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
+    <!-- REVISED: Using css/ subdirectory -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <header class="page-header">
@@ -25,7 +28,7 @@
                 </div>
             </div>
 
-            <div class="card" id="roomSelectedCard" style="display: none;">
+            <div class="card hidden" id="roomSelectedCard">
                 <h2>✅ Room Selected: <span id="selectedRoomName"></span></h2>
                 <div class="room-info">
                     <p>You're now in <strong id="currentRoomName"></strong></p>
@@ -37,9 +40,9 @@
                         <p class="user-count">Looking for people in your room...</p>
                     </div>
                 </div>
-                
+
                 <div class="action-section">
-                    <div id="selectPersonSection" style="display: none;">
+                    <div class="hidden" id="selectPersonSection">
                         <h3>👤 Select someone to chat with:</h3>
                         <div id="availablePeople" class="available-people">
                             <!-- Available people will be populated here -->
@@ -48,7 +51,7 @@
                             💬 Request 2-min chat with selected person
                         </button>
                     </div>
-                    <div id="waitingForResponse" style="display: none;">
+                    <div class="hidden" id="waitingForResponse">
                         <h3>⏳ Waiting for response...</h3>
                         <p>You requested to chat with <strong id="requestedPerson"></strong></p>
                         <p>They'll respond in a moment...</p>
@@ -59,7 +62,7 @@
                 </div>
             </div>
 
-            <div class="card" id="waitingCard" style="display: none;">
+            <div class="card hidden" id="waitingCard">
                 <h2>⏳ Looking for a Chat Partner...</h2>
                 <div class="waiting-animation">
                     <div class="pulse-dot"></div>
@@ -68,7 +71,7 @@
                 <button id="cancelWaitingBtn" class="btn btn-secondary">Cancel</button>
             </div>
 
-            <div class="card" id="matchFoundCard" style="display: none;">
+            <div class="card hidden" id="matchFoundCard">
                 <h2>🎉 Match Found!</h2>
                 <div class="match-info">
                     <p>You've been matched with <strong id="matchUsername"></strong>!</p>
@@ -87,12 +90,19 @@
         </footer>
     </div>
 
+    <!-- REVISED: Added config.js for configurable timer values -->
+    <!-- Load this BEFORE other JS files so CONFIG object is available -->
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='room.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dom-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/timer-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/room.js') }}"></script>
     <script>
         // Pass Flask template variables to JavaScript
         window.roomEventId = '{{ event_id }}';
     </script>
 </body>
+
 </html>

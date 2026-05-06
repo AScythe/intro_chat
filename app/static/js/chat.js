@@ -8,11 +8,9 @@ let chatConfig = {
 };
 
 // State variables
-let chatTimer = null;
-let timeLeft = 120; // 2 minutes in seconds
+let chatTimerInstance = null;
 let currentPromptIndex = 0;
 let prompts = [];
-let wantsToConnect = false;
 
 /**
  * Initialize the chat page
@@ -37,7 +35,7 @@ function loadMatchInfo() {
     if (chatConfig.matchId.startsWith('demo_')) {
         console.log('Demo match detected, setting up demo chat...');
 
-        // Simulate loading delay
+        // Simulate loading delay for demo mode. Demos use artificial delays to simulate real API behavior.
         setTimeout(() => {
             setTextContent('partnerUsername', 'Dan_DevOps');
             setDisplay('chatCard', 'block');
@@ -45,7 +43,7 @@ function loadMatchInfo() {
 
             // Start the timer
             startChatTimer();
-        }, 2000); // 2 second delay to simulate loading
+        }, CONFIG.DEMO_LOADING_DELAY_MS);
 
         return;
     }
@@ -99,7 +97,8 @@ function loadPrompts() {
  */
 function setupEventListeners() {
     addEventListenerSafe('nextPromptBtn', 'click', nextPrompt);
-    addEventListenerSafe('extend2MinBtn', 'click', () => extendChat(120)); // 2 minutes
+    // This allows changing chat length. Edit config.js to change.
+    addEventListenerSafe('extend2MinBtn', 'click', () => extendChat(CONFIG.CHAT_DURATION));
     addEventListenerSafe('extendIndefiniteBtn', 'click', () => extendChat(-1)); // indefinite
     addEventListenerSafe('endChatBtn', 'click', showSlackConnection);
     addEventListenerSafe('endExtendedChatBtn', 'click', showSlackConnection);
@@ -120,34 +119,32 @@ function setupEventListeners() {
  * Start chat timer
  */
 function startChatTimer() {
-    chatTimer = setInterval(() => {
-        timeLeft--;
-        updateTimerDisplay();
-
-        if (timeLeft <= 0) {
-            clearInterval(chatTimer);
-            showTimeUp();
-        }
-    }, 1000);
+    // This allows changing chat length. Edit config.js to change.
+    chatTimerInstance = createChatTimer(CONFIG.CHAT_DURATION, function (timeLeft) {
+        updateTimerDisplay(timeLeft);
+    }, showTimeUp);
+    chatTimerInstance.start();
 }
 
 /**
  * Update timer display
+ * @param {number} timeLeft - Remaining seconds
  */
-function updateTimerDisplay() {
+function updateTimerDisplay(timeLeft) {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
 
     setTextContent('timerMinutes', minutes);
     setTextContent('timerSeconds', seconds.toString().padStart(2, '0'));
 
-    // Change color as time runs out
+    // Change color as time runs out (visual urgency feedback)
     const timer = getElementById('timer');
     if (timer) {
-        if (timeLeft <= 30) {
+        // Now uses CONFIG thresholds adjusted for configurable chat duration.
+        if (timeLeft <= CONFIG.TIMER_WARNING_THRESHOLD) {
             timer.classList.add('timer-warning');
         }
-        if (timeLeft <= 10) {
+        if (timeLeft <= CONFIG.TIMER_DANGER_THRESHOLD) {
             timer.classList.add('timer-danger');
         }
     }
@@ -203,21 +200,15 @@ function extendChat(additionalTime) {
         setTextContent('extendedPartnerName', 'Dan_DevOps');
         const extendedTimerText = getElementById('extendedTimerText');
         if (extendedTimerText) {
-            extendedTimerText.innerHTML = '⏰ <strong>No time limit</strong> - chat as long as you want!';
+            extendedTimerText.innerHTML = '\u23f0 <strong>No time limit</strong> - chat as long as you want!';
         }
 
-        // Clear any existing timer
-        if (chatTimer) {
-            clearInterval(chatTimer);
-        }
+        chatTimerInstance.clear();
     } else {
-        // 2-minute extension
-        timeLeft = additionalTime;
         setDisplay('timeUpCard', 'none');
         setDisplay('extendedChatCard', 'block');
         setTextContent('extendedPartnerName', 'Dan_DevOps');
 
-        // Start new timer
         startExtendedChatTimer();
     }
 }
@@ -226,24 +217,19 @@ function extendChat(additionalTime) {
  * Start extended chat timer
  */
 function startExtendedChatTimer() {
-    chatTimer = setInterval(() => {
-        timeLeft--;
-        updateExtendedTimerDisplay();
-
-        if (timeLeft <= 0) {
-            clearInterval(chatTimer);
-            showSlackConnection();
-        }
-    }, 1000);
+    // Extended chat uses same duration as initial chat for consistency.
+    chatTimerInstance = createChatTimer(CONFIG.CHAT_DURATION, function (timeLeft) {
+        updateExtendedTimerDisplay(timeLeft);
+    }, showSlackConnection);
+    chatTimerInstance.start();
 }
 
 /**
  * Update extended timer display
+ * @param {number} timeLeft - Remaining seconds
  */
-function updateExtendedTimerDisplay() {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    setTextContent('extendedTimeLeft', `${minutes}:${seconds.toString().padStart(2, '0')}`);
+function updateExtendedTimerDisplay(timeLeft) {
+    setTextContent('extendedTimeLeft', formatTime(timeLeft));
 }
 
 /**
@@ -260,13 +246,11 @@ function showSlackConnection() {
  * @param {boolean} connectPreference - Whether user wants to connect
  */
 function setConnectionPreference(connectPreference) {
-    wantsToConnect = connectPreference;
-
     // Check if this is a demo match
     if (chatConfig.matchId.startsWith('demo_')) {
         console.log('Demo connection preference:', connectPreference);
 
-        // Simulate connection exchange for demo
+        // Simulate connection exchange for demo mode
         setTimeout(() => {
             if (connectPreference) {
                 // Simulate both wanting to connect
@@ -278,7 +262,7 @@ function setConnectionPreference(connectPreference) {
                 // Simulate connection declined
                 handleConnectionDeclined();
             }
-        }, 2000); // 2 second delay to simulate processing
+        }, CONFIG.DEMO_CONNECTION_DELAY_MS);
 
         return;
     }
@@ -286,23 +270,23 @@ function setConnectionPreference(connectPreference) {
     // Real API call for actual matches
     fetchJSON(`/api/matches/${chatConfig.matchId}/connect`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             user_id: getUserId(),
             wants_to_connect: connectPreference
         })
     })
-    .then(data => {
-        if (data.success) {
-            // Show waiting state
-            setDisplay('slackConnectionCard', 'none');
-            showWaitingForConnection();
-        }
-    })
-    .catch(error => {
-        console.error('Error setting connection preference:', error);
-        showError('Failed to process connection preference. Please try again.');
-    });
+        .then(data => {
+            if (data.success) {
+                // Show waiting state
+                setDisplay('slackConnectionCard', 'none');
+                showWaitingForConnection();
+            }
+        })
+        .catch(error => {
+            console.error('Error setting connection preference:', error);
+            showError('Failed to process connection preference. Please try again.');
+        });
 }
 
 /**
@@ -367,7 +351,7 @@ function handleConnectionDeclined() {
 }
 
 // Auto-initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Get match ID from data attribute or URL
     const chatContainer = document.getElementById('chatPageContainer');
     if (chatContainer && chatContainer.dataset.matchId) {

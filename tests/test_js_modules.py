@@ -14,6 +14,9 @@ def test_js_files_exist():
 
     required_files = [
         'static/utils.js',
+        'static/dom-utils.js',
+        'static/api-utils.js',
+        'static/timer-utils.js',
         'static/room.js',
         'static/chat.js',
         'static/home.js'
@@ -28,11 +31,15 @@ def test_js_files_exist():
     print()
 
 def test_utils_functions():
-    """Test that utils.js contains all required utility functions"""
+    """Test that utils.js and split utility files contain all required functions"""
     print("🧪 Testing utils.js functions...")
 
-    with open('static/utils.js', 'r') as f:
-        content = f.read()
+    files = ['static/utils.js', 'static/dom-utils.js', 'static/api-utils.js', 'static/timer-utils.js']
+    all_content = ''
+    for f in files:
+        if os.path.exists(f):
+            with open(f, 'r') as fh:
+                all_content += fh.read()
 
     required_functions = [
         'showError',
@@ -50,12 +57,17 @@ def test_utils_functions():
         'generateUsername',
         'storeUserId',
         'getUserId',
-        'clearUserId'
+        'clearUserId',
+        'createChatTimer',
+        'createCountdown',
+        'storeData',
+        'getData',
+        'clearData'
     ]
 
     for func_name in required_functions:
         pattern = rf'function\s+{func_name}\s*\('
-        if re.search(pattern, content):
+        if re.search(pattern, all_content):
             print(f"✅ Function '{func_name}' found")
         else:
             print(f"❌ Function '{func_name}' missing")
@@ -162,10 +174,11 @@ def test_html_templates():
     with open('templates/room.html', 'r') as f:
         room_content = f.read()
 
-    if 'utils.js' in room_content:
-        print("✅ room.html includes utils.js")
-    else:
-        print("❌ room.html missing utils.js")
+    for js_name in ['utils.js', 'dom-utils.js', 'api-utils.js', 'timer-utils.js']:
+        if js_name in room_content:
+            print(f"✅ room.html includes {js_name}")
+        else:
+            print(f"❌ room.html missing {js_name}")
 
     if 'room.js' in room_content:
         print("✅ room.html includes room.js")
@@ -181,10 +194,11 @@ def test_html_templates():
     with open('templates/chat.html', 'r') as f:
         chat_content = f.read()
 
-    if 'utils.js' in chat_content:
-        print("✅ chat.html includes utils.js")
-    else:
-        print("❌ chat.html missing utils.js")
+    for js_name in ['utils.js', 'dom-utils.js', 'api-utils.js', 'timer-utils.js']:
+        if js_name in chat_content:
+            print(f"✅ chat.html includes {js_name}")
+        else:
+            print(f"❌ chat.html missing {js_name}")
 
     if 'chat.js' in chat_content:
         print("✅ chat.html includes chat.js")
@@ -214,7 +228,7 @@ def test_code_quality():
     """Test code quality and best practices"""
     print("🧪 Testing code quality...")
 
-    js_files = ['static/utils.js', 'static/room.js', 'static/chat.js']
+    js_files = ['static/utils.js', 'static/dom-utils.js', 'static/api-utils.js', 'static/timer-utils.js', 'static/room.js', 'static/chat.js']
 
     for js_file in js_files:
         with open(js_file, 'r') as f:

@@ -11,8 +11,7 @@ let roomConfig = {
 let currentRoomId = null;
 let currentUserId = null;
 let matchId = null;
-let countdownInterval = null;
-let selectedPerson = null;
+let countdownInstance = null;
 
 /**
  * Initialize the room page
@@ -52,23 +51,23 @@ function ensureUserExists() {
         console.log('Creating new user for event:', roomConfig.eventId);
         fetchJSON(`/api/events/${roomConfig.eventId}/join`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({username: generateUsername()})
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: generateUsername() })
         })
-        .then(data => {
-            currentUserId = data.user_id;
-            storeUserId(currentUserId);
-            console.log('Created new user:', currentUserId);
-            resolve();
-        })
-        .catch(error => {
-            console.error('Error creating user:', error);
-            // Create a fallback user ID
-            currentUserId = 'user_' + generateRandomString(8);
-            storeUserId(currentUserId);
-            console.log('Using fallback user:', currentUserId);
-            resolve();
-        });
+            .then(data => {
+                currentUserId = data.user_id;
+                storeUserId(currentUserId);
+                console.log('Created new user:', currentUserId);
+                resolve();
+            })
+            .catch(error => {
+                console.error('Error creating user:', error);
+                // Create a fallback user ID
+                currentUserId = 'user_' + generateRandomString(8);
+                storeUserId(currentUserId);
+                console.log('Using fallback user:', currentUserId);
+                resolve();
+            });
     });
 }
 
@@ -124,7 +123,7 @@ function setupEventListeners() {
     // Room selection
     const roomSelect = getElementById('roomSelect');
     if (roomSelect) {
-        roomSelect.addEventListener('change', function() {
+        roomSelect.addEventListener('change', function () {
             const btn = getElementById('selectRoomBtn');
             if (btn) {
                 btn.disabled = !this.value;
@@ -166,13 +165,13 @@ function selectRoom() {
     // Handle fallback rooms (don't send to API)
     if (roomId.startsWith('fallback_')) {
         currentRoomId = roomId;
-        roomConfig.socket.emit('join_room', {room_id: roomId});
+        roomConfig.socket.emit('join_room', { room_id: roomId });
 
         // Update UI
         setTextContent('selectedRoomName', roomName);
         setTextContent('currentRoomName', roomName);
         setDisplay('roomSelectedCard', 'block');
-        setDisplay('card:first-child', 'none');
+        document.querySelector('.card:first-child').style.display = 'none';
 
         // Update nearby users
         updateNearbyUsers(roomName);
@@ -184,34 +183,34 @@ function selectRoom() {
     // Join room
     fetchJSON(`/api/users/${currentUserId}/room`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({room_id: roomId})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room_id: roomId })
     })
-    .then(data => {
-        if (data.success) {
-            currentRoomId = roomId;
-            roomConfig.socket.emit('join_room', {room_id: roomId});
+        .then(data => {
+            if (data.success) {
+                currentRoomId = roomId;
+                roomConfig.socket.emit('join_room', { room_id: roomId });
 
-            // Update UI
-            setTextContent('selectedRoomName', roomName);
-            setTextContent('currentRoomName', roomName);
-            setDisplay('roomSelectedCard', 'block');
-            document.querySelector('.card:first-child').style.display = 'none';
+                // Update UI
+                setTextContent('selectedRoomName', roomName);
+                setTextContent('currentRoomName', roomName);
+                setDisplay('roomSelectedCard', 'block');
+                document.querySelector('.card:first-child').style.display = 'none';
 
-            // Update nearby users
-            updateNearbyUsers(roomName);
+                // Update nearby users
+                updateNearbyUsers(roomName);
 
-            console.log('Room selected successfully:', roomName);
-        } else {
-            throw new Error(data.error || 'Failed to select room');
-        }
-    })
-    .catch(error => {
-        console.error('Error selecting room:', error);
-        showError('Failed to select room. Please try again.');
-        selectBtn.disabled = false;
-        selectBtn.textContent = originalText;
-    });
+                console.log('Room selected successfully:', roomName);
+            } else {
+                throw new Error(data.error || 'Failed to select room');
+            }
+        })
+        .catch(error => {
+            console.error('Error selecting room:', error);
+            showError('Failed to select room. Please try again.');
+            selectBtn.disabled = false;
+            selectBtn.textContent = originalText;
+        });
 }
 
 /**
@@ -220,19 +219,19 @@ function selectRoom() {
 function requestChat() {
     fetchJSON(`/api/users/${currentUserId}/available`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({available: true})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ available: true })
     })
-    .then(data => {
-        if (data.success) {
-            setDisplay('waitingCard', 'block');
-            setDisplay('roomSelectedCard', 'none');
-        }
-    })
-    .catch(error => {
-        console.error('Error requesting chat:', error);
-        showError('Failed to request chat. Please try again.');
-    });
+        .then(data => {
+            if (data.success) {
+                setDisplay('waitingCard', 'block');
+                setDisplay('roomSelectedCard', 'none');
+            }
+        })
+        .catch(error => {
+            console.error('Error requesting chat:', error);
+            showError('Failed to request chat. Please try again.');
+        });
 }
 
 /**
@@ -241,13 +240,13 @@ function requestChat() {
 function cancelWaiting() {
     fetchJSON(`/api/users/${currentUserId}/available`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({available: false})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ available: false })
     })
-    .then(data => {
-        setDisplay('waitingCard', 'none');
-        setDisplay('roomSelectedCard', 'block');
-    });
+        .then(data => {
+            setDisplay('waitingCard', 'none');
+            setDisplay('roomSelectedCard', 'block');
+        });
 }
 
 /**
@@ -284,26 +283,20 @@ function handleMatchFound(data) {
  * Start countdown timer
  */
 function startCountdown() {
-    let timeLeft = 60;
     const countdownElement = getElementById('countdownNumber');
-
-    countdownInterval = setInterval(() => {
-        timeLeft--;
+    // This gives users time to read match info before auto-redirect to chat.
+    countdownInstance = createCountdown(CONFIG.MATCH_FOUND_COUNTDOWN, function (timeLeft) {
         countdownElement.textContent = timeLeft;
-
-        if (timeLeft <= 0) {
-            clearInterval(countdownInterval);
-            goToChat();
-        }
-    }, 1000);
+    }, goToChat);
+    countdownInstance.start();
 }
 
 /**
  * Navigate to chat page
  */
 function goToChat() {
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
+    if (countdownInstance) {
+        countdownInstance.clear();
     }
     window.location.href = `/chat/${matchId}`;
 }
@@ -316,69 +309,44 @@ function addSampleUsers() {
     // Each user has: name, availability status, and status text
     const sampleUsers = {
         'Main Hall': [
-            {name: 'Alex_Coder', available: false, status: 'Busy coding'},
-            {name: 'Sarah_Dev', available: true, status: 'Looking to chat'},
-            {name: 'Mike_Hacker', available: false, status: 'In deep focus'},
-            {name: 'Emma_Tech', available: true, status: 'Open to talk'}
+            { name: 'Alex_Coder', available: false, status: 'Busy coding' },
+            { name: 'Sarah_Dev', available: true, status: 'Looking to chat' },
+            { name: 'Mike_Hacker', available: false, status: 'In deep focus' },
+            { name: 'Emma_Tech', available: true, status: 'Open to talk' }
         ],
         'Table 1': [
-            {name: 'Jake_Python', available: true, status: 'Ready to chat'},
-            {name: 'Lisa_JS', available: false, status: 'Taking notes'}
+            { name: 'Jake_Python', available: true, status: 'Ready to chat' },
+            { name: 'Lisa_JS', available: false, status: 'Taking notes' }
         ],
         'Table 2': [
-            {name: 'Tom_React', available: false, status: 'Debugging'},
-            {name: 'Anna_Vue', available: true, status: 'Available'},
-            {name: 'Chris_Node', available: false, status: 'On a call'}
+            { name: 'Tom_React', available: false, status: 'Debugging' },
+            { name: 'Anna_Vue', available: true, status: 'Available' },
+            { name: 'Chris_Node', available: false, status: 'On a call' }
         ],
         'Table 3': [
-            {name: 'Sam_AI', available: true, status: 'Looking for conversation'},
-            {name: 'Ruby_Data', available: false, status: 'Analyzing data'}
+            { name: 'Sam_AI', available: true, status: 'Looking for conversation' },
+            { name: 'Ruby_Data', available: false, status: 'Analyzing data' }
         ],
         'Table 4': [
-            {name: 'Ben_Mobile', available: false, status: 'Testing app'},
-            {name: 'Zoe_Flutter', available: true, status: 'Open to chat'}
+            { name: 'Ben_Mobile', available: false, status: 'Testing app' },
+            { name: 'Zoe_Flutter', available: true, status: 'Open to chat' }
         ],
         'Table 5': [
-            {name: 'Max_Cloud', available: true, status: 'Ready to talk'},
-            {name: 'Luna_AWS', available: false, status: 'Configuring servers'}
+            { name: 'Max_Cloud', available: true, status: 'Ready to talk' },
+            { name: 'Luna_AWS', available: false, status: 'Configuring servers' }
         ],
         'Quiet Corner': [
-            {name: 'Eve_Designer', available: true, status: 'Quiet but open'}
+            { name: 'Eve_Designer', available: true, status: 'Quiet but open' }
         ],
         'Coffee Area': [
-            {name: 'Dan_DevOps', available: true, status: 'Coffee break - chat me!'},
-            {name: 'Maya_FullStack', available: false, status: 'Focused on laptop'},
-            {name: 'Leo_Backend', available: false, status: 'Reading documentation'}
+            { name: 'Dan_DevOps', available: true, status: 'Coffee break - chat me!' },
+            { name: 'Maya_FullStack', available: false, status: 'Focused on laptop' },
+            { name: 'Leo_Backend', available: false, status: 'Reading documentation' }
         ]
     };
 
     // Store sample users globally for use in room selection
     window.sampleUsers = sampleUsers;
-}
-
-/**
- * Select a person to chat with
- * @param {string} personName - Name of person to select
- * @param {HTMLElement} personCard - Person card element
- */
-function selectPerson(personName, personCard) {
-    // Remove previous selection
-    document.querySelectorAll('.person-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-
-    // Select this person
-    personCard.classList.add('selected');
-    selectedPerson = personName;
-
-    // Enable request button
-    const requestBtn = getElementById('requestChatBtn');
-    if (requestBtn) {
-        requestBtn.disabled = false;
-        requestBtn.textContent = `💬 Request 2-min chat with ${personName}`;
-    }
-
-    console.log('Selected person:', personName);
 }
 
 /**
@@ -402,9 +370,9 @@ function updateNearbyUsers(roomName) {
 
     // Create sample users for Coffee Area (or any room)
     const sampleUsers = [
-        {name: 'Dan_DevOps', available: true, status: 'Coffee break - chat me!'},
-        {name: 'Maya_FullStack', available: false, status: 'Focused on laptop'},
-        {name: 'Leo_Backend', available: false, status: 'Reading documentation'}
+        { name: 'Dan_DevOps', available: true, status: 'Coffee break - chat me!' },
+        { name: 'Maya_FullStack', available: false, status: 'Focused on laptop' },
+        { name: 'Leo_Backend', available: false, status: 'Reading documentation' }
     ];
 
     let availableCount = 0;
@@ -441,7 +409,7 @@ function updateNearbyUsers(roomName) {
         if (user.available) {
             availableCount++;
 
-            personCard.addEventListener('click', function() {
+            personCard.addEventListener('click', function () {
                 console.log('Person clicked:', user.name);
 
                 // Remove previous selection
@@ -459,8 +427,10 @@ function updateNearbyUsers(roomName) {
 
                 // Enable request button
                 const requestBtn = getElementById('requestChatBtn');
-                requestBtn.disabled = false;
-                requestBtn.textContent = `💬 Request 2-min chat with ${user.name}`;
+                if (requestBtn) {
+                    requestBtn.disabled = false;
+                    requestBtn.textContent = `💬 Request 2-min chat with ${user.name}`;
+                }
 
                 console.log('Person selected:', user.name);
             });
@@ -495,10 +465,10 @@ function requestChatWithPerson() {
     setDisplay('waitingForResponse', 'block');
     setTextContent('requestedPerson', window.selectedPerson);
 
-    // Simulate the person's response after 3 seconds
+    // Demo mode: This simulates network delay on person response.
     setTimeout(() => {
         simulatePersonResponse(window.selectedPerson);
-    }, 3000);
+    }, CONFIG.SIMULATE_RESPONSE_DELAY_MS);
 
     console.log('Requesting chat with:', window.selectedPerson);
 }
@@ -565,7 +535,7 @@ function simulatePersonResponse(personName) {
             window.location.href = `/chat/${fakeMatchId}`;
         });
 
-        // Simulate Dan getting ready after 5 seconds
+        // Demo mode: simulates other person preparing for chat.
         setTimeout(() => {
             setTextContent('theirStatus', '✅');
             getElementById('theirStatus').style.color = '#48bb78';
@@ -573,7 +543,7 @@ function simulatePersonResponse(personName) {
 
             // Check if both are ready
             checkIfBothReady();
-        }, 5000);
+        }, CONFIG.SIMULATE_READY_DELAY_MS);
 
         function checkIfBothReady() {
             const yourReady = getElementById('yourStatus').textContent === '✅';
@@ -633,7 +603,7 @@ function testFunction() {
 }
 
 // Auto-initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('Page loaded - initializing...');
 
     // Get event ID from data attribute or URL
