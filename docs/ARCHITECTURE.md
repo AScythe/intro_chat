@@ -14,12 +14,13 @@ intro_chat/
 │   ├── socket_events.py       # SocketIO event handlers (connect, disconnect, join_room)
 │   └── tasks.py               # Background cleanup thread
 │
-├── templates/                    # Jinja2 HTML templates
+├── app/templates/                # Jinja2 HTML templates
 │   ├── index.html             # Homepage: event creation/joining
 │   ├── room.html              # Room selection page
-│   └── chat.html              # Chat interface with timer/prompts
+│   ├── chat.html              # Chat interface with timer/prompts
+│   └── user_info.html         # User profile form (LinkedIn/Slack)
 │
-├── static/                       # Static assets (organized by type)
+├── app/static/                    # Static assets (organized by type)
 │   ├── css/
 │   │   └── style.css           # Main stylesheet (unified styles)
 │   └── js/
@@ -29,19 +30,24 @@ intro_chat/
 │       ├── api-utils.js          # API call utilities (fetchJSON, etc.)
 │       ├── timer-utils.js        # Timer functions (createChatTimer, createCountdown)
 │       ├── home.js               # Homepage logic (event creation, QR codes)
+│       ├── user-info.js          # User profile page logic (save social info)
 │       ├── room.js               # Room selection & user matching logic
 │       └── chat.js               # Chat interface logic (timer, prompts, connection)
 │
 ├── tests/                        # Test suite
 │   ├── test_app.py            # Backend, database, and modular architecture tests
-│   └── test_js_modules.py    # JavaScript module validation tests
+│   ├── test_js_modules.py     # JavaScript module validation tests
+│   ├── test_fixes.py          # API endpoint integration tests
+│   └── test_db.py             # Database utility & verification
 │
 ├── docs/                         # Documentation
 │   ├── README.md              # Main project README (features, setup, deployment)
+│   ├── ARCHITECTURE.md        # This file (project structure reference)
+│   ├── SPECIFICATIONS.md       # Product specification (problem, solution, user flow)
+│   ├── DEMO_GUIDE.md          # Demo guide for judges/users
 │   ├── AGENTS.md              # Agent guidelines (file ownership, commands, rules)
-│   ├── specification.md       # Product specification (problem, solution, user flow)
-│   ├── DEMO_GUIDE.md         # Demo guide for judges/users
-│   └── ARCHITECTURE.md       # This file (project structure reference)
+│   ├── PROJECT_BEST_PRACTICES.md # Universal coding best practices
+│   └── DOCUMENT_GUIDELINES.md # Document scope & governance
 │
 ├── data/                         # Data files
 │   └── introchat.db           # SQLite database (auto-created)
@@ -75,7 +81,7 @@ intro_chat/
 
 ### `app/routes.py` (HTTP Routes)
 - `register_routes(app)` — registers all `@app.route` handlers
-- Endpoints: `/`, `/room/<id>`, `/chat/<id>`, `/api/events`, `/api/rooms`, `/api/join`, etc.
+- Endpoints: `/`, `/join/<event_id>`, `/room/<id>`, `/chat/<id>`, `/api/events`, `/api/events/<id>/join`, etc.
 
 ### Critical Implementation Details
 
@@ -98,7 +104,7 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 - **Production:** Change to explicit origins and add `async_mode='eventlet'`
 
 #### Frontend Module Rules
-- No inline `<script>` in templates — all logic in `static/*.js`
+- No inline `<script>` in templates — all logic in `app/static/js/*.js`
 - Pass Jinja2 data to JS via `window` globals only
 - Shared utilities go in `utils.js`
 
@@ -113,6 +119,32 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 ### `app/tasks.py` (Background Tasks)
 - `cleanup_expired_matches()` — removes matches older than threshold
 - `start_cleanup_thread()` — starts cleanup as daemon thread
+
+---
+
+## Key Functionalities
+
+1. **Event creation** with unique event codes (8 default rooms auto-created)
+2. **QR code generation** for easy event joining (`/api/qr/<event_id>`)
+3. **Room/table selection** for location-based matching
+4. **Person selection** from sample/demo users (demo mode)
+5. **Matchmaking system** finds available users in same room (`matchmaking.py`)
+6. **Timed chat** with conversation prompts (duration configurable via `app/static/js/config.js`, default: 30s)
+7. **Chat extension** - Extend by configured duration or continue indefinitely
+8. **Connection exchange** after chat (double opt-in)
+9. **Background cleanup** of expired matches every 60 seconds (`tasks.py`)
+
+---
+
+## Data Flow (Technical)
+
+1. User creates/joins event → `POST /api/events` or `POST /api/events/<id>/join` → gets event_id
+2. User fills profile (LinkedIn/Slack) on `/join/<event_id>` → `POST /api/events/<id>/join` with social fields → gets user_id
+3. User selects room → `POST /api/users/<id>/room` → joins SocketIO room via `join_room` event
+4. User selects person → `POST /api/users/<id>/available` → triggers `find_match()` in `matchmaking.py`
+5. Match found → `match_found` WebSocket event → 60s countdown → redirect to `/chat/<match_id>`
+6. Chat starts → timer from `CONFIG.CHAT_DURATION` (default: 30s, configurable via `app/static/js/config.js`) + prompts from `GET /api/prompts`
+7. After chat → `POST /api/matches/<id>/connect` → `connection_exchanged` or `connection_declined` event
 
 ---
 
@@ -188,7 +220,7 @@ http://localhost:5000
 3. Update `AGENTS.md` WebSocket Events table
 
 ### Changing Timer Durations
-1. Edit `static/js/config.js` (for frontend timers)
+1. Edit `app/static/js/config.js` (for frontend timers)
 2. Edit `app/state.py` (for backend constants)
 3. Run tests to verify
 

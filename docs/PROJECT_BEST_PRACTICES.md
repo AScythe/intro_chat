@@ -62,18 +62,22 @@ Persistence   → database.py / repository layer
 **Why it matters**: Changes in one layer don't break others.
 
 ### 1.4 Frontend Modularization
-**Context**: From `static/js/` structure
+**Context**: From `app/static/js/` structure
 
 **Principle**: 1 JS file = 1 purpose. Centralize shared code in `utils.js`, page-specific in `page.js`.
 
 **Example**:
 ```
-static/js/
-├── config.js      # Central config ONLY (CHAT_DURATION)
-├── utils.js       # Shared utilities ONLY (showError)
-├── api-utils.js   # API calls ONLY (fetchJSON)
-├── room.js        # Room page logic ONLY
-└── chat.js        # Chat page logic ONLY
+app/static/js/
+├── config.js        # Central config ONLY (CHAT_DURATION)
+├── utils.js         # Shared utilities ONLY (showError)
+├── dom-utils.js     # DOM helper functions ONLY
+├── api-utils.js     # API calls ONLY (fetchJSON)
+├── timer-utils.js   # Timer functions ONLY (createChatTimer)
+├── home.js          # Homepage logic ONLY
+├── user-info.js     # User profile page logic ONLY
+├── room.js          # Room page logic ONLY
+└── chat.js          # Chat page logic ONLY
 ```
 
 **Why it matters**: No 500-line monoliths, easy to find functionality.
@@ -169,12 +173,14 @@ python -m pytest tests/ -v      # Full suite
 ## 6. Documentation
 **Context**: From confusion about where to find info
 
-**Principle**: One doc = one purpose. README (user), ARCHITECTURE (technical), CONTRIBUTING (workflow).
+**Principle**: One doc = one purpose. README (user), ARCHITECTURE (technical), SPECIFICATIONS (product), DEMO (presentation), AGENTS (operational).
 
 **Example**:
-- `README.md` — What it is, how to run (200-800 words)
+- `README.md` — What it is, how to run
 - `ARCHITECTURE.md` — How it's structured
-- `CONTRIBUTING.md` — Dev setup, PR process
+- `SPECIFICATIONS.md` — Product vision & user journey
+- `DEMO_GUIDE.md` — Demo execution steps
+- `AGENTS.md` — Agent permissions & rules
 
 **Why it matters**: Users find info fast, no hunting.
 
@@ -306,9 +312,12 @@ async function fetchJSON(url, options={}) {
 | Document | Purpose |
 |----------|---------|
 | **README.md** | User-facing: what, how, quick start |
-| **AGENTS.md** | Agent context: *what* agents work on |
+| **SPECIFICATIONS.md** | Product vision, user journey, why it exists |
 | **ARCHITECTURE.md** | Technical: *how* it's structured |
-| **CONTRIBUTING.md** | Workflow: dev setup, PR process |
+| **DEMO_GUIDE.md** | Presenter walkthrough: demo steps |
+| **AGENTS.md** | Agent context: *what* agents work on |
+| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns & lessons |
+| **DOCUMENT_GUIDELINES.md** | Governance: doc scope & boundaries |
 
 **Why it matters**: No confusion, clear ownership.
 

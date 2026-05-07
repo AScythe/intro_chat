@@ -35,12 +35,15 @@ Think of it as *Tinder for 120-second conversations* — but only when you're ph
 ## Features
 
 - **🎯 Event-based**: Join events with simple codes or QR codes
-- **📍 Room Selection**: Choose your location to find nearby chat partners
+- **📍 Room Selection**: Choose your location for location-based matching
 - **🤝 Smart Matching**: Real-time matching with people in the same room
 - **💬 Guided Conversations**: 2-minute timer with conversation prompts
-- **🔒 Privacy First**: Fully anonymous, no data stored, opt-in only
-- **📱 Mobile Friendly**: Works on any device with a browser
-- **⚡ Real-time**: WebSocket-powered instant notifications
+- **🔄 Chat Extension**: Extend by 2 minutes or continue indefinitely
+- **💼 Connection Exchange**: Optional username swap after chat (double opt-in required)
+- **📱 QR Code**: Quick event joining for attendees
+- **🎮 Demo Mode**: Sample users with simulated responses
+- **🆔 User Profile**: Optional LinkedIn/Slack handle collection, stored but never shared without permission
+- **🔒 Privacy First**: Fully anonymous, opt-in only, social info collected only for connection exchange
 
 ---
 
@@ -80,15 +83,19 @@ python -m app
 ### For Attendees
 1. **Join an Event**
    - Scan the QR code or enter the event code
+
+2. **Set Up Your Profile**
+   - Optionally add your LinkedIn URL and/or Slack handle (safe — never shared without double opt-in)
+   - Click "Save" to create your profile
+   - Click "Select Room/Area" to proceed
+
+3. **Pick a Room & Chat**
    - Select your room/table location
    - Tap "Request 2-min chat" when ready
    - Get matched with someone nearby!
-
-2. **Have a Micro-Chat**
-   - Meet at the specified location
    - Use the conversation prompts to guide your chat
-   - Timer runs for exactly 2 minutes
-   - Choose whether to exchange contact info
+   - Timer runs for the configured duration (default: 30 seconds, configurable)
+   - Choose whether to exchange usernames
 
 ---
 
@@ -118,8 +125,8 @@ For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
   - `matchmaking.py`: Match logic
   - `socket_events.py`: WebSocket handlers
   - `tasks.py`: Background cleanup
-- **`templates/`**: HTML templates for all pages
-- **`static/`**: Organized assets (`css/`, `js/`)
+- **`app/templates/`**: HTML templates for all pages
+- **`app/static/`**: Organized assets (`css/`, `js/`)
 - **`tests/`**: Test suite (`test_app.py`, `test_js_modules.py`)
 - **`docs/`**: Documentation (README, AGENTS, etc.)
 
@@ -127,17 +134,18 @@ For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## API Endpoints
 
-For full API documentation, see [API.md](API.md).
+For full API documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
 | `POST` | `/api/events` | Create event + 8 default rooms |
 | `GET` | `/api/events/<id>/rooms` | List rooms |
-| `POST` | `/api/events/<id>/join` | Join event |
+| `POST` | `/api/events/<id>/join` | Join event + save social info (`linkedin_url`, `slack_handle`) |
 | `GET` | `/api/qr/<event_id>` | Generate QR code |
 | `POST` | `/api/users/<id>/room` | Select room |
 | `POST` | `/api/users/<id>/available` | Toggle availability |
 | `GET` | `/api/matches/<id>` | Get match details |
+| `GET` | `/join/<event_id>` | User profile page (LinkedIn/Slack form) |
 | `POST` | `/api/matches/<id>/connect` | Submit connection preference |
 | `GET` | `/api/prompts` | Get conversation prompts |
 
@@ -186,10 +194,11 @@ python tests/test_js_modules.py
 ## Privacy & Security
 
 - **No user accounts**: Completely anonymous
-- **No data storage**: Chats are never saved
+- **Chats never stored**: Conversation content is never saved
+- **Social info stored safely**: LinkedIn/Slack handles collected but never shared without double opt-in
 - **Room-level location**: Only general location, not precise coordinates
 - **Opt-in only**: Users can cancel anytime
-- **Temporary matches**: All data expires after 5 minutes
+- **Temporary matches**: All match data expires after 5 minutes
 
 ---
 
@@ -201,7 +210,7 @@ python tests/test_js_modules.py
 4. Test thoroughly
 5. Submit a pull request
 
-For detailed contributing guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+For detailed contributing guidelines, see [ARCHITECTURE.md](ARCHITECTURE.md) (modifying instructions section).
 
 ---
 

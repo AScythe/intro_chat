@@ -10,12 +10,14 @@
 ## Project Overview
 IntroChat is an anonymous 2-minute micro-chat matching at events. Organizers create events and set up rooms. Users join via QR code or event code, select rooms, and get real-time matched with nearby available users. No accounts needed, no persistent messages, no stored identity.
 
+Key functionalities: event creation, QR codes, room selection, demo-mode person selection, real-time matchmaking, timed chats with prompts, chat extension, Slack connection exchange, and background cleanup of expired matches.
+
 ---
 
 ## Architecture
 - **Backend:** Flask + Flask-SocketIO (`app/` package)
 - **Database:** SQLite (`data/introchat.db`) — 4 tables: `events`, `rooms`, `users`, `matches`
-- **Frontend:** Vanilla JS + Jinja2 (`templates/`, `static/`)
+- **Frontend:** Vanilla JS + Jinja2 (`app/templates/`, `app/static/js/`)
 - **Real-time:** WebSocket via SocketIO with room-based broadcasting
 - **In-memory state** (reset on restart): `active_users`, `active_matches`, `waiting_queue`
 
@@ -35,8 +37,8 @@ For full architecture details, component interactions, and implementation specif
 | Location | Role | Agent Policy |
 |----------|------|--------------|
 | `app/` | Flask package — routes, matching, WebSocket handlers | ✅ Safe to edit |
-| `templates/*.html` | Jinja2 UI pages | ✅ Safe to edit |
-| `static/*.js` | Client logic (`utils.js`, `room.js`, `chat.js`) | ✅ Safe to edit |
+| `app/templates/*.html` | Jinja2 UI pages | ✅ Safe to edit |
+| `app/static/js/*.js` | Client logic (`utils.js`, `room.js`, `chat.js`, `user-info.js`) | ✅ Safe to edit |
 | `data/introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
 | `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless asked |
 | `docs/PROJECT_BEST_PRACTICES.md` | Best practices guide | ✅ Safe to update with `update-best-practices` skill |
@@ -62,7 +64,7 @@ python tests/test_js_modules.py   # JS module validation
 |--------|----------|---------|
 | `POST` | `/api/events` | Create event + 8 default rooms |
 | `GET` | `/api/events/<id>/rooms` | List rooms |
-| `POST` | `/api/events/<id>/join` | Join event (optional: `username`) |
+| `POST` | `/api/events/<id>/join` | Join event + save social info (optional: `username`, `linkedin_url`, `slack_handle`) |
 | `GET` | `/api/qr/<event_id>` | Generate QR code |
 | `POST` | `/api/users/<id>/room` | Select room |
 | `POST` | `/api/users/<id>/available` | Toggle availability |
@@ -79,7 +81,7 @@ python tests/test_js_modules.py   # JS module validation
 | `connection_exchanged` | Server → Client | `{user1_username, user2_username}` | `app/routes.py` |
 | `connection_declined` | Server → Client | — | `app/routes.py` |
 
-For full API documentation, see [API.md](API.md).
+For full API documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
