@@ -1,7 +1,7 @@
 # AGENTS.md - IntroChat
 
 ## AGENTS.md Scope
-`AGENTS.md` defines *what* agents work on — project context, tech stack, commands, and file boundaries. The `guidelines` skill defines *how* agents should work — behavioral rules for thinking, implementing, and verifying. The guidelines are layered on top of `AGENTS.md` and take precedence when there is conflict.
+`AGENTS.md` defines *what* agents work on — project context, tech stack, commands, and file boundaries. The `implementation-guidelines` skill defines *how* agents should work — behavioral rules for thinking, implementing, and verifying. The guidelines are layered on top of `AGENTS.md` and take precedence when there is conflict.
 
 > **Key distinction**: If it's about *what* the project is and *what* you can touch → this file. If it's about *how* to behave or *how* to implement → `guidelines` skill.
 
