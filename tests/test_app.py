@@ -14,6 +14,7 @@ import sqlite3
 import json
 import requests
 import time
+from app import app
 
 
 def test_imports():
@@ -98,11 +99,22 @@ def test_file_structure():
         'app/tasks.py',
         'requirements.txt',
         'docs/README.md',
-        'templates/index.html',
-        'templates/room.html',
-        'templates/chat.html',
-        'static/css/style.css',
-        'static/js/home.js'
+        'app/templates/index.html',
+        'app/templates/room.html',
+        'app/templates/chat.html',
+        'app/templates/user_info.html',
+        'app/static/css/style.css',
+        'app/static/js/home.js',
+        'app/static/js/user-info.js',
+        'app/static/js/config.js',
+        'app/static/js/room.js',
+        'app/static/js/chat.js',
+        'app/static/js/dom-utils.js',
+        'app/static/js/api-utils.js',
+        'app/static/js/timer-utils.js',
+        'app/__main__.py',
+        'tests/test_db.py',
+        '.gitattributes'
     ]
 
     for file_path in required_files:
@@ -201,6 +213,181 @@ def test_state_constants():
 
 
 
+def test_home_page():
+    """Test home page renders"""
+    print("🧪 Testing home page...")
+    with app.test_client() as client:
+        resp = client.get('/')
+        assert resp.status_code == 200
+        assert b'IntroChat' in resp.data
+    print("✅ Home page renders correctly\n")
+
+
+def test_api_endpoints():
+    """Test all API endpoints respond correctly"""
+    print("🧪 Testing API endpoints...")
+
+    with app.test_client() as client:
+        # Create event
+        resp = client.post('/api/events', json={'name': 'API Test Event'})
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert 'event_id' in data
+        event_id = data['event_id']
+        print(f"✅ POST /api/events → {event_id}")
+
+        # Get rooms
+        resp = client.get(f'/api/events/{event_id}/rooms')
+        assert resp.status_code == 200
+        rooms = resp.get_json()
+        assert len(rooms) == 8
+        print(f"✅ GET /api/events/<id>/rooms → {len(rooms)} rooms")
+
+        # Join event
+        resp = client.post(f'/api/events/{event_id}/join', json={'username': 'TestUser'})
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert 'user_id' in data
+        user_id = data['user_id']
+        print(f"✅ POST /api/events/<id>/join → user {user_id}")
+
+        # Select room
+        room_id = rooms[0]['id']
+        resp = client.post(f'/api/users/{user_id}/room', json={'room_id': room_id})
+        assert resp.status_code == 200
+        print(f"✅ POST /api/users/<id>/room → room selected")
+
+        # Set available
+        resp = client.post(f'/api/users/{user_id}/available', json={'available': True})
+        assert resp.status_code == 200
+        print(f"✅ POST /api/users/<id>/available → toggled")
+
+        # QR code
+        resp = client.get(f'/api/qr/{event_id}')
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert 'qr_code' in data
+        print(f"✅ GET /api/qr/<id> → QR generated")
+
+        # Prompts
+        resp = client.get('/api/prompts')
+        assert resp.status_code == 200
+        prompts = resp.get_json()
+        assert len(prompts) == 10
+        print(f"✅ GET /api/prompts → {len(prompts)} prompts")
+
+    print("✅ API endpoint test completed\n")
+
+
+def test_social_info():
+    """Test social info (linkedin_url, slack_handle) is saved on join"""
+    print("🧪 Testing social info collection...")
+
+    with app.test_client() as client:
+        resp = client.post('/api/events', json={'name': 'Social Test'})
+        event_id = resp.get_json()['event_id']
+
+        resp = client.post(f'/api/events/{event_id}/join', json={
+            'username': 'SocialUser',
+            'linkedin_url': 'https://linkedin.com/in/testuser',
+            'slack_handle': '@testuser'
+        })
+        assert resp.status_code == 200
+        user_id = resp.get_json()['user_id']
+
+        from app.state import active_users
+        user = active_users.get(user_id, {})
+        assert user.get('linkedin_url') == 'https://linkedin.com/in/testuser'
+        assert user.get('slack_handle') == '@testuser'
+
+    print("✅ Social info saved correctly\n")
+
+
+def test_error_paths():
+    """Test error responses for invalid requests"""
+    print("🧪 Testing error paths...")
+
+    with app.test_client() as client:
+        # Missing user
+        resp = client.post('/api/users/nonexistent/room', json={'room_id': 'room1'})
+        assert resp.status_code == 404
+
+        # Missing match
+        resp = client.get('/api/matches/nonexistent')
+        assert resp.status_code == 404
+
+        # Missing event rooms
+        resp = client.get('/api/events/nonexistent/rooms')
+        assert resp.status_code == 200  # Returns empty list, not error
+
+        # Join with no body
+        resp = client.post('/api/events/nonexistent/join', json={})
+        assert resp.status_code == 200  # Creates user with defaults
+
+    print("✅ Error path test completed\n")
+
+
+def test_matchmaking_lifecycle():
+    """Test match lifecycle: create, retrieve, connect"""
+    print("🧪 Testing matchmaking lifecycle...")
+
+    from app.state import active_users, active_matches, waiting_queue
+    from app.matchmaking import create_match
+
+    with app.test_client() as client:
+        # Create event + users
+        resp = client.post('/api/events', json={'name': 'Match Test'})
+        event_id = resp.get_json()['event_id']
+
+        resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User1'})
+        user1_id = resp.get_json()['user_id']
+
+        resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User2'})
+        user2_id = resp.get_json()['user_id']
+
+        resp = client.get(f'/api/events/{event_id}/rooms')
+        room_id = resp.get_json()[0]['id']
+
+        client.post(f'/api/users/{user1_id}/room', json={'room_id': room_id})
+        client.post(f'/api/users/{user2_id}/room', json={'room_id': room_id})
+
+        # Create match directly
+        create_match(user1_id, user2_id, room_id)
+
+        match_ids = [m for m in active_matches.values()
+                     if m['user1_id'] == user1_id and m['user2_id'] == user2_id]
+        assert len(match_ids) == 1
+        match_id = list(active_matches.keys())[
+            [m['user1_id'] for m in active_matches.values()].index(user1_id)
+        ]
+        print(f"✅ Match created: {match_id}")
+
+        # Retrieve match
+        resp = client.get(f'/api/matches/{match_id}')
+        assert resp.status_code == 200
+        match_data = resp.get_json()
+        assert match_data['user1_username'] == 'User1'
+        assert match_data['user2_username'] == 'User2'
+        print("✅ Match retrieved via API")
+
+        # Connection exchange — user1 opts in
+        resp = client.post(f'/api/matches/{match_id}/connect',
+                           json={'user_id': user1_id, 'wants_to_connect': True})
+        assert resp.status_code == 200
+
+        # Connection exchange — user2 opts in
+        resp = client.post(f'/api/matches/{match_id}/connect',
+                           json={'user_id': user2_id, 'wants_to_connect': True})
+        assert resp.status_code == 200
+        print("✅ Connection exchange completed")
+
+        # Cleanup state
+        if match_id in active_matches:
+            del active_matches[match_id]
+
+    print("✅ Matchmaking lifecycle test completed\n")
+
+
 def main():
     """Run all tests"""
     print("🌟 IntroChat Application Test Suite")
@@ -211,11 +398,16 @@ def main():
     test_database()
     test_conversation_prompts()
     test_state_constants()
+    test_home_page()
+    test_api_endpoints()
+    test_social_info()
+    test_error_paths()
+    test_matchmaking_lifecycle()
 
     print("🎉 All tests completed!")
 
     print("\n📋 To run the application:")
-    print("   python app.py")
+    print("   python -m app")
 
     print("\n🌐 Then open your browser to:")
     print("   http://localhost:5000")
