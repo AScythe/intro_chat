@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Redirect to room selection
-        window.location.href = `/room/${eventCode}`;
+        // Redirect to user info page
+        window.location.href = `/join/${eventCode}`;
     }
 
     function createEvent() {
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function joinCreatedEvent() {
         const eventId = getData('created_event_id');
         if (eventId) {
-            window.location.href = `/room/${eventId}`;
+            window.location.href = `/join/${eventId}`;
         } else {
             showError('Event not found. Please create a new event.');
         }

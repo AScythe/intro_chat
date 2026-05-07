@@ -42,6 +42,8 @@ def init_db(db_path=None):
             event_id TEXT,
             room_id TEXT,
             username TEXT,
+            linkedin_url TEXT DEFAULT '',
+            slack_handle TEXT DEFAULT '',
             is_available BOOLEAN DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -49,6 +51,16 @@ def init_db(db_path=None):
             FOREIGN KEY (room_id) REFERENCES rooms (id)
         )
     ''')
+    
+    # Migration for existing databases — add social columns if missing
+    try:
+        cursor.execute('ALTER TABLE users ADD COLUMN linkedin_url TEXT DEFAULT ""')
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute('ALTER TABLE users ADD COLUMN slack_handle TEXT DEFAULT ""')
+    except sqlite3.OperationalError:
+        pass
     
     # Matches table
     cursor.execute('''

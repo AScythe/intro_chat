@@ -57,7 +57,7 @@
                     <div class="conversation-options">
                         <button id="extend2MinBtn" class="btn btn-primary">Extend for 2 more minutes</button>
                         <button id="extendIndefiniteBtn" class="btn btn-primary">Continue indefinitely</button>
-                        <button id="endChatBtn" class="btn btn-secondary">End chat and connect on Slack</button>
+                        <button id="endChatBtn" class="btn btn-secondary">End chat and connect</button>
                     </div>
                 </div>
             </div>
@@ -71,15 +71,15 @@
                         <p>No pressure — just be yourself!</p>
                     </div>
                     <div class="extended-actions">
-                        <button id="endExtendedChatBtn" class="btn btn-secondary">End chat and connect on Slack</button>
+                        <button id="endExtendedChatBtn" class="btn btn-secondary">End chat and connect</button>
                     </div>
                 </div>
             </div>
 
             <div class="card hidden" id="slackConnectionCard">
-                <h2>💬 Connect on Slack</h2>
+                <h2>💬 Connect</h2>
                 <div class="slack-connection-content">
-                    <p>Would you like to exchange usernames to connect on Slack?</p>
+                    <p>Would you like to exchange usernames to connect?</p>
                     <div class="connection-options">
                         <button id="yesConnectBtn" class="btn btn-primary">Yes, let's connect!</button>
                         <button id="noConnectBtn" class="btn btn-secondary">No thanks</button>
@@ -113,6 +113,7 @@
     <script>
         // Pass Flask template variables to JavaScript
         window.chatMatchId = '{{ match_id }}';
+        window.chatEventId = '{{ event_id }}';
     </script>
 </body>
 

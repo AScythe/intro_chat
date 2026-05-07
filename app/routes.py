@@ -1,5 +1,5 @@
 from flask import jsonify, render_template, request
-from .state import active_users, active_matches, waiting_queue, CONVERSATION_PROMPTS
+from .state import active_users, active_matches, waiting_queue, CONVERSATION_PROMPTS, USER_TEMPLATE
 import sqlite3
 import uuid
 import os
@@ -12,13 +12,23 @@ def register_routes(app):
     def index():
         return render_template('index.html')
 
+    @app.route('/join/<event_id>')
+    def user_info(event_id):
+        return render_template('user_info.html', event_id=event_id)
+
     @app.route('/room/<event_id>')
     def room_selection(event_id):
         return render_template('room.html', event_id=event_id)
 
     @app.route('/chat/<match_id>')
     def chat_room(match_id):
-        return render_template('chat.html', match_id=match_id)
+        from .state import active_matches, active_users
+        event_id = None
+        if match_id in active_matches:
+            match = active_matches[match_id]
+            user1 = active_users.get(match.get('user1_id'), {})
+            event_id = user1.get('event_id')
+        return render_template('chat.html', match_id=match_id, event_id=event_id or '')
 
     @app.route('/api/events', methods=['POST'])
     def create_event():
@@ -69,20 +79,23 @@ def register_routes(app):
         data = request.get_json()
         user_id = str(uuid.uuid4())[:8]
         username = data.get('username', f'User_{user_id}')
+        linkedin_url = data.get('linkedin_url', '')
+        slack_handle = data.get('slack_handle', '')
         db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO users (id, event_id, username) VALUES (?, ?, ?)',
-                       (user_id, event_id, username))
+        cursor.execute('INSERT INTO users (id, event_id, username, linkedin_url, slack_handle) VALUES (?, ?, ?, ?, ?)',
+                       (user_id, event_id, username, linkedin_url, slack_handle))
         conn.commit()
         conn.close()
-        active_users[user_id] = {
+        active_users[user_id] = dict(USER_TEMPLATE)
+        active_users[user_id].update({
             'event_id': event_id,
             'username': username,
-            'room_id': None,
-            'is_available': False,
+            'linkedin_url': linkedin_url,
+            'slack_handle': slack_handle,
             'last_seen': time.time()
-        }
+        })
         return jsonify({'user_id': user_id, 'username': username})
 
     @app.route('/api/users/<user_id>/room', methods=['POST'])

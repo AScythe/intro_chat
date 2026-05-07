@@ -1,4 +1,4 @@
-// static/config.js
+// app/static/js/config.js
 // Central configuration for IntroChat timers and durations
 // 
 // HOW TO USE FOR TESTING:

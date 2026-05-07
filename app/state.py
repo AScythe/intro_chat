@@ -11,6 +11,17 @@ active_users = {}
 active_matches = {}
 waiting_queue = {}
 
+# Default user template for new users
+USER_TEMPLATE = {
+    'event_id': None,
+    'username': None,
+    'room_id': None,
+    'linkedin_url': '',
+    'slack_handle': '',
+    'is_available': False,
+    'last_seen': None
+}
+
 # Conversation prompts
 CONVERSATION_PROMPTS = [
     "What's one thing you're excited about this weekend?",

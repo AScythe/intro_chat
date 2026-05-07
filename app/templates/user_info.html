@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile - IntroChat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header class="page-header">
+            <h1>👤 Your Profile</h1>
+            <p>Add your information so others can connect with you after chatting</p>
+        </header>
+
+        <main class="main-content">
+            <div class="card" id="profileCard">
+                <h2>Connect Details</h2>
+                <p class="card-description">These will be shared only when both you and your chat partner agree to connect.</p>
+
+                <div class="profile-form">
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="linkedinInput" style="display: block; margin-bottom: 5px; font-weight: 500; color: #4a5568;">LinkedIn Profile URL</label>
+                        <input type="url" id="linkedinInput" placeholder="https://linkedin.com/in/yourname" style="width: 100%;">
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 15px;">
+                        <label for="slackInput" style="display: block; margin-bottom: 5px; font-weight: 500; color: #4a5568;">Slack Handle</label>
+                        <input type="text" id="slackInput" placeholder="@username or email@company.slack.com" style="width: 100%;">
+                    </div>
+
+                    <p class="card-description" style="font-size: 0.9rem; color: #718096; margin: 10px 0 20px 0;">
+                        All fields are optional. You can skip anything you're not comfortable sharing.
+                    </p>
+
+                    <div class="form-actions" style="display: flex; flex-direction: column; gap: 10px;">
+                        <button id="saveProfileBtn" class="btn btn-primary">Save Profile</button>
+                        <button id="selectRoomBtn" class="btn btn-chat" disabled>Select Room / Area</button>
+                    </div>
+                </div>
+
+                <div class="hidden" id="saveSuccessCard" style="margin-top: 15px; padding: 10px; background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 8px; text-align: center; color: #276749;">
+                    ✅ Profile saved! You can now select a room.
+                </div>
+            </div>
+        </main>
+
+        <footer class="page-footer">
+            <p>💡 <strong>Privacy:</strong> Your info is only shared when you opt in after a chat.</p>
+            <button id="backToHomeBtn" class="btn btn-secondary" style="margin-top: 10px;">🏠 Back to Home</button>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/api-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/user-info.js') }}"></script>
+    <script>
+        window.userInfoEventId = '{{ event_id }}';
+    </script>
+</body>
+
+</html>

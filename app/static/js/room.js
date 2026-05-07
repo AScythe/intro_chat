@@ -532,7 +532,7 @@ function simulatePersonResponse(personName) {
 
         getElementById('goToChatBtn').addEventListener('click', () => {
             const fakeMatchId = 'demo_' + generateRandomString(8);
-            window.location.href = `/chat/${fakeMatchId}`;
+            window.location.href = `/chat/${fakeMatchId}?event_id=${roomConfig.eventId}`;
         });
 
         // Demo mode: simulates other person preparing for chat.

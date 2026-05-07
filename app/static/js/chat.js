@@ -4,6 +4,7 @@
 // Configuration from Flask template (set via data attributes or inline)
 let chatConfig = {
     matchId: null,
+    eventId: null,
     socket: null
 };
 
@@ -18,6 +19,7 @@ let prompts = [];
  */
 function initChatPage(matchId) {
     chatConfig.matchId = matchId;
+    chatConfig.eventId = window.chatEventId || getUrlParameter('event_id');
     chatConfig.socket = initSocket();
 
     console.log('Chat page initialized for match:', matchId);
@@ -105,7 +107,11 @@ function setupEventListeners() {
     addEventListenerSafe('yesConnectBtn', 'click', () => setConnectionPreference(true));
     addEventListenerSafe('noConnectBtn', 'click', () => setConnectionPreference(false));
     addEventListenerSafe('newChatBtn', 'click', () => {
-        window.location.href = '/';
+        if (chatConfig.eventId) {
+            window.location.href = `/room/${chatConfig.eventId}`;
+        } else {
+            window.location.href = '/';
+        }
     });
 
     // Socket events
