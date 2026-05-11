@@ -9,7 +9,7 @@
 | Document | Routes content about | Audience | Update Trigger | Content Type |
 |----------|---------------------|----------|----------------|--------------|
 | **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | Feature or setup change | User-facing, practical |
-| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Code structure change | Technical, implementation |
+| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow, per-function detail | Developers, AI agents | Code structure change | Technical, implementation |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch | Product owners, devs, AI, stakeholders | Product scope change | Product, pitch, vision, spec |
 | **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, judges | Demo flow change | Practical, step-by-step |
 | **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
@@ -84,6 +84,7 @@ Technical structure reference for the project. Answers "How is it built?", "What
 - **Running instructions** — technical startup sequence, env vars, configuration
 - **Modifying instructions** — how to add routes, events, extend functionality. The "if you need to add X, here's how" section.
 - **Critical implementation details** — match expiry logic, cleanup thread behavior, in-memory state management, default rooms, any non-obvious runtime behavior
+- **Per-function detail** — every function/class in every module with signature and purpose; data structure shapes with key-value descriptions; constants with values; table schemas with column types and constraints; initialization behavior (DOMContentLoaded wiring for UI state management)
 
 ### What NOT to Include
 - ❌ User-facing benefits or marketing language — these go in README.md
@@ -97,6 +98,8 @@ Technical structure reference for the project. Answers "How is it built?", "What
 - **Data flow:** Every endpoint and WebSocket event must include its actual name (e.g., `POST /api/events`, `join_room`). No placeholders.
 - **Design decisions:** Always include the reasoning. "Why SQLite?" not just "Uses SQLite."
 - **Language:** Technical throughout. Assume the reader knows what Flask, SocketIO, and SQLite are.
+- **Per-function detail:** List every named function in source order. Include route context (method + path) for Flask handlers and event context for SocketIO handlers. For DOMContentLoaded wrappers, include a prose initialization note for non-trivial UI state wiring (button enable/disable, input validation). Keep descriptions to one line — purpose only, not implementation logic.
+- **Initialization notes:** Use italic `*note*` format placed after the Functions list. Only document listeners that wire significant UI state — skip trivial wiring (console.log, focus calls).
 
 ---
 
@@ -343,6 +346,7 @@ These are the common confusion points where content could reasonably fit in mult
 | **API endpoints in AGENTS.md vs ARCHITECTURE.md** | AGENTS.md gets a reference table (method, path, purpose) as a quick lookup for agents. ARCHITECTURE.md gets the data flow context — how endpoints interact, request/response details, event sequences. |
 | **Best practice vs project-specific lesson** | If the lesson references a specific module name, route, or implementation detail from this project, it goes in ARCHITECTURE.md. If it can be generalized to "always verify X after Y" without naming this project, it goes in PROJECT_BEST_PRACTICES.md. |
 | **Tech stack in README.md vs Tech stack in SPECIFICATIONS.md** | README.md gets a one-liner (e.g., "Built with Flask + SQLite"). SPECIFICATIONS.md gets the full tech stack with a "Why?" column for each technology. |
+| **Per-function detail in ARCHITECTURE.md vs source docstrings/JSDoc** | ARCHITECTURE.md captures function signature + one-line purpose (what the function does for the system). Source code docstrings/JSDoc capture implementation details (how it works, parameters, return values, edge cases). ARCHITECTURE.md is for navigation; source code is for depth. The `#### Functions` subsection is a map, not a manual. |
 
 ---
 
@@ -352,7 +356,7 @@ These are the common confusion points where content could reasonably fit in mult
 
 2. **Cross-reference, don't copy** — Use `[See ARCHITECTURE.md](ARCHITECTURE.md)` instead of pasting sections from one document into another. A reference is better than a duplicate.
 
-3. **Summary here, details there** — Documents at the top of the funnel (README.md, AGENTS.md) get summary tables and navigation-level overviews. Documents deeper in (ARCHITECTURE.md) get the full detail.
+3. **Summary here, details there** — Documents at the top of the funnel (README.md, AGENTS.md) get summary tables and navigation-level overviews. Documents deeper in (ARCHITECTURE.md) get the full detail. Example: `routes.py` — file tree gets "HTTP route handlers" (5 words), Module Descriptions gets lead line + endpoint list, `#### Functions` gets every handler with method/path + one-line purpose. Each level adds detail without duplicating.
 
 4. **Audience-first** — If audience overlaps, choose the document with the MOST RELEVANT audience. A developer reading about architecture doesn't need the same content as a user reading the README.
 

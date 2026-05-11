@@ -79,11 +79,34 @@ Server-global in-memory state — active users, active matches, waiting queue, c
 - `CONVERSATION_PROMPTS = [...]` — list of conversation prompts
 - Timer constants: `MATCH_EXPIRY_MINUTES`, `CLEANUP_INTERVAL_SECONDS`, `CLEANUP_THRESHOLD_SECONDS`
 
+#### Data Structures
+- `active_users = {}` — `{user_id: {event_id, username, room_id, linkedin_url, slack_handle, is_available, last_seen}}`
+- `active_matches = {}` — `{match_id: {user1_id, user2_id, room_id, created_at}}`
+- `waiting_queue = {}` — `{user_id: {room_id, timestamp}}`
+- `USER_TEMPLATE = {}` — `{event_id: None, username: None, room_id: None, linkedin_url: '', slack_handle: '', is_available: False, last_seen: None}` — default skeleton for new user entries
+
+#### Constants
+- `CONVERSATION_PROMPTS` — array of 10 icebreaker strings
+- `MATCH_EXPIRY_MINUTES = 2` — how long a match is valid in DB
+- `CLEANUP_INTERVAL_SECONDS = 60` — how often cleanup thread checks for expired matches
+- `CLEANUP_THRESHOLD_SECONDS = 300` — remove matches older than this (5 minutes)
+
 ### `app/database.py` (Database Schema)
 SQLite database initialization creating events, users, rooms, and matches tables with migration handling for social profile columns.
 
 - `init_db()` — creates 4 tables: `events`, `rooms`, `users`, `matches`
 - Uses SQLite (`introchat.db` in `data/` folder)
+
+#### Functions
+- `init_db(db_path)` — initializes SQLite database, creates all 4 tables, runs ALTER TABLE migration for social columns
+
+#### Tables
+| Table | Columns |
+|-------|---------|
+| `events` | `id` (TEXT PK), `name` (TEXT NOT NULL), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `is_active` (BOOLEAN DEFAULT 1) |
+| `rooms` | `id` (TEXT PK), `event_id` (TEXT FK → events), `name` (TEXT NOT NULL) |
+| `users` | `id` (TEXT PK), `event_id` (TEXT FK), `room_id` (TEXT FK), `username` (TEXT), `linkedin_url` (TEXT DEFAULT ''), `slack_handle` (TEXT DEFAULT ''), `is_available` (BOOLEAN DEFAULT 0), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `last_seen` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP) |
+| `matches` | `id` (TEXT PK), `user1_id` (TEXT FK), `user2_id` (TEXT FK), `room_id` (TEXT FK), `status` (TEXT DEFAULT 'active'), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `expires_at` (TIMESTAMP) |
 
 ### `app/routes.py` (HTTP Routes)
 All HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints for events, users, rooms, matches, QR codes, and conversation prompts.
@@ -91,11 +114,31 @@ All HTTP route handlers for page rendering (index, user info, room, chat) plus R
 - `register_routes(app)` — registers all `@app.route` handlers
 - Endpoints: `/`, `/join/<event_id>`, `/room/<id>`, `/chat/<id>`, `/api/events`, `/api/events/<id>/join`, etc.
 
+#### Functions
+- `register_routes(app)` — registers all HTTP route handlers on the Flask app instance
+- `index()` — `GET /` → renders landing page (`index.html`)
+- `user_info(event_id)` — `GET /join/<event_id>` → renders user profile form
+- `room_selection(event_id)` — `GET /room/<event_id>` → renders room selection page
+- `chat_room(match_id)` — `GET /chat/<match_id>` → renders chat page
+- `create_event()` — `POST /api/events` → creates event + 8 default rooms, returns event_id
+- `get_rooms(event_id)` — `GET /api/events/<event_id>/rooms` → lists rooms (fallback creation if none found)
+- `join_event(event_id)` — `POST /api/events/<event_id>/join` → creates user with optional linkedin/slack
+- `set_user_room(user_id)` — `POST /api/users/<user_id>/room` → assigns user to a room
+- `set_availability(user_id)` — `POST /api/users/<user_id>/available` → toggles availability, triggers `find_match()`
+- `get_match(match_id)` — `GET /api/matches/<match_id>` → gets match details with usernames
+- `exchange_connection(match_id)` — `POST /api/matches/<match_id>/connect` → double opt-in connection, emits SocketIO event
+- `generate_qr(event_id)` — `GET /api/qr/<event_id>` → generates QR code image as base64
+- `get_prompts()` — `GET /api/prompts` → returns `CONVERSATION_PROMPTS` array
+
 ### `app/matchmaking.py` (Match Logic)
 Match-finding algorithm that pairs available users in the same room, creates match records in the database, and emits match_found events via SocketIO.
 
 - `find_match(user_id)` — finds available users in the same room
 - `create_match(user1_id, user2_id, room_id)` — creates match, notifies users via SocketIO
+
+#### Functions
+- `find_match(user_id)` — scans `active_users` for available users in same room; calls `create_match()` if found, otherwise adds to `waiting_queue`
+- `create_match(user1_id, user2_id, room_id)` — inserts match into DB + `active_matches`, removes from `waiting_queue`, sets both to unavailable, emits `match_found` via SocketIO
 
 ### `app/socket_events.py` (WebSocket Handlers)
 SocketIO event handlers for real-time communication — connect, disconnect, and room joining; registered via register_handlers().
@@ -103,11 +146,21 @@ SocketIO event handlers for real-time communication — connect, disconnect, and
 - `register_handlers(socketio)` — registers `@socketio.on` handlers
 - Events: `connect`, `disconnect`, `join_room`
 
+#### Functions
+- `register_handlers(socketio)` — registers all SocketIO event handlers on the given socketio instance
+- `handle_connect()` — SocketIO `connect` → logs "Client connected"
+- `handle_disconnect()` — SocketIO `disconnect` → logs "Client disconnected"
+- `handle_join_room(data)` — SocketIO `join_room` → joins the SocketIO room `room_{room_id}`
+
 ### `app/tasks.py` (Background Tasks)
 Daemon background thread that periodically checks for and removes expired matches from in-memory state to prevent stale data accumulation.
 
 - `cleanup_expired_matches()` — removes matches older than threshold
 - `start_cleanup_thread()` — starts cleanup as daemon thread
+
+#### Functions
+- `cleanup_expired_matches()` — infinite loop: sleeps `CLEANUP_INTERVAL_SECONDS` (60), removes matches older than `CLEANUP_THRESHOLD_SECONDS` (300) from `active_matches`
+- `start_cleanup_thread()` — creates and starts a daemon thread targeting `cleanup_expired_matches`, returns thread reference
 
 ### `app/__main__.py` (Entry Point)
 Application entry point that launches the SocketIO server on 0.0.0.0:5000 with debug mode enabled.
@@ -119,29 +172,120 @@ Application entry point that launches the SocketIO server on 0.0.0.0:5000 with d
 #### `app/static/js/config.js` (Configuration)
 Central configuration object defining timer durations, countdown thresholds, and demo mode delays — single source of truth consumed by chat.js and room.js.
 
+#### Configuration Constants
+| Property | Value | Description |
+|----------|-------|-------------|
+| `CHAT_DURATION` | `30` | Chat timer countdown in seconds |
+| `MATCH_FOUND_COUNTDOWN` | `60` | Seconds before auto-redirect to chat after match |
+| `TIMER_WARNING_THRESHOLD` | `5` | Seconds remaining for yellow warning state |
+| `TIMER_DANGER_THRESHOLD` | `3` | Seconds remaining for red danger state |
+| `DEMO_LOADING_DELAY_MS` | `2000` | Demo loading animation delay in ms |
+| `DEMO_CONNECTION_DELAY_MS` | `2000` | Demo connection exchange delay in ms |
+| `SIMULATE_RESPONSE_DELAY_MS` | `3000` | Simulated person response delay in ms |
+| `SIMULATE_READY_DELAY_MS` | `5000` | Simulated ready status delay in ms |
+
 #### `app/static/js/utils.js` (Shared Utilities)
 Shared browser utility functions — error display via alert, URL parameter extraction, page navigation, clipboard copy, and DOM helpers used across all pages.
+
+#### Functions
+- `showError(message)` — displays error message via `alert()`
+- `getUrlParameter(name)` — extracts URL query parameter value
+- `formatTime(seconds)` — formats seconds as `M:SS`
+- `initSocket()` — initializes Socket.IO connection, returns socket instance
+- `generateRandomString(length)` — generates random alphanumeric string (default 8 chars)
+- `generateUsername()` — generates `User_XXXXX` random username
+- `storeUserId(userId)` — stores user ID in localStorage under `introchat_user_id`
+- `getUserId()` — retrieves user ID from localStorage
+- `clearUserId()` — removes user ID from localStorage
+- `storeData(key, value)` — generic localStorage setter
+- `getData(key)` — generic localStorage getter
+- `clearData(key)` — generic localStorage remover
 
 #### `app/static/js/dom-utils.js` (DOM Utilities)
 Null-safe DOM manipulation helpers — getElementById with console warnings, setTextContent, show/hide/toggle visibility, and createElement for dynamic UI construction.
 
+#### Functions
+- `getElementById(id)` — safe element lookup with console warning on missing element
+- `setTextContent(elementId, text)` — safe textContent setter with null check
+- `setDisplay(elementId, display)` — safe display style setter with null check
+- `addEventListenerSafe(elementId, event, handler)` — safe event listener registration with console warning
+
 #### `app/static/js/api-utils.js` (API Utilities)
 Thin fetch wrapper with timeout via AbortController, exposing typed HTTP methods (apiGet, apiPost, apiPut, apiDelete) with consistent error handling.
+
+#### Functions
+- `fetchWithTimeout(url, options, timeout)` — fetch with AbortController timeout (default 10000ms)
+- `parseJSON(response)` — checks `response.ok`, parses JSON, throws on HTTP error
+- `fetchJSON(url, options)` — combined `fetchWithTimeout` + `parseJSON` helper
 
 #### `app/static/js/timer-utils.js` (Timer Utilities)
 Timer factory providing createChatTimer() for extendable countdown with tick/complete callbacks and createCountdown() for redirect-on-expiry displays.
 
+#### Functions
+- `createChatTimer(duration, onTick, onComplete)` — creates extendable countdown timer; returns `{start, clear, extend, getTimeLeft}`
+- `createCountdown(duration, onTick, onComplete)` — creates simple countdown timer; returns `{start, clear, getTimeLeft}`
+
 #### `app/static/js/home.js` (Home Controller)
 Landing page controller for event code input submission, QR code file upload/scanning, and event creation via modal dialog with API integration.
+
+#### Functions
+- `joinEvent()` — validates 8-char event code, redirects to `/join/<code>`
+- `createEvent()` — POSTs to `/api/events`, generates QR, shows event created card
+- `generateQRCode(eventId)` — fetches QR from `/api/qr/<event_id>`, displays image
+- `joinCreatedEvent()` — redirects to join the newly created event
+- `handleQRUpload(event)` — shows "QR scanning not implemented" message, resets file input
+
+*Button state management (wired in DOMContentLoaded):* join button disabled until 8-char event code entered; create button disabled until event name entered; both wired via `input` event listeners.
 
 #### `app/static/js/user-info.js` (Profile Controller)
 User profile form controller handling LinkedIn URL and Slack handle input, profile data persistence via API, and navigation to room selection on success.
 
+No named function declarations — all logic is in anonymous `DOMContentLoaded` and button click callbacks. Calls utils functions: `generateUsername()`, `fetchJSON()`, `storeUserId()`, `showError()`.
+
 #### `app/static/js/room.js` (Room Controller)
 Room selection page controller handling room creation/joining, user availability toggling, match-finding initiation, match-found countdown, and connection exchange.
 
+#### Functions
+- `initRoomPage(eventId)` — initializes socket, adds sample users, ensures user exists, loads rooms, sets up listeners
+- `ensureUserExists()` — checks localStorage for user ID, creates via API if needed (with fallback)
+- `loadRooms()` — fetches rooms from API, populates dropdown (with fallback on error)
+- `setupEventListeners()` — wires room select, select room, request chat, cancel, change room, socket `match_found` listener
+- `selectRoom()` — POSTs user/room assignment, emits `join_room` via socket, updates UI with nearby users
+- `requestChat()` — POSTs `/api/users/<id>/available` to true (legacy)
+- `cancelWaiting()` — POSTs availability to false (legacy)
+- `changeRoom()` — resets UI back to room selection
+- `handleMatchFound(data)` — shows match found card with usernames, starts countdown
+- `startCountdown()` — starts `MATCH_FOUND_COUNTDOWN` (60s) timer, redirects to chat on expiry
+- `goToChat()` — navigates to `/chat/<matchId>`
+- `addSampleUsers()` — stores 18 demo users across 8 rooms with availability status
+- `updateNearbyUsers(roomName)` — displays person cards with availability indicators, enables selection
+- `requestChatWithPerson()` — shows "Waiting for response" UI, triggers simulated response after delay
+- `simulatePersonResponse(personName)` — shows acceptance/rejection UI with ready-status flow and "I'm Ready" button
+- `cancelRequest()` — returns to person selection from waiting state
+- `testFunction()` — debug function checking sample users in console
+- `checkIfBothReady()` — nested: checks both user and partner ready status, enables "Start Chat" button
+
 #### `app/static/js/chat.js` (Chat Controller)
 Chat page controller managing SocketIO connection, message sending/receiving, timer countdown with extend support, conversation prompts display, and leave/exit flow.
+
+#### Functions
+- `initChatPage(matchId)` — initializes socket, loads match info and prompts, sets up listeners
+- `loadMatchInfo()` — detects demo (prefix `demo_`) vs real match, loads data from API or simulates
+- `loadPrompts()` — fetches from `/api/prompts` with fallback hardcoded prompts
+- `setupEventListeners()` — wires next prompt, extend 2min, extend indefinite, end chat, connect yes/no, new chat; socket listeners
+- `startChatTimer()` — creates chat timer with `CONFIG.CHAT_DURATION`, starts countdown
+- `updateTimerDisplay(timeLeft)` — updates MM:SS display, applies warning/danger CSS thresholds
+- `displayCurrentPrompt()` — shows current prompt in scrollable container with auto-scroll
+- `nextPrompt()` — cycles to next prompt (wraps around)
+- `showTimeUp()` — hides chat card, shows "Time's Up" card with extend/end options
+- `extendChat(additionalTime)` — extends by `CHAT_DURATION` or indefinite (-1)
+- `startExtendedChatTimer()` — starts a new timer for extended chat period
+- `updateExtendedTimerDisplay(timeLeft)` — updates extended timer display with formatTime
+- `showSlackConnection()` — shows connection exchange card with yes/no buttons
+- `setConnectionPreference(connectPreference)` — demo simulates; real mode POSTs to `/api/matches/<id>/connect`
+- `showWaitingForConnection()` — shows waiting state after submitting preference
+- `handleConnectionExchanged(data)` — shows exchanged usernames on successful double opt-in
+- `handleConnectionDeclined()` — shows "Chat Complete" message when connection declined
 
 ---
 
@@ -164,13 +308,43 @@ Chat page template with timer display, conversation prompts list, scrollable mes
 ### Tests
 
 #### `tests/test_app.py`
-End-to-end integration test suite that starts the Flask server as a subprocess and tests page rendering, API endpoints, matchmaking flow, profile updates, and QR generation via the requests library.
+End-to-end integration test suite that tests page rendering, API endpoints, matchmaking flow, profile updates, and QR generation.
+
+#### Functions
+- `test_imports()` — verifies all modular components import correctly (Flask, SocketIO, QRCode, SQLite3, all app modules)
+- `test_file_structure()` — checks 25 required files exist
+- `test_database()` — tests DB init, 4 tables exist, insert/delete operations
+- `test_conversation_prompts()` — checks prompts list is non-empty
+- `test_state_constants()` — verifies `MATCH_EXPIRY_MINUTES=2`, `CLEANUP_INTERVAL_SECONDS=60`, `CLEANUP_THRESHOLD_SECONDS=300`
+- `test_home_page()` — `GET /` returns 200 with "IntroChat" in body
+- `test_api_endpoints()` — tests create event, get rooms (8), join, select room, toggle availability, QR, prompts (10)
+- `test_social_info()` — verifies `linkedin_url` and `slack_handle` saved to `active_users`
+- `test_error_paths()` — tests 404 for missing user/match, empty list for missing event rooms
+- `test_matchmaking_lifecycle()` — full lifecycle: create users, match via `create_match()`, retrieve via API, double opt-in connection, cleanup
+- `main()` — runs all test functions in sequence
 
 #### `tests/test_js_modules.py`
 JavaScript module validation suite using static regex analysis — checks file existence, JSDoc coverage on exported functions, function name conventions, and cross-file import references.
 
+#### Functions
+- `test_js_files_exist()` — checks 8 required JS files exist
+- `test_utils_functions()` — checks 21 functions across utils/dom-utils/api-utils/timer-utils
+- `test_room_js_functions()` — checks 14 functions in room.js + 11 utils imports
+- `test_chat_js_functions()` — checks 17 functions in chat.js + 8 utils imports
+- `test_config_js()` — checks 8 CONFIG properties defined
+- `test_home_js_functions()` — checks 5 functions + DOMContentLoaded wrapper
+- `test_index_html()` — checks 4 JS includes, no inline functions
+- `test_html_templates()` — checks room.html, chat.html, user_info.html have correct JS includes and window globals
+- `test_user_info_js_functions()` — checks 4 utils functions used + linkedin/slack/button logic
+- `test_code_quality()` — counts console.log, checks JSDoc comments and strict mode
+- `main()` — runs all test functions in sequence
+
 #### `tests/test_db.py`
 Standalone database debugging utility that tests SQLite connection, lists table schemas, and prints column information — run via `python tests/test_db.py`.
+
+#### Functions
+- `test_db_connection()` — checks database exists, lists expected tables, shows row counts
+- `reset_database()` — deletes existing database file and recreates via `init_db()`
 
 ---
 ## Critical Implementation Details
