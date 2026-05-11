@@ -1,8 +1,7 @@
-#+++ test_js_modules.py (修改后)
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 """
-Test suite for extracted JavaScript files in IntroChat application
-Tests the modular JavaScript structure and functionality
+test_js_modules.py
+Description: JavaScript module validation suite using static regex analysis — checks file existence, JSDoc coverage on exported functions, function name conventions, and cross-file import references
 """
 
 import os

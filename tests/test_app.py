@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Test script for IntroChat application
-Tests new modular architecture (state.py, database.py, routes.py, etc.)
+test_app.py
+Description: End-to-end integration test suite that starts the Flask server as a subprocess and tests page rendering, API endpoints, matchmaking flow, profile updates, and QR generation via the requests library
 """
 
 import sys

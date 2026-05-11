@@ -1,7 +1,6 @@
 """
-Database utility script for IntroChat
-Use this to quickly test database connectivity and table structure.
-Run: python tests/test_db.py
+test_db.py
+Description: Standalone database debugging utility that tests SQLite connection, lists table schemas, and prints column information — run via `python tests/test_db.py`
 """
 
 import sqlite3
