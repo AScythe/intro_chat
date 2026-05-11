@@ -667,6 +667,8 @@ implement-plan opens the latest PLAN_*.md, never relies on "as we discussed earl
 ---
 
 ## 9. Version Control
+
+### 9.1 Commit Discipline
 **Context**: From recovering lost work
 
 **Principle**: .gitignore binaries, pin versions, descriptive commits.
@@ -678,6 +680,67 @@ git commit -m "Fix: Resolve 404 on user room"
 ```
 
 **Why it matters**: Reproducible builds, clean history.
+
+### 9.2 Commit by Logical Group
+**Context**: From designing push-to-git skill workflow
+
+**Principle**: Group changes into commits by logical concern, not by file count or directory boundary. A commit should tell one complete story — one feature, one fix, one refactoring. Files from multiple directories can belong to the same commit if they serve the same purpose.
+
+**Example**:
+```
+✅ One commit: "Add input validation to matchmaking + regression tests"
+   (2 dirs: app/ + tests/, 1 logical concern)
+❌ Bad: "Update app files" + "Update test files" 
+   (2 commits for 1 logical change — fragments the story)
+```
+
+**Why it matters**: Logical commits are reviewable and revertible. File-boundary commits fragment the story.
+
+### 9.3 Push Per Commit
+**Context**: From refining push-to-git skill during session (original design batched pushes)
+
+**Principle**: Push after every commit, not after a batch of commits. If a push fails, only one commit is affected and needs rework. The remote stays in sync after each logical change.
+
+**Example**:
+```
+✅ Per-commit push: commit → push → commit → push → commit → push
+❌ Batched push: commit → commit → commit → push (one failure blocks all 3)
+```
+
+**Why it matters**: Isolates risk. A failed push only blocks one commit, not a whole batch.
+
+### 9.4 Auto-Generate Commit Messages from Change Type
+**Context**: From building commit message generation in push-to-git skill
+
+**Principle**: Generate commit messages based on the nature of the changes. New files → "Create", modified only → "Update", format-only additions → "Add ... to all ...", mixed modifications and renames → "Revise". Always present the message for user editing before committing.
+
+**Example**:
+```
+Change type → Generated prefix
+New skill file → "Create push-to-git skill: logical grouping..."
+Description headers → "Add Description: headers to all Python source files"
+Modified existing skills → "Update doc maintenance skills: agents, architecture..."
+Renamed + modified → "Revise core skill pipeline: analyze, grill, readiness..."
+```
+
+**Why it matters**: Consistent, descriptive messages with less effort. User approval prevents auto-generated nonsense from polluting history.
+
+### 9.5 Detect Renames via Deleted + New Untracked Pairs
+**Context**: From handling implementation-guide → implement-plan rename in push-to-git
+
+**Principle**: When a file or directory is renamed outside of git, it appears as a deletion + an untracked addition. To preserve rename history, detect these pairs by matching old and new paths, and stage both in the same commit so git can detect the rename via content similarity.
+
+**Example**:
+```
+git status shows:
+  deleted: .opencode/skills/old-name/SKILL.md
+  untracked: .opencode/skills/new-name/SKILL.md
+
+→ Stage both in one commit
+→ Git detects: renamed old-name/SKILL.md → new-name/SKILL.md
+```
+
+**Why it matters**: Preserves rename history. Without pairing, git shows a deletion and a new file — the connection is lost and blame history breaks.
 
 ---
 
@@ -777,3 +840,7 @@ async function fetchJSON(url, options={}) {
 29. **Stage Gate Pattern** — explicit go/no-go between every phase
 30. **Batch by Logical Concern** — one complete feature per batch, not measured by lines of code
 31. **Persistent Decision Artifacts** — save finalized plans as timestamped, numbered files for all downstream stages
+32. **Commit by Logical Group** — group by concern, not by file count or directory; one story per commit
+33. **Push Per Commit** — push after each commit, not batch; isolate failure risk
+34. **Auto-Generate Commit Messages** — generate from change type, present for editing, never push unapproved
+35. **Detect Renames via Deleted + New Pairs** — pair deleted and untracked files with similar paths to preserve git rename history
