@@ -33,8 +33,9 @@ Every piece of content must pass these three checks:
   - **Frontend Modules** — all `app/static/js/*.js` files
   - **Templates** — all `app/templates/*.html` files
   - **Tests** — all `tests/*.py` files
-  - Each entry: 1-sentence **lead line** extracted from source code's `Description:` header, then **bullet points** for key responsibilities and implementation details
+  - Each entry: 1-sentence **lead line** extracted from source code's `Description:` header, then **bullet points** for key responsibilities and implementation details, then a **`#### Functions` subsection** for per-function detail (see Step 1.75)
   - Lead lines are auto-sourced from code comments — see Workflow Step 1.5 for extraction
+  - Per-function details are auto-extracted from source code declarations and docstrings — see Workflow Step 1.75 for extraction
 - Key functionalities list — technical focus on what the code does, not why users want it
 - Data flow — MUST include API endpoints (e.g., `POST /api/events`) and WebSocket events with direction and payload
 - Key design decisions — include the *why*, not just the *what*
@@ -63,10 +64,72 @@ Every piece of content must pass these three checks:
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
 - Cross-reference, don't copy — use `[See README.md](README.md)` for user-facing setup instead of duplicating
-- Summary here, details there — file tree gets ~10-word descriptions; Module Descriptions gets the full lead line + bullets
+- Summary here, details there — file tree gets ~10-word descriptions; Module Descriptions gets the full lead line + bullets + per-function detail
 - Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
 
 If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in `ARCHITECTURE.md`.
+
+---
+
+### Per-Function Detail Rules
+
+Every module entry in Module Descriptions gets a detail subsection. The type depends on the file's content:
+
+| File type | Subsection heading | Content |
+|-----------|-------------------|---------|
+| Normal module with functions | `#### Functions` | Every function with signature + description |
+| Data-only module (state.py) | `#### Data Structures` | Dict/object shapes with key-value descriptions |
+| | `#### Constants` | Named constants with values |
+| DB schema module (database.py) | `#### Tables` | Full column listing (name, type, constraints) per table |
+| Config-only module (config.js) | `#### Configuration Constants` | All CONFIG.* properties with values |
+
+**Function entry format:**
+```
+- `function_name(param1, param2)` — one-line description
+```
+
+**Route handler format** (prepend HTTP method and path from decorator):
+```
+- `function_name()` — `METHOD /path` → description
+```
+
+**Socket event handler format** (prepend event name from decorator):
+```
+- `function_name()` — SocketIO `event_name` → description
+```
+
+**Missing description format** (flag, never invent):
+```
+- `function_name()` — `⚠️ Description: missing`
+```
+
+**Data structure format:**
+```
+- `name = {}` — `{key: {nested_key: type, ...}}` — purpose
+```
+
+**Constant format:**
+```
+- `NAME = value` — purpose / where it's used
+```
+
+**Table format:**
+```
+| Table | Columns |
+|-------|---------|
+| `name` | `col` (TYPE PK/FK), `col` (TYPE DEFAULT val) |
+```
+
+**Initialization note format** (for JS files with DOMContentLoaded wrappers that wire UI state):
+```
+*Behavior summary (wired in DOMContentLoaded):* description of key input/button state listeners
+```
+
+**Where to place the subsection:**
+- Insert immediately after the last existing bullet point of the module entry
+- Preserve one blank line between the last bullet and the subsection heading
+- Do NOT insert subsections for Template entries (`.html`) or CSS — they contain no functions
+- For initialization notes: place as an italic `*note*` line immediately after the `#### Functions` list (or at the end of the module entry if there are no named functions and the init logic is significant)
 
 ---
 
@@ -121,6 +184,58 @@ This single regex matches all three comment styles:
 - File exists in codebase but not in ARCHITECTURE.md → mark as `new`
 - File exists in ARCHITECTURE.md but not in codebase → mark for removal
 - File has no `Description:` header → mark as `missing`
+
+### 1.75 Extract Per-Function Details
+
+For every source file in `app/*.py`, `app/static/js/*.js`, and `tests/*.py`:
+
+**Parse function declarations:**
+
+| Language | Patterns to match |
+|----------|------------------|
+| Python | `def func_name(params):`, `async def func_name(params):`, `class ClassName:` |
+| JavaScript | `function funcName(params) {`, `const funcName = (params) => {`, `const funcName = function(params) {`, `funcName: function(params) {` (object method), `funcName(params) {` (ES6 method shorthand), `async function funcName`, `const funcName = async` |
+
+- Skip: `__init__`, dunder methods, callbacks passed inline to event listeners (e.g., `.on('event', function() {...})`)
+- Catch: anonymous functions assigned to module-level variables, nested named functions
+
+**Extract initialization behavior from DOMContentLoaded wrappers** (JS files only):
+- After parsing all named functions, check if the file has a `DOMContentLoaded` wrapper
+- If yes, scan inside it for key `addEventListener` calls that wire UI state management:
+  - Input → button enable/disable: `element.disabled = !this.value.trim()`
+  - Button clicks that trigger page navigation or API calls
+  - Socket event listeners wired outside named functions
+- Skip trivial listeners (e.g., `console.log` only, focus calls)
+- Record a prose summary of the initialization behaviors
+
+**Capture decorator context** (2 lines above each `def`):
+- `@app.route('METHOD /path')` → extract METHOD (GET/POST) + path
+- `@socketio.on('event_name')` → extract event name
+- `@app.route(...)` with no explicit methods → default to GET
+
+**Check each function for description:**
+- **Python:** scan lines after `def:` for `"""..."""` (docstring). If no docstring exists, scan for a `# Description:` comment on the line immediately above the `def`.
+- **JavaScript:** scan lines before `function` for `/** ... */` JSDoc block, `// Description:` comment, or `/* ... */` block comment. Prefer the closest comment above the function.
+
+**Record for each function:**
+- `filename`: relative path (e.g., `app/routes.py`)
+- `function_name`: exact name from declaration
+- `params`: parameter list as written in source
+- `route_context`: `METHOD /path` or SocketIO `event_name` (or empty)
+- `description`: extracted docstring/comment first line (or `⚠️ Description: missing`)
+- `is_class_method`: true/false
+
+**For data-only modules** (no function declarations), extract differently:
+- `state.py`: scan for `= {}` dict assignments and `= ` constant assignments → `#### Data Structures` + `#### Constants`
+- `database.py`: parse `CREATE TABLE` SQL strings → `#### Tables` with column name + type + constraints
+- `config.js`: scan for `CONFIG.* = ...` assignments → `#### Configuration Constants`
+
+**Record initialization behavior** for JS files with DOMContentLoaded wrappers:
+- `filename`: relative path
+- `behavior_summary`: prose description of key DOMContentLoaded initialization (e.g., "join button disabled until 8-char code entered; create button disabled until name entered")
+- If no significant initialization behavior is found, leave empty
+
+**Store results** grouped by filename for use in Step 4 (Update the Document).
 
 ### 2. Read the Current Document
 - Check if `docs/ARCHITECTURE.md` exists — create it if not
@@ -196,12 +311,30 @@ If CIDs is currently nested inside the Module Descriptions section (between rout
 1. Move CIDs to a standalone `## Critical Implementation Details` section placed AFTER the full `## Module Descriptions` section
 2. Add a `---` separator before and after
 
+**Per-function subsections — auto-generation:**
+
+For each module entry that has functions extracted in Step 1.75, insert or replace the `#### Functions` (or equivalent) subsection:
+
+1. Insert the subsection after the last bullet point in the entry, with one blank line before `####`
+2. List every function in the order they appear in the source file (top to bottom)
+3. Format per the "Per-Function Detail Rules" section above
+4. For data-only modules (state.py, config.js, database.py), use the appropriate subsection heading (`#### Data Structures`, `#### Constants`, `#### Configuration Constants`, `#### Tables`)
+
+Rules:
+- If a `#### Functions` subsection already exists and source hasn't changed → leave it intact
+- If a `#### Functions` subsection exists but source has changed → replace the entire subsection
+- If no `#### Functions` subsection exists and source has functions → add it
+- If functions were removed from source → remove their entries from the subsection
+- If initialization behavior was recorded (DOMContentLoaded wiring), append a `*note*` line after the Functions list using the initialization note format
+- If the initialization note already exists and behavior hasn't changed → leave it intact
+- If the initialization note exists but behavior changed → replace it
+
 **Other sections (not auto-generated):**
 - File tree: keep as concise navigation. Update directory entries to match actual structure. Verify descriptions don't contradict Module Descriptions lead lines.
 - Key functionalities, Data flow, Design decisions, Import structure, Running instructions, Modifying instructions: update manually against the codebase
 - Keep language technical — internal logic, not user benefits
 
-**Don't rewrite the entire document** — only update outdated or missing sections. The bullet points under each module entry are manually maintained and should not be auto-regenerated.
+**Don't rewrite the entire document** — only update outdated or missing sections. The bullet points under each module entry are manually maintained and should not be auto-regenerated. Only the `#### Functions` subsections are auto-generated.
 
 ### 5. Verify
 
@@ -225,3 +358,19 @@ If CIDs is currently nested inside the Module Descriptions section (between rout
 - [ ] Every claim verified against executable sources, not just docs
 - [ ] No excluded content remains — redirected if needed
 - [ ] Document is concise enough — no unnecessary detail, but all critical technical information is included
+
+**Per-function checks:**
+- [ ] Every source file with functions has a `#### Functions` subsection (or `#### Data Structures` / `#### Constants` / `#### Tables` / `#### Configuration Constants` for data-only modules)
+- [ ] Every function declaration in source is represented exactly once in the subsection
+- [ ] Function signatures match current source code — no stale entries
+- [ ] Missing descriptions are flagged with `⚠️` marker — never invent descriptions
+- [ ] Route handlers include correct HTTP method + path from decorators
+- [ ] Socket event handlers include correct event name from decorator
+- [ ] No function entries remain for functions that no longer exist in source
+- [ ] Subsection type matches file content (Functions for code, Data Structures/Constants for data, Tables for DB schema, Configuration Constants for config)
+- [ ] Functions listed in source order (top to bottom within file)
+
+**Initialization behavior checks:**
+- [ ] JS files with DOMContentLoaded wrappers have an initialization note if they wire significant UI state (button enable/disable, input validation)
+- [ ] Initialization notes describe key `addEventListener` wiring, not trivial setup
+- [ ] Notes use the `*italic note*` format placed after the Functions list
