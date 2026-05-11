@@ -53,7 +53,7 @@ Include both ✅ DO and ❌ DON'T examples where applicable.
 
 **Operations**
 - **Configuration** — tool configs, environment setup (e.g., `.opencode/opencode.json`)
-- **Version Control** — commit discipline, branching, what to never commit
+- **Version Control** — commit grouping logic, per-commit push discipline, auto-generated commit messages from change type, rename detection via deleted+untracked pairs, branching, what to never commit
 
 **Process**
 - **Debugging Process** — how issues were isolated, tools used (grep, read, bash)
