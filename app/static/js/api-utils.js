@@ -1,5 +1,6 @@
-// static/api-utils.js
-// Fetch/API utility functions for IntroChat
+// api-utils.js
+// Description: Thin fetch wrapper with timeout via AbortController, exposing typed HTTP methods (apiGet, apiPost, apiPut, apiDelete) with consistent error handling
+// ====
 
 /**
  * Fetch with timeout and error handling

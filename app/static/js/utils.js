@@ -1,5 +1,6 @@
-// static/utils.js
-// Shared utility functions for IntroChat
+// utils.js
+// Description: Shared browser utility functions — error display via alert, URL parameter extraction, page navigation, clipboard copy, and DOM helpers used across all pages
+// ====
 
 /**
  * Display an error message to the user

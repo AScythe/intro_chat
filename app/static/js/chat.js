@@ -1,5 +1,6 @@
-//+++ static/chat.js (修改后)
-// Chat page JavaScript - handles chat interface and connection exchange
+// chat.js
+// Description: Chat page controller managing SocketIO connection, message sending/receiving, timer countdown with extend support, conversation prompts display, and leave/exit flow
+// ====
 
 // Configuration from Flask template (set via data attributes or inline)
 let chatConfig = {

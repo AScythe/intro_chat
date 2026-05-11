@@ -1,4 +1,6 @@
-// User info page JavaScript
+// user-info.js
+// Description: User profile form controller handling LinkedIn URL and Slack handle input, profile data persistence via API, and navigation to room selection on success
+// ====
 document.addEventListener('DOMContentLoaded', function() {
     const eventId = window.userInfoEventId;
     const linkedinInput = document.getElementById('linkedinInput');

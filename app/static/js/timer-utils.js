@@ -1,5 +1,6 @@
-// static/timer-utils.js
-// Timer utility functions for IntroChat
+// timer-utils.js
+// Description: Timer factory providing createChatTimer() for extendable countdown with tick/complete callbacks and createCountdown() for redirect-on-expiry displays
+// ====
 
 /**
  * Chat timer with extend support (for chat.js)

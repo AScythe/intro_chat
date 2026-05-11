@@ -1,4 +1,6 @@
-// Home page JavaScript
+// home.js
+// Description: Landing page controller for event code input submission, QR code file upload/scanning, and event creation via modal dialog with API integration
+// ====
 document.addEventListener('DOMContentLoaded', function() {
     const eventCodeInput = document.getElementById('eventCode');
     const joinEventBtn = document.getElementById('joinEventBtn');

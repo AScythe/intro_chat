@@ -1,5 +1,6 @@
-//+++ static/room.js (修改后)
-// Room page JavaScript - handles room selection and user matching
+// room.js
+// Description: Room selection page controller handling room creation/joining, user availability toggling, match-finding initiation, match-found countdown, and connection exchange
+// ====
 
 // Configuration from Flask template (set via data attributes or inline)
 let roomConfig = {

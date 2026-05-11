@@ -1,5 +1,6 @@
-// static/dom-utils.js
-// DOM utility functions for IntroChat
+// dom-utils.js
+// Description: Null-safe DOM manipulation helpers — getElementById with console warnings, setTextContent, show/hide/toggle visibility, and createElement for dynamic UI construction
+// ====
 
 /**
  * Safely get element by ID with error handling

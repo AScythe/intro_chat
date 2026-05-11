@@ -1,10 +1,6 @@
-// app/static/js/config.js
-// Central configuration for IntroChat timers and durations
-// 
-// HOW TO USE FOR TESTING:
-// - To change chat duration: modify CHAT_DURATION below (in seconds)
-// - All other JS files (chat.js, room.js) now read from this CONFIG object
-// ================================================================
+// config.js
+// Description: Central configuration object defining timer durations, countdown thresholds, and demo mode delays — single source of truth consumed by chat.js and room.js
+// ====
 
 const CONFIG = {
     // Chat timer duration in seconds (default: 120 = 2 minutes)
