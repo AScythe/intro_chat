@@ -61,6 +61,8 @@ intro_chat/
 ## Module Descriptions
 
 ### `app/__init__.py` (Orchestrator)
+Flask/SocketIO app factory that initializes the server, creates the database, registers HTTP routes and SocketIO handlers, and starts the background cleanup thread.
+
 - Initializes Flask and SocketIO
 - Calls `init_db()` to set up database
 - Registers HTTP routes via `register_routes(app)`
@@ -69,6 +71,8 @@ intro_chat/
 - **Run command:** `python -m app` (or `python app/__init__.py`)
 
 ### `app/state.py` (Shared State)
+Server-global in-memory state — active users, active matches, waiting queue, conversation prompts, and timer configuration constants shared across all modules.
+
 - `active_users = {}` — tracks online users, rooms, availability
 - `active_matches = {}` — tracks active chat matches
 - `waiting_queue = {}` — users waiting for matches
@@ -76,49 +80,123 @@ intro_chat/
 - Timer constants: `MATCH_EXPIRY_MINUTES`, `CLEANUP_INTERVAL_SECONDS`, `CLEANUP_THRESHOLD_SECONDS`
 
 ### `app/database.py` (Database Schema)
+SQLite database initialization creating events, users, rooms, and matches tables with migration handling for social profile columns.
+
 - `init_db()` — creates 4 tables: `events`, `rooms`, `users`, `matches`
 - Uses SQLite (`introchat.db` in `data/` folder)
 
 ### `app/routes.py` (HTTP Routes)
+All HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints for events, users, rooms, matches, QR codes, and conversation prompts.
+
 - `register_routes(app)` — registers all `@app.route` handlers
 - Endpoints: `/`, `/join/<event_id>`, `/room/<id>`, `/chat/<id>`, `/api/events`, `/api/events/<id>/join`, etc.
 
-### Critical Implementation Details
+### `app/matchmaking.py` (Match Logic)
+Match-finding algorithm that pairs available users in the same room, creates match records in the database, and emits match_found events via SocketIO.
 
-#### Match Expiry
+- `find_match(user_id)` — finds available users in the same room
+- `create_match(user1_id, user2_id, room_id)` — creates match, notifies users via SocketIO
+
+### `app/socket_events.py` (WebSocket Handlers)
+SocketIO event handlers for real-time communication — connect, disconnect, and room joining; registered via register_handlers().
+
+- `register_handlers(socketio)` — registers `@socketio.on` handlers
+- Events: `connect`, `disconnect`, `join_room`
+
+### `app/tasks.py` (Background Tasks)
+Daemon background thread that periodically checks for and removes expired matches from in-memory state to prevent stale data accumulation.
+
+- `cleanup_expired_matches()` — removes matches older than threshold
+- `start_cleanup_thread()` — starts cleanup as daemon thread
+
+### `app/__main__.py` (Entry Point)
+Application entry point that launches the SocketIO server on 0.0.0.0:5000 with debug mode enabled.
+
+---
+
+### Frontend Modules
+
+#### `app/static/js/config.js` (Configuration)
+Central configuration object defining timer durations, countdown thresholds, and demo mode delays — single source of truth consumed by chat.js and room.js.
+
+#### `app/static/js/utils.js` (Shared Utilities)
+Shared browser utility functions — error display via alert, URL parameter extraction, page navigation, clipboard copy, and DOM helpers used across all pages.
+
+#### `app/static/js/dom-utils.js` (DOM Utilities)
+Null-safe DOM manipulation helpers — getElementById with console warnings, setTextContent, show/hide/toggle visibility, and createElement for dynamic UI construction.
+
+#### `app/static/js/api-utils.js` (API Utilities)
+Thin fetch wrapper with timeout via AbortController, exposing typed HTTP methods (apiGet, apiPost, apiPut, apiDelete) with consistent error handling.
+
+#### `app/static/js/timer-utils.js` (Timer Utilities)
+Timer factory providing createChatTimer() for extendable countdown with tick/complete callbacks and createCountdown() for redirect-on-expiry displays.
+
+#### `app/static/js/home.js` (Home Controller)
+Landing page controller for event code input submission, QR code file upload/scanning, and event creation via modal dialog with API integration.
+
+#### `app/static/js/user-info.js` (Profile Controller)
+User profile form controller handling LinkedIn URL and Slack handle input, profile data persistence via API, and navigation to room selection on success.
+
+#### `app/static/js/room.js` (Room Controller)
+Room selection page controller handling room creation/joining, user availability toggling, match-finding initiation, match-found countdown, and connection exchange.
+
+#### `app/static/js/chat.js` (Chat Controller)
+Chat page controller managing SocketIO connection, message sending/receiving, timer countdown with extend support, conversation prompts display, and leave/exit flow.
+
+---
+
+### Templates
+
+#### `app/templates/index.html`
+Landing page template with hero section and tagline, event code input form, create-event modal dialog, and QR code file upload for scanning.
+
+#### `app/templates/user_info.html`
+User profile template with LinkedIn URL and Slack handle input fields, save button with success confirmation card, and navigation back to home.
+
+#### `app/templates/room.html`
+Room selection template with interactive location grid, create-room option, match-status message area, and loading overlay during matchmaking.
+
+#### `app/templates/chat.html`
+Chat page template with timer display, conversation prompts list, scrollable message area, text input field, leave button, and user info card with social links.
+
+---
+
+### Tests
+
+#### `tests/test_app.py`
+End-to-end integration test suite that starts the Flask server as a subprocess and tests page rendering, API endpoints, matchmaking flow, profile updates, and QR generation via the requests library.
+
+#### `tests/test_js_modules.py`
+JavaScript module validation suite using static regex analysis — checks file existence, JSDoc coverage on exported functions, function name conventions, and cross-file import references.
+
+#### `tests/test_db.py`
+Standalone database debugging utility that tests SQLite connection, lists table schemas, and prints column information — run via `python tests/test_db.py`.
+
+---
+## Critical Implementation Details
+
+### Match Expiry
 - **Initial expiry:** 2 minutes (set in `create_match()` function)
 - **Cleanup threshold:** 5 minutes (cleanup thread runs every 60 seconds)
 - Cleanup thread is daemonized and starts automatically
 
-#### Default Rooms
+### Default Rooms
 Defined inline in `app/routes.py` (not a constant):
 ```python
 ['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Quiet Corner', 'Coffee Area']
 ```
 
-#### Conversation Prompts
+### Conversation Prompts
 Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 
-#### WebSocket Configuration
+### WebSocket Configuration
 - **Development:** `cors_allowed_origins="*"` (line 15 of `__init__.py`)
 - **Production:** Change to explicit origins and add `async_mode='eventlet'`
 
-#### Frontend Module Rules
+### Frontend Module Rules
 - No inline `<script>` in templates — all logic in `app/static/js/*.js`
 - Pass Jinja2 data to JS via `window` globals only
 - Shared utilities go in `utils.js`
-
-### `app/matchmaking.py` (Match Logic)
-- `find_match(user_id)` — finds available users in the same room
-- `create_match(user1_id, user2_id, room_id)` — creates match, notifies users via SocketIO
-
-### `app/socket_events.py` (WebSocket Handlers)
-- `register_handlers(socketio)` — registers `@socketio.on` handlers
-- Events: `connect`, `disconnect`, `join_room`
-
-### `app/tasks.py` (Background Tasks)
-- `cleanup_expired_matches()` — removes matches older than threshold
-- `start_cleanup_thread()` — starts cleanup as daemon thread
 
 ---
 
