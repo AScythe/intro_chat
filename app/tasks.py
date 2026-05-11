@@ -1,7 +1,6 @@
 # tasks.py
-# Background tasks for IntroChat
-# ===============================================================
-# Contains the cleanup thread that removes expired matches.
+# Description: Daemon background thread that periodically checks for and removes expired matches from in-memory state to prevent stale data accumulation
+# ====
 
 from .state import active_matches, CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
 import time

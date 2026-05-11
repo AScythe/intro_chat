@@ -1,8 +1,7 @@
 # socket_events.py
-# SocketIO event handlers for IntroChat
-# ================================================================
-# These handlers are registered on the socketio instance.
-# Import socketio from app.py and register these handlers.
+# Description: SocketIO event handlers for real-time communication — connect, disconnect, and room joining; registered via register_handlers()
+# ====
+# Handles: connect, disconnect, join_room. Register via register_handlers(socketio).
 
 from flask_socketio import emit, join_room
 from .state import active_users

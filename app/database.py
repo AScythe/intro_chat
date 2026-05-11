@@ -1,8 +1,7 @@
 # database.py
-# Database setup and initialization for IntroChat
-# ================================================================
-# This module handles all SQLite table creation.
-# Call init_db() to initialize the database schema.
+# Description: SQLite database initialization creating events, users, rooms, and matches tables with migration handling for social profile columns
+# ====
+# Creates events, users, rooms, matches tables. Call init_db() to initialize.
 
 import sqlite3
 

@@ -1,3 +1,7 @@
+# matchmaking.py
+# Description: Match-finding algorithm that pairs available users in the same room, creates match records in the database, and emits match_found events via SocketIO
+# ====
+
 from .state import active_users, active_matches, waiting_queue
 import sqlite3
 import uuid

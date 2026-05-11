@@ -1,3 +1,7 @@
+# routes.py
+# Description: All HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints for events, users, rooms, matches, QR codes, and conversation prompts
+# ====
+
 from flask import jsonify, render_template, request
 from .state import active_users, active_matches, waiting_queue, CONVERSATION_PROMPTS, USER_TEMPLATE
 import sqlite3

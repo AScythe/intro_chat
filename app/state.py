@@ -1,10 +1,8 @@
 # state.py
-# Server-global state for IntroChat
-# ================================================================
-# These variables are shared across routes, socket events, and background tasks.
-# They are stored in-memory and reset on server restart.
-# Do NOT import these directly in modules that may cause circular imports.
-# Instead, import from this module: from state import active_users, etc.
+# Description: Server-global in-memory state — active users, active matches, waiting queue, conversation prompts, and timer configuration constants shared across all modules
+# ====
+# Shared across routes, socket events, and background tasks. Do NOT import directly
+# in modules that may cause circular imports — use: from state import active_users, etc.
 
 # In-memory storage for active sessions
 active_users = {}

@@ -1,14 +1,7 @@
-# app/__init__.py
-# Main application entry point for IntroChat
-# ================================================================
-# This file initializes Flask and SocketIO, then wires up all modular components.
-# All business logic has been moved to separate modules in the app package:
-# - state.py:      Shared in-memory state and constants
-# - database.py:   Database schema initialization
-# - routes.py:     All HTTP route handlers
-# - matchmaking.py: Match finding and creation logic
-# - socket_events.py: SocketIO event handlers
-# - tasks.py:     Background cleanup thread
+# __init__.py
+# Description: Flask/SocketIO app factory that initializes the server, creates the database, registers HTTP routes and SocketIO handlers, and starts the background cleanup thread
+# ====
+# Wires up: state.py, database.py, routes.py, matchmaking.py, socket_events.py, tasks.py
 
 from flask import Flask, render_template, request, jsonify, send_file
 from flask_socketio import SocketIO, emit, join_room, leave_room
