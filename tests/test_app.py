@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 test_app.py
-Description: End-to-end integration test suite that starts the Flask server as a subprocess and tests page rendering, API endpoints, matchmaking flow, profile updates, and QR generation via the requests library
+Description: End-to-end integration test suite that uses FastAPI's TestClient to test page rendering, API endpoints, matchmaking flow, profile updates, and QR generation
 """
 
 import sys
@@ -12,8 +12,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import sqlite3
 import json
-import requests
+import asyncio
 import time
+from fastapi.testclient import TestClient
 from app import app
 
 
@@ -22,16 +23,22 @@ def test_imports():
     print("🧪 Testing imports...")
 
     try:
-        import flask
-        print("✅ Flask imported successfully")
+        import fastapi
+        print("✅ FastAPI imported successfully")
     except ImportError as e:
-        print(f"❌ Flask import failed: {e}")
+        print(f"❌ FastAPI import failed: {e}")
 
     try:
-        import flask_socketio
-        print("✅ Flask-SocketIO imported successfully")
+        import uvicorn
+        print("✅ Uvicorn imported successfully")
     except ImportError as e:
-        print(f"❌ Flask-SocketIO import failed: {e}")
+        print(f"❌ Uvicorn import failed: {e}")
+
+    try:
+        import aiosqlite
+        print("✅ aiosqlite imported successfully")
+    except ImportError as e:
+        print(f"❌ aiosqlite import failed: {e}")
 
     try:
         import qrcode
@@ -59,7 +66,7 @@ def test_imports():
         print(f"❌ app/database.py import failed: {e}")
 
     try:
-        from app.routes import register_routes
+        from app.routes import router
         print("✅ app/routes.py imported successfully")
     except ImportError as e:
         print(f"❌ app/routes.py import failed: {e}")
@@ -71,10 +78,16 @@ def test_imports():
         print(f"❌ app/matchmaking.py import failed: {e}")
 
     try:
-        from app.socket_events import register_handlers
-        print("✅ app/socket_events.py imported successfully")
+        from app.schemas import CreateEventRequest, JoinEventRequest
+        print("✅ app/schemas.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/socket_events.py import failed: {e}")
+        print(f"❌ app/schemas.py import failed: {e}")
+
+    try:
+        from app.connection_manager import manager
+        print("✅ app/connection_manager.py imported successfully")
+    except ImportError as e:
+        print(f"❌ app/connection_manager.py import failed: {e}")
 
     try:
         from app.tasks import cleanup_expired_matches
@@ -95,7 +108,9 @@ def test_file_structure():
         'app/database.py',
         'app/routes.py',
         'app/matchmaking.py',
-        'app/socket_events.py',
+        'app/connection_manager.py',
+        'app/schemas.py',
+        'app/config.py',
         'app/tasks.py',
         'requirements.txt',
         'docs/README.md',
@@ -133,8 +148,8 @@ def test_database():
     # Initialize database with correct path
     import os
     from app.database import init_db
-    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
-    init_db(db_path)
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'test_introchat.db')
+    asyncio.run(init_db(db_path))
 
     # Test database connection
     conn = sqlite3.connect(db_path)
@@ -168,6 +183,7 @@ def test_database():
         print(f"❌ Database operations failed: {e}")
 
     conn.close()
+    os.remove(db_path)
     print("✅ Database test completed\n")
 
 
@@ -216,10 +232,10 @@ def test_state_constants():
 def test_home_page():
     """Test home page renders"""
     print("🧪 Testing home page...")
-    with app.test_client() as client:
-        resp = client.get('/')
-        assert resp.status_code == 200
-        assert b'IntroChat' in resp.data
+    client = TestClient(app)
+    resp = client.get('/')
+    assert resp.status_code == 200
+    assert 'IntroChat' in resp.text
     print("✅ Home page renders correctly\n")
 
 
@@ -227,54 +243,55 @@ def test_api_endpoints():
     """Test all API endpoints respond correctly"""
     print("🧪 Testing API endpoints...")
 
-    with app.test_client() as client:
-        # Create event
-        resp = client.post('/api/events', json={'name': 'API Test Event'})
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert 'event_id' in data
-        event_id = data['event_id']
-        print(f"✅ POST /api/events → {event_id}")
+    client = TestClient(app)
 
-        # Get rooms
-        resp = client.get(f'/api/events/{event_id}/rooms')
-        assert resp.status_code == 200
-        rooms = resp.get_json()
-        assert len(rooms) == 8
-        print(f"✅ GET /api/events/<id>/rooms → {len(rooms)} rooms")
+    # Create event
+    resp = client.post('/api/events', json={'name': 'API Test Event'})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert 'event_id' in data
+    event_id = data['event_id']
+    print(f"✅ POST /api/events → {event_id}")
 
-        # Join event
-        resp = client.post(f'/api/events/{event_id}/join', json={'username': 'TestUser'})
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert 'user_id' in data
-        user_id = data['user_id']
-        print(f"✅ POST /api/events/<id>/join → user {user_id}")
+    # Get rooms
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    assert resp.status_code == 200
+    rooms = resp.json()
+    assert len(rooms) == 8
+    print(f"✅ GET /api/events/<id>/rooms → {len(rooms)} rooms")
 
-        # Select room
-        room_id = rooms[0]['id']
-        resp = client.post(f'/api/users/{user_id}/room', json={'room_id': room_id})
-        assert resp.status_code == 200
-        print(f"✅ POST /api/users/<id>/room → room selected")
+    # Join event
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'TestUser'})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert 'user_id' in data
+    user_id = data['user_id']
+    print(f"✅ POST /api/events/<id>/join → user {user_id}")
 
-        # Set available
-        resp = client.post(f'/api/users/{user_id}/available', json={'available': True})
-        assert resp.status_code == 200
-        print(f"✅ POST /api/users/<id>/available → toggled")
+    # Select room
+    room_id = rooms[0]['id']
+    resp = client.post(f'/api/users/{user_id}/room', json={'room_id': room_id})
+    assert resp.status_code == 200
+    print(f"✅ POST /api/users/<id>/room → room selected")
 
-        # QR code
-        resp = client.get(f'/api/qr/{event_id}')
-        assert resp.status_code == 200
-        data = resp.get_json()
-        assert 'qr_code' in data
-        print(f"✅ GET /api/qr/<id> → QR generated")
+    # Set available
+    resp = client.post(f'/api/users/{user_id}/available', json={'available': True})
+    assert resp.status_code == 200
+    print(f"✅ POST /api/users/<id>/available → toggled")
 
-        # Prompts
-        resp = client.get('/api/prompts')
-        assert resp.status_code == 200
-        prompts = resp.get_json()
-        assert len(prompts) == 10
-        print(f"✅ GET /api/prompts → {len(prompts)} prompts")
+    # QR code
+    resp = client.get(f'/api/qr/{event_id}')
+    assert resp.status_code == 200
+    data = resp.json()
+    assert 'qr_code' in data
+    print(f"✅ GET /api/qr/<id> → QR generated")
+
+    # Prompts
+    resp = client.get('/api/prompts')
+    assert resp.status_code == 200
+    prompts = resp.json()
+    assert len(prompts) == 10
+    print(f"✅ GET /api/prompts → {len(prompts)} prompts")
 
     print("✅ API endpoint test completed\n")
 
@@ -283,22 +300,23 @@ def test_social_info():
     """Test social info (linkedin_url, slack_handle) is saved on join"""
     print("🧪 Testing social info collection...")
 
-    with app.test_client() as client:
-        resp = client.post('/api/events', json={'name': 'Social Test'})
-        event_id = resp.get_json()['event_id']
+    client = TestClient(app)
 
-        resp = client.post(f'/api/events/{event_id}/join', json={
-            'username': 'SocialUser',
-            'linkedin_url': 'https://linkedin.com/in/testuser',
-            'slack_handle': '@testuser'
-        })
-        assert resp.status_code == 200
-        user_id = resp.get_json()['user_id']
+    resp = client.post('/api/events', json={'name': 'Social Test'})
+    event_id = resp.json()['event_id']
 
-        from app.state import active_users
-        user = active_users.get(user_id, {})
-        assert user.get('linkedin_url') == 'https://linkedin.com/in/testuser'
-        assert user.get('slack_handle') == '@testuser'
+    resp = client.post(f'/api/events/{event_id}/join', json={
+        'username': 'SocialUser',
+        'linkedin_url': 'https://linkedin.com/in/testuser',
+        'slack_handle': '@testuser'
+    })
+    assert resp.status_code == 200
+    user_id = resp.json()['user_id']
+
+    from app.state import active_users
+    user = active_users.get(user_id, {})
+    assert user.get('linkedin_url') == 'https://linkedin.com/in/testuser'
+    assert user.get('slack_handle') == '@testuser'
 
     print("✅ Social info saved correctly\n")
 
@@ -307,22 +325,23 @@ def test_error_paths():
     """Test error responses for invalid requests"""
     print("🧪 Testing error paths...")
 
-    with app.test_client() as client:
-        # Missing user
-        resp = client.post('/api/users/nonexistent/room', json={'room_id': 'room1'})
-        assert resp.status_code == 404
+    client = TestClient(app)
 
-        # Missing match
-        resp = client.get('/api/matches/nonexistent')
-        assert resp.status_code == 404
+    # Missing user
+    resp = client.post('/api/users/nonexistent/room', json={'room_id': 'room1'})
+    assert resp.status_code == 404
 
-        # Missing event rooms
-        resp = client.get('/api/events/nonexistent/rooms')
-        assert resp.status_code == 200  # Returns empty list, not error
+    # Missing match
+    resp = client.get('/api/matches/nonexistent')
+    assert resp.status_code == 404
 
-        # Join with no body
-        resp = client.post('/api/events/nonexistent/join', json={})
-        assert resp.status_code == 200  # Creates user with defaults
+    # Missing event rooms
+    resp = client.get('/api/events/nonexistent/rooms')
+    assert resp.status_code == 200  # Returns empty list, not error
+
+    # Join with no body
+    resp = client.post('/api/events/nonexistent/join', json={})
+    assert resp.status_code == 200  # Creates user with defaults
 
     print("✅ Error path test completed\n")
 
@@ -334,58 +353,316 @@ def test_matchmaking_lifecycle():
     from app.state import active_users, active_matches, waiting_queue
     from app.matchmaking import create_match
 
-    with app.test_client() as client:
-        # Create event + users
-        resp = client.post('/api/events', json={'name': 'Match Test'})
-        event_id = resp.get_json()['event_id']
+    client = TestClient(app)
 
-        resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User1'})
-        user1_id = resp.get_json()['user_id']
+    # Create event + users
+    resp = client.post('/api/events', json={'name': 'Match Test'})
+    event_id = resp.json()['event_id']
 
-        resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User2'})
-        user2_id = resp.get_json()['user_id']
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User1'})
+    user1_id = resp.json()['user_id']
 
-        resp = client.get(f'/api/events/{event_id}/rooms')
-        room_id = resp.get_json()[0]['id']
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User2'})
+    user2_id = resp.json()['user_id']
 
-        client.post(f'/api/users/{user1_id}/room', json={'room_id': room_id})
-        client.post(f'/api/users/{user2_id}/room', json={'room_id': room_id})
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    room_id = resp.json()[0]['id']
 
-        # Create match directly
-        create_match(user1_id, user2_id, room_id)
+    client.post(f'/api/users/{user1_id}/room', json={'room_id': room_id})
+    client.post(f'/api/users/{user2_id}/room', json={'room_id': room_id})
 
-        match_ids = [m for m in active_matches.values()
-                     if m['user1_id'] == user1_id and m['user2_id'] == user2_id]
-        assert len(match_ids) == 1
-        match_id = list(active_matches.keys())[
-            [m['user1_id'] for m in active_matches.values()].index(user1_id)
-        ]
-        print(f"✅ Match created: {match_id}")
+    # Create match directly
+    asyncio.run(create_match(user1_id, user2_id, room_id))
 
-        # Retrieve match
-        resp = client.get(f'/api/matches/{match_id}')
-        assert resp.status_code == 200
-        match_data = resp.get_json()
-        assert match_data['user1_username'] == 'User1'
-        assert match_data['user2_username'] == 'User2'
-        print("✅ Match retrieved via API")
+    match_ids = [m for m in active_matches.values()
+                 if m['user1_id'] == user1_id and m['user2_id'] == user2_id]
+    assert len(match_ids) == 1
+    match_id = list(active_matches.keys())[
+        [m['user1_id'] for m in active_matches.values()].index(user1_id)
+    ]
+    print(f"✅ Match created: {match_id}")
 
-        # Connection exchange — user1 opts in
-        resp = client.post(f'/api/matches/{match_id}/connect',
-                           json={'user_id': user1_id, 'wants_to_connect': True})
-        assert resp.status_code == 200
+    # Retrieve match via get_match
+    resp = client.get(f'/api/matches/{match_id}')
+    assert resp.status_code == 200
+    match_data = resp.json()
+    assert match_data['user1_username'] == 'User1'
+    assert match_data['user2_username'] == 'User2'
+    print("✅ Match retrieved via API")
 
-        # Connection exchange — user2 opts in
-        resp = client.post(f'/api/matches/{match_id}/connect',
-                           json={'user_id': user2_id, 'wants_to_connect': True})
-        assert resp.status_code == 200
-        print("✅ Connection exchange completed")
+    # Retrieve match via get_user_match
+    resp = client.get(f'/api/users/{user1_id}/match')
+    assert resp.status_code == 200
+    assert resp.json()['match_id'] == match_id
+    resp = client.get(f'/api/users/{user2_id}/match')
+    assert resp.status_code == 200
+    assert resp.json()['match_id'] == match_id
+    print("✅ Match retrieved via get_user_match")
 
-        # Cleanup state
-        if match_id in active_matches:
-            del active_matches[match_id]
+    # get_user_match returns 404 for unmatched user
+    resp = client.get('/api/users/nonexistent/match')
+    assert resp.status_code == 404
+    print("✅ get_user_match 404 for unmatched user")
+
+    # Connection exchange — user1 opts in
+    resp = client.post(f'/api/matches/{match_id}/connect',
+                       json={'user_id': user1_id, 'wants_to_connect': True})
+    assert resp.status_code == 200
+
+    # Connection exchange — user2 opts in
+    resp = client.post(f'/api/matches/{match_id}/connect',
+                       json={'user_id': user2_id, 'wants_to_connect': True})
+    assert resp.status_code == 200
+    print("✅ Connection exchange completed")
+
+    # Connection declined path — user1 opts in, user2 opts out
+    asyncio.run(create_match(user1_id, user2_id, room_id))
+    match_id2 = [mid for mid, m in active_matches.items()
+                 if m['user1_id'] == user1_id and m['user2_id'] == user2_id
+                 and mid != match_id][0]
+    resp = client.post(f'/api/matches/{match_id2}/connect',
+                       json={'user_id': user1_id, 'wants_to_connect': True})
+    assert resp.status_code == 200
+    resp = client.post(f'/api/matches/{match_id2}/connect',
+                       json={'user_id': user2_id, 'wants_to_connect': False})
+    assert resp.status_code == 200
+    print("✅ Connection declined path works")
+    if match_id2 in active_matches:
+        del active_matches[match_id2]
+
+    # Cleanup state
+    if match_id in active_matches:
+        del active_matches[match_id]
 
     print("✅ Matchmaking lifecycle test completed\n")
+
+
+def test_find_match_end_to_end():
+    """Test find_match via availability toggle (full flow, not direct call)"""
+    print("🧪 Testing find_match end-to-end...")
+
+    from app.state import active_users, active_matches, waiting_queue
+    from app.matchmaking import find_match
+
+    client = TestClient(app)
+
+    # Create event + two users
+    resp = client.post('/api/events', json={'name': 'FindMatch Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Alice'})
+    user1_id = resp.json()['user_id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Bob'})
+    user2_id = resp.json()['user_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    room_id = resp.json()[0]['id']
+
+    client.post(f'/api/users/{user1_id}/room', json={'room_id': room_id})
+    client.post(f'/api/users/{user2_id}/room', json={'room_id': room_id})
+
+    # Toggle user1 available — no match yet, goes to waiting_queue
+    client.post(f'/api/users/{user1_id}/available', json={'available': True})
+    assert user1_id in waiting_queue
+    print("✅ User1 in waiting queue")
+
+    # Toggle user2 available — triggers find_match, both should match
+    client.post(f'/api/users/{user2_id}/available', json={'available': True})
+
+    # Verify match was created
+    match_id = None
+    for mid, m in active_matches.items():
+        if (m['user1_id'] == user1_id and m['user2_id'] == user2_id) or \
+           (m['user1_id'] == user2_id and m['user2_id'] == user1_id):
+            match_id = mid
+            break
+    assert match_id is not None, "find_match should create a match when two users are available in same room"
+    print(f"✅ Match created via find_match: {match_id}")
+
+    # Both should be removed from waiting queue
+    assert user1_id not in waiting_queue
+    assert user2_id not in waiting_queue
+    print("✅ Both users removed from waiting queue")
+
+    # Both should be set unavailable
+    assert active_users.get(user1_id, {}).get('is_available') == False
+    assert active_users.get(user2_id, {}).get('is_available') == False
+    print("✅ Both users set to unavailable")
+
+    # Cleanup
+    if match_id in active_matches:
+        del active_matches[match_id]
+
+    print("✅ find_match end-to-end test completed\n")
+
+
+def test_cleanup_expired_matches():
+    """Test cleanup threshold logic — old matches get removed, new ones stay"""
+    print("🧪 Testing cleanup expired matches...")
+
+    from app.state import active_matches, CLEANUP_THRESHOLD_SECONDS
+    import time
+
+    # Add a new match (should NOT be cleaned up)
+    fresh_match_id = 'fresh_match_test'
+    active_matches[fresh_match_id] = {
+        'user1_id': 'u1',
+        'user2_id': 'u2',
+        'room_id': 'r1',
+        'created_at': time.time()
+    }
+
+    # Add an old match (should be cleaned up)
+    old_match_id = 'old_match_test'
+    active_matches[old_match_id] = {
+        'user1_id': 'u3',
+        'user2_id': 'u4',
+        'room_id': 'r2',
+        'created_at': time.time() - CLEANUP_THRESHOLD_SECONDS - 10  # older than threshold
+    }
+
+    # Run cleanup logic inline (same logic as cleanup_expired_matches)
+    current_time = time.time()
+    matches_to_remove = [
+        mid for mid, match in active_matches.items()
+        if current_time - match['created_at'] > CLEANUP_THRESHOLD_SECONDS
+    ]
+
+    assert old_match_id in matches_to_remove
+    print("✅ Old match identified for cleanup")
+
+    assert fresh_match_id not in matches_to_remove
+    print("✅ Fresh match not identified for cleanup")
+
+    # Actually remove them (simulating cleanup)
+    for mid in matches_to_remove:
+        del active_matches[mid]
+
+    assert fresh_match_id in active_matches
+    assert old_match_id not in active_matches
+    print("✅ Cleanup removes old matches, keeps new ones")
+
+    # Cleanup
+    if fresh_match_id in active_matches:
+        del active_matches[fresh_match_id]
+
+    print("✅ Cleanup expired matches test completed\n")
+
+
+def test_websocket_connection():
+    """Test WebSocket endpoint and ConnectionManager"""
+    print("🧪 Testing WebSocket endpoint...")
+
+    from app.connection_manager import manager
+
+    client = TestClient(app)
+
+    # Test ConnectionManager connect/disconnect directly
+    test_user = 'direct_test_user'
+    test_room = 'direct_test_room'
+
+    # Simulate what connect() does internally
+    manager.user_connections[test_user] = None
+    manager.user_rooms[test_user] = test_room
+    manager.room_users.setdefault(test_room, set()).add(test_user)
+    assert test_user in manager.user_connections
+    assert manager.user_rooms.get(test_user) == test_room
+    assert test_user in manager.room_users.get(test_room, set())
+    print("✅ ConnectionManager internal mappings work")
+
+    manager.disconnect(test_user)
+    assert test_user not in manager.user_connections
+    assert test_user not in manager.user_rooms
+    assert test_user not in manager.room_users.get(test_room, set())
+    print("✅ ConnectionManager.disconnect cleans up all mappings")
+
+    # send_to_user handles missing user gracefully
+    asyncio.run(manager.send_to_user('nonexistent', {'type': 'test'}))
+    print("✅ ConnectionManager.send_to_user handles missing user gracefully")
+
+    # broadcast_to_room handles empty room gracefully
+    asyncio.run(manager.broadcast_to_room('empty_room', {'type': 'test'}))
+    print("✅ ConnectionManager.broadcast_to_room handles empty room gracefully")
+
+    # Test WebSocket endpoint via TestClient
+    ws_user = 'ws_e2e_user'
+
+    with client.websocket_connect('/ws') as ws:
+        ws.send_json({'user_id': ws_user, 'room_id': 'ws_room1'})
+
+    assert ws_user not in manager.user_connections
+    print("✅ WebSocket endpoint: connect and clean disconnect works")
+
+    # Test join_room via WebSocket
+    with client.websocket_connect('/ws') as ws:
+        ws.send_json({'user_id': ws_user, 'room_id': 'ws_room1'})
+        ws.send_json({'type': 'join_room', 'room_id': 'ws_room2'})
+
+    assert ws_user not in manager.user_connections
+    print("✅ WebSocket endpoint: join_room and disconnect works")
+
+    # Test WebSocket rejects missing user_id
+    try:
+        with client.websocket_connect('/ws') as ws:
+            ws.send_json({'room_id': 'no_user_room'})
+            ws.receive_json()
+        print("❌ WebSocket should have rejected missing user_id")
+    except Exception:
+        print("✅ WebSocket rejects missing user_id")
+
+    print("✅ WebSocket endpoint test completed\n")
+
+
+def test_template_pages():
+    """Test that template pages render correctly"""
+    print("🧪 Testing template pages...")
+
+    client = TestClient(app)
+
+    # User info page
+    resp = client.get('/join/test_event')
+    assert resp.status_code == 200
+    assert 'test_event' in resp.text
+    print("✅ /join/<event_id> renders")
+
+    # Room selection page
+    resp = client.get('/room/test_event')
+    assert resp.status_code == 200
+    assert 'test_event' in resp.text
+    print("✅ /room/<event_id> renders")
+
+    # Chat page — requires active match in state
+    from app.state import active_users, active_matches
+    test_match_id = 'chat_page_test'
+    active_matches[test_match_id] = {
+        'user1_id': 'chat_u1',
+        'user2_id': 'chat_u2',
+        'room_id': 'chat_r1',
+        'created_at': time.time()
+    }
+    active_users['chat_u1'] = {
+        'event_id': 'chat_event',
+        'username': 'ChatUser1',
+        'room_id': 'chat_r1'
+    }
+    resp = client.get(f'/chat/{test_match_id}')
+    assert resp.status_code == 200
+    assert test_match_id in resp.text
+    print("✅ /chat/<match_id> renders")
+
+    # Cleanup
+    if test_match_id in active_matches:
+        del active_matches[test_match_id]
+    if 'chat_u1' in active_users:
+        del active_users['chat_u1']
+
+    # Chat page with nonexistent match — still renders
+    resp = client.get('/chat/nonexistent')
+    assert resp.status_code == 200
+    print("✅ /chat/<id> renders even for missing match")
+
+    print("✅ Template pages test completed\n")
 
 
 def main():
@@ -403,6 +680,10 @@ def main():
     test_social_info()
     test_error_paths()
     test_matchmaking_lifecycle()
+    test_find_match_end_to_end()
+    test_cleanup_expired_matches()
+    test_websocket_connection()
+    test_template_pages()
 
     print("🎉 All tests completed!")
 

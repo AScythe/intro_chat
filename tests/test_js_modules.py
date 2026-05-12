@@ -87,6 +87,9 @@ def test_room_js_functions():
         'loadRooms',
         'setupEventListeners',
         'selectRoom',
+        'requestChat',
+        'cancelWaiting',
+        'changeRoom',
         'handleMatchFound',
         'startCountdown',
         'goToChat',
@@ -94,6 +97,7 @@ def test_room_js_functions():
         'updateNearbyUsers',
         'requestChatWithPerson',
         'simulatePersonResponse',
+        'checkIfBothReady',
         'cancelRequest',
         'testFunction'
     ]
@@ -231,7 +235,7 @@ def test_index_html():
             print(f"❌ index.html missing {js_name}")
 
     # Verify no inline functions
-    inline_script_pattern = r'<script>\s*(?!// Pass Flask)(?!window\.)[\s\S]*?function\s+\w+'
+    inline_script_pattern = r'<script>\s*(?!// Pass template variables)(?!window\.)[\s\S]*?function\s+\w+'
     if not re.search(inline_script_pattern, content):
         print("✅ index.html has no inline function definitions")
     else:
@@ -312,7 +316,7 @@ def test_html_templates():
         print("❌ user_info.html missing event_id configuration")
 
     # Verify no inline scripts remain (except config)
-    inline_script_pattern = r'<script>\s*(?!// Pass Flask)(?!window\.)[\s\S]*?function\s+\w+'
+    inline_script_pattern = r'<script>\s*(?!// Pass template variables)(?!window\.)[\s\S]*?function\s+\w+'
     if not re.search(inline_script_pattern, room_content):
         print("✅ room.html has no inline function definitions")
     else:
@@ -423,7 +427,7 @@ def main():
     print("   - JavaScript code successfully extracted from HTML templates")
     print("   - Shared utilities moved to utils.js")
     print("   - Page-specific logic separated into room.js and chat.js")
-    print("   - Flask template variables passed via window object")
+    print("   - Template variables passed via window object")
     print("   - All existing functionality preserved")
 
 if __name__ == "__main__":

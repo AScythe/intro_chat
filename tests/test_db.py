@@ -52,6 +52,7 @@ def test_db_connection():
 def reset_database():
     """Reset the database (deletes and recreates)"""
     import sys
+    import asyncio
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
     db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
@@ -62,7 +63,7 @@ def reset_database():
     
     # Recreate database
     from app.database import init_db
-    init_db(db_path)
+    asyncio.run(init_db(db_path))
     print(f"✅ Database recreated at: {db_path}")
 
 if __name__ == '__main__':
