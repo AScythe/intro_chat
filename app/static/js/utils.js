@@ -32,15 +32,25 @@ function formatTime(seconds) {
 }
 
 /**
- * Initialize Socket.IO connection
- * @returns {Socket} Socket.IO socket instance
+ * Initialize WebSocket connection
+ * @param {string} userId - User ID for registration
+ * @param {string} roomId - Room ID for registration
+ * @returns {WebSocket} WebSocket instance
  */
-function initSocket() {
-    if (typeof io === 'undefined') {
-        console.error('Socket.IO library not loaded');
-        return null;
-    }
-    return io();
+function initSocket(userId, roomId) {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = protocol + '//' + window.location.host + '/ws';
+    const ws = new WebSocket(wsUrl);
+    ws.onopen = function () {
+        ws.send(JSON.stringify({ type: 'hello', user_id: userId, room_id: roomId || '' }));
+    };
+    ws.onclose = function () {
+        console.log('WebSocket disconnected');
+    };
+    ws.onerror = function (err) {
+        console.error('WebSocket error:', err);
+    };
+    return ws;
 }
 
 /**

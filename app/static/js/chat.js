@@ -21,7 +21,7 @@ let prompts = [];
 function initChatPage(matchId) {
     chatConfig.matchId = matchId;
     chatConfig.eventId = window.chatEventId || getUrlParameter('event_id');
-    chatConfig.socket = initSocket();
+    chatConfig.socket = initSocket(getUserId(), null);
 
     console.log('Chat page initialized for match:', matchId);
 
@@ -117,8 +117,14 @@ function setupEventListeners() {
 
     // Socket events
     if (chatConfig.socket) {
-        chatConfig.socket.on('connection_exchanged', handleConnectionExchanged);
-        chatConfig.socket.on('connection_declined', handleConnectionDeclined);
+        chatConfig.socket.onmessage = function (event) {
+            var data = JSON.parse(event.data);
+            if (data.type === 'connection_exchanged') {
+                handleConnectionExchanged(data);
+            } else if (data.type === 'connection_declined') {
+                handleConnectionDeclined();
+            }
+        };
     }
 }
 

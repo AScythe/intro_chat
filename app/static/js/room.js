@@ -19,7 +19,6 @@ let countdownInstance = null;
  */
 function initRoomPage(eventId) {
     roomConfig.eventId = eventId;
-    roomConfig.socket = initSocket();
 
     console.log('Room page initialized for event:', eventId);
 
@@ -28,6 +27,7 @@ function initRoomPage(eventId) {
     console.log('Sample users added:', window.sampleUsers);
 
     ensureUserExists().then(() => {
+        roomConfig.socket = initSocket(currentUserId, null);
         loadRooms();
         setupEventListeners();
         console.log('Event listeners set up');
@@ -143,7 +143,12 @@ function setupEventListeners() {
 
     // Socket events
     if (roomConfig.socket) {
-        roomConfig.socket.on('match_found', handleMatchFound);
+        roomConfig.socket.onmessage = function (event) {
+            var data = JSON.parse(event.data);
+            if (data.type === 'match_found') {
+                handleMatchFound(data);
+            }
+        };
     }
 }
 
@@ -166,7 +171,7 @@ function selectRoom() {
     // Handle fallback rooms (don't send to API)
     if (roomId.startsWith('fallback_')) {
         currentRoomId = roomId;
-        roomConfig.socket.emit('join_room', { room_id: roomId });
+        roomConfig.socket.send(JSON.stringify({ type: 'join_room', room_id: roomId }));
 
         // Update UI
         setTextContent('selectedRoomName', roomName);
@@ -190,7 +195,7 @@ function selectRoom() {
         .then(data => {
             if (data.success) {
                 currentRoomId = roomId;
-                roomConfig.socket.emit('join_room', { room_id: roomId });
+                roomConfig.socket.send(JSON.stringify({ type: 'join_room', room_id: roomId }));
 
                 // Update UI
                 setTextContent('selectedRoomName', roomName);
