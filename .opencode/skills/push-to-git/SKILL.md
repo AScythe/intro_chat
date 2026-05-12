@@ -1,13 +1,20 @@
 ---
 name: push-to-git
-description: Stage related files together by logical grouping, commit with auto-generated messages (user-approved), then push. Use when the user says "push", "commit and push", "push to github", or similar.
+mode: build
+description: '[Build mode — standalone] Stage related files together by logical grouping, commit with auto-generated messages (user-approved), then push. Use when the user says "push", "commit and push", "push to github", or similar.'
 ---
 
 ## What I do
+> **Standalone skill** — not part of the core dev workflow. Invoke manually after any implementation work.
+
 - Run `git status` and categorize every change by logical group
 - Present proposed groups and their files to the user for confirmation
 - For each group: stage files, auto-generate commit message, present for editing/approval, commit, then push
 - Stop on any error — a failed push means the group wasn't fully committed
+
+## Documents to Read
+
+None. Run `git status` only.
 
 ## Grouping Logic
 
@@ -54,7 +61,7 @@ Generate a message from the group name and change descriptions:
 Revise core skill pipeline: analyze, grill, readiness, implement, review
 
 - Rewrite analyze-and-plan with docs-first analysis and spot-checking
-- Restructure grill-plan-and-refine into interactive 3-phase walkthrough
+- Restructure grill-and-refine into interactive 3-phase walkthrough
 - Rename readiness-check to plan-readiness, add plan file creation
 - Rename implementation-guide to implement-plan, add batching workflow
 - Create new review-implementation skill for independent verification
@@ -104,3 +111,14 @@ For each group, one at a time:
 After all groups are committed and pushed, show the user the commit summary.
 
 State clearly on success: "✓ All commits pushed to origin/<branch>."
+
+## Outputs & Triggers
+
+### Output
+All changes committed and pushed to remote. Each commit is a coherent logical group with an auto-generated message.
+
+### Exit Declaration
+State clearly: "**All commits pushed to origin/<branch>.**"
+
+### Next Step
+Standalone skill — no automatic next step. Return to previous workflow or wrap up.

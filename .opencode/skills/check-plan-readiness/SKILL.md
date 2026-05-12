@@ -1,15 +1,20 @@
 ---
-name: plan-readiness
-description: Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/plans/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps route back to grill-plan. Trigger after grill-plan-and-refine, or when the user says "are we ready to code", "check readiness", "is everything considered", or similar.
+name: check-plan-readiness
+mode: build
+description: '[Build mode — creates plan documents] Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/plans/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps route back to grill-and-refine. This step creates the plan document — no other step writes to it. Output: docs/plans/PLAN_*.md. Exit: "All planning gates pass" — invokes implement-plan.'
 ---
 
 ## What I do
-- Gather the plan from conversation context (analyze-and-plan + grill-plan-and-refine outputs)
+- Gather the plan from conversation context (analyze-and-plan + grill-and-refine outputs)
 - Create `docs/plans/PLAN_YYYY_MM_DD_XXX.md` — write all sections
 - Verify the plan document against all 7 pre-implementation gates
 - Append gate results to the file
 - If all gates pass, give go signal with file path
 - If any gate fails, report and triage
+
+## Documents to Read
+
+None. Gates 1-7 are presence-checks on the plan file; gate 5 (Soundness) was already validated by the preceding grill-and-refine step.
 
 ## Plan Document Creation
 
@@ -46,7 +51,7 @@ Populate each section from conversation context:
 - **Requirements / Problem** — from the user's initial request and analyze-and-plan's understanding
 - **Solution** — from analyze-and-plan's plan
 - **Implementation Plan** — files, approach, edge cases, testing strategy, success criteria
-- **Grill Outcomes** — resolved dimensions from grill-plan-and-refine's Phase 3 output
+- **Grill Outcomes** — resolved dimensions from grill-and-refine's Phase 3 output
 - **Readiness Gate Results** — append after gates below
 
 ## Gates
@@ -85,8 +90,22 @@ After checking all gates, append a summary under **## Readiness Gate Results** i
 When a gate fails:
 1. Clearly list which gates failed and why
 2. Assess severity:
-   - **Minor** (missing documentation, unclear wording) — suggest the fix, update the plan file, and re-check without leaving plan-readiness
-   - **Significant** (unresolved assumption, edge case, soundness risk) — recommend re-entering grill-plan for the affected dimension
+   - **Minor** (missing documentation, unclear wording) — suggest the fix, update the plan file, and re-check without leaving check-plan-readiness
+   - **Significant** (unresolved assumption, edge case, soundness risk) — recommend re-entering grill-and-refine for the affected dimension
 3. Re-check all gates after resolution
 
 State clearly on pass: "✓ All gates pass. Plan saved at docs/plans/PLAN_.... Ready to implement?"
+
+## Outputs & Triggers
+
+### Output
+Persistent plan file at `docs/plans/PLAN_*.md` with all sections populated and gate results appended. This skill is the sole creator of the plan file — no other step writes to it.
+
+### Exit Declaration (pass)
+State clearly: "**All planning gates pass. Plan saved at `docs/plans/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implement-plan.**"
+
+### Exit Declaration (fail)
+State clearly: "**Gate failure: [list failed gates]. Triage: [minor → fixed in place | significant → route back to grill-and-refine for: list affected dimensions].**"
+
+### Next Step (pass)
+User invokes `implement-plan` (Build mode — same mode, no switch needed).

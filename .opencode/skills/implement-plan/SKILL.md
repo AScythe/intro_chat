@@ -1,16 +1,32 @@
 ---
 name: implement-plan
-description: Execute the approved plan following TDD in reviewable batches. Flag every change. Verify locally per batch. Hand off to review-implementation for final sign-off. Trigger after plan-readiness passes, or when the user says "implement", "proceed", "start coding", or similar.
+mode: build
+description: 'Execute the approved plan following TDD in reviewable batches. Flag every change. Verify locally per batch. Hand off to review-implementation for final sign-off. Trigger after check-plan-readiness passes, or when the user says "implement", "proceed", "start coding", or similar. Reads the plan file as read-only — never writes to it. Exit: "Implementation complete" — invokes review-implementation.'
 ---
 
 ## What I do
+- **Step 0: Verify plan readiness** — check the plan file's Readiness Gate Results; all 7 gates must pass before proceeding
 - **Step 1: Read the plan** — open `docs/plans/PLAN_*.md` (the latest plan file), read every change and success criterion
 - **Step 2: Split into batches** — divide implementation into logical, independently verifiable units
-- **Step 3: For each batch** — write test → implement → verify test passes → flag all changes
-- **Step 4: For non-testable changes** — implement directly and confirm the intended purpose is achieved
+- **Step 3: For each batch** — write test → save test in `tests/` → implement → verify test passes → flag all changes
+- **Step 4: For non-testable changes** — implement directly and confirm the intended purpose is achieved. Non-testable means: config changes, renames without logic changes, typo fixes, or infrastructure with no observable behavior. When in doubt, write the test.
 - **Step 5: After all batches** — run full test suite, confirm all criteria, hand off with "Implementation complete. Ready for review."
 
+## Documents to Read
+
+Read specific sections via Grep→Read (grep heading line number, Read with offset/limit):
+
+- **`AGENTS.md`**: "File Ownership", "Core Commands", "Out of Scope", "Privacy Requirements"
+- **`ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only
+
 ## Guidelines
+
+### 0. Verify Plan Readiness
+**Before any implementation, confirm the plan is ready.**
+
+- Read `docs/plans/PLAN_*.md` and check the **Readiness Gate Results** section
+- If all 7 gates show ✅ → ask the user: "**Plan readiness verified (all 7 gates pass). Proceed with implementation?**" Wait for explicit confirmation before starting
+- If any gate shows ❌ or the section is missing → report: "**Plan readiness not verified. Route to check-plan-readiness first.**" Do not proceed.
 
 ### 1. Read the Plan
 **Open the approved plan file before writing any code.**
@@ -18,6 +34,7 @@ description: Execute the approved plan following TDD in reviewable batches. Flag
 - Read `docs/plans/PLAN_*.md` — use the latest numbered plan file
 - Read every change and success criterion in the plan
 - Identify which files will be created, modified, or removed
+- The plan file is read-only. Do not modify it.
 - If anything is unclear, ask before proceeding
 - Map each test file to a plan task
 
@@ -29,16 +46,18 @@ description: Execute the approved plan following TDD in reviewable batches. Flag
 - "Refactor" → ensure existing tests pass before and after
 - Create test files for every change. Match existing test framework and conventions.
 - Do not skip tests even for "simple" changes.
+- All tests are saved as `.py` files in the `tests/` directory. They become permanent regression tests — never delete them after the batch passes. They will run on every `pytest` invocation going forward.
 
 ### 3. Batch for Reviewability
 **Split implementation into logical units. One concern per batch.**
 
 - Each batch = one complete logical change (not measured by lines of code)
-- Examples of a batch: add one API endpoint + its test, fix one bug + its regression test, extract one function + its unit test
+- Examples of a batch: add one API endpoint + its test, fix one bug + its regression test, extract a new function during feature development + its unit test
 - Each batch must be independently testable — its tests pass before moving to the next
 - After each batch, flag every changed line before starting the next batch
 - Do not mix unrelated concerns in the same batch
 - If a change touches multiple files, they belong in the same batch
+- Every batch that adds or modifies logic must include its test file(s) in `tests/`. A batch is not complete until its tests are saved and passing.
 
 ### 4. Simplicity First
 **Minimum code that solves the problem. Nothing speculative.**
@@ -59,6 +78,7 @@ When editing existing code:
 - Don't revise, refactor, or "improve" code not related to the requirement.
 - Just do what is required. Match existing style.
 - Flag unrelated dead code. Do not delete it.
+- Never remove file-level description comments (the docstring or comment block at the top of a file describing its purpose and responsibility). You may edit them to improve accuracy or align with actual functionality after your changes, but do not delete them.
 
 When your changes create orphans:
 - Remove imports, variables, or functions that your changes made unused.
@@ -78,6 +98,7 @@ The test: Every changed line should trace directly to the user's request.
 - Example: `[ADDED]: validate_email helper — validates email before registration`
 - If you add a function, add a docstring.
 - If you write a constant, add a comment explaining what it does.
+- Preserve and update file-level description comments when you change a file's behavior.
 - Don't comment on unchanged code or code you didn't write.
 
 ### 7. Batch Verification and Hand-off
@@ -98,6 +119,18 @@ After each batch: run its tests before moving to the next.
 Before hand-off to review-implementation:
 - All tests pass
 - Lint or typecheck passes (run the project's lint and typecheck commands)
+- All TDD tests are saved in `tests/` and included in the test suite — no transient or deleted tests
 - All success criteria are met
 - No unrelated changes remain
 - Code is reviewable (flags, docstrings, comments — see section 6)
+
+## Outputs & Triggers
+
+### Output
+All code changes with `[FLAG]` annotations. Full test suite passes. All success criteria from plan file are met. The plan file is read-only — this step does not create or modify it.
+
+### Exit Declaration
+State clearly: "**Implementation complete. Review implementation?**"
+
+### Next Step
+User invokes `review-implementation` — **switch to Plan mode before proceeding**.

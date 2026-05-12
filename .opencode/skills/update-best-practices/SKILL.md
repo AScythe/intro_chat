@@ -95,24 +95,34 @@ If content belongs elsewhere, note it with `→ Redirect to <filename>` — do n
 
 ## Workflow
 
-### 1. Investigate
+This skill follows a two-phase approach: **Plan (read-only)** then **Implement (write)**. Always present findings and confirm with the user before writing anything.
+
+---
+
+### Phase 1: Plan (read-only)
+
+Present findings verbally. Do NOT write anything during this phase.
+
+#### 1. Investigate
 Read sources in this priority order:
 
 1. **Existing `PROJECT_BEST_PRACTICES.md`** — know what's already covered before looking for new entries
-2. **Session conversation** — extract new lessons: decisions made, errors encountered and fixed, testing/verification steps used, anything that caused confusion or required backtracking. Generalize everything to universal principles — strip project-specific names.
+2. **Session conversation** — extract new lessons: decisions made, errors encountered and fixed, testing/verification steps used, anything that caused confusion or required backtracking
 3. **Skills directory (`.opencode/skills/*/SKILL.md`)** — skill methodologies evolve across sessions; extract lessons from how the skills themselves were revised
 4. **Plan files (`docs/plans/PLAN_*.md`)** — persistent decision artifacts contain design rationale and tradeoff context
-5. **Source code** — read relevant files for observable patterns: modularization, imports, error handling, state management. Extract universal lessons not already in the doc.
-6. **Config files** — tool configs, CI setup, formatter/linter configs for repeatable patterns.
+5. **Source code** — read relevant files for observable patterns: modularization, imports, error handling, state management
+6. **Config files** — tool configs, CI setup, formatter/linter configs for repeatable patterns
 
-This skill itself — `update-best-practices/SKILL.md` — is also a source. If this session improved the skill, capture those improvements as practices.
+This skill itself — `update-best-practices/SKILL.md` — is also a source.
 
-### 2. Read the Current Document
+**Push for root pattern extraction:** For every candidate lesson, ask: "Is this the symptom or the root cause?" Surface-level = "Don't accept a WebSocket twice." Root = "When extracting helper functions, check for duplicated lifecycle calls between handler and helper." Extract the root pattern — it IS the universally applicable form. If the root pattern doesn't pass the universal applicability gate (too abstract, not practically useful), step back one level until it does.
+
+#### 2. Read the Current Document
 - Check if `docs/PROJECT_BEST_PRACTICES.md` exists — create it if not
 - Read existing entries to avoid duplication
 - Identify gaps based on what the session produced
 
-### 3. Identify Gaps and Issues
+#### 3. Identify Gaps and Issues
 For each item in **What to Include**:
 - Are there new practices in this category from the current session?
 - Are existing entries still accurate and universally applicable?
@@ -121,7 +131,36 @@ For each existing entry:
 - Does it belong here per **What NOT to Include**?
 - If not → redirect
 
-### 4. Extract, Filter & Update
+#### 4. Present Candidates (Gate Preparation)
+Compile all candidate practices into a structured summary:
+
+```
+## Proposed Additions
+1. Practice Name → Category → Root principle (1 sentence)
+2. Practice Name → Category → Root principle (1 sentence)
+
+## Proposed Improvements to Existing Entries
+- Entry X: reason for update
+
+## This Skill — Self-Improvement Candidates
+- Gap found in skill: description
+- Improvement proposed: description
+```
+
+Do NOT write to any file yet.
+
+---
+
+### Gate: User Confirmation
+**Present the candidate summary to the user and ask: "Shall I add these to the document?"**
+
+Wait for explicit approval before proceeding. If the user requests changes, adjust the candidates and re-present.
+
+---
+
+### Phase 2: Implement
+
+#### 5. Extract, Filter & Update
 For each candidate practice:
 
 1. **Categorize** — assign to one of the category clusters (Code Structure, Quality, Operations, Process, UI, Meta)
@@ -133,16 +172,24 @@ For each candidate practice:
 7. **Add to document** — keep universal; project-specific names only in the **Example** field
 8. **Update Key Takeaways** — after adding new entries, append corresponding takeaways to the ## Key Takeaways list at the end of the document. Each takeaway is a one-line bold phrase with a short description.
 
-### 5. Verify
+#### 6. Verify
 - [ ] Content's PRIMARY purpose identified and routed to the correct document
 - [ ] Content doesn't already exist in another document — cross-reference instead of duplicate
 - [ ] If content spans multiple categories, assigned to the PRIMARY category
 - [ ] All new entries follow Output Format (Context + Principle + Example + Why it matters)
 - [ ] Conciseness applied — no multi-sentence stories, each entry is a tight rule
-- [ ] Project-specific content stripped — names only in Example field
+- [ ] **Universality check** — the principle works on any project. It is framed generically: a developer working on a different codebase should be able to apply it without referencing this project's specific files, names, or architecture
 - [ ] No duplication with existing entries (improve existing instead of creating new)
 - [ ] Every entry passes the "Would someone miss this?" litmus test
 - [ ] No excluded content remains — redirected if needed
 - [ ] Document is concise — nothing fluff, all signal
+- [ ] **Structural integrity** — section numbers are sequential and non-duplicate; no broken numbering gaps
+- [ ] **Takeaway coverage** — each new entry has a corresponding entry in ## Key Takeaways
+- [ ] **Markdown valid** — no obvious formatting issues (broken code fences, unclosed bold/italic)
 - [ ] Key Takeaways updated with new entries if added
-- [ ] This skill itself reviewed for improvements — if the session changed how best practices are extracted, update this file too
+
+#### 7. Route Skill Improvements
+If this session identified improvements to `update-best-practices/SKILL.md` itself:
+
+- **Minor gaps** (wording, format tweaks, missing edge cases) → fix in-place, list the changes in your output
+- **Significant gaps** (structural changes, missing phases, broken workflow) → do not fix in-place. Present as candidates in the Gate summary so the user can decide
