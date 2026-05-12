@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Room - IntroChat</title>
     <!-- REVISED: Using css/ subdirectory -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 
@@ -94,15 +94,14 @@
 
     <!-- REVISED: Added config.js for configurable timer values -->
     <!-- Load this BEFORE other JS files so CONFIG object is available -->
-    <script src="{{ url_for('static', filename='js/config.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
-    <script src="{{ url_for('static', filename='js/dom-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/api-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/timer-utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/room.js') }}"></script>
+    <script src="{{ url_for('static', path='js/config.js') }}"></script>
+    <script src="{{ url_for('static', path='js/dom-utils.js') }}"></script>
+    <script src="{{ url_for('static', path='js/api-utils.js') }}"></script>
+    <script src="{{ url_for('static', path='js/timer-utils.js') }}"></script>
+    <script src="{{ url_for('static', path='js/utils.js') }}"></script>
+    <script src="{{ url_for('static', path='js/room.js') }}"></script>
     <script>
-        // Pass Flask template variables to JavaScript
+        // Pass template variables to JavaScript
         window.roomEventId = '{{ event_id }}';
     </script>
 </body>
