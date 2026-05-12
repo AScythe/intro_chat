@@ -97,8 +97,8 @@ Technical structure reference for the project. Answers "How is it built?", "What
 - **Module descriptions:** Internal logic only. Describe what the module does in the system, not what users get from it.
 - **Data flow:** Every endpoint and WebSocket event must include its actual name (e.g., `POST /api/events`, `join_room`). No placeholders.
 - **Design decisions:** Always include the reasoning. "Why SQLite?" not just "Uses SQLite."
-- **Language:** Technical throughout. Assume the reader knows what Flask, SocketIO, and SQLite are.
-- **Per-function detail:** List every named function in source order. Include route context (method + path) for Flask handlers and event context for SocketIO handlers. For DOMContentLoaded wrappers, include a prose initialization note for non-trivial UI state wiring (button enable/disable, input validation). Keep descriptions to one line — purpose only, not implementation logic.
+- **Language:** Technical throughout. Assume the reader knows what FastAPI, WebSocket, and SQLite are.
+- **Per-function detail:** List every named function in source order. Include route context (method + path) for FastAPI handlers and event context for WebSocket handlers. For DOMContentLoaded wrappers, include a prose initialization note for non-trivial UI state wiring (button enable/disable, input validation). Keep descriptions to one line — purpose only, not implementation logic.
 - **Initialization notes:** Use italic `*note*` format placed after the Functions list. Only document listeners that wire significant UI state — skip trivial wiring (console.log, focus calls).
 
 ---
@@ -340,12 +340,12 @@ These are the common confusion points where content could reasonably fit in mult
 | Tension | Resolution |
 |---------|-----------|
 | **Architecture summary vs AGENTS.md architecture section** | AGENTS.md gets a 3-5 line overview (enough to navigate). Full module descriptions, file tree, and data flow go in ARCHITECTURE.md. |
-| **Product decisions in SPECIFICATIONS.md vs Design decisions in ARCHITECTURE.md** | SPECIFICATIONS.md = vision rationale ("why anonymous?", "why 30 seconds?"). ARCHITECTURE.md = technical rationale ("why Flask?", "why SQLite?"). |
+| **Product decisions in SPECIFICATIONS.md vs Design decisions in ARCHITECTURE.md** | SPECIFICATIONS.md = vision rationale ("why anonymous?", "why 30 seconds?"). ARCHITECTURE.md = technical rationale ("why FastAPI?", "why SQLite?"). |
 | **Brief demo setup in SPECIFICATIONS.md vs Full DEMO_GUIDE.md** | SPECIFICATIONS.md gets 2-3 lines so a judge can run it independently. DEMO_GUIDE.md gets the full ordered walkthrough with UI highlights and fallback options. |
 | **Feature description in README.md vs Feature purpose in SPECIFICATIONS.md** | README.md = what the feature does (benefit to the user). SPECIFICATIONS.md = why the feature exists (rationale, user need being addressed). |
 | **API endpoints in AGENTS.md vs ARCHITECTURE.md** | AGENTS.md gets a reference table (method, path, purpose) as a quick lookup for agents. ARCHITECTURE.md gets the data flow context — how endpoints interact, request/response details, event sequences. |
 | **Best practice vs project-specific lesson** | If the lesson references a specific module name, route, or implementation detail from this project, it goes in ARCHITECTURE.md. If it can be generalized to "always verify X after Y" without naming this project, it goes in PROJECT_BEST_PRACTICES.md. |
-| **Tech stack in README.md vs Tech stack in SPECIFICATIONS.md** | README.md gets a one-liner (e.g., "Built with Flask + SQLite"). SPECIFICATIONS.md gets the full tech stack with a "Why?" column for each technology. |
+| **Tech stack in README.md vs Tech stack in SPECIFICATIONS.md** | README.md gets a one-liner (e.g., "Built with FastAPI + SQLite"). SPECIFICATIONS.md gets the full tech stack with a "Why?" column for each technology. |
 | **Per-function detail in ARCHITECTURE.md vs source docstrings/JSDoc** | ARCHITECTURE.md captures function signature + one-line purpose (what the function does for the system). Source code docstrings/JSDoc capture implementation details (how it works, parameters, return values, edge cases). ARCHITECTURE.md is for navigation; source code is for depth. The `#### Functions` subsection is a map, not a manual. |
 
 ---
@@ -361,6 +361,39 @@ These are the common confusion points where content could reasonably fit in mult
 4. **Audience-first** — If audience overlaps, choose the document with the MOST RELEVANT audience. A developer reading about architecture doesn't need the same content as a user reading the README.
 
 5. **Update this guide** — If you add a new document, add a row to the Quick Reference Table and a new numbered section following the same structure: Scope, Audience, Key Differentiator, What to Include, What NOT to Include, Content Boundaries.
+
+---
+
+## 8. Workflow-to-Document Dependency
+
+This section defines which documents each workflow step should read, and which specific sections (via Grep→Read) to minimize context waste.
+
+### Reading Pattern
+Use Grep→Read to read specific sections: grep for the section heading line number, then `Read(offset=line, limit=~100)`. Do not read entire documents unless specified as "(full)".
+
+### Core Pipeline
+
+| Step | Documents to READ | Specific Sections | Documents to WRITE |
+|------|-------------------|-------------------|--------------------|
+| **analyze-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Out of Scope", "Core Commands" | nothing (verbal) |
+| **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal) |
+| **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/plans/PLAN_*.md` |
+| **implement-plan** | `docs/plans/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md` | PLAN: all. AGENTS: "File Ownership", "Core Commands", "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
+| **review-implementation** (1st pass) | `docs/plans/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
+| **review-implementation** (2nd pass) | `docs/plans/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
+| **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |
+| **push-to-git** | *(none — git status only)* | — | Git commits |
+
+### Doc Sync Steps (Post-Implementation)
+
+| Step | Documents to READ | Documents to WRITE |
+|------|-------------------|--------------------|
+| **update-architecture** | `ARCHITECTURE.md` (full), all source files | `ARCHITECTURE.md` |
+| **update-agents** | `AGENTS.md` (full), `ARCHITECTURE.md`, `README.md`, `PROJECT_BEST_PRACTICES.md` | `AGENTS.md` |
+| **update-specifications** | `SPECIFICATIONS.md` (full), `ARCHITECTURE.md`, `README.md`, `DEMO_GUIDE.md` | `SPECIFICATIONS.md` |
+| **update-readme** | `README.md` (full), `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `DEMO_GUIDE.md` | `README.md` |
+| **update-demo-guide** | `DEMO_GUIDE.md` (full), `SPECIFICATIONS.md`, `README.md`, `ARCHITECTURE.md` | `DEMO_GUIDE.md` |
+| **update-best-practices** | `PROJECT_BEST_PRACTICES.md` (full), session history, full codebase | `PROJECT_BEST_PRACTICES.md` |
 
 ---
 

@@ -15,20 +15,23 @@ Key functionalities: event creation, QR codes, room selection, demo-mode person 
 ---
 
 ## Architecture
-- **Backend:** Flask + Flask-SocketIO (`app/` package)
+- **Backend:** FastAPI + Uvicorn (`app/` package)
 - **Database:** SQLite (`data/introchat.db`) — 4 tables: `events`, `rooms`, `users`, `matches`
 - **Frontend:** Vanilla JS + Jinja2 (`app/templates/`, `app/static/js/`)
-- **Real-time:** WebSocket via SocketIO with room-based broadcasting
+- **Real-time:** WebSocket (FastAPI native) with room-based broadcasting via `ConnectionManager`
 - **In-memory state** (reset on restart): `active_users`, `active_matches`, `waiting_queue`
 
 For full architecture details, component interactions, and implementation specifics, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+For which documents to read during each workflow step (with section-specific Grep→Read instructions), see [DOCUMENT_GUIDELINES.md — Section 8: Workflow-to-Document Dependency](DOCUMENT_GUIDELINES.md#8-workflow-to-document-dependency).
 
 ---
 
 ## Environment
 - **Python:** 3.10+
 - **Setup:** `python -m venv venv && source venv/bin/activate` (Windows: `venv\Scripts\activate`)
-- **Production env vars:** `FLASK_ENV=production`, `SECRET_KEY=<strong-random-key>`, `CORS_ORIGINS=https://yourdomain.com`
+- **Server binding:** Configured in `app/config.py` — `HOST='127.0.0.1'`, `PORT=5000`
+- **Production:** Add `ENV=production` and configure CORS origins via FastAPI middlewares
 
 ---
 
@@ -36,12 +39,13 @@ For full architecture details, component interactions, and implementation specif
 
 | Location | Role | Agent Policy |
 |----------|------|--------------|
-| `app/` | Flask package — routes, matching, WebSocket handlers | ✅ Safe to edit |
+| `app/` | FastAPI package — routes, matching, WebSocket, schemas, config | ✅ Safe to edit |
 | `app/templates/*.html` | Jinja2 UI pages | ✅ Safe to edit |
 | `app/static/js/*.js` | Client logic (`utils.js`, `room.js`, `chat.js`, `user-info.js`) | ✅ Safe to edit |
 | `data/introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
 | `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless asked |
 | `docs/PROJECT_BEST_PRACTICES.md` | Best practices guide | ✅ Safe to update with `update-best-practices` skill |
+| `.opencode/skills/*/SKILL.md` | Workflow skill definitions | ✅ Safe to edit with explicit user permission |
 
 ---
 
@@ -76,7 +80,7 @@ python tests/test_js_modules.py   # JS module validation
 
 | Event | Direction | Payload | Defined In |
 |-------|-----------|---------|------------|
-| `join_room` | Client → Server | `{room_id}` | `app/socket_events.py` |
+| `join_room` | Client → Server | `{room_id}` | `app/routes.py` |
 | `match_found` | Server → Client | `{match_id, room_id, user1_username, user2_username}` | `app/matchmaking.py` |
 | `connection_exchanged` | Server → Client | `{user1_username, user2_username}` | `app/routes.py` |
 | `connection_declined` | Server → Client | — | `app/routes.py` |

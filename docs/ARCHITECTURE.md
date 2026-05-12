@@ -5,13 +5,15 @@
 
 ```
 intro_chat/
-├── app/                          # Python package (Flask application)
-│   ├── __init__.py            # App orchestrator: Flask init, SocketIO init, wires modules
+├── app/                          # Python package (FastAPI application)
+│   ├── __init__.py            # App orchestrator: FastAPI init, static mount, wires modules
 │   ├── state.py               # Shared in-memory state: active_users, active_matches, etc.
 │   ├── database.py            # Database schema initialization (init_db())
-│   ├── routes.py              # All HTTP route handlers (@app.route)
+│   ├── config.py              # Central config constants (DB_PATH, HOST, PORT)
+│   ├── schemas.py             # Pydantic request models for API validation
+│   ├── routes.py              # All HTTP route handlers and WebSocket endpoint
 │   ├── matchmaking.py         # Match finding and creation logic
-│   ├── socket_events.py       # SocketIO event handlers (connect, disconnect, join_room)
+│   ├── connection_manager.py  # WebSocket connection tracking and broadcasting
 │   └── tasks.py               # Background cleanup thread
 │
 ├── app/templates/                # Jinja2 HTML templates
@@ -52,7 +54,7 @@ intro_chat/
 ├── data/                         # Data files
 │   └── introchat.db           # SQLite database (auto-created)
 │
-├── requirements.txt               # Python dependencies (Flask, Flask-SocketIO, etc.)
+├── requirements.txt               # Python dependencies (FastAPI, Uvicorn, aiosqlite, etc.)
 └── .gitignore                     # Git ignore rules
 ```
 
@@ -61,14 +63,15 @@ intro_chat/
 ## Module Descriptions
 
 ### `app/__init__.py` (Orchestrator)
-Flask/SocketIO app factory that initializes the server, creates the database, registers HTTP routes and SocketIO handlers, and starts the background cleanup thread.
+FastAPI app factory that initializes the server, mounts static files, registers routes via APIRouter, starts the background cleanup thread, and initializes the database on startup.
 
-- Initializes Flask and SocketIO
-- Calls `init_db()` to set up database
-- Registers HTTP routes via `register_routes(app)`
-- Registers SocketIO handlers via `register_handlers(socketio)`
-- Starts background cleanup thread
-- **Run command:** `python -m app` (or `python app/__init__.py`)
+- Initializes FastAPI app with `FastAPI(title="IntroChat")`
+- Mounts `/static` directory via `StaticFiles`
+- Creates `Jinja2Templates` instance for template rendering
+- Imports and includes `router` from `.routes` via `app.include_router(router)`
+- Starts background cleanup thread via `start_cleanup_thread()`
+- On startup event: creates `data/` directory, calls `await init_db(DB_PATH)`
+- **Run command:** `python -m app`
 
 ### `app/state.py` (Shared State)
 Server-global in-memory state — active users, active matches, waiting queue, conversation prompts, and timer configuration constants shared across all modules.
@@ -92,13 +95,13 @@ Server-global in-memory state — active users, active matches, waiting queue, c
 - `CLEANUP_THRESHOLD_SECONDS = 300` — remove matches older than this (5 minutes)
 
 ### `app/database.py` (Database Schema)
-SQLite database initialization creating events, users, rooms, and matches tables with migration handling for social profile columns.
+Async SQLite database initialization using aiosqlite, creating events, users, rooms, and matches tables with migration handling for social profile columns.
 
-- `init_db()` — creates 4 tables: `events`, `rooms`, `users`, `matches`
-- Uses SQLite (`introchat.db` in `data/` folder)
+- `init_db()` — async, creates 4 tables: `events`, `rooms`, `users`, `matches`
+- Uses aiosqlite (`introchat.db` in `data/` folder)
 
 #### Functions
-- `init_db(db_path)` — initializes SQLite database, creates all 4 tables, runs ALTER TABLE migration for social columns
+- `init_db(db_path)` — async function that initializes SQLite database, creates all 4 tables, runs ALTER TABLE migration for social columns
 
 #### Tables
 | Table | Columns |
@@ -108,49 +111,70 @@ SQLite database initialization creating events, users, rooms, and matches tables
 | `users` | `id` (TEXT PK), `event_id` (TEXT FK), `room_id` (TEXT FK), `username` (TEXT), `linkedin_url` (TEXT DEFAULT ''), `slack_handle` (TEXT DEFAULT ''), `is_available` (BOOLEAN DEFAULT 0), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `last_seen` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP) |
 | `matches` | `id` (TEXT PK), `user1_id` (TEXT FK), `user2_id` (TEXT FK), `room_id` (TEXT FK), `status` (TEXT DEFAULT 'active'), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `expires_at` (TIMESTAMP) |
 
-### `app/routes.py` (HTTP Routes)
-All HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints for events, users, rooms, matches, QR codes, and conversation prompts.
+### `app/routes.py` (HTTP Routes + WebSocket)
+All HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints for events, users, rooms, matches, QR codes, conversation prompts, and the WebSocket endpoint for real-time communication.
 
-- `register_routes(app)` — registers all `@app.route` handlers
+- `router = APIRouter()` — defines all route handlers with FastAPI decorators
 - Endpoints: `/`, `/join/<event_id>`, `/room/<id>`, `/chat/<id>`, `/api/events`, `/api/events/<id>/join`, etc.
+- WebSocket endpoint: `/ws` — accepts JSON messages with `user_id` and `room_id`, dispatches `join_room` type
 
 #### Functions
-- `register_routes(app)` — registers all HTTP route handlers on the Flask app instance
-- `index()` — `GET /` → renders landing page (`index.html`)
-- `user_info(event_id)` — `GET /join/<event_id>` → renders user profile form
-- `room_selection(event_id)` — `GET /room/<event_id>` → renders room selection page
-- `chat_room(match_id)` — `GET /chat/<match_id>` → renders chat page
-- `create_event()` — `POST /api/events` → creates event + 8 default rooms, returns event_id
+- `index(request)` — `GET /` → renders landing page (`index.html`) via `TemplateResponse`
+- `user_info(request, event_id)` — `GET /join/<event_id>` → renders user profile form
+- `room_selection(request, event_id)` — `GET /room/<event_id>` → renders room selection page
+- `chat_room(request, match_id)` — `GET /chat/<match_id>` → renders chat page
+- `create_event(data)` — `POST /api/events` → creates event + 8 default rooms, returns event_id
 - `get_rooms(event_id)` — `GET /api/events/<event_id>/rooms` → lists rooms (fallback creation if none found)
-- `join_event(event_id)` — `POST /api/events/<event_id>/join` → creates user with optional linkedin/slack
-- `set_user_room(user_id)` — `POST /api/users/<user_id>/room` → assigns user to a room
-- `set_availability(user_id)` — `POST /api/users/<user_id>/available` → toggles availability, triggers `find_match()`
+- `join_event(event_id, data)` — `POST /api/events/<event_id>/join` → creates user with optional linkedin/slack
+- `set_user_room(user_id, data)` — `POST /api/users/<user_id>/room` → assigns user to a room
+- `set_availability(user_id, data)` — `POST /api/users/<user_id>/available` → toggles availability, triggers `await find_match()`
+- `get_user_match(user_id)` — `GET /api/users/<user_id>/match` → gets current match for user
 - `get_match(match_id)` — `GET /api/matches/<match_id>` → gets match details with usernames
-- `exchange_connection(match_id)` — `POST /api/matches/<match_id>/connect` → double opt-in connection, emits SocketIO event
-- `generate_qr(event_id)` — `GET /api/qr/<event_id>` → generates QR code image as base64
+- `exchange_connection(match_id, data)` — `POST /api/matches/<match_id>/connect` → double opt-in connection, broadcasts via WebSocket
+- `generate_qr(event_id, request)` — `GET /api/qr/<event_id>` → generates QR code image as base64
 - `get_prompts()` — `GET /api/prompts` → returns `CONVERSATION_PROMPTS` array
+- `websocket_endpoint(websocket)` — `WS /ws` → accepts connection, registers via `ConnectionManager`, handles `join_room`, listens for messages
 
 ### `app/matchmaking.py` (Match Logic)
-Match-finding algorithm that pairs available users in the same room, creates match records in the database, and emits match_found events via SocketIO.
+Async match-finding algorithm that pairs available users in the same room, creates match records in the database, and sends match_found events via WebSocket.
 
-- `find_match(user_id)` — finds available users in the same room
-- `create_match(user1_id, user2_id, room_id)` — creates match, notifies users via SocketIO
-
-#### Functions
-- `find_match(user_id)` — scans `active_users` for available users in same room; calls `create_match()` if found, otherwise adds to `waiting_queue`
-- `create_match(user1_id, user2_id, room_id)` — inserts match into DB + `active_matches`, removes from `waiting_queue`, sets both to unavailable, emits `match_found` via SocketIO
-
-### `app/socket_events.py` (WebSocket Handlers)
-SocketIO event handlers for real-time communication — connect, disconnect, and room joining; registered via register_handlers().
-
-- `register_handlers(socketio)` — registers `@socketio.on` handlers
-- Events: `connect`, `disconnect`, `join_room`
+- `find_match(user_id)` — async, finds available users in the same room
+- `create_match(user1_id, user2_id, room_id)` — async, creates match, notifies users via WebSocket
 
 #### Functions
-- `register_handlers(socketio)` — registers all SocketIO event handlers on the given socketio instance
-- `handle_connect()` — SocketIO `connect` → logs "Client connected"
-- `handle_disconnect()` — SocketIO `disconnect` → logs "Client disconnected"
-- `handle_join_room(data)` — SocketIO `join_room` → joins the SocketIO room `room_{room_id}`
+- `find_match(user_id)` — async, scans `active_users` for available users in same room; calls `await create_match()` if found, otherwise adds to `waiting_queue`
+- `create_match(user1_id, user2_id, room_id)` — async, inserts match into DB + `active_matches`, removes from `waiting_queue`, sets both to unavailable, sends `match_found` via `manager.broadcast_to_users()`
+
+### `app/config.py` (Configuration)
+Central configuration constants module defining the database path, server host, and port — imported by database, routes, and the main entry point.
+
+#### Constants
+- `DB_PATH` — absolute path to `data/introchat.db`
+- `HOST` — server bind address (`127.0.0.1`)
+- `PORT` — server port (`5000`)
+
+### `app/schemas.py` (Request Models)
+Pydantic request models for API endpoint validation — event creation, user join, room assignment, availability toggle, and connection exchange.
+
+#### Models
+- `CreateEventRequest` — `name: str`
+- `JoinEventRequest` — `username: Optional[str]`, `linkedin_url: Optional[str]`, `slack_handle: Optional[str]`
+- `SetUserRoomRequest` — `room_id: str`
+- `SetAvailabilityRequest` — `available: bool`
+- `ExchangeConnectionRequest` — `user_id: str`, `wants_to_connect: bool`
+
+### `app/connection_manager.py` (WebSocket Manager)
+`ConnectionManager` class that tracks WebSocket connections keyed by user ID, manages room memberships, and provides per-user and per-room message broadcasting.
+
+- `manager = ConnectionManager()` — singleton instance used by routes and matchmaking
+
+#### Class
+- `ConnectionManager` — maps user IDs to WebSocket objects, user IDs to room IDs, and room IDs to user ID sets
+- `connect(websocket, user_id, room_id)` — registers a WebSocket for a user in a room
+- `disconnect(user_id)` — removes user from all mappings
+- `send_to_user(user_id, message)` — sends JSON message to a single user's WebSocket
+- `broadcast_to_users(user_ids, message)` — sends JSON message to multiple users
+- `broadcast_to_room(room_id, message)` — sends JSON message to all users in a room
 
 ### `app/tasks.py` (Background Tasks)
 Daemon background thread that periodically checks for and removes expired matches from in-memory state to prevent stale data accumulation.
@@ -163,7 +187,7 @@ Daemon background thread that periodically checks for and removes expired matche
 - `start_cleanup_thread()` — creates and starts a daemon thread targeting `cleanup_expired_matches`, returns thread reference
 
 ### `app/__main__.py` (Entry Point)
-Application entry point that launches the SocketIO server on 0.0.0.0:5000 with debug mode enabled.
+Application entry point that launches the Uvicorn ASGI server on 127.0.0.1:5000 with hot-reload enabled. Uses `HOST` and `PORT` from `app/config.py`.
 
 ---
 
@@ -266,7 +290,7 @@ Room selection page controller handling room creation/joining, user availability
 - `checkIfBothReady()` — nested: checks both user and partner ready status, enables "Start Chat" button
 
 #### `app/static/js/chat.js` (Chat Controller)
-Chat page controller managing SocketIO connection, message sending/receiving, timer countdown with extend support, conversation prompts display, and leave/exit flow.
+Chat page controller managing WebSocket connection, message sending/receiving, timer countdown with extend support, conversation prompts display, and leave/exit flow.
 
 #### Functions
 - `initChatPage(matchId)` — initializes socket, loads match info and prompts, sets up listeners
@@ -311,7 +335,7 @@ Chat page template with timer display, conversation prompts list, scrollable mes
 End-to-end integration test suite that tests page rendering, API endpoints, matchmaking flow, profile updates, and QR generation.
 
 #### Functions
-- `test_imports()` — verifies all modular components import correctly (Flask, SocketIO, QRCode, SQLite3, all app modules)
+- `test_imports()` — verifies all modular components import correctly (FastAPI, Uvicorn, aiosqlite, QRCode, SQLite3, all app modules)
 - `test_file_structure()` — checks 25 required files exist
 - `test_database()` — tests DB init, 4 tables exist, insert/delete operations
 - `test_conversation_prompts()` — checks prompts list is non-empty
@@ -364,8 +388,8 @@ Defined inline in `app/routes.py` (not a constant):
 Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 
 ### WebSocket Configuration
-- **Development:** `cors_allowed_origins="*"` (line 15 of `__init__.py`)
-- **Production:** Change to explicit origins and add `async_mode='eventlet'`
+- **Development:** WebSocket endpoint at `/ws`, accepts all origins (FastAPI default)
+- **Production:** Add origin restrictions via FastAPI middlewares or WebSocket validator
 
 ### Frontend Module Rules
 - No inline `<script>` in templates — all logic in `app/static/js/*.js`
@@ -392,18 +416,18 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 
 1. User creates/joins event → `POST /api/events` or `POST /api/events/<id>/join` → gets event_id
 2. User fills profile (LinkedIn/Slack) on `/join/<event_id>` → `POST /api/events/<id>/join` with social fields → gets user_id
-3. User selects room → `POST /api/users/<id>/room` → joins SocketIO room via `join_room` event
-4. User selects person → `POST /api/users/<id>/available` → triggers `find_match()` in `matchmaking.py`
-5. Match found → `match_found` WebSocket event → 60s countdown → redirect to `/chat/<match_id>`
+3. User selects room → `POST /api/users/<id>/room` → opens WebSocket to `/ws` with `join_room` message
+4. User selects person → `POST /api/users/<id>/available` → triggers `await find_match()` in `matchmaking.py`
+5. Match found → `match_found` WebSocket message via `ConnectionManager` → 60s countdown → redirect to `/chat/<match_id>`
 6. Chat starts → timer from `CONFIG.CHAT_DURATION` (default: 30s, configurable via `app/static/js/config.js`) + prompts from `GET /api/prompts`
-7. After chat → `POST /api/matches/<id>/connect` → `connection_exchanged` or `connection_declined` event
+7. After chat → `POST /api/matches/<id>/connect` → `connection_exchanged` or `connection_declined` broadcast via `ConnectionManager`
 
 ---
 
 ## Key Design Decisions
 
 ### Why `app/` Package (Not Flat)?
-- Standard Flask pattern for larger applications
+- Standard FastAPI pattern for larger applications
 - Separates Python code from templates, static files, tests, docs
 - Relative imports (`from .state import X`) prevent circular imports
 - Clear separation of concerns
@@ -428,12 +452,14 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 
 ```
 app/
-├── __init__.py       ← imports from .state, .database, .routes, .socket_events, .tasks
+├── __init__.py       ← imports from .routes, .tasks, .database, .config; includes router
 ├── state.py          ← no internal imports (leaf module)
-├── database.py       ← no internal imports (leaf module)
-├── routes.py         ← imports from .state, .matchmaking, .database
-├── matchmaking.py    ← imports from .state, .database; imports socketio from .
-├── socket_events.py  ← imports from .state; takes socketio as argument
+├── database.py       ← imports aiosqlite, sqlite3, os (leaf module — no internal imports)
+├── config.py         ← no internal imports (leaf module)
+├── schemas.py        ← imports pydantic.BaseModel, typing.Optional (leaf module)
+├── routes.py         ← imports from .state, .schemas, .connection_manager, .config, .matchmaking
+├── connection_manager.py  ← imports fastapi.WebSocket, typing (leaf module)
+├── matchmaking.py    ← imports from .state, .connection_manager, .config
 └── tasks.py          ← imports from .state
 ```
 
@@ -450,9 +476,6 @@ pip install -r requirements.txt
 # Run the application (from project root)
 python -m app
 
-# Or run __init__.py directly
-python app/__init__.py
-
 # Open browser
 http://localhost:5000
 ```
@@ -463,12 +486,12 @@ http://localhost:5000
 
 ### Adding a New Route
 1. Open `app/routes.py`
-2. Add new `@app.route` function inside `register_routes(app):`
+2. Add new `@router.get/post` async function
 3. Run `python tests/test_app.py` to verify
 
-### Adding a New SocketIO Event
-1. Open `app/socket_events.py`
-2. Add new handler inside `register_handlers(socketio):`
+### Adding a New WebSocket Message Type
+1. Open `app/routes.py` (WebSocket endpoint at `/ws`)
+2. Add a new `if msg_type == ...:` branch in the message loop
 3. Update `AGENTS.md` WebSocket Events table
 
 ### Changing Timer Durations

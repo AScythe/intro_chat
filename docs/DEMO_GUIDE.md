@@ -138,8 +138,8 @@ python -m app
 ## 🔧 Technical Features to Highlight
 
 ### Backend
-- Python Flask with WebSocket support
-- SQLite database (auto-created)
+- Python FastAPI with native WebSocket support
+- SQLite database (auto-created via aiosqlite)
 - Real-time matching algorithm
 - QR code generation
 
@@ -161,7 +161,7 @@ python -m app
 1. **Start with the problem**: "At every tech event, introverts struggle to connect..."
 2. **Show the solution**: "IntroChat makes it safe and easy with just one button"
 3. **Demonstrate the flow**: Create event → Join → Match → Chat
-4. **Highlight the tech**: "Built with Python Flask (modular `app/` package), real-time WebSockets, and zero frameworks"
+4. **Highlight the tech**: "Built with Python FastAPI (modular `app/` package), native WebSockets, and zero frontend frameworks"
 5. **Emphasize impact**: "This could help thousands of introverts at every event"
 
 ### For Users

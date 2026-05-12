@@ -59,8 +59,8 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 | Layer | Technology | Why? |
 |-------|------------|------|
 | **Frontend** | HTML5 + CSS3 + Vanilla JavaScript | Lightweight, works on any browser. No frameworks needed. |
-| **Backend** | Python + Flask 2.3 | Simple, fast to deploy, great for real-time matching. |
-| **Real-Time** | Flask-SocketIO (WebSocket) | Live match notifications without polling. |
+| **Backend** | Python + FastAPI | Modern ASGI framework, native WebSocket support, automatic OpenAPI docs. |
+| **Real-Time** | Native WebSocket via FastAPI | Live match notifications without polling. |
 | **Data Storage** | SQLite | Zero setup, portable. Active matches stored in memory for speed. |
 | **Location** | Manual room selection ("Main Hall", "Table 7", etc.) | MVP-friendly. Avoids complex geolocation. |
 | **QR Codes** | `qrcode` Python library | Generate event-specific QR codes for quick access. |

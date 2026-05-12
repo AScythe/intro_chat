@@ -18,34 +18,20 @@
 **Example**:
 ```
 app/
-├── __init__.py    # Orchestrator ONLY: init, wire modules
-├── state.py       # Shared state & constants ONLY (leaf module)
-├── database.py    # DB schema ONLY (leaf module)
-├── routes.py      # HTTP endpoints ONLY
-├── matchmaking.py # Business logic ONLY
-└── tasks.py      # Background jobs ONLY
+├── __init__.py           # Orchestrator ONLY: init, wire modules
+├── state.py              # Shared state & constants ONLY (leaf module)
+├── database.py           # DB schema ONLY (leaf module)
+├── config.py             # Config constants ONLY (leaf module)
+├── schemas.py            # Pydantic models ONLY (leaf module)
+├── routes.py             # HTTP + WebSocket endpoints ONLY
+├── connection_manager.py # WebSocket connection tracking ONLY (leaf module)
+├── matchmaking.py        # Business logic ONLY
+└── tasks.py              # Background jobs ONLY
 ```
 
 **Why it matters**: Clear ownership, no mixed concerns, easy to navigate.
 
-### 1.2 Circular Import Prevention
-**Context**: From fixing import errors in `matchmaking.py`
-
-**Principle**: Leaf module pattern: `state.py`, `database.py` export only. Internal modules import from leafs, never sibling-to-sibling.
-
-**Example**:
-```python
-# ✅ Good - from project:
-from .state import active_users      # Import from leaf
-from .matchmaking import find_match  # Import from sibling
-
-# ❌ Bad:
-# from .routes import something  ← This causes circular!
-```
-
-**Why it matters**: Your `app/` package has ZERO circular import errors.
-
-### 1.3 Separation of Concerns
+### 1.2 Separation of Concerns
 **Context**: From debugging mixed-state-logic bugs
 
 **Principle**: Separate by layer: config → state → logic → presentation → persistence.
@@ -61,8 +47,8 @@ Persistence   → database.py / repository layer
 
 **Why it matters**: Changes in one layer don't break others.
 
-### 1.4 Frontend Modularization
-**Context**: From `app/static/js/` structure
+### 1.3 Frontend Modularization
+**Context**: From `app/static/js/` structure and 500-line JS monoliths
 
 **Principle**: 1 JS file = 1 purpose. Centralize shared code in `utils.js`, page-specific in `page.js`.
 
@@ -79,23 +65,41 @@ app/static/js/
 ├── room.js          # Room page logic ONLY
 └── chat.js          # Chat page logic ONLY
 ```
+```javascript
+// api-utils.js ONLY: API calls — no UI, no timers, no config
+async function fetchJSON(url, options={}) {
+    return parseJSON(await fetchWithTimeout(url, options));
+}
+```
 
-**Why it matters**: No 500-line monoliths, easy to find functionality.
+**Why it matters**: No 500-line monoliths, easy to find and test functionality.
 
-### 1.5 Module Communication
-**Context**: From tracing import chains in `app/` package
+### 1.4 Module Communication
+**Context**: From fixing import errors and tracing import chains in `app/` package
 
-**Principle**: Internal modules import from leaf modules only. Never sibling-to-sibling.
+**Principle**: Leaf module pattern — leaf modules export only, never import from internal modules. Internal modules import from leafs only, never sibling-to-sibling.
 
 **Example**:
+```python
+# ✅ Good — leaf modules export, internal modules import from leafs
+from .state import active_users      # Import from leaf
+from .matchmaking import find_match  # Import from sibling
+
+# ❌ Bad — sibling-to-sibling import causes circular errors
+# from .routes import something
 ```
-routes.py → imports from → state.py, database.py, matchmaking.py
-matchmaking.py → imports from → state.py, database.py
+Dependency graph:
+```
+routes.py → imports from → state.py, schemas.py, connection_manager.py, config.py, matchmaking.py
+matchmaking.py → imports from → state.py, connection_manager.py, config.py
+connection_manager.py → no internal imports (leaf module)
+config.py → no internal imports (leaf module)
+schemas.py → no internal imports (leaf module)
 ```
 
-**Why it matters**: Predictable dependency graph, no circular imports.
+**Why it matters**: Predictable dependency graph with zero circular import errors.
 
-### 1.6 When to Split a Module
+### 1.5 When to Split a Module
 **Context**: From debugging sessions with large files
 
 **Principle**: Split triggers: >200 lines, mixed concerns, circular imports, parallel dev conflicts.
@@ -120,6 +124,18 @@ qr.add_data(f"http://localhost:{Config.PORT}/room/{id}")
 ```
 
 **Why it matters**: Change once, apply everywhere.
+
+### 2.1 Server Binding for Browser Access
+**Context**: `0.0.0.0` works for listening but browsers can't navigate to it
+**Principle**: Default server bind to `127.0.0.1` for local development so the URL is directly browser-accessible. Only use `0.0.0.0` when network access from other devices is needed.
+**Example**:
+```python
+# ✅ Local dev — browser-ready
+HOST = '127.0.0.1'
+# ✅ Network access — other devices can connect
+HOST = '0.0.0.0'
+```
+**Why it matters**: `localhost:5000` works in a browser; `0.0.0.0:5000` doesn't.
 
 ---
 
@@ -168,27 +184,60 @@ python -m pytest tests/ -v      # Full suite
 
 **Why it matters**: Catch errors before they reach production.
 
+### 5.1 TestClient Over Live Server
+**Context**: E2E test scripts hung against a live server with WatchFiles reloader (port contention, stale state, hanging requests)
+**Principle**: Use the framework's in-process TestClient (e.g. `fastapi.testclient.TestClient`) for integration tests instead of running a live server process. TestClient avoids reloader conflicts, port fights, and hanging requests while producing the same HTTP responses.
+**Example**:
+```python
+# ✅ Use TestClient — no server process needed
+from fastapi.testclient import TestClient
+from app import app
+
+client = TestClient(app)
+resp = client.get('/')
+assert resp.status_code == 200
+
+# ❌ Don't start a real server for tests
+# subprocess.Popen(['python', '-m', 'app'])  # hangs, port conflicts, reloader issues
+```
+**Why it matters**: TestClient tests are deterministic, fast, and don't require port management.
+
+### 5.2 TDD Tests Are Permanent Regression Tests
+**Context**: Migration where TDD tests were written but not saved to `tests/` permanently
+
+**Principle**: Tests written during TDD are saved permanently in `tests/` as regression tests. They are never deleted after the batch passes. Only skip test creation for non-testable changes: config, renames, typo fixes, infrastructure with no observable behavior. When in doubt, write the test.
+
+**Example**:
+```
+# ✅ Each TDD batch produces code AND a saved test
+tests/test_endpoint.py  ← stays forever, runs on every pytest
+
+# ❌ Wrong: write test to make code pass, then delete it
+```
+
+**Why it matters**: Deleted tests leave the code unwatched. The regression safety net has holes.
+
 ---
 
 ## 6. Documentation
 
 ### 6.1 One Purpose Per Document
-**Context**: From confusion about where content belongs
+**Context**: From confusion about where content belongs and duplicate content across docs
 
-**Principle**: One document = one purpose. Define each document by the questions it answers. If content answers a different question than the document's purpose, it belongs elsewhere.
+**Principle**: One document = one purpose. Define each document by the questions it answers and the purpose it serves. If content answers a different question than the document's purpose, it belongs elsewhere. Move content to `/docs/` if README exceeds ~250 lines.
 
 **Example**:
-| Document | Answers |
-|----------|---------|
-| README.md | "What is it?", "How do I use it?" |
-| ARCHITECTURE.md | "How is it built?", "How do I modify it?" |
-| SPECIFICATIONS.md | "Why does it exist?", "What problem does it solve?" |
-| DEMO_GUIDE.md | "How do I demonstrate this?" |
-| AGENTS.md | "What can agents touch?", "What commands do they use?" |
-| PROJECT_BEST_PRACTICES.md | "What lessons were learned?", "What patterns should I reuse?" |
-| DOCUMENT_GUIDELINES.md | "Where does this content go?" |
+| Document | Answers | Purpose |
+|----------|---------|---------|
+| README.md | "What is it?", "How do I use it?" | User-facing: what, how, quick start |
+| ARCHITECTURE.md | "How is it built?", "How do I modify it?" | Technical: *how* it's structured |
+| SPECIFICATIONS.md | "Why does it exist?", "What problem does it solve?" | Product vision, user journey, why it exists |
+| DEMO_GUIDE.md | "How do I demonstrate this?" | Presenter walkthrough: demo steps |
+| AGENTS.md | "What can agents touch?", "What commands do they use?" | Agent context: *what* agents work on |
+| PROJECT_BEST_PRACTICES.md | "What lessons were learned?", "What patterns should I reuse?" | Universal coding patterns & lessons |
+| DOCUMENT_GUIDELINES.md | "Where does this content go?" | Governance: doc scope & boundaries |
 
-**Why it matters**: Clear purpose prevents content overlap. If two documents answer the same question, one is redundant.
+**Why it matters**: Clear purpose prevents content overlap. If two documents answer the same question, one is redundant. A purpose column makes the distinction actionable.
 
 ### 6.2 Key Differentiator Per Document
 **Context**: From designing boundaries for a 7-doc documentation set
@@ -206,19 +255,20 @@ python -m pytest tests/ -v      # Full suite
 ### 6.3 Quality Gates Before Content
 **Context**: From restructuring 6 skill files that lacked inclusion filters
 
-**Principle**: Define "What qualifies for inclusion?" before writing any content. Three universal gates apply to most documentation:
+**Principle**: Define "What qualifies for inclusion?" before writing any content. Four universal gates apply to most documentation:
 
-1. **Litmus test**: "Would an agent miss this without help?" — filters noise
+1. **Litmus test**: "Would an agent or developer miss this without explicit documentation?" — filters noise. If they'd get it right anyway, leave it out.
 2. **Executable truth**: "Can I verify this against code/config/scripts?" — filters speculation
 3. **Conciseness**: "Can I say this in half the words?" — filters fluff
+4. **Ownership filter**: "Does this concept belong to exactly one file or module?" — prevents fragmentation. One concept lives in exactly one place.
 
 **Example**:
 ```markdown
 # Before applying gates (would be rejected):
-We decided to use Flask because it's a popular Python web framework.
+We decided to use FastAPI because it's a popular Python ASGI framework.
 
 # After applying gates:
-Tech stack: Flask + SocketIO. Why Flask? Lightweight, real-time capable.
+Tech stack: FastAPI + Uvicorn. Why FastAPI? Native WebSockets, async support.
 ```
 The "popular" claim is speculative (gate 2), and the sentence is fluff (gate 3).
 
@@ -281,9 +331,9 @@ Then ARCHITECTURE.md extracts the lead line from the comment — no manual dupli
 
 **Example**:
 ```markdown
-### `app/routes.py` (HTTP Routes)
+### `app/routes.py` (HTTP Routes + WebSocket)
 [auto-generated lead line from source]
-- `register_routes(app)` — registers all @app.route handlers  [manually maintained]
+- `router = APIRouter()` — defines all route handlers  [manually maintained]
 - Endpoints: /, /join/<event_id>, ...                          [manually maintained]
 ```
 
@@ -296,7 +346,7 @@ Then ARCHITECTURE.md extracts the lead line from the comment — no manual dupli
 
 **Example**:
 ```
-Python Modules: __init__ → state → database → routes → matchmaking → socket_events → tasks → __main__
+Python Modules: __init__ → state → database → config → schemas → routes → connection_manager → matchmaking → tasks → __main__
 Frontend Modules: config → utils → dom-utils → api-utils → timer-utils → home → user-info → room → chat
 Templates: index → user_info → room → chat
 ```
@@ -322,6 +372,39 @@ Templates: index → user_info → room → chat
 ```
 
 **Why it matters**: Auto-generated sections will overwrite anything nested inside them. Standalone sections survive regeneration.
+
+### 6.10 Structural Verification After Edits
+**Context**: From the update-best-practices skill adding numbering, takeaway, and markdown checks
+
+**Principle**: After editing a structured document, verify (1) section numbers are sequential with no gaps or duplicates, (2) each new entry has a corresponding entry in any summary/takeaways section, (3) markdown formatting is valid (no broken code fences, unclosed bold/italic). Do this before committing.
+
+**Example**:
+```
+# After adding practices 7.14-7.16, check:
+# ✅ 7.13 → 7.14 → 7.15 → 7.16  (no gaps)
+# ❌ 7.13 → 7.15 → 7.16          (7.14 missing)
+#
+# ✅ Takeaways: 38, 39, 40, 41, 42, 43  (one per new entry)
+# ❌ Takeaways: 38, 39, 40, 41          (missing entries for 42, 43)
+```
+
+**Why it matters**: Numbering gaps and missing takeaways silently erode document quality over time.
+
+### 6.11 Single Canonical Location for Artifacts
+**Context**: Plan files existed in both `.opencode/plans/` and `docs/plans/` causing numbering confusion
+
+**Principle**: Each type of persistent artifact has exactly one canonical directory. Never create copies or variants in alternate locations. One step owns creation of that artifact; all others read-only.
+
+**Example**:
+```
+# ✅ All plan files in docs/plans/
+docs/plans/PLAN_2026_05_12_001.md
+docs/plans/PLAN_2026_05_12_002.md
+
+# ❌ Orphan artifact in .opencode/plans/ creates conflicts
+```
+
+**Why it matters**: Two locations for the same artifact type breaks numbering, confuses agents, and fragments decision history.
 
 ---
 
@@ -434,7 +517,7 @@ Task: Add a new API endpoint
 **Why it matters**: Saves tokens, builds on existing knowledge, catches stale docs cheaply.
 
 ### 7.10 Interactive Walkthrough with Skip Confirmation
-**Context**: From redesigning grill-plan-and-refine's user interaction model
+**Context**: From redesigning grill-and-refine's user interaction model
 
 **Principle**: When probing a plan or design with a user, don't dump all findings at once or ask open-ended questions. Structure the walkthrough: one dimension at a time, present findings as concrete options, accept free-form input beyond options, and resolve before moving on. Before starting, flag which dimensions are skippable and confirm with the user — prevents tedious drilling on obvious items.
 
@@ -473,7 +556,7 @@ Exception: Soundness verification requires active assessment — "does the plan 
 ```
 readiness-check finds:
 - Missing doc reference → minor: fix in-place, update plan file, re-check
-- Unresolved assumption → significant: route back to grill-plan-and-refine
+- Unresolved assumption → significant: route back to grill-and-refine
 
 review-implementation finds:
 - Lint issue → minor: fix the formatting, re-run lint
@@ -481,6 +564,130 @@ review-implementation finds:
 ```
 
 **Why it matters**: Prevents verification steps from duplicating the work of earlier stages. Clear ownership of each fix type.
+
+### 7.13 Preserve File Description Comments
+**Context**: During implementation, agents deleted the `# Description:` comment block at the top of code files when rewriting them
+**Principle**: Never remove file-level description comments (the docstring or comment block at the top of a file describing its purpose). You may edit them to improve accuracy or align with actual functionality after changes, but do not delete them. These are the canonical source of truth for what the file does — other docs (ARCHITECTURE.md) auto-extract from them.
+**Example**:
+```python
+# ✅ Preserve and update
+# Description: HTTP routes for event creation, user management, matchmaking, and WebSocket connections
+
+# ❌ Never delete — this comment is the canonical source for ARCHITECTURE.md
+```
+**Why it matters**: Deleting them breaks the single-source-of-truth chain between code and documentation. They're referenced by auto-extraction scripts.
+
+### 7.14 Windows Shell Quoting Workaround
+**Context**: PowerShell mangled Python f-strings with double quotes in inline `python -c "..."` commands. Scripts timed out or produced syntax errors.
+**Principle**: On Windows PowerShell, write complex Python scripts to `.py` files instead of inline strings in `python -c "..."`. Use `$env:PYTHONIOENCODING='utf-8'` before running scripts that output emoji or Unicode.
+**Example**:
+```powershell
+# ❌ PowerShell mangles embedded double quotes in f-strings
+python -c "print(f'Hello {name}')"  # ← broken
+
+# ✅ Write to a file and run it
+python script.py
+
+# ✅ Encoding fix for emoji in PowerShell
+$env:PYTHONIOENCODING='utf-8'; python test_suite.py
+```
+**Why it matters**: Cross-platform shell differences cause silent failures. Writing to a file avoids quoting issues entirely.
+
+### 7.15 Matchmaking Queue Filter Direction
+**Context**: A bug where `uid not in waiting_queue` was used instead of `uid in waiting_queue`, causing the queue to exclude the very users it should match
+**Principle**: When implementing matchmaking or queue-based matching, double-check the filter direction. The queue should look for users IN the queue (they're waiting for a match), not exclude them. Test the happy path with two users to confirm the flow works end-to-end.
+**Example**:
+```python
+# ✅ Find users who ARE waiting for a match
+if uid in waiting_queue:
+    available_users.append(uid)
+
+# ❌ This excludes the very users waiting to be matched
+if uid not in waiting_queue:
+    available_users.append(uid)
+```
+**Why it matters**: Inverted boolean logic in queues is a classic bug that looks plausible in review but silently breaks the entire matching flow.
+
+### 7.16 Root Pattern Extraction
+**Context**: From revising the update-best-practices skill to push for root cause over symptom
+
+**Principle**: When extracting lessons from a session, distinguish the symptom (what happened) from the root cause (why it happened). The root pattern is the universally applicable form — it transfers to other projects. If the root becomes too abstract to be useful, step back one level. Guard: a pattern passes if a developer on an unrelated project would still find it valuable.
+
+**Example**:
+```
+Symptom: "Don't accept a WebSocket twice."
+Root:     "When extracting helper functions, check for duplicated lifecycle calls
+           between handler and helper — one lifecycle action should live in exactly
+           one caller, not split across both."
+
+Symptom: "AES-GCM: don't reuse nonces."
+Root:     "Always derive cryptographic nonces from a deterministic counter or a
+           CSPRNG, never from user-controlled input or timestamps."
+```
+
+**Why it matters**: Symptom-level lessons only fix this one case. Root-level lessons prevent entire categories of bugs.
+
+### 7.17 Sequential Numbering for Plan Files
+**Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `docs/plans/PLAN_001` both existed
+
+**Principle**: When artifacts use sequential numbering, the number must be globally unique across ALL locations. Before assigning a new number, scan the canonical directory for existing files and pick the next available. Never reuse a number from an alternative directory that was later merged.
+
+**Example**:
+```
+# ✅ docs/plans/ has 001, 002 → next is 003
+# ❌ Bringing in an artifact numbered 001 from elsewhere creates a duplicate
+```
+
+**Why it matters**: Duplicate numbers create ambiguity about which artifact is the real one — the chain of decision history breaks.
+
+### 7.18 Skill Rename Protocol
+**Context**: Renaming `grill-plan-and-refine` → `grill-and-refine` and `plan-readiness` → `check-plan-readiness`
+
+**Principle**: Renaming any component with cross-references follows this protocol: (1) create new directory, (2) copy file contents, (3) delete old directory, (4) update the component's internal name field, (5) update every cross-reference across all files that reference the old name. Use `replaceAll` for bulk updates. Verify zero stale refs survive.
+
+**Example**:
+```
+# After rename, verify with:
+grep -r "old-name" --include="*.md"    # should return nothing
+```
+
+**Why it matters**: A single stale reference can break the workflow chain silently — the skill becomes unloadable or routes to the wrong destination.
+
+### 7.19 Workflow Handoff with Outputs & Triggers
+**Context**: The 5-step analyze→grill→check→implement→review pipeline lacked structured connectivity between stages
+
+**Principle**: Every workflow stage defines three things: (1) what it produces (Output), (2) how it signals completion (Exit Declaration), (3) which stage runs next (Next Step). This creates an explicit handoff contract — the exit declaration IS the trigger. Never let a stage finish without making the next step obvious.
+
+**Example**:
+```
+grill-and-refine
+  Exit: "Grill complete. Check for plan readiness?"
+  → check-plan-readiness knows it's next
+```
+
+**Why it matters**: Without structured handoffs, stages produce orphan outputs and users must chain them from memory. The pipeline becomes fragile.
+
+### 7.20 WebSocket Accept Once
+**Context**: "Expected ASGI message websocket.send or websocket.close, but got websocket.accept"
+**Principle**: Call `accept()` on a WebSocket exactly once. Accept in the route handler, not in nested connection managers. The connection manager should assume the WebSocket is already accepted.
+**Example**:
+```python
+# ✅ Route handler accepts, manager only registers
+@router.websocket('/ws')
+async def ws_endpoint(websocket: WebSocket):
+    await websocket.accept()       # ← accept here
+    await manager.connect(ws, uid) # ← manager does NOT accept again
+
+# connection_manager.py
+async def connect(self, ws, uid):
+    # ❌ await ws.accept() — already accepted
+    self.connections[uid] = ws
+```
+**Why it matters**: Double-accept raises a runtime error that kills the WebSocket connection.
+
+---
+
+## 8. Automation & Process Design
 
 ### 8.1 Permission Control
 **Context**: From maintaining control during automated edits
@@ -494,20 +701,7 @@ review-implementation finds:
 
 **Why it matters**: You approve every change.
 
-### 8.2 "Would an Agent Miss This?" Litmus Test
-**Context**: From filtering content across 7 document restructurings in a single session
-
-**Principle**: For every piece of documentation or instruction, ask: "Would an agent (or developer) likely miss this without explicit documentation?" If no, leave it out. This is the single strongest filter against bloat.
-
-**Example**:
-- ✅ Include: "The default branch is `dev`, not `main`." (An agent would guess wrong.)
-- ❌ Exclude: "Python files use .py extension." (Obvious — no one would miss this.)
-- ✅ Include: "Command order matters: lint then typecheck then test." (Non-obvious.)
-- ❌ Exclude: "Run tests after making changes." (Standard practice — agents know this.)
-
-**Why it matters**: Keeps documentation lean. Every line must earn its place. Reduces token usage and reading time on every session.
-
-### 8.3 Executable Sources of Truth
+### 8.2 Executable Sources of Truth
 **Context**: From discovering doc/script conflicts during codebase investigation
 
 **Principle**: When documentation conflicts with code, configs, scripts, or CI files, trust the executable source. Prose is aspirational — code is truth.
@@ -518,7 +712,7 @@ review-implementation finds:
 
 **Why it matters**: Outdated docs are worse than no docs — they actively mislead. Verifying against executable sources keeps documentation accurate.
 
-### 8.4 Filename as Stable Key
+### 8.3 Filename as Stable Key
 **Context**: From designing auto-update matching for ARCHITECTURE.md
 
 **Principle**: When auto-updating document entries, match by `` `path/file.ext` `` in the section heading as the stable key, not by sequential position or content heuristics. Filenames survive reordering, insertions, and lead line changes.
@@ -532,7 +726,7 @@ Missing entry → insert at correct position in ordering
 
 **Why it matters**: Sequential position breaks when entries are added or reordered. Filename matching is idempotent.
 
-### 8.5 Preserve Manual, Regenerate Auto
+### 8.4 Preserve Manual, Regenerate Auto
 **Context**: From separating auto-extracted lead lines from manually authored bullet points in ARCHITECTURE.md
 
 **Principle**: When automating document updates, clearly split content that has a verifiable source of truth (regenerate automatically) from content that requires human judgment (preserve untouched). Never regenerate what you can't verify against an authoritative source.
@@ -546,7 +740,7 @@ Missing entry → insert at correct position in ordering
 
 **Why it matters**: Prevents automation from silently deleting human-authored nuance that can't be reconstructed from code alone.
 
-### 8.6 Diff Logging for Automation
+### 8.5 Diff Logging for Automation
 **Context**: From building safe auto-update workflows for documentation
 
 **Principle**: Every automated content change should log its action with a clear tag: `[diff]` for content changes, `[REMOVED]` for deletions, `[MISSING]` for unfindable sources. This gives the user a reviewable audit trail and builds trust in the automation.
@@ -560,7 +754,7 @@ Missing entry → insert at correct position in ordering
 
 **Why it matters**: Silent automation erodes trust. Logged diffs let the user verify changes at a glance.
 
-### 8.7 Cross-Language Extraction Pattern
+### 8.6 Cross-Language Extraction Pattern
 **Context**: From extracting file descriptions across Python, JS, HTML in a single codebase
 
 **Principle**: When you need to extract structured metadata from source files across multiple languages, design a uniform header format (`Description: ...`) and a single regex that works across all comment syntaxes. Avoid per-language extraction logic.
@@ -576,7 +770,7 @@ Missing entry → insert at correct position in ordering
 
 **Why it matters**: One regex, one extraction function, no per-language maintenance. Simple, correct, and easy to extend to new file types.
 
-### 8.8 One Verb Per Skill
+### 8.7 One Verb Per Skill
 **Context**: From separating implement-plan (TDD+code) from review-implementation (verify+sign-off) into two distinct skills
 
 **Principle**: Each skill or component should do exactly one thing. If a skill description uses "and" to connect distinct responsibilities ("creates plans AND verifies them"), split it. One verb per skill prevents overlap, makes the pipeline obvious, and forces clear stage boundaries.
@@ -593,7 +787,7 @@ Each step has exactly one verb.
 
 **Why it matters**: No ambiguity about what each component owns. No overlap between adjacent stages. Clear routing on failure — you always know which door to knock on.
 
-### 8.9 Independent Re-Verification
+### 8.8 Independent Re-Verification
 **Context**: From designing review-implementation to run tests/lint independently instead of trusting implement-plan's self-check
 
 **Principle**: The reviewer runs the same checks independently and does NOT trust the implementer's "I already tested this." Run the full test suite, run lint, read every diff line, check every flag — from scratch. During review, only find problems — never fix them. Fixing belongs to the implementer.
@@ -611,24 +805,26 @@ review-implementation: ignores self-test results, re-runs everything from scratc
 
 **Why it matters**: Self-verification is not verification. Independent re-runs catch what the implementer missed.
 
-### 8.10 Stage Gate Pattern
+### 8.9 Stage Gate Pattern
 **Context**: From the 5-skill pipeline with explicit go/no-go between every phase
 
 **Principle**: Between every major phase, insert an explicit gate that must pass before the next phase starts. The gate asks "Are we ready to proceed?" and someone (user or automated check) must answer yes. No implicit progression. No phase approving its own output.
 
 **Example**:
 ```
-Phase                  Gate                    Next phase
-analyze-and-plan →   "Plan created. Shall I present it?"   → user approves → grill-plan
-grill-plan →         "Grill complete. Here is the plan."   → user accepts   → plan-readiness
-plan-readiness →     "All gates pass. Ready to implement?" → user says go   → implement-plan
-implement-plan →     "Ready for review."                   → user triggers  → review-implementation
-review-implementation → "All checks pass. Verified."       → DONE
+Phase                          Gate                                               Next phase
+analyze-and-plan →             "Plan created. Shall I present it?"              → user approves → grill-and-refine
+grill-and-refine →             "Grill complete. Here is the plan."              → user accepts   → check-plan-readiness
+check-plan-readiness →         "All gates pass. Ready to implement?"            → user says go   → implement-plan
+implement-plan →               "Ready for review."                              → user triggers  → review-implementation
+review-implementation (1st) →  "All checks pass. Proceed to cleanup or done?"   → user chooses   → modularize-and-clean / DONE
+modularize-and-clean →         "Cleanup complete. Change-log ready."            → user triggers  → review-implementation (2nd)
+review-implementation (2nd) →  "All checks pass. Verified."                     → DONE
 ```
 
 **Why it matters**: Prevents skipping stages. Every handoff requires explicit confirmation.
 
-### 8.11 Batch by Logical Concern, Not Line Count
+### 8.10 Batch by Logical Concern, Not Line Count
 **Context**: From specifying batching rules for implement-plan
 
 **Principle**: When splitting implementation into reviewable batches, define each batch by its logical completeness — one complete feature, one bug fix, one refactoring — not by lines of code. A batch is complete when its tests pass independently. Never split a single logical change across multiple batches just to make each batch "smaller."
@@ -643,7 +839,7 @@ review-implementation → "All checks pass. Verified."       → DONE
 
 **Why it matters**: Each batch is independently verifiable. Reviewers see a complete change, not a fragment. No "to be continued" across batches.
 
-### 8.12 Persistent Decision Artifacts
+### 8.11 Persistent Decision Artifacts
 **Context**: From saving plans as timestamped, numbered files in docs/plans/ for all downstream stages to consume
 
 **Principle**: Save finalized decisions as persistent files — not just conversation context. Use a consistent naming scheme (PLAN_YYYY_MM_DD_XXX.md) with auto-incrementing numbers. Each downstream stage reads from the artifact file directly, not from memory or chat history. This makes decisions reviewable, auditable, and independent of conversation context.
@@ -676,7 +872,7 @@ implement-plan opens the latest PLAN_*.md, never relies on "as we discussed earl
 **Example**:
 ```bash
 git commit -m "Fix: Resolve 404 on user room"
-# Pin: Flask==2.3.3 (never Flask without version)
+# Pin: fastapi==0.115.0 (never fastapi without version)
 ```
 
 **Why it matters**: Reproducible builds, clean history.
@@ -759,24 +955,7 @@ python -m pytest tests/ -v    # Tests
 
 ---
 
-## 11. Frontend Best Practices
-**Context**: From debugging 500-line JS monoliths
-
-**Principle**: Modular JS: `config.js` (central), `utils.js` (shared), `page.js` (page-specific).
-
-**Example**:
-```javascript
-// api-utils.js ONLY: API calls
-async function fetchJSON(url, options={}) {
-    return parseJSON(await fetchWithTimeout(url, options));
-}
-```
-
-**Why it matters**: Easy to find, easy to test.
-
----
-
-## 12. Debugging Process
+## 11. Debugging Process
 **Context**: From fixing 404 on `/api/users/xxx/room`
 
 **Principle**: Identify → Isolate → Read → Plan → Apply → Verify → Document.
@@ -784,29 +963,6 @@ async function fetchJSON(url, options={}) {
 **Example**: Error: 404 → Cause: state cleared → Fix: restore from DB → Verify: test.
 
 **Why it matters**: Systematic approach, no guesswork.
-
----
-
-## 13. Document Scope & Distinctions
-
-**Context**: From duplicate content across README, AGENTS, ARCHITECTURE
-
-**Principle**: One purpose per document. Move content to `/docs/` if README >250 lines.
-
-**Example**:
-| Document | Purpose |
-|----------|---------|
-| **README.md** | User-facing: what, how, quick start |
-| **SPECIFICATIONS.md** | Product vision, user journey, why it exists |
-| **ARCHITECTURE.md** | Technical: *how* it's structured |
-| **DEMO_GUIDE.md** | Presenter walkthrough: demo steps |
-| **AGENTS.md** | Agent context: *what* agents work on |
-| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns & lessons |
-| **DOCUMENT_GUIDELINES.md** | Governance: doc scope & boundaries |
-
-**Why it matters**: No confusion, clear ownership.
-
----
 
 ## Key Takeaways
 1. **Modular > Monolithic**
@@ -816,7 +972,7 @@ async function fetchJSON(url, options={}) {
 5. **Distinct Docs** — one purpose per document, defined by the questions it answers
 6. **Key Differentiator** — every doc needs a bold one-line uniqueness statement
 7. **Boundary Tensions** — when docs overlap, document the resolution
-8. **Quality Gates** — filter content before including it (litmus test, executable truth, conciseness)
+8. **Quality Gates** — filter content before including it (litmus test, executable truth, conciseness, ownership filter)
 9. **Inline Constraints** — don't separate "what" from "how"; keep formatting rules with their items
 10. **Merge Verification** — one comprehensive verify step, not separate pre/post checklists
 11. **Recover State** — always handle in-memory state recovery
@@ -844,3 +1000,16 @@ async function fetchJSON(url, options={}) {
 33. **Push Per Commit** — push after each commit, not batch; isolate failure risk
 34. **Auto-Generate Commit Messages** — generate from change type, present for editing, never push unapproved
 35. **Detect Renames via Deleted + New Pairs** — pair deleted and untracked files with similar paths to preserve git rename history
+36. **127.0.0.1 for Browser Access** — bind to `127.0.0.1` for local dev, not `0.0.0.0` which browsers can't navigate to
+37. **WebSocket Accept Once** — call `accept()` in the route handler, not in nested connection managers
+38. **TestClient Over Live Server** — use in-process TestClient for integration tests instead of a real server process
+39. **Preserve File Description Comments** — never delete the `# Description:` block; it's the canonical source for docs
+40. **Windows Shell Quoting** — write complex Python to `.py` files instead of inline PowerShell strings
+41. **Queue Filter Direction** — matchmaking queues should look for users IN the queue, not exclude them
+42. **Structural Verification After Edits** — after editing structured docs, verify numbering gaps, takeaway coverage, and markdown validity before committing
+43. **Root Pattern Extraction** — extract root causes not symptoms; guard by asking if a developer on an unrelated project would find it valuable
+44. **TDD Tests Are Permanent** — tests written during TDD live in `tests/` forever as regression tests; only skip for truly non-testable changes
+45. **Single Canonical Location** — each artifact type lives in exactly one directory; one step creates, all others read
+46. **Sequential Numbering for Plan Files** — numbers are globally unique across all directories; no reuse
+47. **Skill Rename Protocol** — create dir → copy → delete old → update name → update all refs; verify zero stale refs
+48. **Workflow Handoff with Outputs & Triggers** — every stage defines Output + Exit Declaration + Next Step; the exit IS the trigger

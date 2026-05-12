@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)]()
-[![Flask](https://img.shields.io/badge/flask-2.3.3-black.svg)]()
+[![FastAPI](https://img.shields.io/badge/fastapi-0.115-blue.svg)]()
 
 > *"IntroChat doesn't make introverts talk more — it makes them feel safe enough to talk once. And sometimes, that one conversation changes everything."*
 
@@ -102,28 +102,30 @@ python -m app
 ## Technical Details
 
 ### Tech Stack
-- **Backend**: Python Flask + Flask-SocketIO (`app/` package)
+- **Backend**: Python FastAPI + Uvicorn (`app/` package)
 - **Frontend**: HTML5 + CSS3 + Vanilla JavaScript
-- **Database**: SQLite (`data/introchat.db`)
-- **Real-time**: WebSocket connections via SocketIO
+- **Database**: SQLite (`data/introchat.db`) via aiosqlite
+- **Real-time**: Native WebSocket via FastAPI
 - **QR Codes**: Python qrcode library
 
 ### Architecture (Simplified)
 ```
-Frontend (Browser) ←→ Flask Backend (app/) ←→ SQLite Database (data/)
+Frontend (Browser) ←→ FastAPI Backend (app/) ←→ SQLite Database (data/)
      ↓                          ↓
-WebSocket IO ←→ Real-time Matching Engine
+WebSocket (native) ←→ Real-time Matching Engine
 ```
 
 For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ### Key Components
 - **`app/`**: Python package with all backend logic
-  - `__init__.py`: App orchestrator
+  - `__init__.py`: FastAPI app orchestrator
   - `state.py`: Shared state and constants
-  - `routes.py`: HTTP route handlers
+  - `config.py`: Central configuration
+  - `schemas.py`: Pydantic request models
+  - `routes.py`: HTTP route handlers and WebSocket endpoint
+  - `connection_manager.py`: WebSocket connection tracking
   - `matchmaking.py`: Match logic
-  - `socket_events.py`: WebSocket handlers
   - `tasks.py`: Background cleanup
 - **`app/templates/`**: HTML templates for all pages
 - **`app/static/`**: Organized assets (`css/`, `js/`)
@@ -184,10 +186,9 @@ python tests/test_js_modules.py
 
 ### Other Platforms
 - Railway.app
-- Heroku
 - DigitalOcean App Platform
 - AWS Elastic Beanstalk
-- Any platform that supports Python Flask
+- Any platform that supports Python ASGI
 
 ---
 
@@ -228,7 +229,7 @@ This project is open source and available under the [MIT License](LICENSE).
 - Make sure you've installed all requirements: `pip install -r requirements.txt`
 
 **"Port already in use" error**
-- Change the port in `app/__init__.py`: `socketio.run(app, debug=True, host='0.0.0.0', port=5001)`
+- Change the port in `app/config.py`: `PORT = 5001`
 
 **WebSocket connection failed**
 - Make sure you're using `http://` not `https://` for local testing
