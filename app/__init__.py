@@ -1,43 +1,30 @@
 # __init__.py
-# Description: Flask/SocketIO app factory that initializes the server, creates the database, registers HTTP routes and SocketIO handlers, and starts the background cleanup thread
+# Description: FastAPI app factory that initializes the server, mounts static files, registers routes via APIRouter, starts the background cleanup thread, and initializes the database on startup
 # ====
-# Wires up: state.py, database.py, routes.py, matchmaking.py, socket_events.py, tasks.py
-
-from flask import Flask, render_template, request, jsonify, send_file
-from flask_socketio import SocketIO, emit, join_room, leave_room
-import sqlite3
-import uuid
-import time
-import threading
-import qrcode
-import io
-import base64
-from datetime import datetime, timedelta
-import json
-
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'introchat_secret_key_2024'
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-# Initialize database with absolute path
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import os
-db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
-# Override the path in database.py by passing it as argument
-from .database import init_db
-init_db(db_path)
 
-# Register HTTP routes
-from .routes import register_routes
-register_routes(app)
-print(f"Registered routes: {[rule.rule for rule in app.url_map.iter_rules()]}" )
+app = FastAPI(title="IntroChat")
 
-# Register SocketIO event handlers
-from .socket_events import register_handlers
-register_handlers(socketio)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
-# Start background cleanup thread
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+templates = Jinja2Templates(directory=TEMPLATE_DIR)
+
+from .routes import router
+app.include_router(router)
+
 from .tasks import start_cleanup_thread
 start_cleanup_thread()
 
-if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+@app.on_event("startup")
+async def on_startup():
+    from .database import init_db
+    from .config import DB_PATH
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    await init_db(DB_PATH)

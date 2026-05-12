@@ -1,119 +1,112 @@
 # routes.py
-# Description: All HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints for events, users, rooms, matches, QR codes, and conversation prompts
+# Description: FastAPI APIRouter with all HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints and WebSocket handler for events, users, rooms, matches, QR codes, and conversation prompts
 # ====
-
-from flask import jsonify, render_template, request
+from fastapi import APIRouter, Request, HTTPException, WebSocket
+from fastapi.responses import JSONResponse
+from starlette.websockets import WebSocketDisconnect
+from urllib.parse import urljoin
 from .state import active_users, active_matches, waiting_queue, CONVERSATION_PROMPTS, USER_TEMPLATE
-import sqlite3
+from .schemas import CreateEventRequest, JoinEventRequest, SetUserRoomRequest, SetAvailabilityRequest, ExchangeConnectionRequest
+from .connection_manager import manager
+from .config import DB_PATH
+import aiosqlite
 import uuid
-import os
 import time
 
-def register_routes(app):
-    print(f"Registering routes. Available routes will include: /api/users/<user_id>/room")
+DEFAULT_ROOMS = ['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Quiet Corner', 'Coffee Area']
 
-    @app.route('/')
-    def index():
-        return render_template('index.html')
+router = APIRouter()
 
-    @app.route('/join/<event_id>')
-    def user_info(event_id):
-        return render_template('user_info.html', event_id=event_id)
+@router.get('/')
+async def index(request: Request):
+    from app import templates
+    return templates.TemplateResponse('index.html', {'request': request})
 
-    @app.route('/room/<event_id>')
-    def room_selection(event_id):
-        return render_template('room.html', event_id=event_id)
+@router.get('/join/{event_id}')
+async def user_info(request: Request, event_id: str):
+    from app import templates
+    return templates.TemplateResponse('user_info.html', {'request': request, 'event_id': event_id})
 
-    @app.route('/chat/<match_id>')
-    def chat_room(match_id):
-        from .state import active_matches, active_users
-        event_id = None
-        if match_id in active_matches:
-            match = active_matches[match_id]
-            user1 = active_users.get(match.get('user1_id'), {})
-            event_id = user1.get('event_id')
-        return render_template('chat.html', match_id=match_id, event_id=event_id or '')
+@router.get('/room/{event_id}')
+async def room_selection(request: Request, event_id: str):
+    from app import templates
+    return templates.TemplateResponse('room.html', {'request': request, 'event_id': event_id})
 
-    @app.route('/api/events', methods=['POST'])
-    def create_event():
-        data = request.get_json()
-        event_id = str(uuid.uuid4())[:8]
-        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO events (id, name) VALUES (?, ?)',
-                       (event_id, data.get('name', 'IntroChat Event')))
-        rooms = ['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Quiet Corner', 'Coffee Area']
-        for room_name in rooms:
+@router.get('/chat/{match_id}')
+async def chat_room(request: Request, match_id: str):
+    event_id = ''
+    if match_id in active_matches:
+        match = active_matches[match_id]
+        user1 = active_users.get(match.get('user1_id'), {})
+        event_id = user1.get('event_id', '')
+    from app import templates
+    return templates.TemplateResponse('chat.html', {'request': request, 'match_id': match_id, 'event_id': event_id})
+
+@router.post('/api/events')
+async def create_event(data: CreateEventRequest):
+    event_id = str(uuid.uuid4())[:8]
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute('INSERT INTO events (id, name) VALUES (?, ?)',
+                         (event_id, data.name or 'IntroChat Event'))
+        for room_name in DEFAULT_ROOMS:
             room_id = str(uuid.uuid4())[:8]
-            cursor.execute('INSERT INTO rooms (id, event_id, name) VALUES (?, ?, ?)',
-                           (room_id, event_id, room_name))
-        conn.commit()
-        conn.close()
-        return jsonify({'event_id': event_id, 'rooms': rooms})
+            await db.execute('INSERT INTO rooms (id, event_id, name) VALUES (?, ?, ?)',
+                             (room_id, event_id, room_name))
+        await db.commit()
+    return {'event_id': event_id, 'rooms': DEFAULT_ROOMS}
 
-    @app.route('/api/events/<event_id>/rooms')
-    def get_rooms(event_id):
-        try:
-            db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            cursor.execute('SELECT id, name FROM rooms WHERE event_id = ?', (event_id,))
-            rooms = [{'id': row[0], 'name': row[1]} for row in cursor.fetchall()]
+@router.get('/api/events/{event_id}/rooms')
+async def get_rooms(event_id: str):
+    try:
+        async with aiosqlite.connect(DB_PATH) as db:
+            cursor = await db.execute('SELECT id, name FROM rooms WHERE event_id = ?', (event_id,))
+            rows = await cursor.fetchall()
+            rooms = [{'id': row[0], 'name': row[1]} for row in rows]
             if not rooms:
-                cursor.execute('SELECT id, name FROM rooms WHERE LOWER(event_id) = LOWER(?)', (event_id,))
-                rooms = [{'id': row[0], 'name': row[1]} for row in cursor.fetchall()]
+                cursor = await db.execute('SELECT id, name FROM rooms WHERE LOWER(event_id) = LOWER(?)', (event_id,))
+                rows = await cursor.fetchall()
+                rooms = [{'id': row[0], 'name': row[1]} for row in rows]
             if not rooms:
-                default_rooms = ['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Quiet Corner', 'Coffee Area']
-                for room_name in default_rooms:
+                for room_name in DEFAULT_ROOMS:
                     room_id = str(uuid.uuid4())[:8]
-                    cursor.execute('INSERT INTO rooms (id, event_id, name) VALUES (?, ?, ?)',
-                                   (room_id, event_id, room_name))
-                conn.commit()
-                cursor.execute('SELECT id, name FROM rooms WHERE event_id = ?', (event_id,))
-                rooms = [{'id': row[0], 'name': row[1]} for row in cursor.fetchall()]
-            conn.close()
-            return jsonify(rooms)
-        except Exception as e:
-            print(f'Error loading rooms: {e}')
-            return jsonify([])
+                    await db.execute('INSERT INTO rooms (id, event_id, name) VALUES (?, ?, ?)',
+                                     (room_id, event_id, room_name))
+                await db.commit()
+                cursor = await db.execute('SELECT id, name FROM rooms WHERE event_id = ?', (event_id,))
+                rows = await cursor.fetchall()
+                rooms = [{'id': row[0], 'name': row[1]} for row in rows]
+            return rooms
+    except Exception as e:
+        print(f'Error loading rooms: {e}')
+        return JSONResponse(content=[])
 
-    @app.route('/api/events/<event_id>/join', methods=['POST'])
-    def join_event(event_id):
-        data = request.get_json()
-        user_id = str(uuid.uuid4())[:8]
-        username = data.get('username', f'User_{user_id}')
-        linkedin_url = data.get('linkedin_url', '')
-        slack_handle = data.get('slack_handle', '')
-        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO users (id, event_id, username, linkedin_url, slack_handle) VALUES (?, ?, ?, ?, ?)',
-                       (user_id, event_id, username, linkedin_url, slack_handle))
-        conn.commit()
-        conn.close()
-        active_users[user_id] = dict(USER_TEMPLATE)
-        active_users[user_id].update({
-            'event_id': event_id,
-            'username': username,
-            'linkedin_url': linkedin_url,
-            'slack_handle': slack_handle,
-            'last_seen': time.time()
-        })
-        return jsonify({'user_id': user_id, 'username': username})
+@router.post('/api/events/{event_id}/join')
+async def join_event(event_id: str, data: JoinEventRequest):
+    user_id = str(uuid.uuid4())[:8]
+    username = data.username or f'User_{user_id}'
+    linkedin_url = data.linkedin_url or ''
+    slack_handle = data.slack_handle or ''
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute('INSERT INTO users (id, event_id, username, linkedin_url, slack_handle) VALUES (?, ?, ?, ?, ?)',
+                         (user_id, event_id, username, linkedin_url, slack_handle))
+        await db.commit()
+    active_users[user_id] = dict(USER_TEMPLATE)
+    active_users[user_id].update({
+        'event_id': event_id,
+        'username': username,
+        'linkedin_url': linkedin_url,
+        'slack_handle': slack_handle,
+        'last_seen': time.time()
+    })
+    return {'user_id': user_id, 'username': username}
 
-    @app.route('/api/users/<user_id>/room', methods=['POST'])
-    def set_user_room(user_id):
-        data = request.get_json()
-        room_id = data.get('room_id')
-        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, event_id, username FROM users WHERE id = ?', (user_id,))
-        user_data = cursor.fetchone()
+@router.post('/api/users/{user_id}/room')
+async def set_user_room(user_id: str, data: SetUserRoomRequest):
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute('SELECT id, event_id, username FROM users WHERE id = ?', (user_id,))
+        user_data = await cursor.fetchone()
         if not user_data:
-            conn.close()
-            return jsonify({'error': 'User not found'}), 404
+            raise HTTPException(status_code=404, detail='User not found')
         if user_id not in active_users:
             active_users[user_id] = {
                 'event_id': user_data[1],
@@ -122,85 +115,113 @@ def register_routes(app):
                 'is_available': False,
                 'last_seen': time.time()
             }
-        active_users[user_id]['room_id'] = room_id
-        cursor.execute('UPDATE users SET room_id = ? WHERE id = ?', (room_id, user_id))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True})
+        active_users[user_id]['room_id'] = data.room_id
+        await db.execute('UPDATE users SET room_id = ? WHERE id = ?', (data.room_id, user_id))
+        await db.commit()
+    return {'success': True}
 
-    @app.route('/api/users/<user_id>/available', methods=['POST'])
-    def set_availability(user_id):
-        from .state import active_users, waiting_queue
+@router.post('/api/users/{user_id}/available')
+async def set_availability(user_id: str, data: SetAvailabilityRequest):
+    if user_id not in active_users:
+        raise HTTPException(status_code=404, detail='User not found')
+    active_users[user_id]['is_available'] = data.available
+    active_users[user_id]['last_seen'] = time.time()
+    if data.available:
         from .matchmaking import find_match
-        data = request.get_json()
-        is_available = data.get('available', False)
-        if user_id not in active_users:
-            return jsonify({'error': 'User not found'}), 404
-        active_users[user_id]['is_available'] = is_available
-        active_users[user_id]['last_seen'] = time.time()
-        if is_available:
-            find_match(user_id)
-        elif user_id in waiting_queue:
-            del waiting_queue[user_id]
-        return jsonify({'success': True})
+        await find_match(user_id)
+    elif user_id in waiting_queue:
+        del waiting_queue[user_id]
+    return {'success': True}
 
-    @app.route('/api/matches/<match_id>')
-    def get_match(match_id):
-        from .state import active_matches, active_users
-        if match_id not in active_matches:
-            return jsonify({'error': 'Match not found'}), 404
-        match = active_matches[match_id]
-        user1 = active_users.get(match['user1_id'], {})
-        user2 = active_users.get(match['user2_id'], {})
-        return jsonify({
-            'match_id': match_id,
-            'user1_username': user1.get('username', 'Unknown'),
-            'user2_username': user2.get('username', 'Unknown'),
-            'room_id': match['room_id']
-        })
+@router.get('/api/users/{user_id}/match')
+async def get_user_match(user_id: str):
+    for match_id, match in active_matches.items():
+        if match['user1_id'] == user_id or match['user2_id'] == user_id:
+            return {'match_id': match_id}
+    raise HTTPException(status_code=404, detail='No match found for this user')
 
-    @app.route('/api/matches/<match_id>/connect', methods=['POST'])
-    def exchange_connection(match_id):
-        from .state import active_matches, active_users
-        from . import socketio
-        from flask_socketio import emit
-        data = request.get_json()
-        user_id = data.get('user_id')
-        wants_to_connect = data.get('wants_to_connect', False)
-        if match_id not in active_matches:
-            return jsonify({'error': 'Match not found'}), 404
-        match = active_matches[match_id]
-        if 'connections' not in match:
-            match['connections'] = {}
-        match['connections'][user_id] = wants_to_connect
-        if len(match['connections']) == 2:
-            both_want = all(match['connections'].values())
-            if both_want:
-                user1 = active_users.get(match['user1_id'], {})
-                user2 = active_users.get(match['user2_id'], {})
-                socketio.emit('connection_exchanged', {
+@router.get('/api/matches/{match_id}')
+async def get_match(match_id: str):
+    if match_id not in active_matches:
+        raise HTTPException(status_code=404, detail='Match not found')
+    match = active_matches[match_id]
+    user1 = active_users.get(match['user1_id'], {})
+    user2 = active_users.get(match['user2_id'], {})
+    return {
+        'match_id': match_id,
+        'user1_username': user1.get('username', 'Unknown'),
+        'user2_username': user2.get('username', 'Unknown'),
+        'room_id': match['room_id']
+    }
+
+@router.post('/api/matches/{match_id}/connect')
+async def exchange_connection(match_id: str, data: ExchangeConnectionRequest):
+    if match_id not in active_matches:
+        raise HTTPException(status_code=404, detail='Match not found')
+    match = active_matches[match_id]
+    if 'connections' not in match:
+        match['connections'] = {}
+    match['connections'][data.user_id] = data.wants_to_connect
+    if len(match['connections']) == 2:
+        both_want = all(match['connections'].values())
+        if both_want:
+            user1 = active_users.get(match['user1_id'], {})
+            user2 = active_users.get(match['user2_id'], {})
+            await manager.broadcast_to_users(
+                [match['user1_id'], match['user2_id']],
+                {
+                    'type': 'connection_exchanged',
                     'user1_username': user1.get('username', 'Unknown'),
                     'user2_username': user2.get('username', 'Unknown')
-                }, room=f"room_{match['room_id']}")
-            else:
-                socketio.emit('connection_declined', {}, room=f"room_{match['room_id']}")
-        return jsonify({'success': True})
+                }
+            )
+        else:
+            await manager.broadcast_to_users(
+                [match['user1_id'], match['user2_id']],
+                {'type': 'connection_declined'}
+            )
+    return {'success': True}
 
-    @app.route('/api/qr/<event_id>')
-    def generate_qr(event_id):
-        import qrcode
-        import io
-        import base64
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(f"http://localhost:5000/room/{event_id}")
-        qr.make(True)
-        img = qr.make_image(fill_color="black", back_color="white")
-        buffer = io.BytesIO()
-        img.save(buffer, format='PNG')
-        buffer.seek(0)
-        img_str = base64.b64encode(buffer.getvalue()).decode()
-        return jsonify({'qr_code': f"data:image/png;base64,{img_str}"})
+@router.get('/api/qr/{event_id}')
+async def generate_qr(event_id: str, request: Request):
+    import qrcode
+    import io
+    import base64
+    origin = f"{request.url.scheme}://{request.url.netloc}/"
+    qr_data = urljoin(origin, f"room/{event_id}")
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(qr_data)
+    qr.make(True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    img_str = base64.b64encode(buffer.getvalue()).decode()
+    return {'qr_code': f"data:image/png;base64,{img_str}"}
 
-    @app.route('/api/prompts')
-    def get_prompts():
-        return jsonify(CONVERSATION_PROMPTS)
+@router.get('/api/prompts')
+async def get_prompts():
+    return CONVERSATION_PROMPTS
+
+@router.websocket('/ws')
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    user_id = None
+    try:
+        hello = await websocket.receive_json()
+        user_id = hello.get('user_id')
+        room_id = hello.get('room_id', '')
+        if not user_id:
+            await websocket.close(code=1008)
+            return
+        await manager.connect(websocket, user_id, room_id)
+        while True:
+            data = await websocket.receive_json()
+            msg_type = data.get('type')
+            if msg_type == 'join_room':
+                new_room = data.get('room_id', '')
+                manager.disconnect(user_id)
+                await manager.connect(websocket, user_id, new_room)
+    except WebSocketDisconnect:
+        if user_id:
+            manager.disconnect(user_id)

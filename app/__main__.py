@@ -1,6 +1,7 @@
 # __main__.py
-# Description: Application entry point that launches the SocketIO server on 0.0.0.0:5000 with debug mode enabled
+# Description: Application entry point that launches the Uvicorn ASGI server on 127.0.0.1:5000 with hot-reload enabled
 # ====
+import uvicorn
+from .config import HOST, PORT
 
-from . import socketio, app
-socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+uvicorn.run("app:app", host=HOST, port=PORT, reload=True)
