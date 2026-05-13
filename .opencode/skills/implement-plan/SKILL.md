@@ -16,7 +16,8 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 Read specific sections via Grep→Read (grep heading line number, Read with offset/limit):
 
-- **`AGENTS.md`**: "File Ownership", "Core Commands", "Out of Scope", "Privacy Requirements"
+- **`AGENTS.md`**: "File Ownership", "Core Commands"
+- **`SPECIFICATIONS.md`**: "Out of Scope"
 - **`ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only
 
 ## Guidelines

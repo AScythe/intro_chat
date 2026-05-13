@@ -12,8 +12,10 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 
 ## Audience
 - Product owners and managers
-- Developers and AI agents needing product context to develop features aligned with the vision
-- Product stakeholders — hackathon judges, investors, or anyone evaluating the product concept
+- Developers and AI agents needing product context to build features aligned with the vision
+- Evaluators and stakeholders — investors, judges, or anyone assessing the product concept
+
+> **Not** end users. End users read `README.md`. Specs serve people making product and development decisions.
 
 ---
 
@@ -22,52 +24,41 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 ### Quality Gates
 Every piece of content must pass these three checks:
 
-- **"Would an agent miss this?" litmus test:** Every line must answer "Would an agent likely miss this without help?" If not, leave it out.
+- **"Would an agent or developer miss this?" litmus test:** Every line must answer "Would a developer or evaluator likely miss this without help?" If not, leave it out.
 - **Product-focused language:** Describe purpose, vision, and user experience in plain language — no endpoint names, no module internals.
 - **Actionable for development:** Feature descriptions must include purpose and rationale so developers can make informed implementation decisions.
 
 ### What to Include
-- Problem statement and context (what pain point exists, why it matters)
-- Solution description and pitch (what the product does at a high level)
-- User journey / core logic flow — product-focused steps in plain language, no endpoint names
-- Feature descriptions with purpose and rationale (what each feature does and why it exists)
-- Product decisions and rationale — why certain approaches were chosen (e.g., timer duration, anonymity model)
-- Target user personas — who the product serves, why they benefit, not user stories or acceptance criteria
-- Feature priority and status — what's implemented vs. planned, to guide development
-- Product constraints — what the product explicitly does NOT do and why
-- Privacy and trust model — user-facing framing, not implementation details
-- Problem-solution pairs — why target users benefit
-- Tech stack with rationale — include a "Why?" column, not detailed module descriptions
-- Sample user flow — narrative story, not a technical sequence
-- Value proposition for evaluators (judges, stakeholders)
-- Future enhancements / bonus features (clearly marked as not yet implemented)
-- Final pitch line
-- Brief demo setup — enough for a judge to run it independently; full walkthrough goes in `DEMO_GUIDE.md`
+- Problem statement and context (what pain point exists, who experiences it, why it matters)
+- Solution description and pitch (what the product does at a high level, why it solves the problem)
+- User journey / core logic flow — product-focused steps in plain language. No endpoint names, no technical sequence. Readable by a non-technical evaluator.
+- Feature descriptions with purpose and rationale — what each feature does and **why** it exists. Every feature needs a reason.
+- Product decisions and rationale — why certain approaches were chosen (e.g., timer duration, anonymity model). Vision rationale, not technical trade-offs.
+- Target user personas — who the product serves and why they benefit. Not user stories or acceptance criteria — archetypes.
+- Feature priority and status — what's implemented vs. planned, to guide what to build next
+- Product constraints / Out of Scope — standalone section listing what the product explicitly does NOT do and why. Hard boundaries, not aspirational wishes.
+- Privacy and trust model — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section with non-negotiable implementation-level rules
+- Tech stack with rationale — include a "Why?" column for each technology. Not detailed module descriptions.
+- Future enhancements / bonus features — clearly marked as not yet implemented
 
 ### What NOT to Include
-| Document | Routes content about | Audience | Update Trigger | Content Type |
-|----------|---------------------|----------|----------------|--------------|
-| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | Feature or setup change | User-facing, practical |
-| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Code structure change | Technical, implementation |
-| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch ✅ | Product owners, devs, AI, stakeholders | Product scope change | Product, pitch, vision, spec |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, judges | Demo flow change | Practical, step-by-step |
-| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
-| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | After each session | Educational, guidelines |
-| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | New doc added | Meta, governance |
 
-**Never include in SPECIFICATIONS.md:**
-- Endpoint names, route definitions, or any implementation-level detail
-- Module descriptions, file trees, or import structure
-- Step-by-step demo walkthrough or presentation instructions
-- AI agent permissions or operational constraints
+| Document | Routes content about | Audience | Content Type |
+|----------|---------------------|----------|--------------|
+| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | User-facing, practical |
+| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical, implementation |
+| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy ✅ | Product owners, devs, AI agents, evaluators/stakeholders | Product, pitch, vision, spec, privacy |
+| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical, step-by-step |
+| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents | Operational, constraints |
+| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | Educational, guidelines |
+| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Meta, governance |
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
 - Cross-reference, don't copy — use `[See DEMO_GUIDE.md](DEMO_GUIDE.md)` for full demo steps instead of duplicating
-- Summary here, details there — SPECIFICATIONS.md gets the brief demo setup; DEMO_GUIDE.md gets the full walkthrough
+- Summary here, details there — SPECIFICATIONS.md gets the brief demo setup (2-3 lines); DEMO_GUIDE.md gets the full walkthrough
 - Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
-
-If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in `SPECIFICATIONS.md`.
+- If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in `SPECIFICATIONS.md`
 
 ---
 
@@ -98,7 +89,7 @@ Focus on *what the product does and why*, not *how it's built*. Review session h
 ### 3. Identify Gaps and Issues
 For each item in **What to Include**:
 - Does it exist in the current document? Is it accurate against the current product state?
-- Is it written for the full audience (product owners, developers needing product context, and stakeholders/judges)?
+- Is it written for the full audience (product owners, developers needing product context, and evaluators/stakeholders)?
 
 For each existing section:
 - Does it belong here per **What NOT to Include**?
@@ -108,26 +99,28 @@ For each existing section:
 - Add missing sections
 - Fix outdated content to match current product state
 - Remove or redirect out-of-scope content
-- Keep language product-focused and pitch-appropriate — no endpoint names, no module internals
-- User journey steps should be readable by a non-technical evaluator
-- Include product rationale sections that help developers understand design intent (e.g., "Why 30 seconds?", "Why anonymous?")
-- Ensure feature descriptions clearly state purpose and benefit so developers can make informed implementation decisions
+- Keep language product-focused — no endpoint names, no module internals
+- User journey steps must be readable by a non-technical evaluator
+- Feature descriptions must state purpose and benefit so developers can make informed implementation decisions
+- Include product rationale (e.g., "Why 30 seconds?", "Why anonymous?") — these help developers understand design intent
 - Tech stack must include a "Why?" rationale column
+- Privacy section must include both user-facing table AND Hard Constraints sub-section
+- Out of Scope must be a standalone section — each item is a hard boundary, not aspirational
 - Future enhancements must be clearly marked as not yet implemented
+- Phase-specific items (pitch line, value proposition for evaluators) must be marked *(phase-specific: remove or archive post-launch)*
 - Don't rewrite the entire document — only update outdated or missing sections
-- Keep it concise — ensure all critical information for product owners, developers, and stakeholders is included
 
 ### 5. Verify
 - [ ] Content's PRIMARY purpose identified and routed to the correct document
 - [ ] Content doesn't already exist in another document — cross-reference instead of duplicate
-- [ ] If content spans multiple purposes, split appropriately
 - [ ] Problem statement is clear and compelling
 - [ ] User journey is described in plain language — no endpoint names
-- [ ] Tech stack includes a "Why?" rationale column
-- [ ] Sample user flow reads as a narrative, not a technical sequence
-- [ ] Future enhancements are clearly marked as not yet implemented
-- [ ] Language balances pitch-readiness for judges with product clarity for developers
 - [ ] Feature descriptions include purpose/rationale suitable for guiding development decisions
-- [ ] Product constraints are clearly stated (what the product explicitly doesn't do)
+- [ ] Product decisions section captures vision rationale (not technical trade-offs)
+- [ ] Privacy section includes both user-facing table and Hard Constraints sub-section
+- [ ] Out of Scope section clearly states what the product explicitly doesn't do — hard boundaries only
+- [ ] Audience is product owners, developers, and evaluators/stakeholders — NOT end users
+- [ ] No endpoint names, route definitions, or implementation-level detail
 - [ ] No excluded content remains — redirected if needed
+- [ ] Every line passes the "Would someone miss this?" litmus test
 - [ ] Document is concise — no unnecessary detail, but all critical product information is included

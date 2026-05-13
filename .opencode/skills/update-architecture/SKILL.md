@@ -13,7 +13,7 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 ## Audience
 - Developers working on the codebase
 - AI agents making code changes
-- Technical reviewers
+- Technical reviewers evaluating the implementation
 
 ---
 
@@ -28,56 +28,45 @@ Every piece of content must pass these three checks:
 
 ### What to Include
 - **Complete project file tree** — concise (1-line) descriptions per directory and key file for quick navigation. Full detail goes in Module Descriptions.
-- **Module Descriptions** — organized into 4 subsections:
-  - **Python Modules** — all `app/*.py` files (excluding `__pycache__`)
-  - **Frontend Modules** — all `app/static/js/*.js` files
-  - **Templates** — all `app/templates/*.html` files
-  - **Tests** — all `tests/*.py` files
-  - Each entry: 1-sentence **lead line** extracted from source code's `Description:` header, then **bullet points** for key responsibilities and implementation details, then a **`#### Functions` subsection** for per-function detail (see Step 1.75)
-  - Lead lines are auto-sourced from code comments — see Workflow Step 1.5 for extraction
-  - Per-function details are auto-extracted from source code declarations and docstrings — see Workflow Step 1.75 for extraction
-- Key functionalities list — technical focus on what the code does, not why users want it
-- Data flow — MUST include API endpoints (e.g., `POST /api/events`) and WebSocket events with direction and payload
-- Key design decisions — include the *why*, not just the *what*
-- Import structure and dependency graph between modules
-- Running instructions (technical: env vars, startup sequence)
-- Modifying instructions — how to add routes, events, extend functionality
-- Critical implementation details (match expiry, default rooms, cleanup thread, in-memory state, etc.) — as a standalone section after Module Descriptions, NOT nested inside it
+- **Module Descriptions** — organized into subsections by type (Python, Frontend, Templates, Tests). Each entry: 1-sentence lead line, bullet points for key responsibilities and implementation details, and a per-function detail subsection (see Per-Function Detail Rules).
+- **Data flow** — authoritative reference for all API endpoints (`METHOD /path`) and WebSocket events (event name, direction, payload). This is the single source of truth for endpoint tables — `README.md` cross-references here; `AGENTS.md` cross-references here.
+- **Key design decisions** — include the *why*, not just the *what*. Technical rationale only (e.g., "why FastAPI?", "why SQLite?"). Product rationale ("why anonymous?", "why 30 seconds?") goes in `SPECIFICATIONS.md`.
+- **Import structure and dependency graph** — how modules depend on each other, circular dependency prevention
+- **Running instructions** — full technical startup sequence: env vars, configuration, service startup order, dependencies. `README.md` gets a condensed quick-start that links here for full detail.
+- **Modifying instructions** — how to add routes, events, extend functionality. "If you need to add X, here's how."
+- **Critical implementation details** — match expiry logic, cleanup thread behavior, in-memory state management, default rooms, any non-obvious runtime behavior. Standalone section placed AFTER Module Descriptions, not nested inside it.
+- **Per-function detail** — every named function/class in every module with signature and one-line purpose. **This is a navigation map, not a manual.** Implementation logic, parameters, return values, and edge cases belong in source docstrings/JSDoc — not here.
 
 ### What NOT to Include
-| Document | Routes content about | Audience | Update Trigger | Content Type |
-|----------|---------------------|----------|----------------|--------------|
-| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | Feature or setup change | User-facing, practical |
-| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow ✅ | Developers, AI agents | Code structure change | Technical, implementation |
-| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch | Product owners, devs, AI, stakeholders | Product scope change | Product, pitch, vision, spec |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, judges | Demo flow change | Practical, step-by-step |
-| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
-| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | After each session | Educational, guidelines |
-| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | New doc added | Meta, governance |
 
-**Never include in ARCHITECTURE.md:**
-- User-facing benefits or marketing language
-- Product vision, pitch, or user journey narrative
-- Demo walkthrough or presentation steps
-- AI agent permissions or operational rules
+| Document | Routes content about | Audience | Content Type |
+|----------|---------------------|----------|--------------|
+| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | User-facing, practical |
+| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow ✅ | Developers, AI agents | Technical, implementation |
+| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product, pitch, vision, spec, privacy |
+| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical, step-by-step |
+| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents | Operational, constraints |
+| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | Educational, guidelines |
+| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Meta, governance |
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
 - Cross-reference, don't copy — use `[See README.md](README.md)` for user-facing setup instead of duplicating
 - Summary here, details there — file tree gets ~10-word descriptions; Module Descriptions gets the full lead line + bullets + per-function detail
 - Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
-
-If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in `ARCHITECTURE.md`.
+- If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in `ARCHITECTURE.md`
 
 ---
 
-### Per-Function Detail Rules
+---
+
+## Per-Function Detail Rules
 
 Every module entry in Module Descriptions gets a detail subsection. The type depends on the file's content:
 
 | File type | Subsection heading | Content |
 |-----------|-------------------|---------|
-| Normal module with functions | `#### Functions` | Every function with signature + description |
+| Normal module with functions | `#### Functions` | Every function with signature + one-line purpose |
 | Data-only module (state.py) | `#### Data Structures` | Dict/object shapes with key-value descriptions |
 | | `#### Constants` | Named constants with values |
 | DB schema module (database.py) | `#### Tables` | Full column listing (name, type, constraints) per table |
@@ -85,17 +74,17 @@ Every module entry in Module Descriptions gets a detail subsection. The type dep
 
 **Function entry format:**
 ```
-- `function_name(param1, param2)` — one-line description
+- `function_name(param1, param2)` — one-line purpose (what it does for the system)
 ```
 
 **Route handler format** (prepend HTTP method and path from decorator):
 ```
-- `function_name()` — `METHOD /path` → description
+- `function_name()` — `METHOD /path` → one-line purpose
 ```
 
 **Socket event handler format** (prepend event name from decorator):
 ```
-- `function_name()` — SocketIO `event_name` → description
+- `function_name()` — SocketIO `event_name` → one-line purpose
 ```
 
 **Missing description format** (flag, never invent):
@@ -120,16 +109,17 @@ Every module entry in Module Descriptions gets a detail subsection. The type dep
 | `name` | `col` (TYPE PK/FK), `col` (TYPE DEFAULT val) |
 ```
 
-**Initialization note format** (for JS files with DOMContentLoaded wrappers that wire UI state):
+**Initialization note format** (for JS files with DOMContentLoaded wrappers that wire significant UI state):
 ```
 *Behavior summary (wired in DOMContentLoaded):* description of key input/button state listeners
 ```
+Only document listeners that wire significant UI state (button enable/disable, input validation). Skip trivial wiring (console.log, focus calls).
 
 **Where to place the subsection:**
 - Insert immediately after the last existing bullet point of the module entry
 - Preserve one blank line between the last bullet and the subsection heading
 - Do NOT insert subsections for Template entries (`.html`) or CSS — they contain no functions
-- For initialization notes: place as an italic `*note*` line immediately after the `#### Functions` list (or at the end of the module entry if there are no named functions and the init logic is significant)
+- Initialization notes: place as an italic `*note*` line immediately after the `#### Functions` list
 
 ---
 
@@ -151,6 +141,7 @@ For each source, extract:
 - What critical implementation details exist (expiry logic, thread behavior, in-memory state)?
 - What design decisions are visible in the code structure?
 - What are the modifying patterns (how to add a route, event, etc.)?
+- What is the full technical startup sequence (env vars, config, service order)?
 
 **Check session history for design rationale:** Review the current conversation for explanations of *why* a pattern was chosen, trade-offs discussed, and decisions made during debugging that reveal architectural intent. Capture only rationale — not session-specific debugging details.
 
@@ -166,14 +157,14 @@ This single regex matches all three comment styles:
 - `# Description: ...` (Python `#` comments)
 - `// Description: ...` (JS `//` comments)
 - `{# Description: ... #}` (Jinja2 `{# #}` comments)
-- `"""...Description: ..."""` (Python docstrings — also captured since `Description:` appears on its own line within the docstring)
+- `"""...Description: ..."""` (Python docstrings)
 
 **For each file, record:**
 - `filename`: relative path (e.g., `app/routes.py`)
 - `lead_line`: extracted `Description:` text
 - `status`: `ok` (found), `missing` (no header), or `new` (file not in current ARCHITECTURE.md)
 
-**Group into 4 categories by directory:**
+**Group into categories by directory:**
 1. **Python Modules** — `app/*.py`
 2. **Frontend Modules** — `app/static/js/*.js`
 3. **Templates** — `app/templates/*.html`
@@ -201,11 +192,11 @@ For every source file in `app/*.py`, `app/static/js/*.js`, and `tests/*.py`:
 
 **Extract initialization behavior from DOMContentLoaded wrappers** (JS files only):
 - After parsing all named functions, check if the file has a `DOMContentLoaded` wrapper
-- If yes, scan inside it for key `addEventListener` calls that wire UI state management:
+- If yes, scan inside it for key `addEventListener` calls that wire significant UI state:
   - Input → button enable/disable: `element.disabled = !this.value.trim()`
   - Button clicks that trigger page navigation or API calls
   - Socket event listeners wired outside named functions
-- Skip trivial listeners (e.g., `console.log` only, focus calls)
+- Skip trivial listeners (console.log only, focus calls)
 - Record a prose summary of the initialization behaviors
 
 **Capture decorator context** (2 lines above each `def`):
@@ -218,7 +209,7 @@ For every source file in `app/*.py`, `app/static/js/*.js`, and `tests/*.py`:
 - **JavaScript:** scan lines before `function` for `/** ... */` JSDoc block, `// Description:` comment, or `/* ... */` block comment. Prefer the closest comment above the function.
 
 **Record for each function:**
-- `filename`: relative path (e.g., `app/routes.py`)
+- `filename`: relative path
 - `function_name`: exact name from declaration
 - `params`: parameter list as written in source
 - `route_context`: `METHOD /path` or SocketIO `event_name` (or empty)
@@ -232,10 +223,10 @@ For every source file in `app/*.py`, `app/static/js/*.js`, and `tests/*.py`:
 
 **Record initialization behavior** for JS files with DOMContentLoaded wrappers:
 - `filename`: relative path
-- `behavior_summary`: prose description of key DOMContentLoaded initialization (e.g., "join button disabled until 8-char code entered; create button disabled until name entered")
+- `behavior_summary`: prose description of key DOMContentLoaded initialization
 - If no significant initialization behavior is found, leave empty
 
-**Store results** grouped by filename for use in Step 4 (Update the Document).
+**Store results** grouped by filename for use in Step 4.
 
 ### 2. Read the Current Document
 - Check if `docs/ARCHITECTURE.md` exists — create it if not
@@ -256,12 +247,13 @@ For every source file in `app/*.py`, `app/static/js/*.js`, and `tests/*.py`:
 - Is the file tree current? Are all directories described?
 - Does the data flow reflect all current endpoints and events?
 - Do bullets reference functions or variables that no longer exist?
+- Does the running instructions section cover the full startup sequence?
 
 ### 4. Update the Document
 
 **Module Descriptions — lead line auto-replacement:**
 
-For each entry in the Module Descriptions section, match by **filename** (stable key — the `` `path/file.ext` `` in the heading):
+For each entry in the Module Descriptions section, match by **filename** (stable key):
 
 ```
 Found: ### `app/routes.py` (HTTP Routes)
@@ -273,7 +265,7 @@ If the entry exists:
 - Preserve all existing bullet points below — they contain implementation details not present in code headers
 - Log diff: `"[diff] app/routes.py: 'old lead line' → 'new lead line'"`
 
-If the entry is new (`/Description:` found but not in ARCHITECTURE.md):
+If the entry is new (`Description:` found but not in ARCHITECTURE.md):
 - Add it to the correct subsection in the correct position
 - Lead line = extracted `Description:` text
 - Add a `- TODO: add bullet points` note so manual detail can be filled in
@@ -307,7 +299,7 @@ Files not in these lists are sorted alphabetically within their subsection.
 
 **Critical Implementation Details — structural fix:**
 
-If CIDs is currently nested inside the Module Descriptions section (between route and matchmaking entries):
+If CIDs is currently nested inside the Module Descriptions section:
 1. Move CIDs to a standalone `## Critical Implementation Details` section placed AFTER the full `## Module Descriptions` section
 2. Add a `---` separator before and after
 
@@ -317,24 +309,24 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 
 1. Insert the subsection after the last bullet point in the entry, with one blank line before `####`
 2. List every function in the order they appear in the source file (top to bottom)
-3. Format per the "Per-Function Detail Rules" section above
-4. For data-only modules (state.py, config.js, database.py), use the appropriate subsection heading (`#### Data Structures`, `#### Constants`, `#### Configuration Constants`, `#### Tables`)
+3. Format per the Per-Function Detail Rules above — one-line purpose only, no implementation logic
+4. For data-only modules, use the appropriate subsection heading
 
 Rules:
 - If a `#### Functions` subsection already exists and source hasn't changed → leave it intact
 - If a `#### Functions` subsection exists but source has changed → replace the entire subsection
 - If no `#### Functions` subsection exists and source has functions → add it
-- If functions were removed from source → remove their entries from the subsection
-- If initialization behavior was recorded (DOMContentLoaded wiring), append a `*note*` line after the Functions list using the initialization note format
+- If functions were removed from source → remove their entries
+- If initialization behavior was recorded, append a `*note*` line after the Functions list
 - If the initialization note already exists and behavior hasn't changed → leave it intact
-- If the initialization note exists but behavior changed → replace it
 
 **Other sections (not auto-generated):**
-- File tree: keep as concise navigation. Update directory entries to match actual structure. Verify descriptions don't contradict Module Descriptions lead lines.
+- File tree: keep as concise navigation. Update directory entries to match actual structure.
 - Key functionalities, Data flow, Design decisions, Import structure, Running instructions, Modifying instructions: update manually against the codebase
 - Keep language technical — internal logic, not user benefits
+- Running instructions must cover the full startup sequence; README's quick-start links here
 
-**Don't rewrite the entire document** — only update outdated or missing sections. The bullet points under each module entry are manually maintained and should not be auto-regenerated. Only the `#### Functions` subsections are auto-generated.
+**Don't rewrite the entire document** — only update outdated or missing sections. The bullet points under each module entry are manually maintained. Only the `#### Functions` subsections are auto-generated.
 
 ### 5. Verify
 
@@ -349,28 +341,25 @@ Rules:
 
 **Content checks:**
 - [ ] Content's PRIMARY purpose identified and routed to the correct document
-- [ ] File tree descriptions don't contradict Module Descriptions lead lines
-- [ ] Data flow includes all current API endpoints and WebSocket events
-- [ ] Design decisions include the *why*, not just the *what*
+- [ ] Data flow includes all current API endpoints and WebSocket events — this is the authoritative table
+- [ ] Design decisions include the *why* (technical rationale only)
+- [ ] Running instructions cover the full startup sequence (env vars, config, dependencies, service order)
 - [ ] Modifying instructions are accurate for the current codebase
-- [ ] Critical implementation details are captured
-- [ ] Bullet points reference current functions/variables — flag stale ones without auto-removing
+- [ ] Critical implementation details are captured in a standalone section
 - [ ] Every claim verified against executable sources, not just docs
 - [ ] No excluded content remains — redirected if needed
-- [ ] Document is concise enough — no unnecessary detail, but all critical technical information is included
+- [ ] Every line passes the "Would an agent miss this?" litmus test
 
 **Per-function checks:**
-- [ ] Every source file with functions has a `#### Functions` subsection (or `#### Data Structures` / `#### Constants` / `#### Tables` / `#### Configuration Constants` for data-only modules)
-- [ ] Every function declaration in source is represented exactly once in the subsection
+- [ ] Every source file with functions has a `#### Functions` subsection (or appropriate data/schema equivalent)
+- [ ] Every function declaration in source is represented exactly once
+- [ ] Function entries are one-line purpose only — no implementation logic, no parameter details
 - [ ] Function signatures match current source code — no stale entries
 - [ ] Missing descriptions are flagged with `⚠️` marker — never invent descriptions
 - [ ] Route handlers include correct HTTP method + path from decorators
 - [ ] Socket event handlers include correct event name from decorator
-- [ ] No function entries remain for functions that no longer exist in source
-- [ ] Subsection type matches file content (Functions for code, Data Structures/Constants for data, Tables for DB schema, Configuration Constants for config)
-- [ ] Functions listed in source order (top to bottom within file)
 
 **Initialization behavior checks:**
-- [ ] JS files with DOMContentLoaded wrappers have an initialization note if they wire significant UI state (button enable/disable, input validation)
+- [ ] JS files with DOMContentLoaded wrappers have an initialization note if they wire significant UI state
 - [ ] Initialization notes describe key `addEventListener` wiring, not trivial setup
-- [ ] Notes use the `*italic note*` format placed after the Functions list
+- [ ] Notes use the `*italic note*` format placed after the `#### Functions` list
