@@ -373,22 +373,20 @@ Templates: index → user_info → room → chat
 
 **Why it matters**: Auto-generated sections will overwrite anything nested inside them. Standalone sections survive regeneration.
 
-### 6.10 Structural Verification After Edits
-**Context**: From the update-best-practices skill adding numbering, takeaway, and markdown checks
+### 6.10 Verify Presence and Quality, Not Absence
+**Context**: From simplifying the update-agents skill's Verify section — removed specific negative boundary checks in favor of a routing catch-all
 
-**Principle**: After editing a structured document, verify (1) section numbers are sequential with no gaps or duplicates, (2) each new entry has a corresponding entry in any summary/takeaways section, (3) markdown formatting is valid (no broken code fences, unclosed bold/italic). Do this before committing.
+**Principle**: A Verify checklist should check what the document contains and whether it's correct (positive correctness), not what it should NOT contain (negative boundaries). Routing rules (What NOT to Include) and Anti-duplication handle negative enforcement upstream. The single "No excluded content remains" catch-all catches stragglers. Avoid specific absence checks — they duplicate routing rules and bloat the checklist.
 
 **Example**:
 ```
-# After adding practices 7.14-7.16, check:
-# ✅ 7.13 → 7.14 → 7.15 → 7.16  (no gaps)
-# ❌ 7.13 → 7.15 → 7.16          (7.14 missing)
-#
-# ✅ Takeaways: 38, 39, 40, 41, 42, 43  (one per new entry)
-# ❌ Takeaways: 38, 39, 40, 41          (missing entries for 42, 43)
+✅ Keep: "Content's PRIMARY purpose identified and routed to the correct document"
+✅ Keep: "Every line passes the 'Would someone miss this?' litmus test"
+❌ Remove: "No API endpoint tables — belongs in ARCHITECTURE.md" (covered by routing + catch-all)
+❌ Remove: "No product constraints" (covered by routing + catch-all)
 ```
 
-**Why it matters**: Numbering gaps and missing takeaways silently erode document quality over time.
+**Why it matters**: Keeps Verify checklists lean and focused on quality. Routing correctness is enforced earlier; the final step only verifies what IS there.
 
 ### 6.11 Single Canonical Location for Artifacts
 **Context**: Plan files existed in both `.opencode/plans/` and `docs/plans/` causing numbering confusion
@@ -1006,7 +1004,7 @@ python -m pytest tests/ -v    # Tests
 39. **Preserve File Description Comments** — never delete the `# Description:` block; it's the canonical source for docs
 40. **Windows Shell Quoting** — write complex Python to `.py` files instead of inline PowerShell strings
 41. **Queue Filter Direction** — matchmaking queues should look for users IN the queue, not exclude them
-42. **Structural Verification After Edits** — after editing structured docs, verify numbering gaps, takeaway coverage, and markdown validity before committing
+42. **Verify Presence, Not Absence** — Verify checks what the document contains (positive correctness), not absence checks which belong upstream in routing rules
 43. **Root Pattern Extraction** — extract root causes not symptoms; guard by asking if a developer on an unrelated project would find it valuable
 44. **TDD Tests Are Permanent** — tests written during TDD live in `tests/` forever as regression tests; only skip for truly non-testable changes
 45. **Single Canonical Location** — each artifact type lives in exactly one directory; one step creates, all others read

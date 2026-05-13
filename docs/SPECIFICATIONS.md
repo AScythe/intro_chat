@@ -32,12 +32,34 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 ---
 
 ## 🔒 Privacy First
+
 | Feature | Detail |
 |--------|--------|
 | Identity | Fully anonymous — auto-generated usernames only. No real names, emails, or photos. |
 | Location | Room-level only (manual select) |
 | Data | Chats are never stored. Social info (LinkedIn/Slack) stored but never shared without double opt-in. Match records expire after 2 minutes with background cleanup. |
 | Control | Cancel anytime. Session resets on page refresh (user ID in `localStorage`). |
+
+### Hard Constraints
+These are non-negotiable — enforced at the implementation level:
+- **No message storage** — chat content exists only in memory during the session, never written to disk
+- **No identity exposure** — auto-generated usernames only (e.g., `User_ABC12`); real names, emails, and photos never collected
+- **No single opt-in** — connection details (LinkedIn/Slack) require both parties to consent; one "no" means no exchange
+- **No IP logging** — users identified by UUIDs only; no IP addresses stored
+- **Match expiry enforced** — 2-minute initial expiry with 5-minute background cleanup
+- **Session reset on page refresh** — closing or refreshing the page clears the session state
+
+---
+
+## 🚫 Out of Scope
+The following are explicitly NOT implemented and should not be built unless the user explicitly requests them:
+- User authentication or accounts
+- Database swaps (PostgreSQL, MySQL, etc.)
+- Frontend frameworks (React, Vue, etc.)
+- Chat message storage
+- GPS/Bluetooth proximity detection
+- Push notifications
+- Admin dashboards
 
 ---
 
@@ -75,10 +97,10 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 >
 > They land on their profile page, optionally add their LinkedIn URL and Slack handle (safe — never shared without permission), then click *"Select Room"*.
 >
-> Select: *"Table 3"* → Tap *"I'm Ready"*
+> Select: *"Hall 3"* → Tap *"I'm Ready"*
 >
 > 10 seconds later:
-> ✅ *"Matched with CodeCalm_42 at Table 3. Head over now!"*
+> ✅ *"Matched with CodeCalm_42 at Hall 3. Head over now!"*
 >
 > Alex walks over. 30-second timer starts.
 > Prompt: *"What's your favorite debugging story?"*
@@ -91,7 +113,7 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 
 ---
 
-## 🏆 Why Judges Will Love It
+## 🏆 Why Users Will Love It
 
 - ✅ **Solves a real, universal pain point** at every tech event
 - ✅ **Incredibly simple UX** — enter code, optional profile, one-click matching, 30 seconds

@@ -45,9 +45,9 @@ intro_chat/
 ├── docs/                         # Documentation
 │   ├── README.md              # Main project README (features, setup, deployment)
 │   ├── ARCHITECTURE.md        # This file (project structure reference)
-│   ├── SPECIFICATIONS.md       # Product specification (problem, solution, user flow)
+│   ├── SPECIFICATIONS.md       # Product specification (problem, solution, user flow, out of scope, privacy)
 │   ├── DEMO_GUIDE.md          # Demo guide for judges/users
-│   ├── AGENTS.md              # Agent guidelines (file ownership, commands, rules)
+│   ├── AGENTS.md              # Agent behavioral rules, file ownership, commands, operational constraints
 │   ├── PROJECT_BEST_PRACTICES.md # Universal coding best practices
 │   └── DOCUMENT_GUIDELINES.md # Document scope & governance
 │
@@ -422,6 +422,29 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 6. Chat starts → timer from `CONFIG.CHAT_DURATION` (default: 30s, configurable via `app/static/js/config.js`) + prompts from `GET /api/prompts`
 7. After chat → `POST /api/matches/<id>/connect` → `connection_exchanged` or `connection_declined` broadcast via `ConnectionManager`
 
+### REST API Endpoints
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| `POST` | `/api/events` | Create event + 8 default rooms |
+| `GET` | `/api/events/<id>/rooms` | List rooms |
+| `POST` | `/api/events/<id>/join` | Join event + save social info (`linkedin_url`, `slack_handle`) |
+| `GET` | `/api/qr/<event_id>` | Generate QR code |
+| `POST` | `/api/users/<id>/room` | Select room |
+| `POST` | `/api/users/<id>/available` | Toggle availability |
+| `GET` | `/api/matches/<id>` | Get match details |
+| `POST` | `/api/matches/<id>/connect` | Submit connection preference |
+| `GET` | `/api/prompts` | Get conversation prompts |
+
+### WebSocket Events
+
+| Event | Direction | Payload |
+|-------|-----------|---------|
+| `join_room` | Client → Server | `{room_id}` |
+| `match_found` | Server → Client | `{match_id, room_id, user1_username, user2_username}` |
+| `connection_exchanged` | Server → Client | `{user1_username, user2_username}` |
+| `connection_declined` | Server → Client | — |
+
 ---
 
 ## Key Design Decisions
@@ -492,7 +515,7 @@ http://localhost:5000
 ### Adding a New WebSocket Message Type
 1. Open `app/routes.py` (WebSocket endpoint at `/ws`)
 2. Add a new `if msg_type == ...:` branch in the message loop
-3. Update `AGENTS.md` WebSocket Events table
+3. Update the WebSocket Events table in this document's Data Flow section
 
 ### Changing Timer Durations
 1. Edit `app/static/js/config.js` (for frontend timers)

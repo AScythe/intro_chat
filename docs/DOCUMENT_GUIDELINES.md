@@ -10,9 +10,9 @@
 |----------|---------------------|----------|----------------|--------------|
 | **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | Feature or setup change | User-facing, practical |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow, per-function detail | Developers, AI agents | Code structure change | Technical, implementation |
-| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch | Product owners, devs, AI, stakeholders | Product scope change | Product, pitch, vision, spec |
+| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product scope change | Product, pitch, vision, spec, privacy |
 | **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, judges | Demo flow change | Practical, step-by-step |
-| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
+| **AGENTS.md** | Agent behavioral rules by workflow phase, permissions, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | After each session | Educational, guidelines |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | New doc added | Meta, governance |
 
@@ -37,10 +37,10 @@ User-facing entry point for anyone discovering the project. Answers "What is it?
 - **Quick start instructions** — install dependencies, run the app, minimum steps to get going
 - **How to use** — step-by-step for each user type (organizer, attendee). Show the workflow from their perspective.
 - **Technical details** — tech stack and simplified architecture. High-level only, max 2-3 paragraphs. Enough for a curious user to understand the stack, not enough to build from.
-- **API endpoints** — summary table only (method, path, purpose). No request/response examples, no detailed schemas.
-- **Testing instructions** — how to run tests, what the test suite covers
+- **API endpoints** — one-line reference only ("See [ARCHITECTURE.md](ARCHITECTURE.md) for full endpoint table"). Do not duplicate the table here.
+- **Testing instructions** — link to contributing guide; do not own full test documentation here
 - **Deployment options** — how to deploy for production use
-- **Privacy and security information** — user-facing framing of privacy model and security practices
+- **Privacy and security information** — user-facing summary only: what data is collected, what is not, and what users control. Implementation-level privacy rules go in SPECIFICATIONS.md.
 - **Troubleshooting common issues** — problems users have encountered and how to resolve them
 - **Contributing guidelines reference** — link to contributing guide, not the full content
 - **License information** — what license the project uses
@@ -57,7 +57,9 @@ User-facing entry point for anyone discovering the project. Answers "What is it?
 ### Content Boundaries
 - **Features section:** Write in terms of user benefits, not technical implementation. "Users can join a room and chat anonymously" not "WebSocket connections are established on room join."
 - **Technical details:** Maximum 2-3 paragraphs. Summarize the stack, don't document it.
-- **API endpoints:** Summary table only. No request/response examples, no headers, no status codes. Just method, path, and a one-line purpose.
+- **API endpoints:** One-line cross-reference only. All endpoint and WebSocket event details live in ARCHITECTURE.md.
+- **Privacy:** User-facing framing only ("we don't store messages"). Hard constraints and implementation-level rules go in SPECIFICATIONS.md.
+- **Running instructions:** Quick-start only — minimum steps for a user to get going. Full technical startup sequence (env vars, configuration, dependencies) goes in ARCHITECTURE.md.
 
 ---
 
@@ -81,10 +83,10 @@ Technical structure reference for the project. Answers "How is it built?", "What
 - **Data flow** — MUST include all API endpoints (method, path, purpose) and WebSocket events (event name, direction, payload). This is the authoritative data flow reference.
 - **Key design decisions** — why certain patterns were chosen. Must include the *why*, not just the *what*.
 - **Import structure and dependency graph** — how modules depend on each other, circular dependency prevention
-- **Running instructions** — technical startup sequence, env vars, configuration
+- **Running instructions** — technical startup sequence, env vars, configuration. Full detail lives here; README gets a condensed quick-start that links here.
 - **Modifying instructions** — how to add routes, events, extend functionality. The "if you need to add X, here's how" section.
 - **Critical implementation details** — match expiry logic, cleanup thread behavior, in-memory state management, default rooms, any non-obvious runtime behavior
-- **Per-function detail** — every function/class in every module with signature and purpose; data structure shapes with key-value descriptions; constants with values; table schemas with column types and constraints; initialization behavior (DOMContentLoaded wiring for UI state management)
+- **Per-function detail** — every function/class in every module with signature and one-line purpose (what it does for the system, not how it works internally). Data structure shapes with key-value descriptions; constants with values; table schemas with column types and constraints; initialization behavior (DOMContentLoaded wiring for UI state management). **This is a navigation map, not a manual** — implementation logic, parameters, return values, and edge cases belong in source docstrings/JSDoc.
 
 ### What NOT to Include
 - ❌ User-facing benefits or marketing language — these go in README.md
@@ -110,8 +112,8 @@ Product specification and vision. Answers "Why does this exist?", "What problem 
 
 ### Audience
 - Product owners and managers
-- Developers and AI agents needing product context to develop features aligned with the vision
-- Product stakeholders — hackathon judges, investors, or anyone evaluating the product concept
+- Developers and AI agents needing product context to build features aligned with the vision
+- Evaluators and stakeholders — hackathon judges, investors, or anyone assessing the product concept
 
 ### Key Differentiator
 **Vision over implementation.** Describes purpose, user journey, and product rationale. The "WHY" document — in contrast to ARCHITECTURE.md which is the "HOW" document. No endpoint names, no module internals, no implementation details. If a decision involves trade-offs about what to build and why, it belongs here.
@@ -124,15 +126,15 @@ Product specification and vision. Answers "Why does this exist?", "What problem 
 - **Product decisions and rationale** — why certain approaches were chosen (e.g., "Why 30 seconds?", "Why anonymous?", "Why no accounts?")
 - **Target user personas** — who the product serves, why they benefit. Not user stories or acceptance criteria — archetypes.
 - **Feature priority and status** — what's implemented vs. planned, to guide what to build next
-- **Product constraints** — what the product explicitly does NOT do and why. Honest boundaries prevent scope creep.
-- **Privacy and trust model** — user-facing framing of how privacy works. Not implementation details.
+- **Product constraints / Out of Scope** — what the product explicitly does NOT do and why. Honest boundaries prevent scope creep.
+- **Privacy and trust model** — user-facing framing of how privacy works, plus hard constraints (non-negotiable implementation-level rules).
 - **Problem-solution pairs** — why target users benefit from each feature
 - **Tech stack with rationale** — include a "Why?" column alongside each technology choice. Not detailed module descriptions.
 - **Sample user flow** — narrative story of a user experiencing the product. Readable by a non-technical evaluator.
-- **Value proposition for evaluators** — what judges, investors, or stakeholders should understand about the product's value
+- **Value proposition for evaluators** — what judges, investors, or stakeholders should understand about the product's value *(phase-specific: remove or archive post-launch)*
 - **Future enhancements / bonus features** — clearly marked as not yet implemented
-- **Final pitch line** — the one-sentence summary of what this product is
-- **Brief demo setup** — 2-3 lines so a judge can run it independently. Full walkthrough goes in DEMO_GUIDE.md.
+- **Final pitch line** — the one-sentence summary of what this product is *(phase-specific: remove or archive post-launch)*
+- **Brief demo setup** — 2-3 lines so an evaluator can run it independently. Full walkthrough goes in DEMO_GUIDE.md.
 
 ### What NOT to Include
 - ❌ Endpoint names, route definitions, or any implementation-level detail — these go in ARCHITECTURE.md
@@ -151,6 +153,8 @@ Product specification and vision. Answers "Why does this exist?", "What problem 
 - **Feature priority / status:** What state each feature is in. Not implementation timeline.
 - **Tech stack:** Include a "Why?" rationale column. Not detailed module descriptions.
 - **Brief demo setup:** Enough for a judge to run it independently. Full walkthrough goes in DEMO_GUIDE.md.
+- **Privacy:** User-facing table covering identity, location, data, and control — followed by a "Hard Constraints" sub-section with non-negotiable implementation-level rules.
+- **Out of Scope:** Standalone section listing explicitly forbidden implementations. Not aspirational — each item is a hard boundary.
 
 **Context for developers:**
 - Need **product context** (what to build and why) → SPECIFICATIONS.md
@@ -169,20 +173,20 @@ Practical demo execution guide. Answers "How do I demonstrate this?", "What shou
 
 ### Audience
 - Presenters demonstrating the app
-- Hackathon judges evaluating the demo
-- Users trying the app for the first time
+- Evaluators and reviewers assessing the demo (judges, stakeholders, technical reviewers)
 
 ### Key Differentiator
 **Action over description.** Not what the product does — exactly what to click, what to say, what to expect at each step. Written for a presenter under pressure who needs to deliver a smooth demo. Every step must have a clear expected result. If it can't be demonstrated, it doesn't belong here.
 
 ### What to Include
+- **Document header** — "Last verified: [date] against [version/commit]". Demo guides go stale fast; currency must be explicit.
 - **Prerequisites** — what must be running before the demo starts (services running, env vars set, data pre-loaded)
 - **Quick start walkthrough** — ordered steps to reach a working demo state from scratch
 - **Key features to demonstrate** — what to highlight and in what order for maximum impact
 - **Testing scenarios** — discrete flows with exact actions and expected results. "Click X, expect Y to appear."
 - **UI highlights** — what the runner should point to on screen at each stage
 - **Technical features to highlight** — for technical evaluators who care about implementation
-- **Demo tips** — separate guidance for different audience types (what judges care about vs. what users care about)
+- **Demo tips** — separate guidance for different audience types (what technical evaluators care about vs. what general users care about)
 - **Fallback options** — what to do if something breaks live. Must be actionable ("if X breaks, do Y"), not vague reassurance.
 - **Reset instructions** — how to restore demo state after a run so it can be shown again
 - **Success signals** — what the audience should feel or see at the end. Not technical metrics.
@@ -197,54 +201,53 @@ Practical demo execution guide. Answers "How do I demonstrate this?", "What shou
 
 ### Content Boundaries
 - **Testing scenarios:** Step-by-step actions with expected results. Not technical implementation.
-- **Demo tips:** Must have separate sections for judges vs. users. They care about different things.
+- **Demo tips:** Must have separate sections for technical evaluators vs. general users. They care about different things.
 - **Fallback options:** Must be actionable. "If the QR code doesn't load, refresh the page and try again." Not "try again later."
 - **Success signals:** How the audience feels or what they see. Not technical metrics.
 - **Language:** Presenter-focused throughout. Assume the reader is on stage with people watching.
+- **Currency:** Always include a header: "Last verified: [date] against [version/commit]." Update this on every demo flow change.
 
 ---
 
 ## 5. AGENTS.md
 
 ### Scope
-AI agent operational guidelines. Answers "What can agents touch?", "What commands do they use?", "What are they forbidden from doing?".
+Agent behavioral rules and operational guidelines. Answers "How should I think, plan, implement, and verify?" and "What can I touch?", "What commands do I use?".
 
 ### Audience
 - AI agents (e.g., opencode)
 - Developers setting up agent permissions
 
 ### Key Differentiator
-**Operational constraints over technical structure.** Not how the code is organized — what agents are allowed to edit, what commands to run, what files to never touch. The boundary between AGENTS.md and ARCHITECTURE.md is: AGENTS.md = permissions and commands; ARCHITECTURE.md = implementation and data flow. If an agent needs to know "can I edit this file?" or "what command do I run to test?", it's here.
+**Behavioral rules + operational constraints over technical structure.** Organized by workflow phase, each phase mapping to the skill that owns it. AGENTS.md = how to behave and what to touch; ARCHITECTURE.md = implementation and data flow. If an agent needs to know "what's the right way to approach this task?" or "can I edit this file?", it's here.
 
 ### What to Include
 - **Scope definition** — what this document covers and how it relates to other guidance (e.g., skill files)
 - **Project overview** — 1 paragraph describing the project and its key functionalities (enough for context, not full detail)
 - **Architecture summary** — key components only, 3-5 lines. Enough to navigate the codebase. Full detail goes in ARCHITECTURE.md.
-- **Environment setup** — Python version, venv setup, production env vars
+- **Environment setup** — agent-specific env config only: non-interactive invocation, headless env vars, Python version, venv setup. User-facing setup (install steps, quick start) goes in README.md.
 - **File ownership table** — every location an agent might touch, with explicit policy: ✅ safe to edit, ⚠️ caution required, ❌ forbidden
 - **Core commands** — setup commands, run commands, test commands with exact syntax
-- **Command ordering** — when sequence matters (e.g., run lint before test)
-- **Agent rules** — explicit always/never directives, no "consider" or "try to"
-- **Verification requirements** — what must pass before a task is done
-- **API endpoints** — reference table (method, path, purpose). Data flow context goes in ARCHITECTURE.md.
-- **WebSocket events** — reference table (event name, direction, payload). Same boundary as API endpoints.
-- **Out of scope list** — explicit forbidden implementations, not suggestions
-- **Privacy requirements** — hard constraints, not guidelines
+- **Agent behavioral rules** — organized by workflow phase (Thinking → Probing → Planning → Implementing → Reviewing → Structuring → Committing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
+- **Cross-references** — to ARCHITECTURE.md for endpoints and data flow, to SPECIFICATIONS.md for product boundaries and privacy
 
 ### What NOT to Include
+- ❌ API endpoint tables or WebSocket event tables — these go in ARCHITECTURE.md (Data Flow section)
+- ❌ Out of scope or product constraints — these go in SPECIFICATIONS.md
+- ❌ Privacy hard requirements or trust model — these go in SPECIFICATIONS.md
 - ❌ Detailed module descriptions or file trees — these go in ARCHITECTURE.md
 - ❌ User-facing setup instructions or benefit descriptions — these go in README.md
 - ❌ Product pitch, vision, or user journey — these go in SPECIFICATIONS.md
 - ❌ Demo walkthrough or presentation steps — these go in DEMO_GUIDE.md
 - ❌ Best practices philosophy or universal coding patterns — these go in PROJECT_BEST_PRACTICES.md
-- ❌ Detailed data flow with request/response details — this goes in ARCHITECTURE.md
 
 ### Content Boundaries
 - **File ownership:** Every entry must include a policy column (✅ safe, ⚠️ caution, ❌ forbidden). File names alone are not enough.
-- **Agent rules:** Must be imperative. "Always run tests after changes." Not "Consider running tests after changes."
-- **Out of scope:** Must be explicit forbidden items. "Do not implement user authentication." Not "Authentication is not recommended."
-- **Privacy requirements:** Hard constraints. "No message storage." Not "Avoid storing messages when possible."
+- **Behavioral rules:** Organized by workflow phase. Each phase header names the skill(s) it maps to. Rules are imperative sentences, one per bullet. Cross-reference the skill file for full detail.
+- **Verification:** No standalone verification section — verification requirements are embedded in each phase's behavioral rules (e.g., Phase 4: "Verify locally per batch", "Run full test suite + lint before hand-off").
+- **Command ordering:** No separate ordering section — commands are listed under Core Commands without ordering constraints.
 - **Architecture summary:** 3-5 lines maximum. Navigation-level only. Cross-reference ARCHITECTURE.md for details.
+- **Cross-references:** Point to SPECIFICATIONS.md for product boundaries and privacy, ARCHITECTURE.md for endpoints and data flow. Do not duplicate content from either document.
 
 ---
 
@@ -278,13 +281,26 @@ Practices are organized into 6 category clusters:
 **Process**
 - **Debugging Process** — how issues were isolated, tools and commands that worked
 - **Documentation** — doc structure principles, scope distinctions, cross-referencing patterns
+- **Skills Methodology** — skill architecture (one verb per skill, stage gates, triage routing), workflow patterns (interactive walkthrough, docs-first analysis), handoff patterns (persistent artifacts, file-based stage communication)
 - **AI-Assisted Development** — prompting patterns that worked, skill usage, agent behavior insights
 
 **UI**
 - **Frontend Practices** — UI patterns, JS module organization, template conventions
 
 **Meta**
-- **Session Lessons Learned** — process meta-lessons only. If a practice fits any named category above, put it there instead. This is the overflow for lessons that don't have a home elsewhere.
+- **Session Lessons Learned** — process meta-lessons that are genuinely cross-cutting and don't fit any named category above. **Do not use this as an overflow bin.** Categorize at entry time; only lessons that span multiple categories or describe the development process itself belong here.
+
+### Entry Format
+
+Every entry **must** follow this structure. No exceptions.
+
+```
+**[Practice Name]**
+Context: [1 line — what situation triggers this]
+Principle: [2-3 lines — the generalized rule, no project-specific names]
+Example: [short snippet or scenario — project names allowed here for context]
+Why it matters: [1 line]
+```
 
 ### What NOT to Include
 - ❌ Project-specific architecture decisions or module designs — these go in ARCHITECTURE.md
@@ -294,7 +310,7 @@ Practices are organized into 6 category clusters:
 - ❌ AI agent file permissions or operational rules — these go in AGENTS.md
 
 ### Content Boundaries
-- **Every entry** must follow the format: Context (1 line) + Principle (2-3 lines) + Example (short snippet) + Why it matters (1 line). No exceptions.
+- **Entry format:** Follow the Entry Format structure above without exception.
 - **Project-specific names** are stripped from the Principle and kept only in the Example field for context.
 - **One practice per entry.** If a lesson spans multiple categories, pick the PRIMARY category.
 - **No duplicates.** If an entry already covers a principle, improve the existing entry instead of creating a new one.
@@ -319,6 +335,7 @@ Meta-governance for all project documentation. Answers "Where does this content 
 - **Per-document differentiation sections** — for each doc: scope, audience, key differentiator, what to include, what not to include, content boundaries
 - **Boundary Tensions** — known overlap points between documents with explicit resolution guidance
 - **Anti-Duplication Rules** — principles for avoiding content overlap across documents
+- **Workflow-to-Document Dependency** — which documents each workflow step reads and writes, with section-level grep targets
 - **Checklist** — verification steps before adding content to any document
 
 ### What NOT to Include
@@ -341,12 +358,16 @@ These are the common confusion points where content could reasonably fit in mult
 |---------|-----------|
 | **Architecture summary vs AGENTS.md architecture section** | AGENTS.md gets a 3-5 line overview (enough to navigate). Full module descriptions, file tree, and data flow go in ARCHITECTURE.md. |
 | **Product decisions in SPECIFICATIONS.md vs Design decisions in ARCHITECTURE.md** | SPECIFICATIONS.md = vision rationale ("why anonymous?", "why 30 seconds?"). ARCHITECTURE.md = technical rationale ("why FastAPI?", "why SQLite?"). |
-| **Brief demo setup in SPECIFICATIONS.md vs Full DEMO_GUIDE.md** | SPECIFICATIONS.md gets 2-3 lines so a judge can run it independently. DEMO_GUIDE.md gets the full ordered walkthrough with UI highlights and fallback options. |
+| **Brief demo setup in SPECIFICATIONS.md vs Full DEMO_GUIDE.md** | SPECIFICATIONS.md gets 2-3 lines so an evaluator can run it independently. DEMO_GUIDE.md gets the full ordered walkthrough with UI highlights and fallback options. |
 | **Feature description in README.md vs Feature purpose in SPECIFICATIONS.md** | README.md = what the feature does (benefit to the user). SPECIFICATIONS.md = why the feature exists (rationale, user need being addressed). |
-| **API endpoints in AGENTS.md vs ARCHITECTURE.md** | AGENTS.md gets a reference table (method, path, purpose) as a quick lookup for agents. ARCHITECTURE.md gets the data flow context — how endpoints interact, request/response details, event sequences. |
+| **API endpoints — where they live** | All endpoint and WebSocket event tables go in ARCHITECTURE.md (Data Flow section). README.md gets a one-line cross-reference. AGENTS.md cross-references ARCHITECTURE.md instead of duplicating. |
+| **Out of Scope / Privacy in AGENTS.md vs SPECIFICATIONS.md** | Both product constraints live in SPECIFICATIONS.md (Out of Scope section + Privacy section with hard constraints). AGENTS.md cross-references SPECIFICATIONS.md for these. AGENTS.md owns behavioral rules only. |
 | **Best practice vs project-specific lesson** | If the lesson references a specific module name, route, or implementation detail from this project, it goes in ARCHITECTURE.md. If it can be generalized to "always verify X after Y" without naming this project, it goes in PROJECT_BEST_PRACTICES.md. |
 | **Tech stack in README.md vs Tech stack in SPECIFICATIONS.md** | README.md gets a one-liner (e.g., "Built with FastAPI + SQLite"). SPECIFICATIONS.md gets the full tech stack with a "Why?" column for each technology. |
-| **Per-function detail in ARCHITECTURE.md vs source docstrings/JSDoc** | ARCHITECTURE.md captures function signature + one-line purpose (what the function does for the system). Source code docstrings/JSDoc capture implementation details (how it works, parameters, return values, edge cases). ARCHITECTURE.md is for navigation; source code is for depth. The `#### Functions` subsection is a map, not a manual. |
+| **Per-function detail in ARCHITECTURE.md vs source docstrings/JSDoc** | ARCHITECTURE.md captures function signature + one-line purpose (what the function does for the system). Source code docstrings/JSDoc capture implementation details (how it works, parameters, return values, edge cases). ARCHITECTURE.md is for navigation; source code is for depth. |
+| **Running instructions in README.md vs ARCHITECTURE.md** | README.md = condensed quick-start (minimum steps for a user to get going). ARCHITECTURE.md = full technical startup sequence (env vars, config, dependencies, service startup order). README links to ARCHITECTURE for full detail. |
+| **Privacy in README.md vs SPECIFICATIONS.md** | README.md = user-facing summary ("we don't store messages"). SPECIFICATIONS.md = full privacy model table + hard constraints (non-negotiable implementation-level rules). |
+| **Environment setup in README.md vs AGENTS.md** | README.md = user-facing install steps (pip install, node setup, quick start). AGENTS.md = agent-specific invocation config (headless env vars, non-interactive execution, venv activation). These serve different actors; don't merge them. |
 
 ---
 
@@ -356,7 +377,7 @@ These are the common confusion points where content could reasonably fit in mult
 
 2. **Cross-reference, don't copy** — Use `[See ARCHITECTURE.md](ARCHITECTURE.md)` instead of pasting sections from one document into another. A reference is better than a duplicate.
 
-3. **Summary here, details there** — Documents at the top of the funnel (README.md, AGENTS.md) get summary tables and navigation-level overviews. Documents deeper in (ARCHITECTURE.md) get the full detail. Example: `routes.py` — file tree gets "HTTP route handlers" (5 words), Module Descriptions gets lead line + endpoint list, `#### Functions` gets every handler with method/path + one-line purpose. Each level adds detail without duplicating.
+3. **Summary here, details there** — Documents at the top of the funnel (README.md) get summary tables and navigation-level overviews. Documents deeper in (ARCHITECTURE.md, AGENTS.md) get the full detail. AGENTS.md gets high-level behavioral rules with cross-references to detail docs. ARCHITECTURE.md gets the authoritative data flow with endpoint tables. Example: `routes.py` — file tree gets "HTTP route handlers" (5 words), Module Descriptions gets lead line + endpoint list, `#### Functions` gets every handler with method/path + one-line purpose. Each level adds detail without duplicating.
 
 4. **Audience-first** — If audience overlaps, choose the document with the MOST RELEVANT audience. A developer reading about architecture doesn't need the same content as a user reading the README.
 
@@ -375,10 +396,10 @@ Use Grep→Read to read specific sections: grep for the section heading line num
 
 | Step | Documents to READ | Specific Sections | Documents to WRITE |
 |------|-------------------|-------------------|--------------------|
-| **analyze-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Out of Scope", "Core Commands" | nothing (verbal) |
-| **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal) |
+| **analyze-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Core Commands" | nothing (verbal) |
+| **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal only — this step produces no artifact; if issues require a revised plan, loop back to check-plan-readiness) |
 | **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/plans/PLAN_*.md` |
-| **implement-plan** | `docs/plans/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md` | PLAN: all. AGENTS: "File Ownership", "Core Commands", "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
+| **implement-plan** | `docs/plans/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Core Commands". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
 | **review-implementation** (1st pass) | `docs/plans/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
 | **review-implementation** (2nd pass) | `docs/plans/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
 | **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |
@@ -388,12 +409,12 @@ Use Grep→Read to read specific sections: grep for the section heading line num
 
 | Step | Documents to READ | Documents to WRITE |
 |------|-------------------|--------------------|
-| **update-architecture** | `ARCHITECTURE.md` (full), all source files | `ARCHITECTURE.md` |
-| **update-agents** | `AGENTS.md` (full), `ARCHITECTURE.md`, `README.md`, `PROJECT_BEST_PRACTICES.md` | `AGENTS.md` |
-| **update-specifications** | `SPECIFICATIONS.md` (full), `ARCHITECTURE.md`, `README.md`, `DEMO_GUIDE.md` | `SPECIFICATIONS.md` |
-| **update-readme** | `README.md` (full), `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `DEMO_GUIDE.md` | `README.md` |
-| **update-demo-guide** | `DEMO_GUIDE.md` (full), `SPECIFICATIONS.md`, `README.md`, `ARCHITECTURE.md` | `DEMO_GUIDE.md` |
-| **update-best-practices** | `PROJECT_BEST_PRACTICES.md` (full), session history, full codebase | `PROJECT_BEST_PRACTICES.md` |
+| **update-architecture** | `ARCHITECTURE.md` (full), `README.md`, all source files | `ARCHITECTURE.md` |
+| **update-agents** | `AGENTS.md` (full), `ARCHITECTURE.md`, `SPECIFICATIONS.md`, `README.md` | `AGENTS.md` |
+| **update-specifications** | `SPECIFICATIONS.md` (full), `README.md` | `SPECIFICATIONS.md` |
+| **update-readme** | `README.md` (full) | `README.md` |
+| **update-demo-guide** | `DEMO_GUIDE.md` (full), `README.md` | `DEMO_GUIDE.md` |
+| **update-best-practices** | `PROJECT_BEST_PRACTICES.md` (full), `.opencode/skills/*/SKILL.md`, `docs/plans/PLAN_*.md`, session history, changed files only (not full codebase) | `PROJECT_BEST_PRACTICES.md` |
 
 ---
 

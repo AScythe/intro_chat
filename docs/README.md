@@ -20,7 +20,9 @@
 - [Privacy & Security](#privacy--security)
 - [Contributing](#contributing)
 - [License](#license)
-- [Troubleshooting](#troubleshooting)
+- [Why IntroChat?](#why-introchat)
+- [Success Metrics](#-success-metrics)
+- [The Pitch](#-the-pitch)
 
 ---
 
@@ -117,60 +119,13 @@ WebSocket (native) ←→ Real-time Matching Engine
 
 For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
-### Key Components
-- **`app/`**: Python package with all backend logic
-  - `__init__.py`: FastAPI app orchestrator
-  - `state.py`: Shared state and constants
-  - `config.py`: Central configuration
-  - `schemas.py`: Pydantic request models
-  - `routes.py`: HTTP route handlers and WebSocket endpoint
-  - `connection_manager.py`: WebSocket connection tracking
-  - `matchmaking.py`: Match logic
-  - `tasks.py`: Background cleanup
-- **`app/templates/`**: HTML templates for all pages
-- **`app/static/`**: Organized assets (`css/`, `js/`)
-- **`tests/`**: Test suite (`test_app.py`, `test_js_modules.py`)
-- **`docs/`**: Documentation (README, AGENTS, etc.)
-
----
-
-## API Endpoints
-
-For full API documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
-
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| `POST` | `/api/events` | Create event + 8 default rooms |
-| `GET` | `/api/events/<id>/rooms` | List rooms |
-| `POST` | `/api/events/<id>/join` | Join event + save social info (`linkedin_url`, `slack_handle`) |
-| `GET` | `/api/qr/<event_id>` | Generate QR code |
-| `POST` | `/api/users/<id>/room` | Select room |
-| `POST` | `/api/users/<id>/available` | Toggle availability |
-| `GET` | `/api/matches/<id>` | Get match details |
-| `GET` | `/join/<event_id>` | User profile page (LinkedIn/Slack form) |
-| `POST` | `/api/matches/<id>/connect` | Submit connection preference |
-| `GET` | `/api/prompts` | Get conversation prompts |
-
 ---
 
 ## Testing
 
-### Local Testing
-1. Run the application: `python -m app`
-2. Open two browser tabs/windows
-3. Create an event in one tab
-4. Join the event in the other tab
-5. Select the same room in both
-6. Request chat in both
-7. Watch them match and start chatting!
-
-### Automated Tests
 ```bash
-# Backend and database checks
-python tests/test_app.py
-
-# JS module validation
-python tests/test_js_modules.py
+python tests/test_app.py   # Backend and database checks
+python tests/test_js_modules.py   # JS module validation
 ```
 
 ---
@@ -200,6 +155,8 @@ python tests/test_js_modules.py
 - **Room-level location**: Only general location, not precise coordinates
 - **Opt-in only**: Users can cancel anytime
 - **Temporary matches**: All match data expires after 5 minutes
+
+For the full privacy model and hard constraints, see [SPECIFICATIONS.md](SPECIFICATIONS.md).
 
 ---
 
@@ -256,6 +213,22 @@ IntroChat solves a real problem that affects millions of people at events:
 - ❌ **"What if they're rude?"** → Only 2 minutes — easy to walk away
 - ❌ **"I don't want to be 'networking'"** → Feels like a game, not a chore
 - ❌ **"Too many people — where do I start?"** → Matches you with someone right here
+
+---
+
+## 📊 Success Metrics
+
+After using IntroChat, users should feel:
+- ✅ **Safe**: No pressure, easy to opt-out
+- ✅ **Confident**: Guided prompts eliminate awkward silences
+- ✅ **Connected**: Real conversations with real people
+- ✅ **Empowered**: One conversation can change everything
+
+---
+
+## 🎯 The Pitch
+
+> **"IntroChat doesn't make introverts talk more — it makes them feel safe enough to talk once. And sometimes, that one conversation changes everything."**
 
 **Built for Hackathons. Designed for Humans. Powered by Python.**
 

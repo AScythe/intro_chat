@@ -1,5 +1,7 @@
 # 🎬 IntroChat Demo Guide
 
+> **Last verified:** 2026-05-13 against commit `30f409e`
+
 ## 🚀 Quick Start Demo
 
 ### Step 1: Start the Application
@@ -96,6 +98,19 @@ python -m app
 2. Demonstrate easy cancellation
 3. Social info collected but never shared without double opt-in
 
+## 🔄 Reset Instructions
+
+After completing a demo run, reset for the next run:
+1. Close both browser tabs/windows
+2. Reopen the app at `http://localhost:5000`
+3. Create a new event name (e.g., "Demo Round 2")
+4. Join with a new user on each device
+5. Proceed through Room → Chat flow again
+
+Session state resets on page refresh — no manual cleanup needed.
+
+---
+
 ## 🛠️ Fallback Options
 
 ### Only One Device Available
@@ -169,29 +184,6 @@ python -m app
 2. **Show the beauty**: "Look how clean and modern this interface is"
 3. **Demonstrate privacy**: "No accounts, no data stored, completely anonymous"
 4. **Highlight the prompts**: "Never run out of things to talk about"
-
-## 🚀 Deployment Ready
-
-The application is ready for deployment to:
-- **Render.com** (recommended)
-- **Railway.app**
-- **Heroku**
-- **DigitalOcean**
-- Any Python hosting platform
-
-## 📊 Success Metrics
-
-After using IntroChat, users should feel:
-- ✅ **Safe**: No pressure, easy to opt-out
-- ✅ **Confident**: Guided prompts eliminate awkward silences
-- ✅ **Connected**: Real conversations with real people
-- ✅ **Empowered**: One conversation can change everything
-
-## 🎯 The Pitch
-
-> **"IntroChat doesn't make introverts talk more — it makes them feel safe enough to talk once. And sometimes, that one conversation changes everything."**
-
-**Built for Hackathons. Designed for Humans. Powered by Python.**
 
 ---
 
