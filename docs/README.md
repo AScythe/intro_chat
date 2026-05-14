@@ -54,6 +54,8 @@ Think of it as *Tinder for 120-second conversations* — but only when you're ph
 ### Prerequisites
 - Python 3.10 or higher
 - pip (Python package installer)
+- Node.js 18+ and npm
+- Virtual environment: `python -m venv venv` (create) — activate via `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
 
 ### Installation & Run
 ```bash
@@ -61,8 +63,14 @@ Think of it as *Tinder for 120-second conversations* — but only when you're ph
 git clone <repository-url>
 cd introchat
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Install and build frontend
+cd frontend
+npm install
+npm run build
+cd ..
 
 # Run the application
 python -m app
@@ -70,6 +78,8 @@ python -m app
 # Open your browser
 # Go to http://localhost:5000
 ```
+
+> **Note:** Always `cd ..` after navigating into `frontend/` to avoid path drift in the same shell session.
 
 ---
 
@@ -105,16 +115,16 @@ python -m app
 
 ### Tech Stack
 - **Backend**: Python FastAPI + Uvicorn (`app/` package)
-- **Frontend**: HTML5 + CSS3 + Vanilla JavaScript
+- **Frontend**: React 19 + TypeScript + Vite (SPA with React Router)
 - **Database**: SQLite (`data/introchat.db`) via aiosqlite
 - **Real-time**: Native WebSocket via FastAPI
 - **QR Codes**: Python qrcode library
 
 ### Architecture (Simplified)
 ```
-Frontend (Browser) ←→ FastAPI Backend (app/) ←→ SQLite Database (data/)
-     ↓                          ↓
-WebSocket (native) ←→ Real-time Matching Engine
+React SPA (frontend/) ←→ FastAPI Backend (app/) ←→ SQLite Database (data/)
+       ↓                          ↓
+React Router          WebSocket (native) ←→ Real-time Matching Engine
 ```
 
 For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
@@ -124,8 +134,17 @@ For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 ## Testing
 
 ```bash
-python tests/test_app.py   # Backend and database checks
-python tests/test_js_modules.py   # JS module validation
+# Type-check frontend (run after TypeScript changes before testing)
+cd frontend && npm run type-check && cd ..
+
+# Backend and database checks
+python tests/test_app.py
+
+# Frontend source validation
+python tests/test_js_modules.py
+
+# Vitest component and hook tests
+cd frontend && npm test && cd ..
 ```
 
 ---
@@ -135,7 +154,7 @@ python tests/test_js_modules.py   # JS module validation
 ### Render.com (Recommended)
 1. Connect your GitHub repository to Render
 2. Create a new Web Service
-3. Set build command: `pip install -r requirements.txt`
+3. Set build command: `cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt`
 4. Set start command: `python -m app`
 5. Deploy!
 
@@ -144,6 +163,8 @@ python tests/test_js_modules.py   # JS module validation
 - DigitalOcean App Platform
 - AWS Elastic Beanstalk
 - Any platform that supports Python ASGI
+
+> **Note:** Set `ENV=production` in production environments. CORS origins should be configured via FastAPI middlewares in `app/main.py`.
 
 ---
 

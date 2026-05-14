@@ -217,6 +217,19 @@ tests/test_endpoint.py  ← stays forever, runs on every pytest
 
 **Why it matters**: Deleted tests leave the code unwatched. The regression safety net has holes.
 
+### 5.3 Test References Updated in Same Batch as Code Changes
+**Context**: Renaming a function in source without updating its test references — tests broke silently in the next batch
+
+**Principle**: When a batch modifies existing code (rename, signature change, behavioral change), update ALL test references to that code in the **same batch** — import paths, function names, mock setups, and assertion expectations. Source and tests are a single unit; never split them across batches.
+
+**Example**:
+```
+✅ Same batch: rename getUser → fetchUser in source + update test_getUser test
+❌ Split: rename in batch 1, fix tests in batch 2 (tests fail between batches)
+```
+
+**Why it matters**: Every batch must be independently testable. Stale test references mean the batch fails verification and breaks the pipeline.
+
 ---
 
 ## 6. Documentation
@@ -403,6 +416,45 @@ docs/plans/PLAN_2026_05_12_002.md
 ```
 
 **Why it matters**: Two locations for the same artifact type breaks numbering, confuses agents, and fragments decision history.
+
+### 6.12 File Description Convention Across All Languages
+**Context**: Frontend TS/TSX files had no file-level descriptions while Python files had consistent `# Description:` headers — inconsistency made ARCHITECTURE.md auto-extraction incomplete
+
+**Principle**: Every code file across all languages must have a file-level description header following the same two-line pattern, adapted to the language's comment syntax. The description states the module's single responsibility in one concise line.
+
+**Example**:
+```typescript
+// Timer.tsx
+// Description: Timer display component showing MM:SS with warning/danger visual states
+
+// ... rest of file
+```
+```python
+# matchmaking.py
+# Description: Async match-finding algorithm that pairs available users in the same room
+
+# ... rest of file
+```
+```css
+/* style.css */
+/* Description: Global stylesheet for IntroChat — reset, layout, component styles, and responsive rules */
+```
+Comment syntax by language: `#` for Python, `//` for TS/TSX/JS, `/* */` for CSS.
+
+**Why it matters**: Single source of truth for auto-extraction into ARCHITECTURE.md. Descriptions stay accurate because they live next to the code they describe. New contributors and AI agents can understand each file's purpose at a glance.
+
+### 6.13 ARCHITECTURE.md Project Structure Tree Synced from Source
+**Context**: After adding description headers to 45 frontend files, the Project Structure tree in ARCHITECTURE.md still showed the old generic descriptions — only Module Descriptions were auto-synced
+
+**Principle**: The inline `# ` descriptions in the Project Structure ASCII tree must be synced from source file `Description:` headers, not just Module Descriptions lead lines. Both the tree and the module entries are auto-extracted from the same source-of-truth headers.
+
+**Example**:
+```
+Before: │   ├── format.ts      # formatTime() — seconds to MM:SS
+After:  │   ├── format.ts      # Utility functions for formatting values (time, display strings)
+```
+
+**Why it matters**: The file tree is the first thing readers see. If its descriptions are manual, they drift from reality. Syncing both tree and module entries from the same source headers keeps the entire document internally consistent.
 
 ---
 
@@ -858,6 +910,59 @@ implement-plan opens the latest PLAN_*.md, never relies on "as we discussed earl
 
 **Why it matters**: No hidden state between stages. A plan survives conversation context loss, and any stage can be re-run against the same artifact.
 
+### 8.12 Dead Code Detection Protocol
+**Context**: Cleanup passes removed dead imports and orphaned files, but some were removed without evidence or user approval — causing rework
+
+**Principle**: Dead code must be detected with evidence (grep showing zero imports/references), assigned a recommendation (remove/keep/archive), and presented for user approval before removal. Never remove dead code silently.
+
+**Example**:
+```
+[DEAD] frontend/src/hooks/useCountdown.ts — useCountdown — zero imports across codebase → Recommend: Remove
+```
+
+**Why it matters**: Not all unused code is safe to delete — some are public API exports, type-only re-exports, or intentionally kept for future use. Evidence-based approval prevents accidental deletions.
+
+### 8.13 Batch Conflict Resolution
+**Context**: During a cleanup pass, two approved candidates modified the same file sequentially — the second overwrote the first's changes silently
+
+**Principle**: When multiple approved candidates touch the same file, sort them by dependency order before applying. If direct line overlap is unavoidable, present the conflict to the user — do NOT silently apply conflicting batches in sequence.
+
+**Example**:
+```
+Conflict: [frontend/src/pages/ChatPage.tsx:80-95] — candidate A (extract timer logic)
++ candidate B (inline mock data) both modify this section
+→ Recommend: merge into one batch, or apply A first and skip B
+```
+
+**Why it matters**: Silent sequential application of overlapping batches causes data loss. The second batch overwrites the first's changes with no warning.
+
+### 8.14 Review-Implementation Expanded Checks
+**Context**: review-implementation only checked diff + tests + lint — missed git status changes, test count drift, and production build failures
+
+**Principle**: A full implementation review must include: (1) read diff + check flags, (2) check git status for unexpected files, (3) run all test suites with test count diff reporting, (4) run production build, (5) run lint/typecheck, (6) verify against plan document success criteria, (7) sign off or route. Non-CLEANUP flags found during a cleanup review route to implement-plan (not back to modularize-and-clean) — behavioral changes during cleanup mean the fix belongs in implementation, not restructuring.
+
+**Example**:
+```
+Step 3 — Test count diff:
+  test_app.py: 20 → 20 (no change) ✅
+  vitest: 83 → 83 (no change) ✅
+  test_js_modules.py: 45 → 45 (no change) ✅
+```
+
+**Why it matters**: A narrow review (diff + tests only) misses production regressions, scope creep, and broken builds. The expanded checklist catches all failure modes before sign-off.
+
+### 8.15 Non-Interactive Execution
+**Context**: From running agent-driven commands in headless CI and non-interactive shell environments
+
+**Principle**: All commands must run without stdin prompts. If a command requires user input (e.g., confirmation prompts, package install questions), use flags to suppress them (e.g., `--yes`, `-y`, `--non-interactive`) or pre-configure via environment variables. Never assume an interactive terminal is available.
+
+**Example**:
+- `npm install --yes` or set `npm config set yes true`
+- `pip install -r requirements.txt` (non-interactive by default)
+- `git commit -m "msg"` (never `git commit` without `-m`)
+
+**Why it matters**: A command that blocks waiting for stdin will hang indefinitely in a headless or agent-driven session, causing timeouts and false failures.
+
 ---
 
 ## 9. Version Control
@@ -1011,3 +1116,6 @@ python -m pytest tests/ -v    # Tests
 46. **Sequential Numbering for Plan Files** — numbers are globally unique across all directories; no reuse
 47. **Skill Rename Protocol** — create dir → copy → delete old → update name → update all refs; verify zero stale refs
 48. **Workflow Handoff with Outputs & Triggers** — every stage defines Output + Exit Declaration + Next Step; the exit IS the trigger
+49. **File Descriptions Across All Languages** — every file gets a `filename + Description:` header matching its comment syntax; canonical source for ARCHITECTURE.md
+50. **Test References in Same Batch** — rename, signature, or behavioral change updates all test references in the same batch; source and tests are a single unit
+51. **Full Review Pipeline** — review must include git status, test count diff, production build, exact lint commands, and escalation routing for non-CLEANUP flags

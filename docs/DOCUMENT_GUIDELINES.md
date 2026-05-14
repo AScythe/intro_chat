@@ -223,13 +223,18 @@ Agent behavioral rules and operational guidelines. Answers "How should I think, 
 
 ### What to Include
 - **Scope definition** — what this document covers and how it relates to other guidance (e.g., skill files)
-- **Project overview** — 1 paragraph describing the project and its key functionalities (enough for context, not full detail)
-- **Architecture summary** — key components only, 3-5 lines. Enough to navigate the codebase. Full detail goes in ARCHITECTURE.md.
-- **Environment setup** — agent-specific env config only: non-interactive invocation, headless env vars, Python version, venv setup. User-facing setup (install steps, quick start) goes in README.md.
 - **File ownership table** — every location an agent might touch, with explicit policy: ✅ safe to edit, ⚠️ caution required, ❌ forbidden
-- **Core commands** — setup commands, run commands, test commands with exact syntax
-- **Agent behavioral rules** — organized by workflow phase (Thinking → Probing → Planning → Implementing → Reviewing → Structuring → Committing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
-- **Cross-references** — to ARCHITECTURE.md for endpoints and data flow, to SPECIFICATIONS.md for product boundaries and privacy
+- **Agent behavioral rules** — organized by workflow phase (Thinking → Probing → Planning → Implementing → Reviewing → Structuring → Committing → Architecture Evaluation → Architecture Improvement), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
+- **Context Window Discipline** — Grep→Read patterns for minimizing context waste
+- **Doc Sync Triggers** — table mapping change types to the doc sync skill to run
+- **Failure Triage** — classification table for test failures (import path, brittle test, behavioral regression, pre-existing, flaky)
+- **Cross-Phase Universal Rules** — rules that apply to every phase and override phase-specific rules when they conflict
+- **Cross-references** — to ARCHITECTURE.md, SPECIFICATIONS.md, DOCUMENT_GUIDELINES.md §8, and skill files
+
+For project context, product description, and key functionalities → [SPECIFICATIONS.md](SPECIFICATIONS.md) and [README.md](README.md).  
+For architecture summary and tech stack → [ARCHITECTURE.md](ARCHITECTURE.md).  
+For setup commands and test commands → [README.md §Quick Start](README.md#quick-start) and [README.md §Testing](README.md#testing).  
+For agent-specific operational requirements (non-interactive execution, venv setup) → [PROJECT_BEST_PRACTICES.md §8.15](PROJECT_BEST_PRACTICES.md#815-non-interactive-execution) and [README.md §Quick Start](README.md#quick-start).
 
 ### What NOT to Include
 - ❌ API endpoint tables or WebSocket event tables — these go in ARCHITECTURE.md (Data Flow section)
@@ -245,9 +250,7 @@ Agent behavioral rules and operational guidelines. Answers "How should I think, 
 - **File ownership:** Every entry must include a policy column (✅ safe, ⚠️ caution, ❌ forbidden). File names alone are not enough.
 - **Behavioral rules:** Organized by workflow phase. Each phase header names the skill(s) it maps to. Rules are imperative sentences, one per bullet. Cross-reference the skill file for full detail.
 - **Verification:** No standalone verification section — verification requirements are embedded in each phase's behavioral rules (e.g., Phase 4: "Verify locally per batch", "Run full test suite + lint before hand-off").
-- **Command ordering:** No separate ordering section — commands are listed under Core Commands without ordering constraints.
-- **Architecture summary:** 3-5 lines maximum. Navigation-level only. Cross-reference ARCHITECTURE.md for details.
-- **Cross-references:** Point to SPECIFICATIONS.md for product boundaries and privacy, ARCHITECTURE.md for endpoints and data flow. Do not duplicate content from either document.
+- **Cross-references:** Point to SPECIFICATIONS.md for product boundaries and privacy, ARCHITECTURE.md for endpoints and data flow, README.md for commands and setup. Do not duplicate content from other documents.
 
 ---
 
@@ -367,7 +370,7 @@ These are the common confusion points where content could reasonably fit in mult
 | **Per-function detail in ARCHITECTURE.md vs source docstrings/JSDoc** | ARCHITECTURE.md captures function signature + one-line purpose (what the function does for the system). Source code docstrings/JSDoc capture implementation details (how it works, parameters, return values, edge cases). ARCHITECTURE.md is for navigation; source code is for depth. |
 | **Running instructions in README.md vs ARCHITECTURE.md** | README.md = condensed quick-start (minimum steps for a user to get going). ARCHITECTURE.md = full technical startup sequence (env vars, config, dependencies, service startup order). README links to ARCHITECTURE for full detail. |
 | **Privacy in README.md vs SPECIFICATIONS.md** | README.md = user-facing summary ("we don't store messages"). SPECIFICATIONS.md = full privacy model table + hard constraints (non-negotiable implementation-level rules). |
-| **Environment setup in README.md vs AGENTS.md** | README.md = user-facing install steps (pip install, node setup, quick start). AGENTS.md = agent-specific invocation config (headless env vars, non-interactive execution, venv activation). These serve different actors; don't merge them. |
+| **Environment setup in README.md vs AGENTS.md** | AGENTS.md no longer owns environment setup. README.md = user-facing install steps (pip install, node setup, quick start). Agent-specific operational requirements (venv activation, non-interactive execution, Windows encoding) now live in README.md and PROJECT_BEST_PRACTICES.md. These serve different actors; don't merge them.
 
 ---
 
@@ -394,15 +397,26 @@ Use Grep→Read to read specific sections: grep for the section heading line num
 
 ### Core Pipeline
 
+The pipeline branches after `review-implementation` (1st pass):
+
+```
+review-implementation (1st pass)
+    ├──→ modularize-and-clean → review-implementation (clean up pass)
+    └──→ evaluate-architecture → improve-architecture → review-implementation (architecture pass)
+```
+
 | Step | Documents to READ | Specific Sections | Documents to WRITE |
 |------|-------------------|-------------------|--------------------|
-| **analyze-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Core Commands" | nothing (verbal) |
+| **analyze-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline" | nothing (verbal) |
 | **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal only — this step produces no artifact; if issues require a revised plan, loop back to check-plan-readiness) |
 | **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/plans/PLAN_*.md` |
-| **implement-plan** | `docs/plans/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Core Commands". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
+| **implement-plan** | `docs/plans/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
 | **review-implementation** (1st pass) | `docs/plans/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
-| **review-implementation** (2nd pass) | `docs/plans/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
+| **evaluate-architecture** | `ARCHITECTURE.md`, `PROJECT_BEST_PRACTICES.md`, `AGENTS.md` | ARCHITECTURE: "Project Structure", "Module Descriptions", "Import Structure". PROJECT_BEST_PRACTICES: §1, §4, §5, §7, §8. AGENTS: "File Ownership" | nothing (verbal) |
+| **improve-architecture** | `AGENTS.md`, `ARCHITECTURE.md`, `implement-plan/SKILL.md` | AGENTS: "File Ownership". ARCHITECTURE: "Project Structure", relevant module descriptions. implement-plan: §3, §5, §6, test-adaptation rule | Source code (`[ARCH]`), regression tests |
 | **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |
+| **review-implementation** (clean up pass — after modularize-and-clean) | `docs/plans/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
+| **review-implementation** (architecture pass — after improve-architecture) | `evaluate-architecture` output (verbal, session context) | — | nothing (verbal) |
 | **push-to-git** | *(none — git status only)* | — | Git commits |
 
 ### Doc Sync Steps (Post-Implementation)

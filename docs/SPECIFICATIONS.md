@@ -55,7 +55,7 @@ These are non-negotiable — enforced at the implementation level:
 The following are explicitly NOT implemented and should not be built unless the user explicitly requests them:
 - User authentication or accounts
 - Database swaps (PostgreSQL, MySQL, etc.)
-- Frontend frameworks (React, Vue, etc.)
+- Frontend frameworks beyond React (Vue, Svelte, etc.)
 - Chat message storage
 - GPS/Bluetooth proximity detection
 - Push notifications
@@ -80,7 +80,7 @@ The following are explicitly NOT implemented and should not be built unless the 
 
 | Layer | Technology | Why? |
 |-------|------------|------|
-| **Frontend** | HTML5 + CSS3 + Vanilla JavaScript | Lightweight, works on any browser. No frameworks needed. |
+| **Frontend** | React 19 + TypeScript + Vite | Component-based SPA with type safety, built via Vite pipeline. |
 | **Backend** | Python + FastAPI | Modern ASGI framework, native WebSocket support, automatic OpenAPI docs. |
 | **Real-Time** | Native WebSocket via FastAPI | Live match notifications without polling. |
 | **Data Storage** | SQLite | Zero setup, portable. Active matches stored in memory for speed. |

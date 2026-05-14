@@ -5,8 +5,8 @@
 
 ```
 intro_chat/
-├── app/                          # Python package (FastAPI application)
-│   ├── __init__.py            # App orchestrator: FastAPI init, static mount, wires modules
+├── app/                       # Python package (FastAPI application)
+│   ├── __init__.py            # App orchestrator: FastAPI init, static mount, SPA catch-all, wires modules
 │   ├── state.py               # Shared in-memory state: active_users, active_matches, etc.
 │   ├── database.py            # Database schema initialization (init_db())
 │   ├── config.py              # Central config constants (DB_PATH, HOST, PORT)
@@ -16,30 +16,80 @@ intro_chat/
 │   ├── connection_manager.py  # WebSocket connection tracking and broadcasting
 │   └── tasks.py               # Background cleanup thread
 │
-├── app/templates/                # Jinja2 HTML templates
-│   ├── index.html             # Homepage: event creation/joining
-│   ├── room.html              # Room selection page
-│   ├── chat.html              # Chat interface with timer/prompts
-│   └── user_info.html         # User profile form (LinkedIn/Slack)
+├── frontend/                  # React SPA (Vite + TypeScript)
+│   ├── index.html             # SPA entry HTML (mounts #root)
+│   ├── package.json           # Dependencies: react, react-dom, react-router-dom, vite, vitest
+│   ├── tsconfig.json          # TypeScript config (strict, jsx: react-jsx)
+│   ├── vite.config.ts         # Vite build configuration — React plugin, dev proxy to backend, Vitest integration
+│   ├── src/
+│   │   ├── main.tsx           # React app entry point — mounts root component and imports global styles
+│   │   ├── App.tsx            # Root component — React Router setup with SocketContext and UserContext providers
+│   │   ├── api/
+│   │   │   └── client.ts      # Typed fetch wrapper with timeout for backend API calls
+│   │   ├── config/
+│   │   │   └── constants.ts   # Application configuration constants — chat duration, timer defaults, demo delays
+│   │   ├── types/
+│   │   │   └── api.ts         # TypeScript interfaces for API request/response payloads
+│   │   ├── utils/
+│   │   │   ├── format.ts      # Utility functions for formatting values (time, display strings)
+│   │   │   ├── storage.ts     # localStorage wrappers for persisting user session data
+│   │   │   ├── random.ts      # Utility functions for random string and username generation
+│   │   │   └── demoData.ts    # Demo/simulation data — sample users, fallback prompts, and mock responses
+│   │   ├── hooks/
+│   │   │   ├── useSocket.ts   # Context and hook for managing a persistent WebSocket connection
+│   │   │   ├── useTimer.ts    # Hook providing extendable countdown timer with start/clear/extend callbacks
+│   │   │   ├── useDemoMode.ts # Hook providing demo/simulation logic gated by VITE_ENABLE_DEMO feature flag
+│   │   │   └── useUser.ts     # Context and hook for user session data (userId, eventId, username)
+│   │   ├── context/
+│   │   │   ├── SocketContext.tsx  # WebSocket context provider — connects at app root, persists across routes, auto-reconnects
+│   │   │   └── UserContext.tsx    # User session context provider — hydrates from localStorage, writes on change
+│   │   ├── components/
+│   │   │   ├── Timer.tsx          # Timer display component showing MM:SS with warning/danger visual states
+│   │   │   ├── PersonCard.tsx     # Person selector card showing username, availability status, and click-to-select
+│   │   │   ├── PromptCard.tsx     # Conversation prompt display with fade transition
+│   │   │   ├── MatchCountdown.tsx # 60-second countdown display shown after a match is found before navigating to chat
+│   │   │   ├── ConnectionCard.tsx # Post-chat connection card with yes/no buttons for Slack connection exchange
+│   │   │   └── QRDisplay.tsx      # QR code image display with event code shown below
+│   │   └── pages/
+│   │       ├── HomePage.tsx       # Landing page — event code input, create/join event, QR display
+│   │       ├── UserInfoPage.tsx   # Profile form — LinkedIn/Slack input, save via API, navigate to room
+│   │       ├── RoomPage.tsx       # Room selection and person matching — dropdown, person cards, match countdown
+│   │       └── ChatPage.tsx       # Chat interface — timed conversation with prompts, timer, extend, and connection exchange
+│   ├── tests/
+│   │   ├── setup.ts           # Vitest test setup — imports jest-dom DOM matchers
+│   │   ├── App.test.tsx       # Tests for App root — route rendering and provider integration
+│   │   ├── utils/
+│   │   │   ├── format.test.ts # Tests for format utilities — formatTime edge cases
+│   │   │   └── storage.test.ts # Tests for storage utilities — localStorage read/write/clear
+│   │   ├── hooks/
+│   │   │   ├── useSocket.test.ts   # Tests for useSocket hook — connect, disconnect, auto-reconnect
+│   │   │   ├── useTimer.test.ts    # Tests for useChatTimer hook — tick, extend, clear, onComplete
+│   │   │   └── useDemoMode.test.ts # Tests for useDemoMode hook — demo flag toggles simulation behavior
+│   │   ├── context/
+│   │   │   └── UserContext.test.tsx # Tests for UserContext — session hydration and state updates
+│   │   ├── components/
+│   │   │   ├── Timer.test.tsx          # Tests for Timer — MM:SS display, warning/danger thresholds
+│   │   │   ├── PersonCard.test.tsx     # Tests for PersonCard — rendering, availability, selection
+│   │   │   ├── PromptCard.test.tsx     # Tests for PromptCard — prompt text rendering
+│   │   │   ├── MatchCountdown.test.tsx # Tests for MatchCountdown — countdown display and navigation
+│   │   │   ├── ConnectionCard.test.tsx # Tests for ConnectionCard — yes/no button callbacks
+│   │   │   └── QRDisplay.test.tsx      # Tests for QRDisplay — image and event code rendering
+│   │   └── pages/
+│   │       ├── HomePage.test.tsx     # Tests for HomePage — event creation, join, navigation
+│   │       ├── UserInfoPage.test.tsx # Tests for UserInfoPage — form input, save, navigation
+│   │       ├── RoomPage.test.tsx     # Tests for RoomPage — room selection, person matching, countdown
+│   │       └── ChatPage.test.tsx     # Tests for ChatPage — chat flow, timer, prompts, connection exchange
+│   └── dist/
+│       ├── index.html          # Built SPA entry HTML served by FastAPI catch-all
+│       └── assets/             # Built and optimized JS/CSS bundles
 │
-├── app/static/                    # Static assets (organized by type)
-│   ├── css/
-│   │   └── style.css           # Main stylesheet (unified styles)
-│   └── js/
-│       ├── config.js             # Timer configuration constants (CHAT_DURATION, etc.)
-│       ├── utils.js              # Shared utilities (showError, getElementById, etc.)
-│       ├── dom-utils.js          # DOM helper functions
-│       ├── api-utils.js          # API call utilities (fetchJSON, etc.)
-│       ├── timer-utils.js        # Timer functions (createChatTimer, createCountdown)
-│       ├── home.js               # Homepage logic (event creation, QR codes)
-│       ├── user-info.js          # User profile page logic (save social info)
-│       ├── room.js               # Room selection & user matching logic
-│       └── chat.js               # Chat interface logic (timer, prompts, connection)
+├── app/static/                    # Static assets (served at /static)
+│   └── css/
+│       └── style.css           # Global stylesheet for IntroChat — reset, layout, component styles, and responsive rules
 │
-├── tests/                        # Test suite
-│   ├── test_app.py            # Backend, database, and modular architecture tests
-│   ├── test_js_modules.py     # JavaScript module validation tests
-│   ├── test_fixes.py          # API endpoint integration tests
+├── tests/                        # Backend test suite
+│   ├── test_app.py            # Backend, database, and SPA serving tests
+│   ├── test_js_modules.py     # Frontend source validation tests
 │   └── test_db.py             # Database utility & verification
 │
 ├── docs/                         # Documentation
@@ -67,7 +117,8 @@ FastAPI app factory that initializes the server, mounts static files, registers 
 
 - Initializes FastAPI app with `FastAPI(title="IntroChat")`
 - Mounts `/static` directory via `StaticFiles`
-- Creates `Jinja2Templates` instance for template rendering
+- Mounts `/assets` from `frontend/dist/assets/` for built JS bundles (if exists)
+- Registers SPA catch-all via 404 exception handler (serves `frontend/dist/index.html` for non-API/non-WS paths)
 - Imports and includes `router` from `.routes` via `app.include_router(router)`
 - Starts background cleanup thread via `start_cleanup_thread()`
 - On startup event: creates `data/` directory, calls `await init_db(DB_PATH)`
@@ -112,17 +163,14 @@ Async SQLite database initialization using aiosqlite, creating events, users, ro
 | `matches` | `id` (TEXT PK), `user1_id` (TEXT FK), `user2_id` (TEXT FK), `room_id` (TEXT FK), `status` (TEXT DEFAULT 'active'), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `expires_at` (TIMESTAMP) |
 
 ### `app/routes.py` (HTTP Routes + WebSocket)
-All HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints for events, users, rooms, matches, QR codes, conversation prompts, and the WebSocket endpoint for real-time communication.
+All HTTP route handlers for REST API endpoints (events, users, rooms, matches, QR codes, conversation prompts) and the WebSocket endpoint for real-time communication. SPA page serving is handled by the catch-all in `app/__init__.py`.
 
 - `router = APIRouter()` — defines all route handlers with FastAPI decorators
-- Endpoints: `/`, `/join/<event_id>`, `/room/<id>`, `/chat/<id>`, `/api/events`, `/api/events/<id>/join`, etc.
+- Endpoints: `/`, `/api/events`, `/api/events/<id>/join`, `/api/events/<id>/rooms`, etc.
 - WebSocket endpoint: `/ws` — accepts JSON messages with `user_id` and `room_id`, dispatches `join_room` type
 
 #### Functions
-- `index(request)` — `GET /` → renders landing page (`index.html`) via `TemplateResponse`
-- `user_info(request, event_id)` — `GET /join/<event_id>` → renders user profile form
-- `room_selection(request, event_id)` — `GET /room/<event_id>` → renders room selection page
-- `chat_room(request, match_id)` — `GET /chat/<match_id>` → renders chat page
+- `index()` — `GET /` → reads and serves `frontend/dist/index.html` as HTMLResponse
 - `create_event(data)` — `POST /api/events` → creates event + 8 default rooms, returns event_id
 - `get_rooms(event_id)` — `GET /api/events/<event_id>/rooms` → lists rooms (fallback creation if none found)
 - `join_event(event_id, data)` — `POST /api/events/<event_id>/join` → creates user with optional linkedin/slack
@@ -191,12 +239,13 @@ Application entry point that launches the Uvicorn ASGI server on 127.0.0.1:5000 
 
 ---
 
-### Frontend Modules
+### Frontend Modules (React SPA)
 
-#### `app/static/js/config.js` (Configuration)
-Central configuration object defining timer durations, countdown thresholds, and demo mode delays — single source of truth consumed by chat.js and room.js.
+The frontend is a React 19 SPA built with Vite + TypeScript. All routing is client-side via React Router. The backend serves the built `frontend/dist/index.html` as a catch-all.
 
-#### Configuration Constants
+#### `frontend/src/config/constants.ts` (Configuration)
+Application configuration constants — chat duration, timer defaults, demo delays.
+
 | Property | Value | Description |
 |----------|-------|-------------|
 | `CHAT_DURATION` | `30` | Chat timer countdown in seconds |
@@ -208,124 +257,86 @@ Central configuration object defining timer durations, countdown thresholds, and
 | `SIMULATE_RESPONSE_DELAY_MS` | `3000` | Simulated person response delay in ms |
 | `SIMULATE_READY_DELAY_MS` | `5000` | Simulated ready status delay in ms |
 
-#### `app/static/js/utils.js` (Shared Utilities)
-Shared browser utility functions — error display via alert, URL parameter extraction, page navigation, clipboard copy, and DOM helpers used across all pages.
+#### `frontend/src/api/client.ts` (API Client)
+Typed fetch wrapper with timeout for backend API calls.
 
-#### Functions
-- `showError(message)` — displays error message via `alert()`
-- `getUrlParameter(name)` — extracts URL query parameter value
-- `formatTime(seconds)` — formats seconds as `M:SS`
-- `initSocket()` — initializes Socket.IO connection, returns socket instance
-- `generateRandomString(length)` — generates random alphanumeric string (default 8 chars)
-- `generateUsername()` — generates `User_XXXXX` random username
-- `storeUserId(userId)` — stores user ID in localStorage under `introchat_user_id`
-- `getUserId()` — retrieves user ID from localStorage
-- `clearUserId()` — removes user ID from localStorage
-- `storeData(key, value)` — generic localStorage setter
-- `getData(key)` — generic localStorage getter
-- `clearData(key)` — generic localStorage remover
+#### `frontend/src/utils/format.ts` (Format Utilities)
+Utility functions for formatting values (time, display strings).
+- `formatTime(seconds: number): string` — formats seconds as `M:SS`
 
-#### `app/static/js/dom-utils.js` (DOM Utilities)
-Null-safe DOM manipulation helpers — getElementById with console warnings, setTextContent, show/hide/toggle visibility, and createElement for dynamic UI construction.
+#### `frontend/src/utils/storage.ts` (Storage Wrappers)
+localStorage wrappers for persisting user session data.
 
-#### Functions
-- `getElementById(id)` — safe element lookup with console warning on missing element
-- `setTextContent(elementId, text)` — safe textContent setter with null check
-- `setDisplay(elementId, display)` — safe display style setter with null check
-- `addEventListenerSafe(elementId, event, handler)` — safe event listener registration with console warning
+#### `frontend/src/utils/random.ts` (Random Utilities)
+Utility functions for random string and username generation.
+- `generateRandomString(length = 8): string` — random alphanumeric string
+- `generateUsername(): string` — generates `User_XXXXX` random username
 
-#### `app/static/js/api-utils.js` (API Utilities)
-Thin fetch wrapper with timeout via AbortController, exposing typed HTTP methods (apiGet, apiPost, apiPut, apiDelete) with consistent error handling.
+#### `frontend/src/utils/demoData.ts` (Demo Mock Data)
+Demo/simulation data — sample users, fallback prompts, and mock responses. Imported by `useDemoMode.ts` and `PersonCard.tsx`.
 
-#### Functions
-- `fetchWithTimeout(url, options, timeout)` — fetch with AbortController timeout (default 10000ms)
-- `parseJSON(response)` — checks `response.ok`, parses JSON, throws on HTTP error
-- `fetchJSON(url, options)` — combined `fetchWithTimeout` + `parseJSON` helper
+#### `frontend/src/hooks/useSocket.ts` (WebSocket Hook)
+Context and hook for managing a persistent WebSocket connection. Single persistent WS connection at app root. Auto-reconnect with exponential backoff (1s, 2s, 4s, 8s max). All pages consume via `useSocket()`.
 
-#### `app/static/js/timer-utils.js` (Timer Utilities)
-Timer factory providing createChatTimer() for extendable countdown with tick/complete callbacks and createCountdown() for redirect-on-expiry displays.
+#### `frontend/src/hooks/useTimer.ts` (Timer Hooks)
+Hook providing extendable countdown timer with start/clear/extend callbacks.
+- `useChatTimer(duration, callbacks)` — extendable countdown with `start`, `clear`, `extend`, `getTimeLeft`
 
-#### Functions
-- `createChatTimer(duration, onTick, onComplete)` — creates extendable countdown timer; returns `{start, clear, extend, getTimeLeft}`
-- `createCountdown(duration, onTick, onComplete)` — creates simple countdown timer; returns `{start, clear, getTimeLeft}`
+#### `frontend/src/hooks/useDemoMode.ts` (Demo Mode)
+Hook providing demo/simulation logic gated by `VITE_ENABLE_DEMO` feature flag. Returns `{ isDemo, addSampleUsers, addAllSampleUsers, simulatePersonResponse, simulateDelay, createDemoMatchId, isDemoMatch }`. Mock data (`SamplePerson`, `SAMPLE_USERS`, `RESPONSES`) imported from `utils/demoData.ts`. No-ops when demo is disabled.
 
-#### `app/static/js/home.js` (Home Controller)
-Landing page controller for event code input submission, QR code file upload/scanning, and event creation via modal dialog with API integration.
+#### `frontend/src/hooks/useUser.ts` (User Session)
+Context and hook for user session data (userId, eventId, username). Provides `{ userId, eventId, username, setUser, clearUser }`. Hydrates from `localStorage` on app init.
 
-#### Functions
-- `joinEvent()` — validates 8-char event code, redirects to `/join/<code>`
-- `createEvent()` — POSTs to `/api/events`, generates QR, shows event created card
-- `generateQRCode(eventId)` — fetches QR from `/api/qr/<event_id>`, displays image
-- `joinCreatedEvent()` — redirects to join the newly created event
-- `handleQRUpload(event)` — shows "QR scanning not implemented" message, resets file input
+#### `frontend/src/context/SocketContext.tsx` (WebSocket Provider)
+WebSocket context provider — connects at app root, persists across routes, auto-reconnects. Connects on mount, disconnects on unmount. Stores `socket`, `connected` state, and `error` in context.
 
-*Button state management (wired in DOMContentLoaded):* join button disabled until 8-char event code entered; create button disabled until event name entered; both wired via `input` event listeners.
+#### `frontend/src/context/UserContext.tsx` (User Session Provider)
+User session context provider — hydrates from localStorage, writes on change. Provides `{ userId, eventId, username, linkedin_url, slack_handle, setUser, clearUser }`.
 
-#### `app/static/js/user-info.js` (Profile Controller)
-User profile form controller handling LinkedIn URL and Slack handle input, profile data persistence via API, and navigation to room selection on success.
+#### Components
 
-No named function declarations — all logic is in anonymous `DOMContentLoaded` and button click callbacks. Calls utils functions: `generateUsername()`, `fetchJSON()`, `storeUserId()`, `showError()`.
+##### `frontend/src/components/Timer.tsx`
+Timer display component showing MM:SS with warning/danger visual states. Displays with CSS class `timer-warning` (yellow) when below `TIMER_WARNING_THRESHOLD` and `timer-danger` (red) when below `TIMER_DANGER_THRESHOLD`.
 
-#### `app/static/js/room.js` (Room Controller)
-Room selection page controller handling room creation/joining, user availability toggling, match-finding initiation, match-found countdown, and connection exchange.
+##### `frontend/src/components/PersonCard.tsx`
+Person selector card showing username, availability status, and click-to-select. Shows availability dot (green/red), and optional room name. Uses `SamplePerson` interface from `utils/demoData.ts`. Click fires `onSelect` callback.
 
-#### Functions
-- `initRoomPage(eventId)` — initializes socket, adds sample users, ensures user exists, loads rooms, sets up listeners
-- `ensureUserExists()` — checks localStorage for user ID, creates via API if needed (with fallback)
-- `loadRooms()` — fetches rooms from API, populates dropdown (with fallback on error)
-- `setupEventListeners()` — wires room select, select room, request chat, cancel, change room, socket `match_found` listener
-- `selectRoom()` — POSTs user/room assignment, emits `join_room` via socket, updates UI with nearby users
-- `requestChat()` — POSTs `/api/users/<id>/available` to true (legacy)
-- `cancelWaiting()` — POSTs availability to false (legacy)
-- `changeRoom()` — resets UI back to room selection
-- `handleMatchFound(data)` — shows match found card with usernames, starts countdown
-- `startCountdown()` — starts `MATCH_FOUND_COUNTDOWN` (60s) timer, redirects to chat on expiry
-- `goToChat()` — navigates to `/chat/<matchId>`
-- `addSampleUsers()` — stores 18 demo users across 8 rooms with availability status
-- `updateNearbyUsers(roomName)` — displays person cards with availability indicators, enables selection
-- `requestChatWithPerson()` — shows "Waiting for response" UI, triggers simulated response after delay
-- `simulatePersonResponse(personName)` — shows acceptance/rejection UI with ready-status flow and "I'm Ready" button
-- `cancelRequest()` — returns to person selection from waiting state
-- `testFunction()` — debug function checking sample users in console
-- `checkIfBothReady()` — nested: checks both user and partner ready status, enables "Start Chat" button
+##### `frontend/src/components/PromptCard.tsx`
+Conversation prompt display with fade transition. Receives prompt string as prop.
 
-#### `app/static/js/chat.js` (Chat Controller)
-Chat page controller managing WebSocket connection, message sending/receiving, timer countdown with extend support, conversation prompts display, and leave/exit flow.
+##### `frontend/src/components/MatchCountdown.tsx`
+60-second countdown display shown after a match is found before navigating to chat. Shows number and "seconds" label. Auto-redirects via `navigate()` on expiry.
 
-#### Functions
-- `initChatPage(matchId)` — initializes socket, loads match info and prompts, sets up listeners
-- `loadMatchInfo()` — detects demo (prefix `demo_`) vs real match, loads data from API or simulates
-- `loadPrompts()` — fetches from `/api/prompts` with fallback hardcoded prompts
-- `setupEventListeners()` — wires next prompt, extend 2min, extend indefinite, end chat, connect yes/no, new chat; socket listeners
-- `startChatTimer()` — creates chat timer with `CONFIG.CHAT_DURATION`, starts countdown
-- `updateTimerDisplay(timeLeft)` — updates MM:SS display, applies warning/danger CSS thresholds
-- `displayCurrentPrompt()` — shows current prompt in scrollable container with auto-scroll
-- `nextPrompt()` — cycles to next prompt (wraps around)
-- `showTimeUp()` — hides chat card, shows "Time's Up" card with extend/end options
-- `extendChat(additionalTime)` — extends by `CHAT_DURATION` or indefinite (-1)
-- `startExtendedChatTimer()` — starts a new timer for extended chat period
-- `updateExtendedTimerDisplay(timeLeft)` — updates extended timer display with formatTime
-- `showSlackConnection()` — shows connection exchange card with yes/no buttons
-- `setConnectionPreference(connectPreference)` — demo simulates; real mode POSTs to `/api/matches/<id>/connect`
-- `showWaitingForConnection()` — shows waiting state after submitting preference
-- `handleConnectionExchanged(data)` — shows exchanged usernames on successful double opt-in
-- `handleConnectionDeclined()` — shows "Chat Complete" message when connection declined
+##### `frontend/src/components/ConnectionCard.tsx`
+Post-chat connection card with yes/no buttons for Slack connection exchange. Fires `onYes`/`onNo` callbacks.
+
+##### `frontend/src/components/QRDisplay.tsx`
+QR code image display with event code shown below. Receives `qrCode`, `eventCode`, and optional `eventName` as props.
+
+#### Pages
+
+##### `frontend/src/pages/HomePage.tsx`
+Landing page — event code input, create/join event, QR display. Features event code input, create event modal, QR display, success card, feature grid, privacy notice. Calls API via `client.ts`, uses `QRDisplay` component.
+
+##### `frontend/src/pages/UserInfoPage.tsx`
+Profile form — LinkedIn/Slack input, save via API, navigate to room. Features input fields, save via API, success card, navigates to `/room/:eventId`.
+
+##### `frontend/src/pages/RoomPage.tsx`
+Room selection and person matching — dropdown, person cards, match countdown. Features nearby users grid, `PersonCard` selection, chat request flow, match-found display with `MatchCountdown`, 60s countdown → navigate to `/chat/:matchId`. Uses `useDemoMode` for demo flows.
+
+##### `frontend/src/pages/ChatPage.tsx`
+Chat interface — timed conversation with prompts, timer, extend, and connection exchange. Features loading card, chat card with `Timer` + `PromptCard`, time-up card with extend options, extended timer, `ConnectionCard`, connection result. WebSocket listener for `connection_exchanged`/`connection_declined`.
 
 ---
 
-### Templates
+### SPA Serving
 
-#### `app/templates/index.html`
-Landing page template with hero section and tagline, event code input form, create-event modal dialog, and QR code file upload for scanning.
-
-#### `app/templates/user_info.html`
-User profile template with LinkedIn URL and Slack handle input fields, save button with success confirmation card, and navigation back to home.
-
-#### `app/templates/room.html`
-Room selection template with interactive location grid, create-room option, match-status message area, and loading overlay during matchmaking.
-
-#### `app/templates/chat.html`
-Chat page template with timer display, conversation prompts list, scrollable message area, text input field, leave button, and user info card with social links.
+The React SPA is served by the FastAPI backend:
+1. **`/` route** in `app/routes.py` reads and returns `frontend/dist/index.html`
+2. **`/assets/` mount** in `app/__init__.py` serves built JS bundles from `frontend/dist/assets/`
+3. **`/static/` mount** serves `app/static/` files (CSS, images)
+4. **404 exception handler** in `app/__init__.py` serves `index.html` for all non-API, non-WS paths (client-side routing via React Router)
 
 ---
 
@@ -348,19 +359,18 @@ End-to-end integration test suite that tests page rendering, API endpoints, matc
 - `main()` — runs all test functions in sequence
 
 #### `tests/test_js_modules.py`
-JavaScript module validation suite using static regex analysis — checks file existence, JSDoc coverage on exported functions, function name conventions, and cross-file import references.
+Frontend source module validation suite using static regex analysis — checks file existence, TypeScript exports (interfaces, types, functions, components), config constants, and cross-file import references.
 
 #### Functions
-- `test_js_files_exist()` — checks 8 required JS files exist
-- `test_utils_functions()` — checks 21 functions across utils/dom-utils/api-utils/timer-utils
-- `test_room_js_functions()` — checks 14 functions in room.js + 11 utils imports
-- `test_chat_js_functions()` — checks 17 functions in chat.js + 8 utils imports
-- `test_config_js()` — checks 8 CONFIG properties defined
-- `test_home_js_functions()` — checks 5 functions + DOMContentLoaded wrapper
-- `test_index_html()` — checks 4 JS includes, no inline functions
-- `test_html_templates()` — checks room.html, chat.html, user_info.html have correct JS includes and window globals
-- `test_user_info_js_functions()` — checks 4 utils functions used + linkedin/slack/button logic
-- `test_code_quality()` — counts console.log, checks JSDoc comments and strict mode
+- `test_frontend_files_exist()` — checks 25 required frontend source files exist
+- `test_api_exports()` — checks 5 API interfaces defined in types/api.ts
+- `test_config()` — checks 8 CONFIG properties and FALLBACK_PROMPTS in config/constants.ts
+- `test_utils_exports()` — checks formatTime, 5 storage functions, generateRandomString, generateUsername, SamplePerson, SAMPLE_USERS, RESPONSES
+- `test_hook_exports()` — checks exports from useSocket, useTimer, useDemoMode, useUser
+- `test_component_exports()` — checks 6 component exports
+- `test_page_exports()` — checks 4 page exports
+- `test_import_references()` — checks App.tsx imports all pages and providers
+- `test_code_quality()` — counts console.log across all source files
 - `main()` — runs all test functions in sequence
 
 #### `tests/test_db.py`
@@ -392,9 +402,13 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 - **Production:** Add origin restrictions via FastAPI middlewares or WebSocket validator
 
 ### Frontend Module Rules
-- No inline `<script>` in templates — all logic in `app/static/js/*.js`
-- Pass Jinja2 data to JS via `window` globals only
-- Shared utilities go in `utils.js`
+- All routing via React Router — no page reloads
+- Shared state in React Context (`SocketContext`, `UserContext`) — no `window` globals
+- Shared utilities in `frontend/src/utils/` — no direct DOM manipulation
+- Demo mock data in `utils/demoData.ts` — `SamplePerson`, `SAMPLE_USERS`, `RESPONSES` extracted from `useDemoMode.ts`
+- Same CSS class names as original `style.css` — imported once at `main.tsx` root
+- Demo logic extracted to `useDemoMode` hook, gated by `VITE_ENABLE_DEMO` env flag
+- Single persistent WebSocket in `SocketContext` — survives route changes
 
 ---
 
@@ -405,7 +419,7 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 3. **Room/table selection** for location-based matching
 4. **Person selection** from sample/demo users (demo mode)
 5. **Matchmaking system** finds available users in same room (`matchmaking.py`)
-6. **Timed chat** with conversation prompts (duration configurable via `app/static/js/config.js`, default: 30s)
+6. **Timed chat** with conversation prompts (duration configurable via `frontend/src/config/constants.ts`, default: 30s)
 7. **Chat extension** - Extend by configured duration or continue indefinitely
 8. **Connection exchange** after chat (double opt-in)
 9. **Background cleanup** of expired matches every 60 seconds (`tasks.py`)
@@ -419,7 +433,7 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 3. User selects room → `POST /api/users/<id>/room` → opens WebSocket to `/ws` with `join_room` message
 4. User selects person → `POST /api/users/<id>/available` → triggers `await find_match()` in `matchmaking.py`
 5. Match found → `match_found` WebSocket message via `ConnectionManager` → 60s countdown → redirect to `/chat/<match_id>`
-6. Chat starts → timer from `CONFIG.CHAT_DURATION` (default: 30s, configurable via `app/static/js/config.js`) + prompts from `GET /api/prompts`
+6. Chat starts → timer from `CONFIG.CHAT_DURATION` (default: 30s, configurable via `frontend/src/config/constants.ts`) + prompts from `GET /api/prompts`
 7. After chat → `POST /api/matches/<id>/connect` → `connection_exchanged` or `connection_declined` broadcast via `ConnectionManager`
 
 ### REST API Endpoints
@@ -456,9 +470,8 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 - Clear separation of concerns
 
 ### Why Organized `static/`?
-- `css/` and `js/` subfolders follow web development conventions
-- Easier to find and manage assets as project grows
-- HTML templates reference with: `{{ url_for('static', filename='css/style.css') }}`
+- `css/` subfolder follows web development conventions
+- Served at `/static/css/style.css` — imported by React SPA at build time
 
 ### Why `data/` Folder?
 - Isolates database file from application code
@@ -493,15 +506,27 @@ app/
 ## Running the Application
 
 ```bash
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Build frontend (required before first run and after any frontend changes)
+cd frontend
+npm install
+npm run build
+cd ..
 
 # Run the application (from project root)
 python -m app
 
 # Open browser
 http://localhost:5000
+
+# Development — run frontend dev server with hot reload (separate terminal)
+cd frontend
+npm run dev        # Starts Vite on port 3000, proxies /api and /ws to backend
 ```
+
+> **Production:** Set `ENV=production` environment variable and configure CORS origins via FastAPI middlewares in `app/__init__.py`.
 
 ---
 
@@ -518,9 +543,9 @@ http://localhost:5000
 3. Update the WebSocket Events table in this document's Data Flow section
 
 ### Changing Timer Durations
-1. Edit `app/static/js/config.js` (for frontend timers)
+1. Edit `frontend/src/config/constants.ts` (for frontend timers)
 2. Edit `app/state.py` (for backend constants)
-3. Run tests to verify
+3. Run `python tests/test_app.py && python tests/test_js_modules.py` and `cd frontend && npm test` to verify
 
 ### Adding a New Documentation File
 1. Create in `docs/` folder
