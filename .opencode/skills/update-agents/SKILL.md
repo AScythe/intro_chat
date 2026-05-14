@@ -21,38 +21,37 @@ Analyze the codebase and session history, then update or create `docs/AGENTS.md`
 ### Quality Gates
 Every piece of content must pass these checks:
 
-- **"Would an agent miss this?" litmus test:** Every line must answer "Would an agent likely miss this without help?" If not, leave it out.
+- **"Would an agent or developer miss this?" litmus test:** Every line must answer "Would an agent or developer likely miss this without help?" If not, leave it out.
 - **Executable sources of truth:** Prefer configs, scripts, and CI files over prose documentation. If docs conflict with executable sources, trust the executable source.
 - **Simple-repo handling:** If the repo is simple, keep the file simple. When in doubt, omit.
+- **Conciseness:** Agents read the full file on every task — omit anything an agent could infer, redundant examples, or content that doesn't affect agent behavior.
 
 ### What to Include
-- Project overview (1 paragraph + key functionalities summary)
-- Architecture summary + entrypoints — key components and where the app starts, enough to navigate; 3-5 lines maximum. Full detail goes in `ARCHITECTURE.md`.
-- Environment setup — **agent-specific only**: non-interactive invocation, headless env vars, Python version, venv activation. User-facing install steps go in `README.md`.
-- File ownership table — location, role, agent policy (✅ safe / ⚠️ caution / ❌ forbidden). Every entry must include a policy column — file names alone are not enough.
-- Core commands (setup + test commands with exact syntax)
+- File ownership table — location, role, agent policy (⚠️ caution / ❌ forbidden). Include only files with non-default agent policies — omit ✅ safe files.
 - Agent behavioral rules organized by workflow phase — explicit always/never directives, no "consider" or "try to". Verification requirements embedded within each phase's rules, not in a separate section.
-- Cross-references — `ARCHITECTURE.md`, `SPECIFICATIONS.md`, and any other docs an agent should consult. Cross-reference instead of duplicating content.
+- Context Window Discipline — Grep→Read patterns for minimizing context waste.
+- Doc Sync Triggers — table mapping change types to the doc sync skill to run.
+- Failure Triage — classification table for test failures with action for each type.
+- Cross-Phase Universal Rules — rules that apply to every phase and override phase-specific rules.
 
 ### What NOT to Include
 
-| Document | Routes content about | Audience | Content Type |
-|----------|---------------------|----------|--------------|
-| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | User-facing, practical |
-| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical, implementation |
-| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product, pitch, vision, spec, privacy |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical, step-by-step |
-| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints ✅ | AI agents | Operational, constraints |
-| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | Educational, guidelines |
-| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Meta, governance |
+| Document | Scope | Audience | Content Type | Canonical Source Of |
+|----------|-------|----------|--------------|-------------------|
+| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start, troubleshooting |
+| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | API endpoints, WebSocket events, module descriptions, import graph, design decisions (technical) |
+| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product / Vision | Product vision, user journey, feature rationale, privacy model, design decisions (product), out-of-scope boundaries |
+| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options, reset instructions |
+| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership policies, doc sync triggers, failure triage, cross-phase universal rules |
+| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies, transferable patterns |
+| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries (no dedicated skill) |
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — `[See ARCHITECTURE.md](ARCHITECTURE.md)` instead of duplicating
-- Summary here, details there — AGENTS.md gets navigation-level behavioral rules; other docs get full detail
+- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` instead of duplicating
+- Summary here, details there — each document gets its appropriate level of detail; cross-reference for full content
 - Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
-- If content belongs elsewhere, note with `→ Redirect to <filename>` — do not include it
-- No generic advice, speculative claims, or unverifiable assertions
+- If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
 ---
 
@@ -70,30 +69,49 @@ For each source, extract items from **What to Include** — files, commands, env
 
 **Ask the user** only when the repo can't answer: undocumented team conventions, missing prereqs. One short batch. Never ask what the repo makes clear.
 
+**Check session history** for behavioral rule updates, file ownership changes, and any agent-facing decisions that affect what AGENTS.md should document.
+
 ### 2. Read the Current Document
 - Check if `docs/AGENTS.md` exists — create if not
 - Read section by section; flag outdated or missing items from **What to Include**
+- Flag content that violates the boundary rules above
 
 ### 3. Identify Gaps and Issues
 For each **What to Include** item: does it exist? Is it accurate?
 For each existing section: does it belong here per **What NOT to Include**? If not → redirect.
 
+### 3.5 Extract Cross-Phase Patterns from Skills
+Read `.opencode/skills/*/SKILL.md` (all current skills) and identify rules or patterns that appear in two or more skills. These are **universalization candidates** — patterns that should be elevated to Cross-Phase Universal Rules so each skill doesn't duplicate them.
+
+For each candidate:
+1. Does it pass the **"Would an agent miss this?"** litmus test? If it's obvious or already well-covered by existing universal rules, skip it.
+2. Is the duplicated text word-for-word identical or semantically equivalent across skills? If yes, it's a good candidate.
+3. Does it apply to all or most Build phases? If it only applies to one specific skill, leave it phase-specific.
+
+If candidates are found:
+- Add them as new Cross-Phase Universal Rules in AGENTS.md
+- Prune the redundant copies from individual phase rules (replace with a brief cross-reference or remove if fully covered)
+
 ### 4. Update the Document
-- Add missing sections, fix outdated content
-- Redirect out-of-scope content per **What NOT to Include**
+- Add missing sections
+- Fix outdated content to match the codebase
+- Remove or redirect out-of-scope content per the **What NOT to Include** table
 - Don't rewrite the entire document — only update what's changed
 - Keep concise — agents read the full file on every task
 
 ### 5. Verify
-- [ ] Content's PRIMARY purpose identified and routed to the correct document
-- [ ] Content doesn't already exist in another document — cross-reference instead of duplicate
-- [ ] File ownership table covers all current files with explicit policies (✅ / ⚠️ / ❌)
+
+**Integrity & Scope:**
+- [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
+- [ ] No content duplicated from another document — use `[See <DOC>.md](<DOC>.md)` cross-references instead
+- [ ] All claims verified against executable sources (code, config, workflows), not just docs
+- [ ] Every line passes the litmus test defined in Quality Gates
+- [ ] Document omits everything an agent doesn't need — no speculative, aspirational, or unverifiable content
+
+**Document-Specific Checks:**
+- [ ] File ownership table covers all files with non-default policies (⚠️ / ❌) — accurate and complete
 - [ ] All commands are accurate and runnable with exact syntax
-- [ ] Framework/toolchain quirks captured if present
-- [ ] Architecture summary is 3-5 lines maximum — full detail cross-referenced to `ARCHITECTURE.md`
+- [ ] Agent behavioral rules are imperative — "always/never", not "consider" or "try to"
+- [ ] Cross-phase universal rules are not duplicated in phase-specific sections
 - [ ] Cross-references to `ARCHITECTURE.md` and `SPECIFICATIONS.md` are accurate
-- [ ] Agent behavioral rules are imperative — "always/never", not "consider"
-- [ ] Every line passes the "Would an agent miss this?" litmus test
-- [ ] All content verified against executable sources, not just docs
-- [ ] No excluded content remains — redirected if needed
-- [ ] Document is concise enough for an agent to read 
+- [ ] Framework/toolchain quirks are documented if present

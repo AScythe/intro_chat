@@ -20,44 +20,45 @@ Mine the codebase and session history, then update or create `README.md` so new 
 ## Content Rules
 
 ### Quality Gates
-Every piece of content must pass these three checks:
+Every piece of content must pass these five checks:
 
+- **"Would a first-time visitor miss this?" litmus test:** Every line must answer "Would a non-technical first-time visitor likely miss this without help?" If not, leave it out.
 - **User-facing language:** Describe benefits and outcomes, not implementation details. A non-technical first-time visitor should understand it.
 - **Accuracy against current project:** Every claim about setup, features, and usage must be verifiable against the actual codebase.
 - **Minimum necessary detail:** If a non-technical first-time visitor wouldn't care about it, it doesn't belong here.
+- **User-friendly formatting:** Emojis are acceptable in feature lists, headings, and success metrics to improve scannability for a non-technical audience.
 
 ### What to Include
 - Project description and tagline — what it is and why it exists, in one paragraph
-- Feature list — user-facing benefits, not technical internals. Describe what users can do, not how it works.
-- Quick start instructions — condensed only: install dependencies, run the app, minimum steps to get going. Link to `ARCHITECTURE.md` for the full technical startup sequence.
+- Feature list — user-facing benefits, not technical internals.
+- Quick start instructions — condensed only: install dependencies, run the app, minimum steps to get going.
 - How to use — step-by-step for each user type (organizer, attendee). Show the workflow from their perspective.
-- Technical details — high-level only: tech stack and simplified architecture, max 2-3 paragraphs. Enough for a curious user to understand the stack, not enough to build from. One-liner per technology (e.g., "Built with FastAPI + SQLite"). Full tech stack rationale goes in `SPECIFICATIONS.md`.
-- API endpoints — one-line cross-reference only: "See [ARCHITECTURE.md](ARCHITECTURE.md) for full endpoint and WebSocket event tables." Do not duplicate endpoint tables here.
-- Testing instructions — link to contributing guide; do not own full test documentation here
-- Deployment options — how to deploy for production use
-- Privacy and security information — user-facing summary only: what data is collected, what is not, and what users control. Full privacy model and hard constraints go in `SPECIFICATIONS.md`.
-- Value proposition and success metrics — user-facing description of what users gain from the product and how it makes them feel (e.g., safe, confident, connected)
-- Pitch line — one-sentence summary of the product's core value, expressed in user-facing language
-- Troubleshooting common issues — problems users have encountered and how to resolve them
+- Technical details — high-level only: tech stack and simplified architecture, max 2-3 paragraphs. One-liner per technology.
+- Testing instructions — inline runnable commands for common test suites.
+- Deployment options — how to deploy for production use.
+- Privacy and security information — user-facing summary only: what data is collected, what is not, and what users control.
+- Value proposition and success metrics — user-facing description of what users gain from the product.
+- Pitch line — one-sentence summary of the product's core value, expressed in user-facing language.
+- Troubleshooting common issues — problems users have encountered and how to resolve them.
 
 ### What NOT to Include
 
-| Document | Routes content about | Audience | Content Type |
-|----------|---------------------|----------|--------------|
-| **README.md** | User-facing setup, usage, features, benefits, installation ✅ | End users, new developers | User-facing, practical |
-| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical, implementation |
-| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product, pitch, vision, spec, privacy |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical, step-by-step |
-| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents | Operational, constraints |
-| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | Educational, guidelines |
-| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Meta, governance |
+| Document | Scope | Audience | Content Type | Canonical Source Of |
+|----------|-------|----------|--------------|-------------------|
+| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start, troubleshooting |
+| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | API endpoints, WebSocket events, module descriptions, import graph, design decisions (technical) |
+| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product / Vision | Product vision, user journey, feature rationale, privacy model, design decisions (product), out-of-scope boundaries |
+| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options, reset instructions |
+| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership policies, doc sync triggers, failure triage, cross-phase universal rules |
+| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies, transferable patterns |
+| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries (no dedicated skill) |
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — `[See ARCHITECTURE.md](ARCHITECTURE.md)` instead of duplicating content
-- Summary here, details there — README gets summary and navigation-level overviews; other docs get full detail
+- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` instead of duplicating
+- Summary here, details there — each document gets its appropriate level of detail; cross-reference for full content
 - Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
-- If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in `README.md`
+- If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
 ---
 
@@ -81,6 +82,10 @@ For each source, extract:
 
 Focus on *what the user experiences*, not *how it's built internally*.
 
+**Ask the user** only when the codebase can't answer: target audience preferences, expected user expertise level. One short batch. Never ask what the code makes clear.
+
+**Check session history** for user-facing changes reported during the session — feature changes, setup step changes, configuration changes.
+
 ### 2. Read the Current Document
 - Check if `README.md` exists — create it if not
 - Read existing content section by section
@@ -101,26 +106,30 @@ For each existing section:
 ### 4. Update the Document
 - Add missing sections
 - Fix outdated content to match the codebase
-- Remove or redirect out-of-scope content
+- Remove or redirect out-of-scope content per the **What NOT to Include** table
+- Don't rewrite the entire document — only update what's changed
 - Keep language user-facing — benefits, outcomes, not implementation
-- Quick start steps must work based on actual project files; link to `ARCHITECTURE.md` for full detail
+- Quick start steps must work based on actual project files; include venv setup and path-drift warning where applicable
 - Technical details: high-level only (max 2-3 paragraphs), one-liner per technology
 - API endpoints: one-line cross-reference to `ARCHITECTURE.md` only — no tables here
 - Privacy: user-facing summary only — link to `SPECIFICATIONS.md` for full model
-- Don't rewrite the entire document — only update outdated or missing sections
 - Keep it concise — all critical information for users and new developers, no implementation detail
 
 ### 5. Verify
-- [ ] Content's PRIMARY purpose identified and routed to the correct document
-- [ ] Content doesn't already exist in another document — cross-reference instead of duplicate
+
+**Integrity & Scope:**
+- [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
+- [ ] No content duplicated from another document — use `[See <DOC>.md](<DOC>.md)` cross-references instead
+- [ ] All claims verified against the current codebase
+- [ ] Every line passes the litmus test defined in Quality Gates
+- [ ] Document omits everything a non-technical first-time visitor doesn't need — no speculative, aspirational, or unverifiable content
+
+**Document-Specific Checks:**
 - [ ] Features section describes user benefits, not technical internals
-- [ ] Value proposition and success metrics written in user-facing language (how the product makes users feel)
-- [ ] Pitch line is a one-sentence user-facing summary — not a technical description
+- [ ] Value proposition and success metrics written in user-facing language
+- [ ] Pitch line is a one-sentence user-facing summary
 - [ ] Technical details are high-level only (max 2-3 paragraphs, one-liner per technology)
-- [ ] Quick start is condensed only — links to `ARCHITECTURE.md` for full startup sequence
+- [ ] Quick start is the canonical source for install/run commands — condensed and accurate
 - [ ] Install and run steps work based on actual project files
+- [ ] If features were added/removed/renamed, verify README (benefits), SPECS (rationale), and DEMO_GUIDE (demo steps) are all synced
 - [ ] Language is appropriate for a non-technical first-time visitor
-- [ ] Every claim verified against the current codebase
-- [ ] No excluded content remains — redirected if needed
-- [ ] Every line passes the "Would someone miss this?" litmus test
-- [ ] Document is concise — no unnecessary detail, but all critical information for users is included

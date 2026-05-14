@@ -29,7 +29,7 @@ Follow this layered analysis pipeline — all read-only:
 - Map the task type to the right document:
   - Product vision / user flow → `SPECIFICATIONS.md` (read: "Problem", "Solution", "How It Works", "User Flow" sections)
   - Module structure / data flow / API → `ARCHITECTURE.md` (read: "Project Structure", "Module Descriptions" relevant entries, "Import Structure", "Modifying Instructions")
-  - Setup / configuration / agent rules / Out of Scope → `AGENTS.md` (read: "File Ownership", "Core Commands"), `SPECIFICATIONS.md` (read: "Out of Scope")
+  - Setup / configuration / agent rules / Out of Scope → `AGENTS.md` (read: "File Ownership", "Context Window Discipline", "Failure Triage"), `SPECIFICATIONS.md` (read: "Out of Scope")
 - PROJECT_BEST_PRACTICES.md is excluded at this stage — coding patterns are implementation concerns, not planning concerns.
 
 **Layer 2: Spot-check doc accuracy**

@@ -38,6 +38,7 @@ Create the plan file at `docs/plans/PLAN_YYYY_MM_DD_XXX.md`:
 ### Approach & Design Decisions
 ### Edge Cases
 ### Testing Strategy (TDD)
+### Task Breakdown
 ### Success Criteria
 
 ---
@@ -50,9 +51,28 @@ Create the plan file at `docs/plans/PLAN_YYYY_MM_DD_XXX.md`:
 Populate each section from conversation context:
 - **Requirements / Problem** — from the user's initial request and analyze-and-plan's understanding
 - **Solution** — from analyze-and-plan's plan
-- **Implementation Plan** — files, approach, edge cases, testing strategy, success criteria
+- **Implementation Plan** — files, approach, edge cases, testing strategy, task breakdown, success criteria
 - **Grill Outcomes** — resolved dimensions from grill-and-refine's Phase 3 output
 - **Readiness Gate Results** — append after gates below
+
+#### Task Breakdown Guidelines
+
+The **Task Breakdown** subsection must decompose the implementation into a sequence of logical, independently testable tasks organized by phase:
+
+1. **Group by phase** — organize tasks into phases (e.g., Foundation → State Layer → Components → Pages → Integration). Each phase has a clear prerequisite.
+
+2. **Each task must specify**:
+   - **What** — one clear unit of work (create a file, modify a module, extract logic)
+   - **Files** — every file touched by this task, with a brief purpose
+   - **Dependencies** — which earlier tasks must be complete first
+   - **Tests** — what specific test cases validate this task (use TDD: test before code)
+   - **Verification** — how to confirm the task is done (e.g., `npm test` passes, specific test names pass)
+
+3. **Task numbering** — sequential numbers across all phases (Task 1, Task 2, ...) makes cross-referencing easy.
+
+4. **Independently verifiable** — each task must be testable in isolation. Never merge two unrelated changes into one task.
+
+5. **Phase headers** — use `#### Phase N: Name` to separate groups. Include a brief summary of the phase's purpose.
 
 ## Gates
 **Only write code when all gates are clear.**

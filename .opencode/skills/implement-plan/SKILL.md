@@ -16,7 +16,7 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 Read specific sections via Grep→Read (grep heading line number, Read with offset/limit):
 
-- **`AGENTS.md`**: "File Ownership", "Core Commands"
+- **`AGENTS.md`**: "File Ownership", "Failure Triage", "Cross-Phase Universal Rules"
 - **`SPECIFICATIONS.md`**: "Out of Scope"
 - **`ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only
 
@@ -59,6 +59,7 @@ Read specific sections via Grep→Read (grep heading line number, Read with offs
 - Do not mix unrelated concerns in the same batch
 - If a change touches multiple files, they belong in the same batch
 - Every batch that adds or modifies logic must include its test file(s) in `tests/`. A batch is not complete until its tests are saved and passing.
+- **When a batch modifies existing code** (rename, signature change, behavioral change), update ALL test references to that code in the **same batch** — import paths, function names, mock setups, and assertion expectations. Source and tests are a single unit; never split them across batches.
 
 ### 4. Simplicity First
 **Minimum code that solves the problem. Nothing speculative.**
@@ -80,6 +81,13 @@ When editing existing code:
 - Just do what is required. Match existing style.
 - Flag unrelated dead code. Do not delete it.
 - Never remove file-level description comments (the docstring or comment block at the top of a file describing its purpose and responsibility). You may edit them to improve accuracy or align with actual functionality after your changes, but do not delete them.
+
+When creating new files:
+- Every new file must include a file-level description comment matching the project convention:
+  - `.py`: `# filename.py` + `# Description: ...`
+  - `.ts` / `.tsx`: `// filename.ext` + `// Description: ...`
+  - `.css`: `/* filename.ext */` + `/* Description: ... */`
+- The description must state the module's single responsibility in one concise line.
 
 When your changes create orphans:
 - Remove imports, variables, or functions that your changes made unused.
