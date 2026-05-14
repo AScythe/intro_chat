@@ -1,5 +1,5 @@
 # state.py
-# Description: Server-global in-memory state — active users, active matches, waiting queue, conversation prompts, and timer configuration constants shared across all modules
+# Description: Server-global in-memory state — active users, active matches, waiting queue, and conversation prompts shared across all modules
 # ====
 # Shared across routes, socket events, and background tasks. Do NOT import directly
 # in modules that may cause circular imports — use: from state import active_users, etc.
@@ -33,9 +33,3 @@ CONVERSATION_PROMPTS = [
     "If you could build any app, what would it be?",
     "What's your favorite way to unwind after a long day of coding?"
 ]
-
-# Backend timer configuration constants
-# These replace hardcoded values in the original app.py.
-MATCH_EXPIRY_MINUTES = 2           # How long a match is valid in DB (informational)
-CLEANUP_INTERVAL_SECONDS = 60      # How often to check for expired matches
-CLEANUP_THRESHOLD_SECONDS = 300    # Remove matches older than this (5 minutes)

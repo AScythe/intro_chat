@@ -1,6 +1,7 @@
 # routes.py
 # Description: FastAPI APIRouter with all HTTP route handlers for page rendering (index, user info, room, chat) plus REST API endpoints and WebSocket handler for events, users, rooms, matches, QR codes, and conversation prompts
 # ====
+import os
 from fastapi import APIRouter, Request, HTTPException, WebSocket
 from fastapi.responses import JSONResponse
 from starlette.websockets import WebSocketDisconnect
@@ -18,29 +19,10 @@ DEFAULT_ROOMS = ['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table
 router = APIRouter()
 
 @router.get('/')
-async def index(request: Request):
-    from app import templates
-    return templates.TemplateResponse('index.html', {'request': request})
-
-@router.get('/join/{event_id}')
-async def user_info(request: Request, event_id: str):
-    from app import templates
-    return templates.TemplateResponse('user_info.html', {'request': request, 'event_id': event_id})
-
-@router.get('/room/{event_id}')
-async def room_selection(request: Request, event_id: str):
-    from app import templates
-    return templates.TemplateResponse('room.html', {'request': request, 'event_id': event_id})
-
-@router.get('/chat/{match_id}')
-async def chat_room(request: Request, match_id: str):
-    event_id = ''
-    if match_id in active_matches:
-        match = active_matches[match_id]
-        user1 = active_users.get(match.get('user1_id'), {})
-        event_id = user1.get('event_id', '')
-    from app import templates
-    return templates.TemplateResponse('chat.html', {'request': request, 'match_id': match_id, 'event_id': event_id})
+async def index():
+    from fastapi.responses import HTMLResponse
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'dist', 'index.html')) as f:
+        return HTMLResponse(content=f.read())
 
 @router.post('/api/events')
 async def create_event(data: CreateEventRequest):

@@ -2,7 +2,8 @@
 # Description: Daemon background thread that periodically checks for and removes expired matches from in-memory state to prevent stale data accumulation
 # ====
 
-from .state import active_matches, CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
+from .state import active_matches
+from .config import CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
 import time
 import threading
 

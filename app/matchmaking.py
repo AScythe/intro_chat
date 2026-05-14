@@ -34,7 +34,7 @@ async def find_match(user_id):
         }
 
 async def create_match(user1_id, user2_id, room_id):
-    from .state import MATCH_EXPIRY_MINUTES
+    from .config import MATCH_EXPIRY_MINUTES
     match_id = str(uuid.uuid4())[:8]
     expires_at = datetime.now() + timedelta(minutes=MATCH_EXPIRY_MINUTES)
     async with aiosqlite.connect(DB_PATH) as db:
