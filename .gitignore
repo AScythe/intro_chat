@@ -55,3 +55,7 @@ build/
 # Opencode folders
 # .opencode/
 .opencode/node_modules/
+
+# Frontend
+node_modules/
+frontend/dist/
