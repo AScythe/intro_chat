@@ -114,19 +114,25 @@ def test_file_structure():
         'app/tasks.py',
         'requirements.txt',
         'docs/README.md',
-        'app/templates/index.html',
-        'app/templates/room.html',
-        'app/templates/chat.html',
-        'app/templates/user_info.html',
+        'frontend/package.json',
+        'frontend/index.html',
+        'frontend/src/main.tsx',
+        'frontend/src/App.tsx',
+        'frontend/src/types/api.ts',
+        'frontend/src/api/client.ts',
+        'frontend/src/utils/format.ts',
+        'frontend/src/utils/storage.ts',
+        'frontend/src/hooks/useSocket.ts',
+        'frontend/src/hooks/useTimer.ts',
+        'frontend/src/context/SocketContext.tsx',
+        'frontend/src/context/UserContext.tsx',
+        'frontend/src/pages/HomePage.tsx',
+        'frontend/src/pages/UserInfoPage.tsx',
+        'frontend/src/pages/RoomPage.tsx',
+        'frontend/src/pages/ChatPage.tsx',
+        'frontend/src/components/Timer.tsx',
+        'frontend/src/components/PersonCard.tsx',
         'app/static/css/style.css',
-        'app/static/js/home.js',
-        'app/static/js/user-info.js',
-        'app/static/js/config.js',
-        'app/static/js/room.js',
-        'app/static/js/chat.js',
-        'app/static/js/dom-utils.js',
-        'app/static/js/api-utils.js',
-        'app/static/js/timer-utils.js',
         'app/__main__.py',
         'tests/test_db.py',
         '.gitattributes'
@@ -206,7 +212,7 @@ def test_state_constants():
     """Test that state constants are correctly defined"""
     print("🧪 Testing state constants...")
 
-    from app.state import MATCH_EXPIRY_MINUTES, CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
+    from app.config import MATCH_EXPIRY_MINUTES, CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
 
     if MATCH_EXPIRY_MINUTES == 2:
         print(f"✅ MATCH_EXPIRY_MINUTES = {MATCH_EXPIRY_MINUTES}")
@@ -501,7 +507,8 @@ def test_cleanup_expired_matches():
     """Test cleanup threshold logic — old matches get removed, new ones stay"""
     print("🧪 Testing cleanup expired matches...")
 
-    from app.state import active_matches, CLEANUP_THRESHOLD_SECONDS
+    from app.state import active_matches
+    from app.config import CLEANUP_THRESHOLD_SECONDS
     import time
 
     # Add a new match (should NOT be cleaned up)
@@ -615,54 +622,25 @@ def test_websocket_connection():
 
 
 def test_template_pages():
-    """Test that template pages render correctly"""
-    print("🧪 Testing template pages...")
+    """Test that SPA pages render correctly (all return index.html)"""
+    print("🧪 Testing SPA pages...")
 
     client = TestClient(app)
 
-    # User info page
-    resp = client.get('/join/test_event')
-    assert resp.status_code == 200
-    assert 'test_event' in resp.text
-    print("✅ /join/<event_id> renders")
+    # All client-side routes return the SPA index.html
+    for path in ['/', '/join/test_event', '/room/test_event', '/chat/test_match']:
+        resp = client.get(path)
+        assert resp.status_code == 200
+        assert '<div id="root">' in resp.text
+    print("✅ All SPA routes return index.html")
 
-    # Room selection page
-    resp = client.get('/room/test_event')
-    assert resp.status_code == 200
-    assert 'test_event' in resp.text
-    print("✅ /room/<event_id> renders")
-
-    # Chat page — requires active match in state
-    from app.state import active_users, active_matches
-    test_match_id = 'chat_page_test'
-    active_matches[test_match_id] = {
-        'user1_id': 'chat_u1',
-        'user2_id': 'chat_u2',
-        'room_id': 'chat_r1',
-        'created_at': time.time()
-    }
-    active_users['chat_u1'] = {
-        'event_id': 'chat_event',
-        'username': 'ChatUser1',
-        'room_id': 'chat_r1'
-    }
-    resp = client.get(f'/chat/{test_match_id}')
-    assert resp.status_code == 200
-    assert test_match_id in resp.text
-    print("✅ /chat/<match_id> renders")
-
-    # Cleanup
-    if test_match_id in active_matches:
-        del active_matches[test_match_id]
-    if 'chat_u1' in active_users:
-        del active_users['chat_u1']
-
-    # Chat page with nonexistent match — still renders
+    # SPA returns index.html even for unknown paths
     resp = client.get('/chat/nonexistent')
     assert resp.status_code == 200
-    print("✅ /chat/<id> renders even for missing match")
+    assert '<div id="root">' in resp.text
+    print("✅ /chat/<id> renders for unknown match (SPA catch-all)")
 
-    print("✅ Template pages test completed\n")
+    print("✅ SPA pages test completed\n")
 
 
 def main():

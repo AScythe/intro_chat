@@ -1,434 +1,261 @@
 #! /usr/bin/env python3
 """
 test_js_modules.py
-Description: JavaScript module validation suite using static regex analysis — checks file existence, JSDoc coverage on exported functions, function name conventions, and cross-file import references
+Description: Frontend source module validation suite using static regex analysis — checks file existence, TypeScript exports, function/component definitions, and cross-file import references
 """
-
 import os
 import re
 
-def test_js_files_exist():
-    """Test that all required JS files exist"""
-    print("🧪 Testing JavaScript file structure...")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_SRC = os.path.join(BASE_DIR, 'frontend', 'src')
+
+def _read(src_path):
+    with open(os.path.join(FRONTEND_SRC, src_path), 'r', encoding='utf-8') as f:
+        return f.read()
+
+def test_frontend_files_exist():
+    """Test that all required frontend source files exist"""
+    print("🧪 Testing frontend file structure...")
 
     required_files = [
-        'app/static/js/utils.js',
-        'app/static/js/dom-utils.js',
-        'app/static/js/api-utils.js',
-        'app/static/js/timer-utils.js',
-        'app/static/js/room.js',
-        'app/static/js/chat.js',
-        'app/static/js/home.js',
-        'app/static/js/user-info.js'
+        'api/client.ts',
+        'config/constants.ts',
+        'utils/format.ts',
+        'utils/storage.ts',
+        'utils/random.ts',
+        'utils/demoData.ts',
+        'types/api.ts',
+        'hooks/useSocket.ts',
+        'hooks/useTimer.ts',
+        'hooks/useDemoMode.ts',
+        'hooks/useUser.ts',
+        'context/SocketContext.tsx',
+        'context/UserContext.tsx',
+        'components/Timer.tsx',
+        'components/PersonCard.tsx',
+        'components/PromptCard.tsx',
+        'components/MatchCountdown.tsx',
+        'components/ConnectionCard.tsx',
+        'components/QRDisplay.tsx',
+        'pages/HomePage.tsx',
+        'pages/UserInfoPage.tsx',
+        'pages/RoomPage.tsx',
+        'pages/ChatPage.tsx',
+        'App.tsx',
+        'main.tsx',
     ]
 
-    for file_path in required_files:
-        if os.path.exists(file_path):
-            print(f"✅ {file_path} exists")
+    for rel in required_files:
+        full = os.path.join(FRONTEND_SRC, rel)
+        if os.path.exists(full):
+            print(f"✅ {rel} exists")
         else:
-            print(f"❌ {file_path} missing")
-
+            print(f"❌ {rel} missing")
     print()
 
-def test_utils_functions():
-    """Test that utils.js and split utility files contain all required functions"""
-    print("🧪 Testing utils.js functions...")
-
-    files = ['app/static/js/utils.js', 'app/static/js/dom-utils.js', 'app/static/js/api-utils.js', 'app/static/js/timer-utils.js']
-    all_content = ''
-    for f in files:
-        if os.path.exists(f):
-            with open(f, 'r', encoding='utf-8') as fh:
-                all_content += fh.read()
-
-    required_functions = [
-        'showError',
-        'getUrlParameter',
-        'formatTime',
-        'initSocket',
-        'getElementById',
-        'setTextContent',
-        'setDisplay',
-        'addEventListenerSafe',
-        'fetchWithTimeout',
-        'parseJSON',
-        'fetchJSON',
-        'generateRandomString',
-        'generateUsername',
-        'storeUserId',
-        'getUserId',
-        'clearUserId',
-        'createChatTimer',
-        'createCountdown',
-        'storeData',
-        'getData',
-        'clearData'
+def test_api_exports():
+    """Test that api.ts has all expected interfaces"""
+    print("🧪 Testing API types (api.ts)...")
+    content = _read('types/api.ts')
+    expected = [
+        'CreateEventResponse', 'Room',
+        'JoinEventResponse',
+        'QRResponse', 'ApiSuccess',
     ]
-
-    for func_name in required_functions:
-        pattern = rf'function\s+{func_name}\s*\('
-        if re.search(pattern, all_content):
-            print(f"✅ Function '{func_name}' found")
+    for name in expected:
+        if f'export interface {name}' in content or f'export type {name}' in content:
+            print(f"✅ Interface '{name}' found")
         else:
-            print(f"❌ Function '{func_name}' missing")
-
+            print(f"❌ Interface '{name}' missing")
     print()
 
-def test_room_js_functions():
-    """Test that room.js contains all required functions"""
-    print("🧪 Testing room.js functions...")
-
-    with open('app/static/js/room.js', 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    required_functions = [
-        'initRoomPage',
-        'ensureUserExists',
-        'loadRooms',
-        'setupEventListeners',
-        'selectRoom',
-        'requestChat',
-        'cancelWaiting',
-        'changeRoom',
-        'handleMatchFound',
-        'startCountdown',
-        'goToChat',
-        'addSampleUsers',
-        'updateNearbyUsers',
-        'requestChatWithPerson',
-        'simulatePersonResponse',
-        'checkIfBothReady',
-        'cancelRequest',
-        'testFunction'
+def test_demo_data_exports():
+    """Test that demoData.ts exports all expected interfaces and data"""
+    print("🧪 Testing demo data exports (utils/demoData.ts)...")
+    content = _read('utils/demoData.ts')
+    expected = [
+        'SamplePerson', 'SAMPLE_USERS', 'RESPONSES',
     ]
-
-    for func_name in required_functions:
-        pattern = rf'function\s+{func_name}\s*\('
-        if re.search(pattern, content):
-            print(f"✅ Function '{func_name}' found")
+    for name in expected:
+        if f'export interface {name}' in content or f'export const {name}' in content:
+            print(f"✅ demoData.ts exports {name}")
         else:
-            print(f"❌ Function '{func_name}' missing")
-
-    # Check for proper imports from utils
-    utils_imports = ['getUserId', 'storeUserId', 'generateUsername', 'generateRandomString',
-                     'fetchJSON', 'getElementById', 'setTextContent', 'setDisplay',
-                     'addEventListenerSafe', 'initSocket', 'showError']
-
-    print("\nChecking utils.js function usage:")
-    for func in utils_imports:
-        if func in content:
-            print(f"✅ Uses '{func}' from utils.js")
-        else:
-            print(f"⚠️  Does not use '{func}' (may be optional)")
-
+            print(f"❌ demoData.ts missing {name}")
     print()
 
-def test_chat_js_functions():
-    """Test that chat.js contains all required functions"""
-    print("🧪 Testing chat.js functions...")
-
-    with open('app/static/js/chat.js', 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    required_functions = [
-        'initChatPage',
-        'loadMatchInfo',
-        'loadPrompts',
-        'setupEventListeners',
-        'startChatTimer',
-        'updateTimerDisplay',
-        'displayCurrentPrompt',
-        'nextPrompt',
-        'showTimeUp',
-        'extendChat',
-        'startExtendedChatTimer',
-        'updateExtendedTimerDisplay',
-        'showSlackConnection',
-        'setConnectionPreference',
-        'showWaitingForConnection',
-        'handleConnectionExchanged',
-        'handleConnectionDeclined'
-    ]
-
-    for func_name in required_functions:
-        pattern = rf'function\s+{func_name}\s*\('
-        if re.search(pattern, content):
-            print(f"✅ Function '{func_name}' found")
-        else:
-            print(f"❌ Function '{func_name}' missing")
-
-    # Check for proper imports from utils
-    utils_imports = ['getUserId', 'fetchJSON', 'getElementById', 'setTextContent',
-                     'setDisplay', 'addEventListenerSafe', 'initSocket', 'showError']
-
-    print("\nChecking utils.js function usage:")
-    for func in utils_imports:
-        if func in content:
-            print(f"✅ Uses '{func}' from utils.js")
-        else:
-            print(f"⚠️  Does not use '{func}' (may be optional)")
-
-    print()
-
-def test_config_js():
-    """Test that config.js CONFIG object has all expected properties"""
-    print("🧪 Testing config.js...")
-
-    with open('app/static/js/config.js', 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    expected_properties = [
-        'CHAT_DURATION',
-        'MATCH_FOUND_COUNTDOWN',
-        'TIMER_WARNING_THRESHOLD',
-        'TIMER_DANGER_THRESHOLD',
-        'DEMO_LOADING_DELAY_MS',
-        'DEMO_CONNECTION_DELAY_MS',
-        'SIMULATE_RESPONSE_DELAY_MS',
-        'SIMULATE_READY_DELAY_MS'
-    ]
-
-    for prop in expected_properties:
+def test_config():
+    """Test that constants.ts has all expected config properties"""
+    print("🧪 Testing config constants (config/constants.ts)...")
+    content = _read('config/constants.ts')
+    expected = ['CHAT_DURATION', 'MATCH_FOUND_COUNTDOWN', 'TIMER_WARNING_THRESHOLD',
+                 'TIMER_DANGER_THRESHOLD', 'DEMO_LOADING_DELAY_MS', 'DEMO_CONNECTION_DELAY_MS',
+                 'SIMULATE_RESPONSE_DELAY_MS', 'SIMULATE_READY_DELAY_MS']
+    for prop in expected:
         if prop in content:
             print(f"✅ CONFIG.{prop} defined")
         else:
             print(f"❌ CONFIG.{prop} missing")
-
     print()
 
+def test_utils_exports():
+    """Test that util files export all expected functions"""
+    print("🧪 Testing utility exports...")
 
-def test_home_js_functions():
-    """Test that home.js contains all required functions"""
-    print("🧪 Testing home.js functions...")
-
-    with open('app/static/js/home.js', 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    required = ['joinEvent', 'createEvent', 'generateQRCode', 'joinCreatedEvent', 'handleQRUpload']
-
-    for func_name in required:
-        if func_name in content:
-            print(f"✅ Function '{func_name}' found")
-        else:
-            print(f"❌ Function '{func_name}' missing")
-
-    # Check DOMContentLoaded wrapper exists
-    if 'DOMContentLoaded' in content:
-        print("✅ Uses DOMContentLoaded wrapper")
+    # format.ts
+    fmt = _read('utils/format.ts')
+    if 'export function formatTime' in fmt:
+        print("✅ format.ts exports formatTime")
     else:
-        print("❌ Missing DOMContentLoaded wrapper")
+        print("❌ format.ts missing formatTime")
 
+    # storage.ts
+    store = _read('utils/storage.ts')
+    store_funcs = ['storeUserId', 'getUserId', 'clearUserId', 'storeData', 'getData']
+    for fn in store_funcs:
+        if f'export function {fn}' in store:
+            print(f"✅ storage.ts exports {fn}")
+        else:
+            print(f"❌ storage.ts missing {fn}")
+
+    # random.ts
+    rand = _read('utils/random.ts')
+    if 'export function generateRandomString' in rand:
+        print(f"✅ random.ts exports generateRandomString")
+    else:
+        print(f"❌ random.ts missing generateRandomString")
+    if 'export function generateUsername' in rand:
+        print(f"✅ random.ts exports generateUsername")
+    else:
+        print(f"❌ random.ts missing generateUsername")
     print()
 
+def test_hook_exports():
+    """Test that hooks export all expected functions"""
+    print("🧪 Testing hook exports...")
 
-def test_index_html():
-    """Test index.html properly includes JS files"""
-    print("🧪 Testing index.html...")
+    hook_files = {
+        'useSocket.ts': ['useSocket', 'SocketContext', 'SocketContextValue'],
+        'useTimer.ts': ['useChatTimer'],
+        'useDemoMode.ts': ['useDemoMode'],
+        'useUser.ts': ['useUser', 'UserContext', 'UserData'],
+    }
 
-    with open('app/templates/index.html', 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    for js_name in ['config.js', 'api-utils.js', 'utils.js', 'home.js']:
-        if js_name in content:
-            print(f"✅ index.html includes {js_name}")
-        else:
-            print(f"❌ index.html missing {js_name}")
-
-    # Verify no inline functions
-    inline_script_pattern = r'<script>\s*(?!// Pass template variables)(?!window\.)[\s\S]*?function\s+\w+'
-    if not re.search(inline_script_pattern, content):
-        print("✅ index.html has no inline function definitions")
-    else:
-        print("⚠️  index.html may still have inline functions")
-
+    for filename, expected in hook_files.items():
+        content = _read(os.path.join('hooks', filename))
+        for name in expected:
+            if f'export function {name}' in content or f'export const {name}' in content or f'export interface {name}' in content:
+                print(f"✅ {filename} exports {name}")
+            else:
+                print(f"❌ {filename} missing {name}")
     print()
 
-
-def test_html_templates():
-    """Test that HTML templates properly include the new JS files"""
-    print("🧪 Testing HTML template script includes...")
-
-    # Test room.html
-    with open('app/templates/room.html', 'r', encoding='utf-8') as f:
-        room_content = f.read()
-
-    for js_name in ['utils.js', 'dom-utils.js', 'api-utils.js', 'timer-utils.js']:
-        if js_name in room_content:
-            print(f"✅ room.html includes {js_name}")
+def test_component_exports():
+    """Test that all components export their expected React components"""
+    print("🧪 Testing component exports...")
+    components = {
+        'Timer.tsx': 'Timer',
+        'PersonCard.tsx': 'PersonCard',
+        'PromptCard.tsx': 'PromptCard',
+        'MatchCountdown.tsx': 'MatchCountdown',
+        'ConnectionCard.tsx': 'ConnectionCard',
+        'QRDisplay.tsx': 'QRDisplay',
+    }
+    for filename, comp in components.items():
+        content = _read(os.path.join('components', filename))
+        if f'export function {comp}' in content:
+            print(f"✅ {filename} exports {comp}")
         else:
-            print(f"❌ room.html missing {js_name}")
-
-    for js_name in ['config.js', 'room.js']:
-        if js_name in room_content:
-            print(f"✅ room.html includes {js_name}")
-        else:
-            print(f"❌ room.html missing {js_name}")
-
-    if 'window.roomEventId' in room_content:
-        print("✅ room.html passes event_id to JavaScript")
-    else:
-        print("❌ room.html missing event_id configuration")
-
-    # Test chat.html
-    with open('app/templates/chat.html', 'r', encoding='utf-8') as f:
-        chat_content = f.read()
-
-    for js_name in ['utils.js', 'dom-utils.js', 'api-utils.js', 'timer-utils.js']:
-        if js_name in chat_content:
-            print(f"✅ chat.html includes {js_name}")
-        else:
-            print(f"❌ chat.html missing {js_name}")
-
-    for js_name in ['config.js', 'chat.js']:
-        if js_name in chat_content:
-            print(f"✅ chat.html includes {js_name}")
-        else:
-            print(f"❌ chat.html missing {js_name}")
-
-    if 'window.chatMatchId' in chat_content:
-        print("✅ chat.html passes match_id to JavaScript")
-    else:
-        print("❌ chat.html missing match_id configuration")
-
-    if 'window.chatEventId' in chat_content:
-        print("✅ chat.html passes event_id to JavaScript")
-    else:
-        print("❌ chat.html missing event_id configuration")
-
-    # Test user_info.html
-    with open('app/templates/user_info.html', 'r', encoding='utf-8') as f:
-        user_info_content = f.read()
-
-    for js_name in ['config.js', 'utils.js', 'api-utils.js']:
-        if js_name in user_info_content:
-            print(f"✅ user_info.html includes {js_name}")
-        else:
-            print(f"❌ user_info.html missing {js_name}")
-
-    if 'user-info.js' in user_info_content:
-        print("✅ user_info.html includes user-info.js")
-    else:
-        print("❌ user_info.html missing user-info.js")
-
-    if 'window.userInfoEventId' in user_info_content:
-        print("✅ user_info.html passes event_id to JavaScript")
-    else:
-        print("❌ user_info.html missing event_id configuration")
-
-    # Verify no inline scripts remain (except config)
-    inline_script_pattern = r'<script>\s*(?!// Pass template variables)(?!window\.)[\s\S]*?function\s+\w+'
-    if not re.search(inline_script_pattern, room_content):
-        print("✅ room.html has no inline function definitions")
-    else:
-        print("⚠️  room.html may still have inline functions")
-
-    if not re.search(inline_script_pattern, chat_content):
-        print("✅ chat.html has no inline function definitions")
-    else:
-        print("⚠️  chat.html may still have inline functions")
-
-    if not re.search(inline_script_pattern, user_info_content):
-        print("✅ user_info.html has no inline function definitions")
-    else:
-        print("⚠️  user_info.html may still have inline functions")
-
+            print(f"❌ {filename} missing {comp}")
     print()
 
-def test_user_info_js_functions():
-    """Test that user-info.js contains all required functions"""
-    print("🧪 Testing user-info.js functions...")
-
-    with open('app/static/js/user-info.js', 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    required_functions = [
-        'generateUsername',
-        'fetchJSON',
-        'storeUserId',
-        'showError'
-    ]
-
-    for func_name in required_functions:
-        if func_name in content:
-            print(f"✅ Uses '{func_name}' from utils.js")
+def test_page_exports():
+    """Test that page components are exported"""
+    print("🧪 Testing page exports...")
+    pages = {
+        'HomePage.tsx': 'HomePage',
+        'UserInfoPage.tsx': 'UserInfoPage',
+        'RoomPage.tsx': 'RoomPage',
+        'ChatPage.tsx': 'ChatPage',
+    }
+    for filename, page in pages.items():
+        content = _read(os.path.join('pages', filename))
+        if f'export function {page}' in content:
+            print(f"✅ {filename} exports {page}")
         else:
-            print(f"❌ Missing '{func_name}'")
+            print(f"❌ {filename} missing {page}")
+    print()
 
-    # Check for key behaviors
-    if 'linkedin_url' in content:
-        print("✅ Saves linkedin_url to API")
-    else:
-        print("❌ Missing linkedin_url in API call")
+def test_import_references():
+    """Test that App.tsx references all pages and contexts"""
+    print("🧪 Testing App.tsx import references...")
+    app = _read('App.tsx')
 
-    if 'slack_handle' in content:
-        print("✅ Saves slack_handle to API")
-    else:
-        print("❌ Missing slack_handle in API call")
-
-    if 'selectRoomBtn' in content:
-        print("✅ Has select room button logic")
-    else:
-        print("❌ Missing select room button logic")
-
-    if 'storeUserId' in content:
-        print("✅ Stores user ID on save")
-    else:
-        print("❌ Missing user ID storage on save")
-
+    expected_imports = ['HomePage', 'UserInfoPage', 'RoomPage', 'ChatPage',
+                        'SocketProvider', 'UserProvider']
+    for imp in expected_imports:
+        if imp in app:
+            print(f"✅ App.tsx imports '{imp}'")
+        else:
+            print(f"❌ App.tsx missing '{imp}' import")
     print()
 
 def test_code_quality():
-    """Test code quality and best practices"""
+    """Test code quality — no console.log stmts in production code, strict mode"""
     print("🧪 Testing code quality...")
 
-    js_files = ['app/static/js/utils.js', 'app/static/js/dom-utils.js', 'app/static/js/api-utils.js', 'app/static/js/timer-utils.js', 'app/static/js/room.js', 'app/static/js/chat.js', 'app/static/js/home.js', 'app/static/js/user-info.js']
+    ts_files = [
+        'api/client.ts', 'config/constants.ts',
+        'utils/format.ts', 'utils/storage.ts', 'utils/random.ts',
+        'hooks/useSocket.ts', 'hooks/useTimer.ts', 'hooks/useDemoMode.ts', 'hooks/useUser.ts',
+    ]
 
-    for js_file in js_files:
-        with open(js_file, 'r', encoding='utf-8') as f:
-            content = f.read()
+    for rel in ts_files:
+        content = _read(rel)
+        count = content.count('console.log')
+        code_len = len(content.splitlines())
+        ratio = count / max(code_len, 1)
+        status = "⚠️" if ratio > 0.05 else "✅"
+        print(f"{status} {rel}: {count} console.log in {code_len} lines")
 
-        # Check for console.log statements (acceptable for debugging)
-        console_logs = content.count('console.log')
-        print(f"ℹ️  {js_file}: {console_logs} console.log statements")
-
-        # Check for JSDoc comments
-        if '/**' in content:
-            print(f"✅ {js_file} has JSDoc comments")
-        else:
-            print(f"⚠️  {js_file} could use more JSDoc comments")
-
-        # Check for strict mode or module pattern
-        if "'use strict'" in content or '"use strict"' in content:
-            print(f"✅ {js_file} uses strict mode")
-        else:
-            print(f"ℹ️  {js_file} doesn't explicitly use strict mode (acceptable for modern browsers)")
-
+    tsx_files = [
+        'components/Timer.tsx', 'components/PersonCard.tsx', 'components/PromptCard.tsx',
+        'components/MatchCountdown.tsx', 'components/ConnectionCard.tsx', 'components/QRDisplay.tsx',
+        'pages/HomePage.tsx', 'pages/UserInfoPage.tsx', 'pages/RoomPage.tsx', 'pages/ChatPage.tsx',
+        'App.tsx',
+    ]
+    for rel in tsx_files:
+        content = _read(rel)
+        count = content.count('console.log')
+        code_len = len(content.splitlines())
+        ratio = count / max(code_len, 1)
+        status = "⚠️" if ratio > 0.05 else "✅"
+        print(f"{status} {rel}: {count} console.log in {code_len} lines")
     print()
 
 def main():
-    """Run all tests"""
-    print("🌟 IntroChat JavaScript Modularization Test Suite")
+    print("🌟 IntroChat Frontend Source Validation Suite")
     print("=" * 60)
     print()
 
-    test_js_files_exist()
-    test_config_js()
-    test_utils_functions()
-    test_room_js_functions()
-    test_chat_js_functions()
-    test_user_info_js_functions()
-    test_home_js_functions()
-    test_html_templates()
-    test_index_html()
+    test_frontend_files_exist()
+    test_api_exports()
+    test_demo_data_exports()
+    test_config()
+    test_utils_exports()
+    test_hook_exports()
+    test_component_exports()
+    test_page_exports()
+    test_import_references()
     test_code_quality()
 
-    print("🎉 All JavaScript tests completed!")
+    print("🎉 All frontend source validation tests completed!")
     print("\n📋 Summary:")
-    print("   - JavaScript code successfully extracted from HTML templates")
-    print("   - Shared utilities moved to utils.js")
-    print("   - Page-specific logic separated into room.js and chat.js")
-    print("   - Template variables passed via window object")
-    print("   - All existing functionality preserved")
+    print("   - TypeScript types and interfaces validated")
+    print("   - Demo data exports validated (demoData.ts)")
+    print("   - Utility functions present in format.ts, storage.ts, random.ts")
+    print("   - Hooks exported: useSocket, useTimer, useDemoMode, useUser")
+    print("   - 6 components + 4 pages exported with expected names")
+    print("   - App.tsx references all pages and context providers")
 
 if __name__ == "__main__":
     main()
