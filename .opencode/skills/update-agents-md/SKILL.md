@@ -1,12 +1,12 @@
 ---
-name: update-agents
+name: update-agents-md
 description: Analyze the current codebase and update `AGENTS.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update agents", "sync agents doc", "agents.md is outdated", or similar.
 ---
 
 ## Purpose
-Guide for updating `docs/AGENTS.md` — the authoritative reference for agent behavioral rules, file ownership, commands, and operational constraints. Answers "What can agents touch?", "What commands do I use?", "What are my behavioral rules?".
+Guide for updating `AGENTS.md` — the authoritative reference for agent behavioral rules, file ownership, commands, and operational constraints. Answers "What can agents touch?", "What commands do I use?", "What are my behavioral rules?".
 
-Analyze the codebase and session history, then update or create `docs/AGENTS.md` so agents can operate accurately on every task.
+Analyze the codebase and session history, then update or create `AGENTS.md` so agents can operate accurately on every task.
 
 ---
 
@@ -28,11 +28,13 @@ Every piece of content must pass these checks:
 
 ### What to Include
 - File ownership table — location, role, agent policy (⚠️ caution / ❌ forbidden). Include only files with non-default agent policies — omit ✅ safe files.
-- Agent behavioral rules organized by workflow phase — explicit always/never directives, no "consider" or "try to". Verification requirements embedded within each phase's rules, not in a separate section.
-- Context Window Discipline — Grep→Read patterns for minimizing context waste.
-- Doc Sync Triggers — table mapping change types to the doc sync skill to run.
-- Failure Triage — classification table for test failures with action for each type.
-- Cross-Phase Universal Rules — rules that apply to every phase and override phase-specific rules.
+- SDD Workflow Rules — explicit always/never directives organized by 9 workflow phases. Verification requirements embedded within each phase's rules, not in a separate section.
+- Cross-Phase Universal Rules sub-sections:
+  - Context Window Discipline — Grep→Read patterns for minimizing context waste.
+  - Doc Sync Triggers — table mapping change types to the doc sync skill to run.
+  - Documentation Discipline — cross-referencing, description headers, executable truth.
+  - Process Discipline — read-before-write, exit declarations, test discipline, failure triage.
+  - Failure Triage — classification table for test failures with action for each type.
 
 ### What NOT to Include
 
@@ -72,7 +74,7 @@ For each source, extract items from **What to Include** — files, commands, env
 **Check session history** for behavioral rule updates, file ownership changes, and any agent-facing decisions that affect what AGENTS.md should document.
 
 ### 2. Read the Current Document
-- Check if `docs/AGENTS.md` exists — create if not
+- Check if `AGENTS.md` exists at the project root — create if not
 - Read section by section; flag outdated or missing items from **What to Include**
 - Flag content that violates the boundary rules above
 
@@ -91,6 +93,27 @@ For each candidate:
 If candidates are found:
 - Add them as new Cross-Phase Universal Rules in AGENTS.md
 - Prune the redundant copies from individual phase rules (replace with a brief cross-reference or remove if fully covered)
+
+### 3.6 Extract Universal Best Practices from PROJECT_BEST_PRACTICES.md
+
+Read `refs/PROJECT_BEST_PRACTICES.md` and identify entries that are universal agent-behavioral rules suitable for `AGENTS.md`.
+
+**Selection criteria** — promote if ALL apply:
+1. The rule governs **how agents should behave** (not project-specific implementation patterns)
+2. It passes the **"Would an agent miss this?"** litmus test
+3. It is **not already covered** by an existing rule in AGENTS.md
+
+**Routing priority** — place each promoted rule in the most specific section:
+
+1. **First try: a specific Phase** — if the rule only applies during a single workflow phase (e.g., "commit discipline" only applies to Phase 9), add it as a new bullet under that phase's behavioral rules.
+
+2. **Fallback: Cross-Phase sub-section** — if the rule applies across multiple phases, check if it fits an existing sub-section:
+   - Documentation-related → `Documentation Discipline`
+   - Process-related → `Process Discipline`
+
+3. **Last resort: new sub-section** — if the rule is cross-phase but doesn't fit Documentation Discipline or Process Discipline, create a new H3 sub-section under Cross-Phase Universal Rules with a descriptive name.
+
+**Housekeeping:** Do NOT remove the promoted entries from PROJECT_BEST_PRACTICES.md — the document remains as-is. Only the principle is elevated to AGENTS.md.
 
 ### 4. Update the Document
 - Add missing sections

@@ -387,7 +387,7 @@ Templates: index → user_info → room → chat
 **Why it matters**: Auto-generated sections will overwrite anything nested inside them. Standalone sections survive regeneration.
 
 ### 6.10 Verify Presence and Quality, Not Absence
-**Context**: From simplifying the update-agents skill's Verify section — removed specific negative boundary checks in favor of a routing catch-all
+**Context**: From simplifying the update-agents-md skill's Verify section — removed specific negative boundary checks in favor of a routing catch-all
 
 **Principle**: A Verify checklist should check what the document contains and whether it's correct (positive correctness), not what it should NOT contain (negative boundaries). Routing rules (What NOT to Include) and Anti-duplication handle negative enforcement upstream. The single "No excluded content remains" catch-all catches stragglers. Avoid specific absence checks — they duplicate routing rules and bloat the checklist.
 
@@ -402,15 +402,15 @@ Templates: index → user_info → room → chat
 **Why it matters**: Keeps Verify checklists lean and focused on quality. Routing correctness is enforced earlier; the final step only verifies what IS there.
 
 ### 6.11 Single Canonical Location for Artifacts
-**Context**: Plan files existed in both `.opencode/plans/` and `docs/plans/` causing numbering confusion
+**Context**: Plan files existed in both `.opencode/plans/` and `plans/` causing numbering confusion
 
 **Principle**: Each type of persistent artifact has exactly one canonical directory. Never create copies or variants in alternate locations. One step owns creation of that artifact; all others read-only.
 
 **Example**:
 ```
-# ✅ All plan files in docs/plans/
-docs/plans/PLAN_2026_05_12_001.md
-docs/plans/PLAN_2026_05_12_002.md
+# ✅ All plan files in plans/
+plans/PLAN_2026_05_12_001.md
+plans/PLAN_2026_05_12_002.md
 
 # ❌ Orphan artifact in .opencode/plans/ creates conflicts
 ```
@@ -535,7 +535,7 @@ python -c "from app import app"
 **Why it matters**: Eliminates duplicate maintenance. One list to update, one place to look.
 
 ### 7.8 Gap Grilling Methodology
-**Context**: From comparing /init template against update-agents skill
+**Context**: From comparing /init template against update-agents-md skill
 
 **Principle**: When comparing two sources (template vs implementation, spec vs code), don't just list differences. Test each gap against four questions: (1) Is it truly additive (not already covered)? (2) Does it affect output or methodology? (3) Which document owns it? (4) What's the cost/benefit? Only act on gaps that survive the grill.
 
@@ -544,7 +544,7 @@ python -c "from app import app"
 Gap found: "Prefer wiring files over leaf files"
 Grill: (1) Not currently explicit — additive ✓
        (2) Investigation methodology only — affects skill, not output ✓
-       (3) Belongs in update-agents skill ✓
+       (3) Belongs in update-agents-md skill ✓
        (4) Low cost — one sentence addendum ✓
 Decision: ✅ Add
 ```
@@ -659,7 +659,7 @@ if uid not in waiting_queue:
 **Why it matters**: Inverted boolean logic in queues is a classic bug that looks plausible in review but silently breaks the entire matching flow.
 
 ### 7.16 Root Pattern Extraction
-**Context**: From revising the update-best-practices skill to push for root cause over symptom
+**Context**: From revising the update-best-practices-md skill to push for root cause over symptom
 
 **Principle**: When extracting lessons from a session, distinguish the symptom (what happened) from the root cause (why it happened). The root pattern is the universally applicable form — it transfers to other projects. If the root becomes too abstract to be useful, step back one level. Guard: a pattern passes if a developer on an unrelated project would still find it valuable.
 
@@ -678,13 +678,13 @@ Root:     "Always derive cryptographic nonces from a deterministic counter or a
 **Why it matters**: Symptom-level lessons only fix this one case. Root-level lessons prevent entire categories of bugs.
 
 ### 7.17 Sequential Numbering for Plan Files
-**Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `docs/plans/PLAN_001` both existed
+**Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `plans/PLAN_001` both existed
 
 **Principle**: When artifacts use sequential numbering, the number must be globally unique across ALL locations. Before assigning a new number, scan the canonical directory for existing files and pick the next available. Never reuse a number from an alternative directory that was later merged.
 
 **Example**:
 ```
-# ✅ docs/plans/ has 001, 002 → next is 003
+# ✅ plans/ has 001, 002 → next is 003
 # ❌ Bringing in an artifact numbered 001 from elsewhere creates a duplicate
 ```
 
@@ -703,19 +703,24 @@ grep -r "old-name" --include="*.md"    # should return nothing
 
 **Why it matters**: A single stale reference can break the workflow chain silently — the skill becomes unloadable or routes to the wrong destination.
 
-### 7.19 Workflow Handoff with Outputs & Triggers
-**Context**: The 5-step analyze→grill→check→implement→review pipeline lacked structured connectivity between stages
+### 7.19 Workflow Handoff with Outputs & Triggers + Hand-off Checklists
+**Context**: The 5-step analyze→grill→check→implement→review pipeline lacked structured connectivity between stages; later extended to 9 phases
 
-**Principle**: Every workflow stage defines three things: (1) what it produces (Output), (2) how it signals completion (Exit Declaration), (3) which stage runs next (Next Step). This creates an explicit handoff contract — the exit declaration IS the trigger. Never let a stage finish without making the next step obvious.
+**Principle**: Every workflow stage defines four things: (1) what it produces (Output), (2) a pre-exit **Hand-off checklist** with verifiable completion criteria, (3) how it signals completion (Exit Declaration), (4) which stage runs next (Next Step). This creates an explicit handoff contract — verify, then signal. Never let a stage finish without proving readiness and making the next step obvious.
 
 **Example**:
 ```
-grill-and-refine
-  Exit: "Grill complete. Check for plan readiness?"
-  → check-plan-readiness knows it's next
+improve-architecture
+  ## Hand-off
+  - All approved items applied or skipped (with reason)
+  - Full test suite passes
+  - Every changed line carries [ARCH] flag
+  ---
+  Exit: "Architecture improvements complete. Review implementation?"
+  → review-implementation knows it's next
 ```
 
-**Why it matters**: Without structured handoffs, stages produce orphan outputs and users must chain them from memory. The pipeline becomes fragile.
+**Why it matters**: Without a verifiable pre-exit checklist, stages can declare completion without proving it. The checklist catches incomplete work before handoff.
 
 ### 7.20 WebSocket Accept Once
 **Context**: "Expected ASGI message websocket.send or websocket.close, but got websocket.accept"
@@ -734,6 +739,53 @@ async def connect(self, ws, uid):
     self.connections[uid] = ws
 ```
 **Why it matters**: Double-accept raises a runtime error that kills the WebSocket connection.
+
+### 7.21 Skill Audit After Content Restructure
+**Context**: When content from one document moves to other documents (e.g., AGENTS.md content transferred to README.md, ARCHITECTURE.md, PROJECT_BEST_PRACTICES.md), the owning skills have stale "What to Include" rules
+**Principle**: After moving content between documents, update each target document's owning skill in the same batch. The skill's "What to Include" must match what the document actually contains, not what it used to contain. If you skip the skill update, the next time the skill runs it regenerates old boundaries — the document fix is temporary, but the skill fix is permanent.
+**Example**: Removed "Templates" from `update-architecture-md`'s module categories; added venv activation + path-drift warning to `update-readme-md`'s Quick Start rules; added State Management category to `update-best-practices-md`
+**Why it matters**: A stale owning skill undoes the document fix on next run. Fixing both in the same batch prevents regression.
+
+### 7.22 Exhaustive Section Mapping
+**Context**: From comparing 3 documents against their owning skills section by section and finding drift in every one
+**Principle**: When comparing two related files (doc↔owning skill, spec↔implementation), read both end-to-end and map every section explicitly. Don't infer gaps from section headings alone — inference misses silent drift where a doc section has no corresponding skill rule. Create a two-column table: "Doc section" | "Skill has it?" for the full comparison.
+**Example**: Doc's §4 "State Management" had no corresponding category in the skill's "What to Include" — caught only by exhaustive mapping, not by heading scanning.
+**Why it matters**: Section-heading inference is fast but unreliable. Exhaustive mapping catches every gap and prevents iterative "find one fix one" cycles.
+
+### 7.23 Stale Pattern Audit After Migration
+**Context**: SocketIO decorator extraction logic, DOMContentLoaded wrappers, and Jinja2 conventions survived in skill files after Flask→FastAPI, SocketIO→WebSocket, and Jinja2→React migrations
+**Principle**: After a framework migration, grep all skill and instruction files for the old technology's specific patterns. They survive in multiple subsections — decorator extraction examples, per-function formatting rules, verify checklists — far from where the migration source code changed. Search broadly: technology names (SocketIO, Jinja2), framework-specific constructs (DOMContentLoaded, socketio.on), and old file globs (app/static/js/*).
+**Example**: After Jinja2→React migration, "Jinja2 conventions" still existed in `update-best-practices-md`; `@socketio.on(...)` still existed in `update-architecture-md`'s decorator extraction section; DOMContentLoaded extraction logic still existed in `update-architecture-md`'s per-function detail step.
+**Why it matters**: A single stale reference in a skill can corrupt the entire section when the skill regenerates the document. Skills are instruction sets — one wrong instruction produces wrong output.
+
+### 7.24 Consistency Pass as Final Cross-Cutting Step
+**Context**: After standardizing Hand-off sections across 9 workflow skills — individual edits were correct but collectively inconsistent (mismatched heading names, missing sections, inconsistent prefixes)
+
+**Principle**: After completing a cross-cutting change across multiple files, run a dedicated consistency pass rather than assuming each individually correct edit produces a coherent whole. Read every affected file end-to-end once more, checking for: naming consistency, section structure uniformity, and coverage completeness. Fix all inconsistencies in one batch.
+
+**Example**:
+```
+Individual edits: added Hand-off sections to 9 skills
+Consistency pass found:
+- 4 skills missing Hand-off entirely
+- 2 skills had wrong heading level (#### vs ##)
+- 3 skills missing "State clearly:" prefix
+All fixed in one pass.
+```
+
+**Why it matters**: Individual correctness ≠ collective consistency. The consistency pass catches structural drift that individual edits miss.
+
+### 7.26 Surgical Edits Over File Rewrites
+**Context**: 23 targeted edits across 3 skill files preserved all existing context while fixing every gap identified by exhaustive mapping
+**Principle**: When updating instruction files (skills, workflows, rulesets), prefer oldString→newString replacements over file rewrites. Instruction files contain branching workflows, nuanced edge case handling, and manually maintained rules — rewriting them risks silently dropping context that wasn't explicitly identified as problematic. Each edit is independently verifiable by oldString uniqueness.
+**Example**: Instead of rewriting `update-architecture-md/SKILL.md` (386 lines), 12 targeted replacements were applied — each verifiable by selecting for the old text.
+**Why it matters**: A rewrite that drops a single behavioral rule changes agent behavior permanently. Surgical edits preserve everything not explicitly changed.
+
+### 7.25 Three-Layer Verification After Bulk Edits
+**Context**: After 23 edits across 3 skill files, three separate verification layers each caught a different class of issue
+**Principle**: After a batch of surgical edits, verify at three layers: (1) grep for stale patterns that should have been removed, (2) grep for additions that should have been added, (3) read the critical sections of each file for structural correctness. Layer 1 catches what you missed removing, Layer 2 catches what you missed adding, Layer 3 catches structural breakage (empty subsections, orphaned references, broken formatting). Never skip layer 3.
+**Example**: Layer 1 caught `@socketio.on()` still surviving after SocketIO→WebSocket rename; Layer 2 confirmed `ENV=production` was present in both skills; Layer 3 would catch an empty "Where to place the subsection" section.
+**Why it matters**: Each layer catches what the others miss. Layer 1 and 2 are grep-fast; Layer 3 requires reading but catches silent structural breaks that no regex can find.
 
 ---
 
@@ -890,13 +942,13 @@ review-implementation (2nd) →  "All checks pass. Verified."                   
 **Why it matters**: Each batch is independently verifiable. Reviewers see a complete change, not a fragment. No "to be continued" across batches.
 
 ### 8.11 Persistent Decision Artifacts
-**Context**: From saving plans as timestamped, numbered files in docs/plans/ for all downstream stages to consume
+**Context**: From saving plans as timestamped, numbered files in plans/ for all downstream stages to consume
 
 **Principle**: Save finalized decisions as persistent files — not just conversation context. Use a consistent naming scheme (PLAN_YYYY_MM_DD_XXX.md) with auto-incrementing numbers. Each downstream stage reads from the artifact file directly, not from memory or chat history. This makes decisions reviewable, auditable, and independent of conversation context.
 
 **Example**:
 ```
-docs/plans/
+plans/
 ├── PLAN_2026_05_11_001.md   ← created by plan-readiness, consumed by implement-plan
 └── .gitkeep
 
@@ -962,6 +1014,23 @@ Step 3 — Test count diff:
 - `git commit -m "msg"` (never `git commit` without `-m`)
 
 **Why it matters**: A command that blocks waiting for stdin will hang indefinitely in a headless or agent-driven session, causing timeouts and false failures.
+
+### 8.17 Orchestrator Pattern for Convergent Pipeline Paths
+**Context**: The SDD workflow had 3 exit paths from review-implementation (modularize-and-clean, improve-architecture, update-docs) — all needing documentation sync as their final step before git push
+
+**Principle**: When a workflow has multiple exit paths that all converge at the same downstream step, introduce an orchestrator as the single entry point rather than duplicating logic across each route. The orchestrator owns the routing decision and produces a single handoff. This prevents scattered routing logic, makes the pipeline self-documenting, and ensures consistent pre-flight checks.
+
+**Example**:
+```
+review-implementation (1st pass)
+    ├──→ modularize-and-clean → review-implementation (clean up) → update-docs
+    ├──→ improve-architecture → review-implementation (arch) → update-docs
+    └──→ update-docs (skip cleanup/arch, proceed directly)
+
+update-docs: single orchestrator, routes to push-to-git
+```
+
+**Why it matters**: Without an orchestrator, each branch independently decides when and how to trigger the shared step — leading to inconsistent setups, duplicated cleanup logic, and missed edge cases.
 
 ---
 
@@ -1080,7 +1149,7 @@ python -m pytest tests/ -v    # Tests
 10. **Merge Verification** — one comprehensive verify step, not separate pre/post checklists
 11. **Recover State** — always handle in-memory state recovery
 12. **Verify Immediately** — one change, one verification
-13. **Update Practices** — use `update-best-practices` skill after every significant session
+13. **Update Practices** — use `update-best-practices-md` skill after every significant session
 14. **Source Comments > Doc Duplication** — write `Description:` headers in code as canonical source; auto-extract into docs
 15. **Auto Headline, Manual Detail** — auto-generate lead lines from code, manually preserve bullet points
 16. **Logical > Alphabetical Ordering** — order entries by dependency flow (dependency → utility → user), not alphabetically
@@ -1115,7 +1184,15 @@ python -m pytest tests/ -v    # Tests
 45. **Single Canonical Location** — each artifact type lives in exactly one directory; one step creates, all others read
 46. **Sequential Numbering for Plan Files** — numbers are globally unique across all directories; no reuse
 47. **Skill Rename Protocol** — create dir → copy → delete old → update name → update all refs; verify zero stale refs
-48. **Workflow Handoff with Outputs & Triggers** — every stage defines Output + Exit Declaration + Next Step; the exit IS the trigger
+48. **Workflow Handoff with Outputs & Triggers + Hand-off Checklist** — every stage defines Output + Hand-off checklist + Exit Declaration + Next Step; verify before signaling
 49. **File Descriptions Across All Languages** — every file gets a `filename + Description:` header matching its comment syntax; canonical source for ARCHITECTURE.md
 50. **Test References in Same Batch** — rename, signature, or behavioral change updates all test references in the same batch; source and tests are a single unit
 51. **Full Review Pipeline** — review must include git status, test count diff, production build, exact lint commands, and escalation routing for non-CLEANUP flags
+52. **Skill Audit After Restructure** — update owning skills in same batch as document content moves; a stale skill regenerates old boundaries
+53. **Exhaustive Section Mapping** — compare doc↔skill by reading both end-to-end with a two-column table, not by section-heading inference
+54. **Stale Pattern Audit After Migration** — grep skill files broadly for old technology names after any framework migration
+55. **Surgical Edits Over Rewrites** — replace targeted text, not whole files, when updating instruction documents
+56. **Three-Layer Verification** — grep removals, grep additions, read-test critical sections — each layer catches what others miss
+57. **Consistency Pass** — after cross-cutting changes, run a dedicated consistency pass across all affected files
+58. **Hand-off Checklist** — every stage needs a verifiable pre-exit checklist before declaring completion
+59. **Orchestrator for Convergent Paths** — when multiple pipeline paths share a final step, insert an orchestrator as single entry point

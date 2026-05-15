@@ -1,12 +1,12 @@
 ---
-name: update-best-practices
-description: Extract universal best practices from the current coding session and existing codebase, then write them into `docs/PROJECT_BEST_PRACTICES.md`. Trigger when the user says "update best practices", "document lessons learned", or similar.
+name: update-best-practices-md
+description: Extract universal best practices from the current coding session and existing codebase, then write them into `refs/PROJECT_BEST_PRACTICES.md`. Trigger when the user says "update best practices", "document lessons learned", or similar.
 ---
 
 ## Purpose
 Universal best practices collection for future projects. Answers "What lessons were learned?", "What patterns should I reuse in future projects?".
 
-Mine session conversations, changed files, skills, and plan files for reusable, universal lessons, then update or create `docs/PROJECT_BEST_PRACTICES.md` so developers and agents can carry forward proven patterns to new projects.
+Mine session conversations, changed files, skills, and plan files for reusable, universal lessons, then update or create `refs/PROJECT_BEST_PRACTICES.md` so developers and agents can carry forward proven patterns to new projects.
 
 ---
 
@@ -111,19 +111,19 @@ Read sources in this priority order:
 1. **Existing `PROJECT_BEST_PRACTICES.md`** — know what's already covered before looking for new entries
 2. **Session conversation** — extract new lessons: decisions made, errors encountered and fixed, testing/verification steps used, anything that caused confusion or required backtracking
 3. **Skills directory (`.opencode/skills/*/SKILL.md`)** — skill methodologies evolve across sessions; extract lessons from how the skills themselves were revised
-4. **Plan files (`docs/plans/PLAN_*.md`)** — persistent decision artifacts contain design rationale and tradeoff context
+4. **Plan files (`plans/PLAN_*.md`)** — persistent decision artifacts contain design rationale and tradeoff context
 5. **Changed files from this session** — read only files modified during this session, not the full codebase. Look for observable patterns: modularization, imports, error handling, state management, file-description conventions, test-coordination patterns.
    - **Modified skill files**: specifically check for new workflow rules added (e.g., batch conflict resolution, dead code protocol, expanded review checks) — these signal new process patterns to extract as best practices.
 6. **Config files** — tool configs, CI setup, formatter/linter configs for repeatable patterns
 
-This skill itself — `update-best-practices/SKILL.md` — is also a source.
+This skill itself — `update-best-practices-md/SKILL.md` — is also a source.
 
 **Push for root pattern extraction:** For every candidate lesson, ask: "Is this the symptom or the root cause?" Surface-level = "Don't accept a WebSocket twice." Root = "When extracting helper functions, check for duplicated lifecycle calls between handler and helper." Extract the root pattern — it is the universally applicable form. If the root pattern doesn't pass the universal applicability gate (too abstract, not practically useful), step back one level until it does.
 
 **Ask the user** only when session or plan files can't answer: unclear root causes, ambiguous patterns. One short batch. Never ask what the session makes clear.
 
 #### 2. Read the Current Document
-- Check if `docs/PROJECT_BEST_PRACTICES.md` exists — create it if not
+- Check if `refs/PROJECT_BEST_PRACTICES.md` exists — create it if not
 - Read existing entries to avoid duplication
 - Identify gaps based on what the session produced
 
@@ -200,7 +200,7 @@ For each candidate practice:
 - [ ] "Session Lessons Learned" contains only genuinely cross-cutting lessons — not overflow from other categories
 
 #### 7. Route Skill Improvements
-If this session identified improvements to `update-best-practices/SKILL.md` itself:
+If this session identified improvements to `update-best-practices-md/SKILL.md` itself:
 
 - **Minor gaps** (wording, format tweaks, missing edge cases) → fix in-place, list the changes in your output
 - **Significant gaps** (structural changes, missing phases, broken workflow) → do not fix in-place. Present as candidates in the Gate summary so the user can decide.

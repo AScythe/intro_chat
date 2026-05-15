@@ -1,5 +1,5 @@
 ---
-name: update-readme
+name: update-readme-md
 description: Analyze the current codebase and update `README.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update readme", "sync readme", "readme is outdated", or similar.
 ---
 

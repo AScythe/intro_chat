@@ -1,5 +1,5 @@
 ---
-name: update-architecture
+name: update-architecture-md
 description: Analyze the current codebase and update `ARCHITECTURE.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update architecture", "sync architecture doc", "architecture is outdated", or similar.
 ---
 

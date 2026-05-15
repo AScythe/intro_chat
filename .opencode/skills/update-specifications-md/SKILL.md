@@ -1,5 +1,5 @@
 ---
-name: update-specifications
+name: update-specifications-md
 description: Analyze the current product state and update `SPECIFICATIONS.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update specs", "update specifications", "specs are outdated", or similar.
 ---
 

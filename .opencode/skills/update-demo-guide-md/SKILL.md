@@ -1,5 +1,5 @@
 ---
-name: update-demo-guide
+name: update-demo-guide-md
 description: Analyze the current app state and update `DEMO_GUIDE.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update demo guide", "sync demo guide", "demo guide is outdated", or similar.
 ---
 
