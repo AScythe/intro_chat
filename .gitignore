@@ -40,6 +40,9 @@ Thumbs.db
 .pytest_cache/
 .mypy_cache/
 .hypothesis/
+frontend/playwright-report/
+frontend/test-results/
+data/e2e_test.db
 
 # IDE
 .vscode/
@@ -59,3 +62,4 @@ build/
 # Frontend
 node_modules/
 frontend/dist/
+frontend/tsconfig.tsbuildinfo
