@@ -1,7 +1,6 @@
 ---
 name: grill-and-refine
-mode: plan
-description: 'Interview relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree, then produce a fool-proof revised plan with no gaps. Use when user wants to stress-test a plan/design, after analyze-and-plan, or when the user says "grill the plan", "stress-test the plan", or similar. Output: verbal revised plan with resolved dimensions as copy-ready code blocks. Exit: "Grill complete" — invokes check-plan-readiness.'
+description: 'Interview relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree, then produce a fool-proof revised plan with no gaps. Use when user wants to stress-test a plan/design, after analyze-and-plan, or triggered when the user says "grill the plan", "stress-test the plan", or similar.'
 ---
 
 ## What I do
@@ -12,7 +11,9 @@ description: 'Interview relentlessly about a plan or design until reaching share
 
 ## Documents to Read
 
-Before Phase 1 analysis, consult `ARCHITECTURE.md` via Grep→Read for these sections:
+Before Phase 1 analysis, consult these docs via Grep→Read for the listed sections:
+
+**`ARCHITECTURE.md`**
 - "Project Structure" (file tree context)
 - "Module Descriptions" (relevant entries — modules the plan touches)
 - "Data Flow" (endpoint and event sequences)
@@ -20,13 +21,17 @@ Before Phase 1 analysis, consult `ARCHITECTURE.md` via Grep→Read for these sec
 - "Import Structure" (dependency graph validation)
 - "Critical Implementation Details" (match expiry, thread behavior, etc.)
 
-Do not read the full document — read only the sections listed above.
+**`SPECIFICATIONS.md`**
+- "Hard Constraints" (privacy rules, non-negotiables to probe against)
+- "Out of Scope" (boundaries to respect during probing)
+
+Do not read the full documents — read only the sections listed above.
 
 ## How to Grill
 
 ### Phase 1: Analyze (agent only)
-1. **Start with the plan** (can be from the previous step analyze-and-plan output)
-2. **Explore the codebase** to identify findings for each dimension:
+1. **Start with the initial plan** (can be from the previous step analyze-and-plan output)
+2. **Explore the identified files/code** to explore findings for each dimension:
    - **Assumptions:** Which assumptions does the plan make? Are they validated by code?
    - **Edge cases:** What happens with empty, null, or unexpected input?
    - **Alternatives:** Is there a simpler or safer approach?
@@ -45,7 +50,8 @@ Do not read the full document — read only the sections listed above.
 
 ### Phase 3: Produce Revised Plan
 
-Compile the revised plan from all resolved dimensions. Output each dimension as a copy-ready code block that `check-plan-readiness` can paste directly into the plan document:
+Compile the gathered information from all resolved dimensions. 
+Output each dimension as a copy-ready code block:
 
 ```
 ### Dimension: [name]
@@ -56,20 +62,37 @@ Compile the revised plan from all resolved dimensions. Output each dimension as 
 
 After all dimensions, produce the full revised plan summary.
 
-## Output: Fool-Proof Revised Plan
+## Fool-Proof Revised Plan
 
 After all branches are resolved, produce a revised plan that is:
-- **Complete** — every file, every change, every edge case accounted for
+- **Complete** — contains the approach on how to implement the task
+   - The approach and design decisions.
+   - Which files need to be created, modified, or removed.
+   - Resolved dimensions from the grill.
+   - Testing strategy (test framework, key scenarios).
+   - Success criteria (verifiable).
 - **Gap-free** — no unresolved questions, no skipped branches in the decision tree
 - **Logically sound** — the reasoning holds under scrutiny and will work as intended
 - **Testable** — clear testing strategy (TDD) with specific test cases defined
 
-State clearly: "**Grill complete. Check for plan readiness?**"
+Presented in a clean, copy-ready format.
+
+
+## Hand-off
+
+Before declaring completion:
+- All six dimensions probed and resolved (assumptions, edge cases, alternatives, dependencies, risks, consistency)
+- Each dimension documented with decision, rationale, and impact
+- Revised plan gap-free, logically sound, and testable
+- No file writes occurred (read-only phase)
+- Plan formatted as copy-ready code block
+
+---
 
 ## Outputs & Triggers
 
 ### Output
-Revised plan (verbal) with each resolved dimension formatted as a ready-to-copy code block. Updated approach, edge cases, risks, testing strategy, and success criteria.
+Revised plan (verbal) formatted as a ready-to-copy code block.
 
 ### Exit Declaration
 State clearly: "**Grill complete. Check for plan readiness?**"

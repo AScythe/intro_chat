@@ -1,113 +1,164 @@
 ---
 name: improve-architecture
-mode: build
-description: 'Apply architecture improvements from the evaluation list in TDD-backed batches. Each item verified by existing tests (or new regression test) before and after the change. Uses [ARCH] flags. Trigger after evaluate-architecture, or when the user says "improve architecture", "apply structural changes", or similar. Exit: "Architecture improvements complete" — invokes review-implementation.'
+description: 'Scan the project structure against best practices, produce a prioritized list of structural improvements, then apply them in TDD-backed batches with [ARCH] flags. Two-phase: Phase 1 is read-only analysis (verbal output); Phase 2 applies changes after user approval. Trigger after review-implementation (first pass), or when the user says "evaluate the architecture", "improve architecture", "review project structure", or similar.'
 ---
 
 ## What I do
-- Read the prioritized list from `evaluate-architecture` (verbal, session context)
-- For each item: TDD (use existing test or write regression test) → apply structural change with `[ARCH]` flag → verify
-- Cross-reference **implement-plan** for shared guidelines: batch rules (§3), surgical changes (§5), flag format (§6), and test-adaptation rule (line 62) — see those sections for details; this skill only documents what differs
-- On stale evaluation list: re-evaluate the current codebase before acting
-- On partial completion: pick up where left off (track done items in conversation)
-- On test failure: review if the change is logically sound; if yes → fix test; if not → skip the item and report
+- Scan the full project structure across 10 areas (directory layout, import hygiene, config placement, module boundaries, naming, dead code, and more)
+- Evaluate against general software engineering conventions
+- Produce a verbal prioritized list (P0–P2) with `file:line` references, findings, and recommendations
+- After user approval, apply structural changes in TDD-backed batches with `[ARCH]` flags — no behavior or logic changes
+- Two phases, always in order: **Evaluate (read-only)** → user approval gate → **Improve (write)**
 
-## Documents to Read
+## Boundaries
+- **Phase 1 is strictly read-only.** No file writes, no code changes, no notes files.
+- **Phase 2 is structural changes only.** No behavior changes, no bug fixes, no feature additions.
 
-Read via Grep→Read (grep heading line number, Read with offset/limit):
-
-- **`AGENTS.md`**: "File Ownership"
-- **`ARCHITECTURE.md`**: "Project Structure", relevant module descriptions
-- **`implement-plan/SKILL.md`**: §3 (Batch for Reviewability), §5 (Surgical Changes), §6 (Easy to Review), test-adaptation rule (line 62)
-- **`evaluate-architecture/SKILL.md`**: Scan checklist (to understand how items were classified)
+---
 
 ## Guidelines
 
-### 0. Prerequisites
-- Must have a current `evaluate-architecture` output in the conversation. If none exists or the output is stale (codebase has changed significantly since evaluation), re-run `evaluate-architecture` first.
-- If resuming from a previous `improve-architecture` session: confirm which items were already completed.
+### Phase 1: Evaluate (Read-Only)
 
-### 1. Prepare the List
-- Receive the prioritized list from `evaluate-architecture` (P0 items first, then P1, then P2).
-- The user may approve all, select specific items, or prioritize out of order.
-- If the user modifies the list (adds/removes/reorders), use the modified version.
+#### Documents to Read
+Use Grep→Read for all sources (grep heading line number, then `Read(offset=line, limit=~100)`):
 
-### 2. Per-Item Workflow
+- `ARCHITECTURE.md` — "Project Structure", "Module Descriptions", "Import Structure"
+- Source files — spot-check 2-3 key files per area to verify docs reflect reality
 
-For each item, in priority order:
+#### Scan Checklist
 
-**Step 1: Baseline test check**
-- Run the full test suite. All must pass before starting. If any pre-existing failures exist, flag them and do not proceed until resolved.
-- Record the test count for each suite: *"Backend: 25, Frontend: 83"*
+Examine each area in order. For every finding: note priority, `file:line`, and a clear recommendation.
 
-**Step 2: TDD — determine the oracle**
-- **If an existing test covers this code's behavior:** use it as the oracle. The test must pass before and after the change.
-- **If NO existing test covers this code's behavior:** write a regression test that captures the current behavior. Save it in `tests/` (or `frontend/tests/`). Run it to confirm it passes — this is the oracle.
-- Regression tests follow the project's existing test conventions. For structural-only changes (no behavior change), the test verifies the code works as before (import resolves, function call returns expected type, etc.).
+| # | Area | What to Check | Priority Guide |
+|---|------|---------------|----------------|
+| 1 | **Directory organization** | Backend/frontend files in the right packages? Static assets co-located with their runtime? Any code in the wrong package? | P0 = cross-package misplacement, P1 = confusing layout, P2 = minor naming |
+| 2 | **Import hygiene** | Path aliases (`@/`) used where configured? Relative `../../` imports that should use the alias? Circular imports? Imports from wrong package? | P0 = broken/circular, P1 = alias unused but configured, P2 = inconsistency |
+| 3 | **Config placement** | Config constants in designated `config.py`/`constants.ts`? Config values mixed into state or logic modules? | P0 = config in wrong module, P1 = duplicated values, P2 = minor misplacement |
+| 4 | **Asset location** | CSS/images/static assets in `frontend/` (UI) or `app/` (backend)? Served via the right tool (Vite vs FastAPI)? | P0 = frontend CSS in backend dir, P1 = served via wrong mechanism, P2 = minor convention |
+| 5 | **Test structure** | Tests mirror source tree? Tests in unexpected locations? Tests for modules that no longer exist? | P0 = orphaned test files, P1 = non-mirroring layout, P2 = missing test dir |
+| 6 | **Monolithic patterns** | Files over ~200 lines with multiple distinct concerns? Single files handling too many responsibilities? | P0 = mixed concerns blocking extension, P1 = large but single-purpose, P2 = borderline |
+| 7 | **Dead/deprecated code** | Exported symbols, files, or directories with zero imports? Unused config, templates, or assets? | P0 = dead code in active build path, P1 = orphaned docs/notes, P2 = dead comments |
+| 8 | **Naming conventions** | All source files have `# Description:`/`// Description:`/`/* Description: */` headers? Consistent casing (camelCase TS, snake_case Python)? | P0 = missing headers, P1 = inconsistent casing, P2 = minor style |
+| 9 | **Module boundaries** | Feature modules clearly separated? Pages importing from the wrong layer (e.g., component imports from pages)? | P0 = layer violation, P1 = unclear boundary, P2 = minor cross-ref |
+| 10 | **Config vs convention gaps** | Project conventions that the codebase doesn't follow? | P0 = safety issue, P1 = maintainability, P2 = style |
 
-**Step 3: Apply the structural change**
-- Apply the change described in the evaluation item (move file, rename, reorganize, fix import, add header, etc.).
-- Do NOT change behavior or logic. Do NOT add features or fix bugs unrelated to the architecture item.
-- Follow **implement-plan §5 (Surgical Changes)** for editing discipline (touch only what's needed, preserve description headers, clean orphans).
-- Follow **implement-plan §3 (Batch for Reviewability)** for batching rules (one concern per batch, dependency ordering, conflict resolution).
+#### Priority Definitions
 
-**Step 4: Flag every changed line with `[ARCH]`**
-- Format: `[ARCH]: short_reason — what/why`
-- Example: `[ARCH]: relocate CSS — moved from app/static/css/ to frontend/src/styles/`
-- Follow **implement-plan §6 (Easy to Review)** for flagging conventions.
-- Include test adaptation flags too: `[ARCH]: update test import — reflect new file path`
+| Priority | Meaning |
+|----------|---------|
+| **P0** | Must fix — violates separation of concerns, breaks tooling, or creates a safety risk |
+| **P1** | Should fix — increases cognitive load or refactoring risk |
+| **P2** | Nice to fix — style or convention inconsistency with low impact |
 
-**Step 5: Update test references**
-- If the change moved or renamed files, update all import paths in test files to match.
-- Follow implement-plan's test-adaptation rule (line 62): source and test references updated in the same batch.
+#### Output Format
 
-**Step 6: Verify**
-- Run the full test suite. Use the same test count recording from Step 1 for comparison:
-  - Same count with all passing → item verified ✅
-  - Different count (test added/removed) → flag and explain
-  - Any failure → enter failure review (Step 7)
+Group findings by area. Format each item:
 
-**Step 7: Handle test failure**
-- Analyze the failure:
-  - **Import path issue** (module not found) → fix the import, re-verify
-  - **The change is logically correct but exposed a brittle test** → fix the test to be resilient, re-verify
-  - **The change breaks intended behavior** → revert the batch, skip this item, report in hand-off
-- Do NOT silently revert. Review first, decide based on logic.
+```
+[P0/P1/P2] file:line — finding → Recommend: action
+```
 
-**Step 8: Proceed to next item**
-- Done items are tracked in-conversation. On resume, pick up from the first undone item.
+Example:
+```
+P0: app/static/css/style.css — frontend CSS in backend package → Recommend: move to frontend/src/styles/
+P1: frontend/src/pages/ChatPage.tsx — relative imports when @/ alias is configured → Recommend: convert to @/
+P2: frontend/src/hooks/useTimer.ts — missing // Description: header → Recommend: add header
+```
 
-### 3. Hand-off
+---
+
+### Gate: User Approval
+
+After presenting findings, ask: **"Shall I apply these changes? You can approve all, select specific items, or reorder."**
+
+- Wait for explicit approval before proceeding to Phase 2.
+- If the codebase changes significantly between evaluation and improvement, re-run Phase 1 first.
+- If zero findings: report **"Architecture evaluation complete. Codebase structure is clean — no issues found."** Workflow ends here.
+
+---
+
+### Phase 2: Improve (Write)
+
+> **Mode switch required.** Phase 2 writes files — switch to Build mode before proceeding.
+
+Cross-reference **`implement-plan/SKILL.md`** for shared rules: batch discipline (§3), surgical changes (§5), flag format (§6), and test-adaptation (line 62). This skill documents only what differs.
+
+#### Per-Item Workflow
+
+Work through approved items in P0 → P1 → P2 order. For each item:
+
+**1. Baseline** — Run the full test suite. All must pass. Record test counts: *"Backend: N, Frontend: M."* Do not proceed if pre-existing failures exist.
+
+**2. TDD oracle** — If an existing test covers this code's behavior, use it as the oracle. If not, write a regression test that captures current behavior, save it to `tests/`, and confirm it passes. Structural-only changes need tests that verify the code still works as before (import resolves, function returns expected type, etc.).
+
+**3. Apply the change** — Move, rename, reorganize, fix import, add header, etc. Do NOT change behavior or logic. Do NOT fix unrelated bugs. Follow implement-plan §5 (surgical changes) and §3 (batch discipline).
+
+**4. Flag every changed line with `[ARCH]`**
+```
+[ARCH]: short_reason — what/why
+# Example: [ARCH]: relocate CSS — moved from app/static/css/ to frontend/src/styles/
+```
+Test adaptation flags too: `[ARCH]: update test import — reflect new file path`
+
+**5. Update test references** — If files moved or renamed, update all import paths in test files in the same batch as the source change (implement-plan test-adaptation rule).
+
+**6. Verify** — Run the full test suite. Compare to baseline counts:
+- Same count, all passing → item verified ✅
+- Count changed (test added/removed) → flag and explain
+- Any failure → see Failure Handling below
+
+#### Failure Handling
+
+| Symptom | Action |
+|---------|--------|
+| Import path error | Fix the import — do not revert the source change |
+| Change is correct but test is brittle | Fix the test, re-verify |
+| Change breaks intended behavior | Revert the batch, skip item, report in handoff |
+
+Never silently revert. Review first, decide based on logic.
+
+#### Partial Completion & Staleness
+
+- **Partial:** Track done items in-conversation. On resume, pick up at the first undone item.
+- **Stale evaluation:** If the codebase changed significantly since Phase 1, re-run Phase 1 before continuing.
+
+
+
+## Workflow
+
+### Phase 1: Evaluate
+1. Read documents via Grep→Read per the Documents to Read list above
+2. Spot-check 2-3 source files per scan area to confirm doc accuracy
+3. Work through all 10 areas in the Scan Checklist
+4. Present findings grouped by area in the output format
+5. State exit declaration and prompt for approval
+
+### Phase 2: Improve
+1. Confirm approved items and order
+2. For each item: baseline → TDD oracle → apply change → flag `[ARCH]` → update test refs → verify
+3. Track done/skipped in-conversation
+4. Verify hand-off checklist before declaring completion
+
+
+## Hand-off
 
 Before declaring completion:
-- All selected items either applied or explicitly skipped (with reason)
-- Full test suite passes with same or documented test counts
-- Build succeeds (`cd frontend && npm run build`)
-- Typecheck passes (`cd frontend && npx tsc --noEmit`)
-- All changes carry `[ARCH]` flags — zero non-ARCH flags
-- No unrelated changes remain
-- File-level description headers preserved or updated on moved/changed files
+- All approved items applied or explicitly skipped (with reason)
+- Full test suite passes with same or documented test count change
+- Frontend build succeeds
+- Typecheck passes
+- Every changed line carries `[ARCH]` flag — zero non-ARCH flags
 
-State clearly: **"Architecture improvements complete. [N] batches applied, [M] skipped (with reasons). Review the changes?"**
-
-## Cross-Reference Summary
-
-| Guideline | Location | How improve-architecture uses it |
-|-----------|----------|----------------------------------|
-| Batch rules | implement-plan §3 | Same: one concern per batch, dependency order, conflict resolution |
-| Surgical changes | implement-plan §5 | Same: touch only what's needed, preserve headers, clean orphans |
-| Flag format | implement-plan §6 | Same format, but `[ARCH]` prefix instead of `[ADDED]`/etc |
-| Test-adaptation rule | implement-plan line 62 | Same: test refs updated in same batch as code changes |
-| TDD first | implement-plan §2 | Modified: use existing test as oracle, write regression test only if none exists |
-| Simplicity first | implement-plan §4 | Same: minimum code, nothing speculative |
+---
 
 ## Outputs & Triggers
 
 ### Output
-Structural changes with `[ARCH]` flags. Updated test imports. Regression tests for uncovered behavior. Summary of applied and skipped items.
+Verbal prioritized list (P0–P2) with `file:line` references and recommendations. Then: structural changes with `[ARCH]` flags, updated test imports, regression tests for uncovered behavior, and a summary of applied and skipped items.
 
 ### Exit Declaration
-State clearly: "**Architecture improvements complete. [N] batches applied, [M] skipped. Review implementation?**"
+State clearly: "**Architecture improvements complete. Review implementation?**"
 
 ### Next Step
-User invokes `review-implementation` — **switch to Plan mode before proceeding**.
+User invokes `review-implementation` — switch to Plan mode before proceeding.

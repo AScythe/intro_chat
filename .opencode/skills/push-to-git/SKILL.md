@@ -104,6 +104,17 @@ After all groups are committed and pushed, show the user the commit summary.
 
 State clearly on success: "✓ All commits pushed to origin/<branch>."
 
+
+## Hand-off
+
+Before declaring completion:
+- All changes grouped by logical concern and presented to user
+- User approved the grouping
+- Each group committed with auto-generated, approved message
+- Each commit pushed to remote successfully
+
+---
+
 ## Outputs & Triggers
 
 ### Output

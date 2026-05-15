@@ -1,12 +1,11 @@
 ---
 name: check-plan-readiness
-mode: build
-description: '[Build mode — creates plan documents] Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/plans/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps route back to grill-and-refine. This step creates the plan document — no other step writes to it. Output: docs/plans/PLAN_*.md. Exit: "All planning gates pass" — invokes implement-plan.'
+description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to plans/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. This step creates the plan document. Use after grill-and-refine, triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
 ---
 
 ## What I do
 - Gather the plan from conversation context (analyze-and-plan + grill-and-refine outputs)
-- Create `docs/plans/PLAN_YYYY_MM_DD_XXX.md` — write all sections
+- Create `plans/PLAN_YYYY_MM_DD_XXX.md` — write all sections
 - Verify the plan document against all 7 pre-implementation gates
 - Append gate results to the file
 - If all gates pass, give go signal with file path
@@ -18,10 +17,10 @@ None. Gates 1-7 are presence-checks on the plan file; gate 5 (Soundness) was alr
 
 ## Plan Document Creation
 
-Create the plan file at `docs/plans/PLAN_YYYY_MM_DD_XXX.md`:
+Create the plan file at `plans/PLAN_YYYY_MM_DD_XXX.md`:
 - **YYYY_MM_DD**: today's date
-- **XXX**: next available 3-digit number (001, 002, ...). List existing files in `docs/plans/` and increment the highest number.
-- Example: `docs/plans/PLAN_2026_05_11_001.md`
+- **XXX**: next available 3-digit number (001, 002, ...). List existing files in `plans/` and increment the highest number.
+- Example: `plans/PLAN_2026_05_11_001.md`
 
 ### Template
 
@@ -52,7 +51,7 @@ Populate each section from conversation context:
 - **Requirements / Problem** — from the user's initial request and analyze-and-plan's understanding
 - **Solution** — from analyze-and-plan's plan
 - **Implementation Plan** — files, approach, edge cases, testing strategy, task breakdown, success criteria
-- **Grill Outcomes** — resolved dimensions from grill-and-refine's Phase 3 output
+- **Grill Outcomes** — resolved dimensions from grill-and-refine's output
 - **Readiness Gate Results** — append after gates below
 
 #### Task Breakdown Guidelines
@@ -111,21 +110,33 @@ When a gate fails:
 1. Clearly list which gates failed and why
 2. Assess severity:
    - **Minor** (missing documentation, unclear wording) — suggest the fix, update the plan file, and re-check without leaving check-plan-readiness
-   - **Significant** (unresolved assumption, edge case, soundness risk) — recommend re-entering grill-and-refine for the affected dimension
+   - **Significant** (unresolved assumption, edge case, soundness risk) — interactively ask the user about the affected dimension
 3. Re-check all gates after resolution
 
-State clearly on pass: "✓ All gates pass. Plan saved at docs/plans/PLAN_.... Ready to implement?"
+
+## Hand-off
+
+Before declaring completion:
+- Plan file created at `plans/PLAN_*.md` with all sections populated
+- All 7 gates checked and results appended to plan file
+- All gates pass: route to implementation
+- Gate failure: triaged (minor fixed in-place, significant routed back to grill-and-refine)
+
+---
 
 ## Outputs & Triggers
 
 ### Output
-Persistent plan file at `docs/plans/PLAN_*.md` with all sections populated and gate results appended. This skill is the sole creator of the plan file — no other step writes to it.
+Persistent plan file at `plans/PLAN_*.md` with all sections populated and gate results appended. This skill is the sole creator of the plan file — no other step writes to it.
 
 ### Exit Declaration (pass)
-State clearly: "**All planning gates pass. Plan saved at `docs/plans/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implement-plan.**"
+State clearly: "**All planning gates pass. Plan saved at `plans/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implementation of the plan.**"
 
 ### Exit Declaration (fail)
-State clearly: "**Gate failure: [list failed gates]. Triage: [minor → fixed in place | significant → route back to grill-and-refine for: list affected dimensions].**"
+State clearly: "**Gate failure: [list failed gates]. Triage: [minor → fixed in place | significant → let's resolve these: list affected dimensions].**"
 
 ### Next Step (pass)
 User invokes `implement-plan` (Build mode — same mode, no switch needed).
+
+### Next Step (fail)
+User invokes `grill-and-refine` (Plan mode) to resolve the failed gates.
