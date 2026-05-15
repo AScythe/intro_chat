@@ -53,9 +53,9 @@ Think of it as *Tinder for 120-second conversations* — but only when you're ph
 
 ### Prerequisites
 - Python 3.10 or higher
-- pip (Python package installer)
+- uv (Python package installer — install via `powershell -c "irm https://astral.sh/uv/install.ps1 | iex"`)
 - Node.js 18+ and npm
-- Virtual environment: `python -m venv venv` (create) — activate via `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
+- Virtual environment: `uv venv` (auto-creates `.venv/`)
 
 ### Installation & Run
 ```bash
@@ -64,7 +64,7 @@ git clone <repository-url>
 cd introchat
 
 # Install Python dependencies
-pip install -r requirements.txt
+uv sync
 
 # Install and build frontend
 cd frontend
@@ -73,7 +73,7 @@ npm run build
 cd ..
 
 # Run the application
-python -m app
+uv run python -m app
 
 # Open your browser
 # Go to http://localhost:5000
@@ -139,10 +139,10 @@ For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 cd frontend && npm run type-check && cd ..
 
 # Backend and database checks
-python tests/test_app.py
+uv run python tests/test_app.py
 
 # Frontend source validation
-python tests/test_js_modules.py
+uv run python tests/test_js_modules.py
 
 # Vitest component and hook tests
 cd frontend && npm test && cd ..
@@ -158,8 +158,8 @@ cd frontend && npm run test:e2e && cd ..
 ### Render.com (Recommended)
 1. Connect your GitHub repository to Render
 2. Create a new Web Service
-3. Set build command: `cd frontend && npm install && npm run build && cd .. && pip install -r requirements.txt`
-4. Set start command: `python -m app`
+3. Set build command: `cd frontend && npm install && npm run build && cd .. && uv sync`
+4. Set start command: `uv run python -m app`
 5. Deploy!
 
 ### Other Platforms
@@ -208,7 +208,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ### Common Issues
 
 **"Module not found" errors**
-- Make sure you've installed all requirements: `pip install -r requirements.txt`
+- Make sure you've installed all requirements: `uv sync`
 
 **"Port already in use" error**
 - Change the port in `app/config.py`: `PORT = 5001`

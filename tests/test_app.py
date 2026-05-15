@@ -666,7 +666,7 @@ def main():
     print("🎉 All tests completed!")
 
     print("\n📋 To run the application:")
-    print("   python -m app")
+    print("   uv run python -m app")
 
     print("\n🌐 Then open your browser to:")
     print("   http://localhost:5000")

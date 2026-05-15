@@ -33,7 +33,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'python -m app',
+    command: 'uv run python -m app',
     url: 'http://127.0.0.1:5000',
     reuseExistingServer: !process.env.CI,
     cwd: path.resolve(__dirname, '..'),

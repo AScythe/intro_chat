@@ -1,6 +1,6 @@
 ---
 name: update-docs
-description: Analyze session changes and run the matching update-* skills to sync all project documentation. Trigger when a documentation sync phase completes, or when the user says "sync docs", "update docs", "docs are outdated", or similar.
+description: 'Analyze session changes and run the matching update-* skills to sync all project documentation. Trigger when a documentation sync phase completes, or when the user says "sync docs", "update docs", "docs are outdated", or similar.'
 ---
 
 ## Purpose

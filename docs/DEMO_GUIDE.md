@@ -6,7 +6,7 @@
 
 ### Step 1: Start the Application
 ```bash
-python -m app
+uv run python -m app
 ```
 
 ### Step 2: Open in Browser

@@ -1,7 +1,6 @@
 ---
 name: push-to-git
-mode: build
-description: '[Build mode — standalone] Stage related files together by logical grouping, commit with auto-generated messages (user-approved), then push. Use when the user says "push", "commit and push", "push to github", or similar.'
+description: 'Stage related files together by logical grouping, commit with auto-generated messages (user-approved), then push. Use when the user says "push", "commit and push", "push to github", or similar.'
 ---
 
 ## What I do
@@ -29,7 +28,7 @@ Group files by their **logical nature and purpose**, not by file count. A group 
 | **html templates** | `app/templates/*.html` | "Add user info page between home and room selection" |
 | **tests** | `tests/*.py` | "Add regression tests for matchmaking edge cases" |
 | **documentation** | `docs/*.md` | "Update ARCHITECTURE.md with new component flow" |
-| **config** | Root config files (`.gitignore`, `requirements.txt`, etc.) | "Pin Flask and Flask-SocketIO versions" |
+| **config** | Root config files (`.gitignore`, `pyproject.toml`, etc.) | "Pin Flask and Flask-SocketIO versions" |
 
 Move files between groups if they belong to the same logical commit. For example, a Python backend change that also updates tests should be a single commit: "Add input validation + regression tests."
 

@@ -1,6 +1,6 @@
 """
 test_db.py
-Description: Standalone database debugging utility that tests SQLite connection, lists table schemas, and prints column information — run via `python tests/test_db.py`
+Description: Standalone database debugging utility that tests SQLite connection, lists table schemas, and prints column information — run via `uv run python tests/test_db.py`
 """
 
 import sqlite3
@@ -13,7 +13,7 @@ def test_db_connection():
     
     if not os.path.exists(db_path):
         print(f"❌ Database not found at: {db_path}")
-        print("   Run: python -m app  (to create database)")
+        print("   Run: uv run python -m app  (to create database)")
         return False
     
     print(f"✅ Database found: {db_path}")
@@ -75,6 +75,6 @@ if __name__ == '__main__':
             reset_database()
         else:
             print(f"Unknown command: {sys.argv[1]}")
-            print("Usage: python tests/test_db.py [reset]")
+            print("Usage: uv run python tests/test_db.py [reset]")
     else:
         test_db_connection()

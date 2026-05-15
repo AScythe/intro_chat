@@ -168,7 +168,7 @@ The following are explicitly NOT implemented and should not be built unless the 
 
 ### 🖥️ Demo Setup Instructions (For Judges)
 1. Open two browsers (or two phones) on the same network.
-2. Run the server with `python -m app`.
+2. Run the server with `uv run python -m app`.
 3. Visit `http://localhost:5000` — create a new event.
 4. In both browsers, enter the same event code → pick the same room → both tap *"I'm Ready"*
 5. Watch them match in real time!

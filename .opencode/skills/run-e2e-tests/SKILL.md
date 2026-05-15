@@ -37,7 +37,7 @@ If build fails, report the error and stop. Do not run tests against stale artifa
 cd frontend && npx playwright test
 ```
 Playwright's `webServer` config handles:
-- Starting `python -m app` with `DB_PATH` set to `data/e2e_test.db` (temp database)
+- Starting `uv run python -m app` with `DB_PATH` set to `data/e2e_test.db` (temp database)
 - Waiting for port 5000 to be ready
 - Killing the server on exit
 
