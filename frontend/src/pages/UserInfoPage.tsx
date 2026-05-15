@@ -1,5 +1,5 @@
 // UserInfoPage.tsx
-// Description: Profile form — LinkedIn/Slack input, save via API, navigate to room
+// Description: Profile form — name, LinkedIn/Slack input, save via API, navigate to room
 
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ export function UserInfoPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const { setUser } = useUser();
+  const [name, setName] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [slackHandle, setSlackHandle] = useState('');
   const [saving, setSaving] = useState(false);
@@ -21,7 +22,7 @@ export function UserInfoPage() {
     if (!eventId) return;
     setSaving(true);
     try {
-      const username = generateUsername();
+      const username = name.trim() || generateUsername();
       const data = await fetchJSON<JoinEventResponse>(`/api/events/${eventId}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,6 +62,21 @@ export function UserInfoPage() {
           <div className="profile-form">
             <div className="input-group" style={{ marginBottom: 15 }}>
               <label style={{ display: 'block', marginBottom: 5, fontWeight: 500, color: '#4a5568' }}>
+                Your Name
+              </label>
+              <input
+                type="text"
+                id="nameInput"
+                placeholder="e.g. Alex"
+                maxLength={50}
+                style={{ width: '100%' }}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+
+            <div className="input-group" style={{ marginBottom: 15 }}>
+              <label style={{ display: 'block', marginBottom: 5, fontWeight: 500, color: '#4a5568' }}>
                 LinkedIn Profile URL
               </label>
               <input
@@ -88,7 +104,7 @@ export function UserInfoPage() {
             </div>
 
             <p className="card-description" style={{ fontSize: '0.9rem', color: '#718096', margin: '10px 0 20px 0' }}>
-              All fields are optional. You can skip anything you're not comfortable sharing.
+              Name is optional — leave blank for an anonymous username. LinkedIn and Slack are optional too.
             </p>
 
             <div className="form-actions" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

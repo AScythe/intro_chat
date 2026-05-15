@@ -28,25 +28,51 @@ describe('UserInfoPage', () => {
   it('renders profile header and form fields', () => {
     renderWithRouter();
     expect(screen.getByText('Your Profile')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/e\.g\. Alex/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/linkedin/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/@username/i)).toBeInTheDocument();
   });
 
-  it('renders save profile and select room buttons', () => {
+  it('save button is enabled when name is empty', () => {
     renderWithRouter();
-    expect(screen.getByText('Save Profile')).toBeInTheDocument();
-    const selectRoomBtn = screen.getByText('Select Room / Area');
-    expect(selectRoomBtn).toBeDisabled();
+    expect(screen.getByText('Save Profile')).not.toBeDisabled();
   });
 
-  it('saves profile and enables select room button', async () => {
-    const mockResponse = { user_id: 'user_abc123', username: 'User_abc123' };
+  it('saves profile with auto-generated username when name is empty', async () => {
+    const mockResponse = { user_id: 'user_abc123', username: 'User_abc12' };
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockResponse),
     });
 
     renderWithRouter();
+    fireEvent.click(screen.getByText('Save Profile'));
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringMatching(/"username":"User_[a-z0-9]{5}"/),
+        })
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByText(/Profile saved/i)).toBeInTheDocument();
+    });
+    expect(screen.getByText('Select Room / Area')).not.toBeDisabled();
+  });
+
+  it('saves profile with custom name and enables select room', async () => {
+    const mockResponse = { user_id: 'user_abc123', username: 'Alex' };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    renderWithRouter();
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\. Alex/i), {
+      target: { value: 'Alex' },
+    });
     fireEvent.change(screen.getByPlaceholderText(/linkedin/i), {
       target: { value: 'https://linkedin.com/in/test' },
     });
@@ -55,6 +81,14 @@ describe('UserInfoPage', () => {
     });
     fireEvent.click(screen.getByText('Save Profile'));
 
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          body: expect.stringContaining('"username":"Alex"'),
+        })
+      );
+    });
     await waitFor(() => {
       expect(screen.getByText(/Profile saved/i)).toBeInTheDocument();
     });
