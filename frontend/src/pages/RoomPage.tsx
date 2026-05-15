@@ -7,6 +7,7 @@ import { fetchJSON } from '@/api/client';
 import { useUser } from '@/hooks/useUser';
 import { useSocket } from '@/hooks/useSocket';
 import { useDemoMode } from '@/hooks/useDemoMode';
+import { useChatRequest } from '@/hooks/useChatRequest';
 import { PersonCard } from '@/components/PersonCard';
 import { MatchCountdown } from '@/components/MatchCountdown';
 import { CONFIG } from '@/config/constants';
@@ -21,6 +22,7 @@ export function RoomPage() {
   const { user } = useUser();
   const socket = useSocket();
   const demo = useDemoMode(true);
+  const { requestedPerson, personResponse, yourReady, theirReady, requestChat, imReady, cancelRequest } = useChatRequest();
 
   const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState('');
@@ -31,10 +33,6 @@ export function RoomPage() {
   const [matchUsername, setMatchUsername] = useState('');
   const [matchId, setMatchId] = useState('');
   const [countdown, setCountdown] = useState<number>(CONFIG.MATCH_FOUND_COUNTDOWN);
-  const [requestedPerson, setRequestedPerson] = useState<SamplePerson | null>(null);
-  const [personResponse, setPersonResponse] = useState<{ accepted: boolean; message: string } | null>(null);
-  const [yourReady, setYourReady] = useState(false);
-  const [theirReady, setTheirReady] = useState(false);
 
   useEffect(() => {
     if (!eventId) return;
@@ -72,24 +70,12 @@ export function RoomPage() {
 
   function handleRequestChat() {
     if (!selectedPerson) return;
-    setRequestedPerson(selectedPerson);
+    requestChat(selectedPerson);
     setViewState('waitingResponse');
-
-    setTimeout(async () => {
-      await demo.simulateDelay(CONFIG.SIMULATE_RESPONSE_DELAY_MS);
-      const response = demo.simulatePersonResponse(selectedPerson.name);
-      if (response) {
-        setPersonResponse(response);
-        setViewState('accepted');
-        setTimeout(() => {
-          setTheirReady(true);
-        }, CONFIG.SIMULATE_READY_DELAY_MS);
-      }
-    }, 100);
   }
 
   function handleImReady() {
-    setYourReady(true);
+    imReady();
   }
 
   function handleGoToChat() {
@@ -98,11 +84,16 @@ export function RoomPage() {
   }
 
   function handleCancelRequest() {
+    cancelRequest();
     setViewState('roomSelected');
-    setRequestedPerson(null);
     setSelectedPerson(null);
-    setPersonResponse(null);
   }
+
+  useEffect(() => {
+    if (personResponse) {
+      setViewState('accepted');
+    }
+  }, [personResponse]);
 
   function handleChangeRoom() {
     setViewState('selecting');
@@ -222,11 +213,24 @@ export function RoomPage() {
 
         {viewState === 'waitingResponse' && requestedPerson && (
           <div className="card">
-            <h2>Waiting for response...</h2>
-            <p>
-              You requested to chat with <strong>{requestedPerson.name}</strong>
-            </p>
-            <p>They'll respond in a moment...</p>
+            {/* [MODIFIED]: Changed heading from "Waiting for response..." to "Request Sent" */}
+            <h2>Request Sent</h2>
+            {/* [ADDED]: PersonCard for invited user — mirrors accepted state layout */}
+            <div className="available-people" style={{ margin: '15px 0' }}>
+              <PersonCard person={requestedPerson} />
+            </div>
+            {/* [ADDED]: Status indicators — mirrors accepted state's .ready-status layout */}
+            <div className="ready-status">
+              <div className="status-item">
+                <div className="status-indicator">⏳</div>
+                <span>You: Request sent</span>
+              </div>
+              {/* [ADDED]: .pending class enables pulse animation on this indicator */}
+              <div className="status-item pending">
+                <div className="status-indicator">⏳</div>
+                <span>{requestedPerson.name}: Waiting for response...</span>
+              </div>
+            </div>
             <button className="btn btn-secondary" onClick={handleCancelRequest}>
               Cancel Request
             </button>

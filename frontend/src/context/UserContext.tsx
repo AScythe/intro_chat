@@ -4,6 +4,7 @@
 import { useState, useCallback, type ReactNode } from 'react';
 import { UserContext, type UserData } from '@/hooks/useUser';
 import { storeUserId, getUserId, clearUserId, storeData, getData } from '@/utils/storage';
+import { generateUsername } from '@/utils/random';
 
 const EVENT_ID_KEY = 'introchat_event_id';
 const USERNAME_KEY = 'introchat_username';
@@ -15,7 +16,7 @@ function loadUserFromStorage(): UserData | null {
 
   if (!userId || !eventId) return null;
 
-  return { userId, eventId, username: username || `User_${userId}` };
+  return { userId, eventId, username: username || generateUsername() };
 }
 
 function saveUserToStorage(data: UserData): void {

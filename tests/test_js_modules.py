@@ -138,6 +138,7 @@ def test_hook_exports():
         'useTimer.ts': ['useChatTimer'],
         'useDemoMode.ts': ['useDemoMode'],
         'useUser.ts': ['useUser', 'UserContext', 'UserData'],
+        'useChatRequest.ts': ['useChatRequest'],
     }
 
     for filename, expected in hook_files.items():

@@ -2,6 +2,7 @@
 // Description: Timer display component showing MM:SS with warning/danger visual states
 
 import { CONFIG } from '@/config/constants';
+import { formatTime } from '@/utils/format';
 
 interface TimerProps {
   timeLeft: number;
@@ -14,9 +15,6 @@ export function Timer({
   warningThreshold = CONFIG.TIMER_WARNING_THRESHOLD,
   dangerThreshold = CONFIG.TIMER_DANGER_THRESHOLD,
 }: TimerProps) {
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
-
   const classNames = ['timer'];
   if (timeLeft <= dangerThreshold) {
     classNames.push('timer-danger');
@@ -26,7 +24,7 @@ export function Timer({
 
   return (
     <div className={classNames.join(' ')}>
-      <span>{minutes}</span>:<span>{seconds.toString().padStart(2, '0')}</span>
+      {formatTime(timeLeft)}
     </div>
   );
 }

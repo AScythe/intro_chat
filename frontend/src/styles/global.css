@@ -354,92 +354,6 @@ body {
     border-radius: 12px;
 }
 
-.user-dots {
-    display: flex;
-    gap: 10px;
-    margin: 15px 0;
-    flex-wrap: wrap;
-}
-
-.user-dot {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-    position: relative;
-    margin: 5px;
-    transition: all 0.3s ease;
-}
-
-.user-dot.available {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
-    animation: pulse-available 2s infinite;
-}
-
-.user-dot.busy {
-    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
-    box-shadow: 0 2px 8px rgba(160, 174, 192, 0.3);
-    opacity: 0.7;
-}
-
-.availability-indicator {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    border: 2px solid white;
-}
-
-.availability-indicator.available {
-    background: #48bb78;
-    animation: pulse-indicator 1.5s infinite;
-}
-
-.availability-indicator.busy {
-    background: #e53e3e;
-}
-
-@keyframes pulse-available {
-    0% {
-        box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
-    }
-
-    50% {
-        box-shadow: 0 4px 16px rgba(72, 187, 120, 0.6);
-        transform: scale(1.05);
-    }
-
-    100% {
-        box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
-    }
-}
-
-@keyframes pulse-indicator {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
 
 /* Person Selection Styles */
 .available-people {
@@ -572,6 +486,11 @@ body {
     border-radius: 50%;
     background: #f7fafc;
     transition: all 0.3s ease;
+}
+
+/* [ADDED]: Pulse animation on the "them" status indicator while waiting for response */
+.status-item.pending .status-indicator {
+    animation: pulse 1.5s infinite;
 }
 
 .ready-actions {
@@ -793,28 +712,6 @@ body {
     padding: 20px;
 }
 
-.username-exchange {
-    background: #f7fafc;
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
-}
-
-.username-item {
-    margin-bottom: 10px;
-    font-size: 1.1rem;
-}
-
-.username-item:last-child {
-    margin-bottom: 0;
-}
-
-.connection-note {
-    color: #718096;
-    font-style: italic;
-    margin-top: 15px;
-}
-
 .connection-declined {
     text-align: center;
     padding: 20px;
@@ -828,11 +725,6 @@ body {
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.9rem;
     padding: 20px 0;
-}
-
-/* Hidden Utility */
-.hidden {
-    display: none;
 }
 
 /* Responsive Design */

@@ -101,13 +101,8 @@ export function ChatPage() {
   }
 
   function handleExtend(seconds: number) {
-    if (seconds === -1) {
-      timer.clear();
-      setState('extended');
-    } else {
-      timer.extend(seconds);
-      setState('extended');
-    }
+    timer.extend(seconds);
+    setState('extended');
   }
 
   function handleEndChat() {
