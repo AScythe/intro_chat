@@ -1,5 +1,5 @@
 # Database file
-# introchat.db
+data/introchat.db
 
 # Environment files
 .env
