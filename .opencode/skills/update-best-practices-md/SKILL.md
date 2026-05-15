@@ -111,7 +111,7 @@ Read sources in this priority order:
 1. **Existing `PROJECT_BEST_PRACTICES.md`** — know what's already covered before looking for new entries
 2. **Session conversation** — extract new lessons: decisions made, errors encountered and fixed, testing/verification steps used, anything that caused confusion or required backtracking
 3. **Skills directory (`.opencode/skills/*/SKILL.md`)** — skill methodologies evolve across sessions; extract lessons from how the skills themselves were revised
-4. **Plan files (`plans/PLAN_*.md`)** — persistent decision artifacts contain design rationale and tradeoff context
+4. **Plan files (`archive/PLAN_*.md`)** — persistent decision artifacts contain design rationale and tradeoff context
 5. **Changed files from this session** — read only files modified during this session, not the full codebase. Look for observable patterns: modularization, imports, error handling, state management, file-description conventions, test-coordination patterns.
    - **Modified skill files**: specifically check for new workflow rules added (e.g., batch conflict resolution, dead code protocol, expanded review checks) — these signal new process patterns to extract as best practices.
 6. **Config files** — tool configs, CI setup, formatter/linter configs for repeatable patterns

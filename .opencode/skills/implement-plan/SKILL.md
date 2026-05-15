@@ -5,14 +5,14 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 ## What I do
 - **Step 0: Verify plan readiness** — check the plan file's Readiness Gate Results; all 7 gates must pass before proceeding
-- **Step 1: Read the plan** — open `plans/PLAN_*.md` (the plan file in consideration), read every change and success criterion
+- **Step 1: Read the plan** — open `docs/PLAN_*.md` (the plan file in consideration), read every change and success criterion
 - **Step 2: Split into batches** — divide implementation into logical, independently verifiable units
 - **Step 3: For each batch** — write test → save test in `tests/` → implement → verify test passes → flag all changes
 - **Step 4: For non-testable changes** — implement directly and confirm the intended purpose is achieved. Non-testable means: config changes, renames without logic changes, typo fixes, or infrastructure with no observable behavior. When in doubt, write the test.
 - **Step 5: After all batches** — run full test suite, confirm all criteria, hand off with exit declaration.
 
 ## Boundaries
-- **Plan file is read-only.** Never create or modify `plans/PLAN_*.md`.
+- **Plan file is read-only.** Never create or modify `docs/PLAN_*.md`.
 - **No scope creep.** Only implement what the plan specifies — nothing speculative, no unrelated fixes.
 
 ## Documents to Read
@@ -27,7 +27,7 @@ Read specific sections via Grep→Read (grep heading line number, Read with offs
 ### 1. Read the Plan
 **Open the approved plan file before writing any code.**
 
-- Read `plans/PLAN_*.md` — use the relevant plan file from check-plan-readiness's output
+- Read `docs/PLAN_*.md` — use the relevant plan file from check-plan-readiness's output
 - Read every change and success criterion
 - Identify which files will be created, modified, or removed
 - Map each test file to a plan task

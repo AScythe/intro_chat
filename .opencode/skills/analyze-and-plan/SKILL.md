@@ -1,6 +1,6 @@
 ---
 name: analyze-and-plan
-description: 'Pre-implementation analysis and planning — understand context (code and requirements), surface assumptions, resolve ambiguities, confirm understanding with user, then create a concrete plan. Trigger at the start of any coding task, or when the user says "analyze the requirements", "understand before making plan", "analyze and plan", "propose a plan", or similar.
+description: 'Pre-implementation analysis and planning — understand context (code and requirements), surface assumptions, resolve ambiguities, confirm understanding with user, then create a concrete plan. Trigger at the start of any coding task, or when the user says "analyze the requirements", "understand before making plan", "analyze and plan", "propose a plan", or similar.'
 ---
 
 ## What I do
@@ -14,7 +14,7 @@ description: 'Pre-implementation analysis and planning — understand context (c
 - **No file writes.** Do NOT create, modify, or write any files — including plan documents, analysis notes, or code changes.
 - **No implementation.** This skill only understands and plans.
 - **Broad strokes, not deep scrutiny.** Deep edge-case analysis, risk probing, and alternative evaluation are handled by `grill-and-refine`.
-- **Verbal output only.** Present the plan as text in the conversation. Formal plan documents (`plans/PLAN_*.md`) are written later by `check-plan-readiness`.
+- **Verbal output only.** Present the plan as text in the conversation. Formal plan documents (`docs/PLAN_*.md`) are written later by `check-plan-readiness`.
 
 ## Guidelines
 

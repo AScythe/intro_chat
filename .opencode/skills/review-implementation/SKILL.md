@@ -1,6 +1,6 @@
 ---
 name: review-implementation
-description: 'Verify the completed implementation meets all success criteria — review diff, run tests, run lint, confirm intended function. Trigger after implement-plan, improve-architecture, or modularize-and-clean, or when the user says "review the implementation", "verify changes", or similar. '
+description: 'Verify the completed implementation meets all success criteria — review diff, run tests, run lint, confirm intended function. Trigger after implement-plan, improve-architecture, or modularize-and-clean, or when the user says "review the implementation", "verify changes", "review and verify",or similar. '
 ---
 
 ## What I do
@@ -24,8 +24,8 @@ description: 'Verify the completed implementation meets all success criteria —
 
 Read via Grep→Read (grep heading line number, Read with offset/limit):
 
-- **First pass** (after `implement-plan`): `plans/PLAN_*.md` (relevant plan) + `ARCHITECTURE.md` ("Import Structure", relevant module descriptions)
-- **Clean-up pass** (after `modularize-and-clean`): `plans/PLAN_*.md` (success criteria only) — change-log from `modularize-and-clean` is the primary verification target
+- **First pass** (after `implement-plan`): `docs/PLAN_*.md` (relevant plan) + `ARCHITECTURE.md` ("Import Structure", relevant module descriptions)
+- **Clean-up pass** (after `modularize-and-clean`): `docs/PLAN_*.md` (success criteria only) — fall back to `archive/` if the plan was already moved after the first pass. Change-log from `modularize-and-clean` is the primary verification target.
 - **Architecture pass** (after `improve-architecture`): `improve-architecture` output from session context — the evaluation list is the verification target
 
 ## Review Process
@@ -57,8 +57,8 @@ Execute every test suite. All must pass. On failure: list what failed and why �
 
 Exact commands:
 ```bash
-python tests/test_app.py
-python tests/test_js_modules.py
+uv run python tests/test_app.py
+uv run python tests/test_js_modules.py
 cd frontend && npx vitest run
 ```
 
@@ -88,7 +88,7 @@ Must pass. On failure: list files and issues — do not fix here.
 Identify which pass this is by the prior skill (see Flag Type Reference above), then verify against the appropriate target:
 
 **First pass** (prior: `implement-plan`):  
-Read `plans/PLAN_*.md`. Check every item in the Implementation Plan against the actual code. Every planned change must be accounted for. Every success criterion must be met. If any planned item is missing or incomplete, it's a failure.
+Read `docs/PLAN_*.md`. Check every item in the Implementation Plan against the actual code. Every planned change must be accounted for. Every success criterion must be met. If any planned item is missing or incomplete, it's a failure.
 
 **Clean-up pass** (prior: `modularize-and-clean`):  
 Read the verbal change-log produced by `modularize-and-clean`. Verify every `[CLEANUP]` entry was applied correctly. Confirm all approved batches are either applied or explicitly skipped with a reason. Check that no behavioral changes snuck in (flags must be `[CLEANUP]` only).
@@ -109,6 +109,18 @@ For non-testable changes (config, rename): confirm the intended effect directly.
 **All pass — clean-up pass** → see Exit Declarations below
 **All pass — architecture pass** → see Exit Declarations below
 **Any fail** → see Exit Declarations below
+
+### 8. Archive Plan (on success)
+
+Run this only after confirming a pass (Step 7). If the plan is already in `archive/`, skip entirely.
+
+Ask the user: **"Move plan to archive? (y/n)"**
+
+If yes:
+- Scan `archive/` for the highest existing `PLAN_*` number → increment by 1 for the new filename
+- Read `docs/PLAN_xxx.md`, update the internal `# PLAN_...` header to match the new archive filename
+- Move the file: `docs/PLAN_xxx.md` → `archive/PLAN_yyy.md`
+- Confirm the move: "Plan archived as `archive/PLAN_yyy.md`."
 
 
 ## Hand-off

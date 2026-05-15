@@ -178,8 +178,8 @@ if user_id not in active_users:
 
 **Example**:
 ```bash
-python -c "from app import app"  # Syntax check
-python -m pytest tests/ -v      # Full suite
+uv run python -c "from app import app"  # Syntax check
+uv run pytest tests/ -v                 # Full suite
 ```
 
 **Why it matters**: Catch errors before they reach production.
@@ -402,15 +402,15 @@ Templates: index → user_info → room → chat
 **Why it matters**: Keeps Verify checklists lean and focused on quality. Routing correctness is enforced earlier; the final step only verifies what IS there.
 
 ### 6.11 Single Canonical Location for Artifacts
-**Context**: Plan files existed in both `.opencode/plans/` and `plans/` causing numbering confusion
+**Context**: Plan files existed in both `.opencode/plans/` and `archive/` causing numbering confusion
 
 **Principle**: Each type of persistent artifact has exactly one canonical directory. Never create copies or variants in alternate locations. One step owns creation of that artifact; all others read-only.
 
 **Example**:
 ```
-# ✅ All plan files in plans/
-plans/PLAN_2026_05_12_001.md
-plans/PLAN_2026_05_12_002.md
+# ✅ All archive plan files in archive/
+archive/PLAN_2026_05_12_001.md
+archive/PLAN_2026_05_12_002.md
 
 # ❌ Orphan artifact in .opencode/plans/ creates conflicts
 ```
@@ -467,8 +467,8 @@ After:  │   ├── format.ts      # Utility functions for formatting values
 
 **Example**:
 ```bash
-python -m py_compile **/*.py
-python -c "from app import app"
+uv run python -m py_compile **/*.py
+uv run python -c "from app import app"
 ```
 
 **Why it matters**: Catch errors before testing.
@@ -628,18 +628,18 @@ review-implementation finds:
 **Why it matters**: Deleting them breaks the single-source-of-truth chain between code and documentation. They're referenced by auto-extraction scripts.
 
 ### 7.14 Windows Shell Quoting Workaround
-**Context**: PowerShell mangled Python f-strings with double quotes in inline `python -c "..."` commands. Scripts timed out or produced syntax errors.
-**Principle**: On Windows PowerShell, write complex Python scripts to `.py` files instead of inline strings in `python -c "..."`. Use `$env:PYTHONIOENCODING='utf-8'` before running scripts that output emoji or Unicode.
+**Context**: PowerShell mangled Python f-strings with double quotes in inline `uv run python -c "..."` commands. Scripts timed out or produced syntax errors.
+**Principle**: On Windows PowerShell, write complex Python scripts to `.py` files instead of inline strings in `uv run python -c "..."`. Use `$env:PYTHONIOENCODING='utf-8'` before running scripts that output emoji or Unicode.
 **Example**:
 ```powershell
 # ❌ PowerShell mangles embedded double quotes in f-strings
-python -c "print(f'Hello {name}')"  # ← broken
+uv run python -c "print(f'Hello {name}')"  # ← broken
 
 # ✅ Write to a file and run it
-python script.py
+uv run python script.py
 
 # ✅ Encoding fix for emoji in PowerShell
-$env:PYTHONIOENCODING='utf-8'; python test_suite.py
+$env:PYTHONIOENCODING='utf-8'; uv run python test_suite.py
 ```
 **Why it matters**: Cross-platform shell differences cause silent failures. Writing to a file avoids quoting issues entirely.
 
@@ -678,13 +678,13 @@ Root:     "Always derive cryptographic nonces from a deterministic counter or a
 **Why it matters**: Symptom-level lessons only fix this one case. Root-level lessons prevent entire categories of bugs.
 
 ### 7.17 Sequential Numbering for Plan Files
-**Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `plans/PLAN_001` both existed
+**Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `archive/PLAN_001` both existed
 
 **Principle**: When artifacts use sequential numbering, the number must be globally unique across ALL locations. Before assigning a new number, scan the canonical directory for existing files and pick the next available. Never reuse a number from an alternative directory that was later merged.
 
 **Example**:
 ```
-# ✅ plans/ has 001, 002 → next is 003
+# ✅ docs/ has 001, 002 → next is 003
 # ❌ Bringing in an artifact numbered 001 from elsewhere creates a duplicate
 ```
 
@@ -809,7 +809,7 @@ All fixed in one pass.
 **Principle**: When documentation conflicts with code, configs, scripts, or CI files, trust the executable source. Prose is aspirational — code is truth.
 
 **Example**:
-- README says "run `python app.py`" but `requirements.txt` shows the entrypoint is `python -m app` → trust the code and fix the docs
+- README says "run `python app.py`" but `pyproject.toml` shows the entrypoint is `uv run python -m app` → trust the code and fix the docs
 - ARCHITECTURE.md describes an old module structure that no longer exists in the actual file tree → update ARCHITECTURE.md to match the code
 
 **Why it matters**: Outdated docs are worse than no docs — they actively mislead. Verifying against executable sources keeps documentation accurate.
@@ -942,11 +942,18 @@ review-implementation (2nd) →  "All checks pass. Verified."                   
 **Why it matters**: Each batch is independently verifiable. Reviewers see a complete change, not a fragment. No "to be continued" across batches.
 
 ### 8.11 Persistent Decision Artifacts
-**Context**: From saving plans as timestamped, numbered files in plans/ for all downstream stages to consume
+**Context**: From saving plans as timestamped, numbered files for all downstream stages to consume
 
-**Principle**: Save finalized decisions as persistent files — not just conversation context. Use a consistent naming scheme (PLAN_YYYY_MM_DD_XXX.md) with auto-incrementing numbers. Each downstream stage reads from the artifact file directly, not from memory or chat history. This makes decisions reviewable, auditable, and independent of conversation context.
+**Principle**: Save finalized decisions as persistent files — not just conversation context. Use a consistent naming scheme (PLAN_YYYY_MM_DD_XXX.md) with auto-incrementing numbers. Each downstream stage reads from the artifact file directly, not from memory or chat history. This makes decisions reviewable, auditable, and independent of conversation context. Move completed plans to `archive/` after successful review to keep `docs/` clean.
 
 **Example**:
+```
+docs/
+├── PLAN_2026_05_15_001.md   ← active (during implementation/review)
+└── ... 
+archive/
+├── PLAN_2026_05_12_001.md   ← completed (after review)
+└── ...
 ```
 plans/
 ├── PLAN_2026_05_11_001.md   ← created by plan-readiness, consumed by implement-plan
@@ -1010,7 +1017,7 @@ Step 3 — Test count diff:
 
 **Example**:
 - `npm install --yes` or set `npm config set yes true`
-- `pip install -r requirements.txt` (non-interactive by default)
+- `uv sync` (non-interactive by default)
 - `git commit -m "msg"` (never `git commit` without `-m`)
 
 **Why it matters**: A command that blocks waiting for stdin will hang indefinitely in a headless or agent-driven session, causing timeouts and false failures.
@@ -1119,8 +1126,8 @@ git status shows:
 
 **Example**:
 ```bash
-python -m py_compile          # Syntax
-python -m pytest tests/ -v    # Tests
+uv run python -m py_compile          # Syntax
+uv run pytest tests/ -v              # Tests
 ```
 
 **Why it matters**: Catch issues before merge.

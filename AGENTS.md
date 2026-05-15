@@ -20,7 +20,8 @@
 | `app/static/css/style.css` | Main stylesheet (classNames shared with SPA) | ✅ Safe to edit |
 | `data/introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
 | `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless explicitly asked |
-| `plans/PLAN_*.md` | Persistent plan artifacts | ⚠️ Read-only during implementation — only `check-plan-readiness` writes these |
+| `docs/PLAN_*.md` | Active plan (during implementation/review) | ⚠️ Read-only — only `check-plan-readiness` writes these; moved to `archive/` after review |
+| `archive/PLAN_*.md` | Completed/reviewed plan artifacts | ⚠️ Archived — moved here after successful review; in `.ignore` to avoid context waste |
 | `AGENTS.md` | Agent behavioral rules | ✅ Safe to update with `update-agents-md` skill |
 | `docs/ARCHITECTURE.md` | Technical structure reference | ✅ Safe to update with `update-architecture-md` skill |
 | `docs/README.md` | User-facing README | ✅ Safe to update with `update-readme-md` skill |
@@ -52,8 +53,8 @@ Rules are organized by workflow phase. Each phase maps to the skill that owns it
 
 ### Phase 3: Planning & Readiness — `check-plan-readiness`
 - **Presence check, not re-probe:** Verify each criterion is *addressed* in the plan. Do not re-analyze from scratch.
-- **Sequential numbering:** Plan files use globally unique numbers across ALL directories. Scan `plans/` and increment the highest existing number.
-- **Persistent artifacts:** Save the plan as `plans/PLAN_*.md`. This skill is the sole creator — no other step writes to plan files.
+- **Sequential numbering:** Plan files use globally unique numbers across ALL directories. Scan `docs/` and increment the highest existing number.
+- **Persistent artifacts:** Save the plan as `docs/PLAN_*.md`. This skill is the sole creator — no other step writes to plan files.
 - **Triage routing:** Minor gaps (missing doc refs, unclear wording) → fix in-place. Significant gaps (unresolved assumptions, soundness risks) → route back to `grill-and-refine`.
 
 ### Phase 4: Implementing — `implement-plan`
@@ -64,7 +65,7 @@ Rules are organized by workflow phase. Each phase maps to the skill that owns it
 - **Simplicity first:** Minimum code that solves the problem. Nothing speculative. No abstractions for single-use code.
 - **Surgical changes:** Touch only what the requirement demands. Preserve all file-level `# Description:` comments — never delete or blank them.
 - **Verify per batch:** Run the batch's tests before moving to the next batch. Run full test suite + lint before handoff.
-- **Read plan as read-only:** Never modify `plans/PLAN_*.md` during implementation.
+- **Read plan as read-only:** Never modify `docs/PLAN_*.md` during implementation.
 
 ### Phase 5: Reviewing — `review-implementation`
 - **Independent verification:** Re-run all checks from scratch. Never trust the implementer's self-test.
@@ -119,7 +120,10 @@ Agents must minimize context waste. Follow Grep→Read over full-file reads:
 2. **Read with offset:** `Read(path, offset=<line>, limit=~100)` to read only the relevant section.
 3. **Full reads only when required:** Read an entire document only if the task spans the whole file (e.g., a doc sync skill).
 4. **Specific sections per workflow step:** The "Documents to Read" section in each skill defines exactly which sections to consult for that step. Consult it before opening any doc.
-5. **Never read `frontend/dist/`** — built output, not source. Always read from `frontend/src/`.
+5. **Avoid low-signal files** — these rarely contribute to understanding or implementation:
+   - `frontend/dist/` — built output, not source. Always read from `frontend/src/`.
+   - `archive/` — completed plan artifacts, only read when explicitly needed
+   - `uv.lock` — auto-generated dependency lockfile
 
 ### Doc Sync Triggers
 

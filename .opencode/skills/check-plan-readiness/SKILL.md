@@ -1,11 +1,11 @@
 ---
 name: check-plan-readiness
-description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to plans/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. This step creates the plan document. Use after grill-and-refine, triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
+description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. This step creates the plan document. Use after grill-and-refine, triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
 ---
 
 ## What I do
 - Gather the plan from conversation context (analyze-and-plan + grill-and-refine outputs)
-- Create `plans/PLAN_YYYY_MM_DD_XXX.md` — write all sections
+- Create `docs/PLAN_YYYY_MM_DD_XXX.md` — write all sections
 - Verify the plan document against all 7 pre-implementation gates
 - Append gate results to the file
 - If all gates pass, give go signal with file path
@@ -17,10 +17,10 @@ None. Gates 1-7 are presence-checks on the plan file; gate 5 (Soundness) was alr
 
 ## Plan Document Creation
 
-Create the plan file at `plans/PLAN_YYYY_MM_DD_XXX.md`:
+Create the plan file at `docs/PLAN_YYYY_MM_DD_XXX.md`:
 - **YYYY_MM_DD**: today's date
-- **XXX**: next available 3-digit number (001, 002, ...). List existing files in `plans/` and increment the highest number.
-- Example: `plans/PLAN_2026_05_11_001.md`
+- **XXX**: next available 3-digit number (001, 002, ...). List existing files in `docs/` and increment the highest number.
+- Example: `docs/PLAN_2026_05_11_001.md`
 
 ### Template
 
@@ -117,7 +117,7 @@ When a gate fails:
 ## Hand-off
 
 Before declaring completion:
-- Plan file created at `plans/PLAN_*.md` with all sections populated
+- Plan file created at `docs/PLAN_*.md` with all sections populated
 - All 7 gates checked and results appended to plan file
 - All gates pass: route to implementation
 - Gate failure: triaged (minor fixed in-place, significant routed back to grill-and-refine)
@@ -127,10 +127,10 @@ Before declaring completion:
 ## Outputs & Triggers
 
 ### Output
-Persistent plan file at `plans/PLAN_*.md` with all sections populated and gate results appended. This skill is the sole creator of the plan file — no other step writes to it.
+Persistent plan file at `docs/PLAN_*.md` with all sections populated and gate results appended. This skill is the sole creator of the plan file — no other step writes to it.
 
 ### Exit Declaration (pass)
-State clearly: "**All planning gates pass. Plan saved at `plans/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implementation of the plan.**"
+State clearly: "**All planning gates pass. Plan saved at `docs/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implementation of the plan.**"
 
 ### Exit Declaration (fail)
 State clearly: "**Gate failure: [list failed gates]. Triage: [minor → fixed in place | significant → let's resolve these: list affected dimensions].**"

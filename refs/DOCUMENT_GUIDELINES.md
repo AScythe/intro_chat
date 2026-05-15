@@ -231,6 +231,7 @@ SDD Workflow Rules and operational guidelines. Answers "How should I think, plan
   - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
   - **Process Discipline** — read-before-write, exit declarations, full test suite after every change, source+tests as one unit
   - **Failure Triage** — classification table for test failures (import path, brittle test, behavioral regression, pre-existing, flaky)
+- **Architecture overview** — 3-5 lines so agents can navigate the project structure. Full detail (module descriptions, file tree, data flow) stays in ARCHITECTURE.md.
 - **Cross-references** — to ARCHITECTURE.md, SPECIFICATIONS.md, DOCUMENT_GUIDELINES.md, and skill files
 
 For project context, product description, and key functionalities → [SPECIFICATIONS.md](../docs/SPECIFICATIONS.md) and [README.md](../docs/README.md).  
@@ -355,28 +356,6 @@ Meta-governance for all project documentation. Answers "Where does this content 
 
 ---
 
-## Boundary Tensions
-
-These are the common confusion points where content could reasonably fit in multiple documents. When in doubt, use this table:
-
-| Tension | Resolution |
-|---------|-----------|
-| **Architecture summary vs AGENTS.md SDD Workflow Rules section** | AGENTS.md gets a 3-5 line overview (enough to navigate). Full module descriptions, file tree, and data flow go in ARCHITECTURE.md. |
-| **Product decisions in SPECIFICATIONS.md vs Design decisions in ARCHITECTURE.md** | SPECIFICATIONS.md = vision rationale ("why anonymous?", "why 30 seconds?"). ARCHITECTURE.md = technical rationale ("why FastAPI?", "why SQLite?"). |
-| **Brief demo setup in SPECIFICATIONS.md vs Full DEMO_GUIDE.md** | SPECIFICATIONS.md gets 2-3 lines so an evaluator can run it independently. DEMO_GUIDE.md gets the full ordered walkthrough with UI highlights and fallback options. |
-| **Feature description in README.md vs Feature purpose in SPECIFICATIONS.md** | README.md = what the feature does (benefit to the user). SPECIFICATIONS.md = why the feature exists (rationale, user need being addressed). |
-| **API endpoints — where they live** | All endpoint and WebSocket event tables go in ARCHITECTURE.md (Data Flow section). README.md gets a one-line cross-reference. AGENTS.md cross-references ARCHITECTURE.md instead of duplicating. |
-| **Out of Scope / Privacy in AGENTS.md vs SPECIFICATIONS.md** | Both product constraints live in SPECIFICATIONS.md (Out of Scope section + Privacy section with hard constraints). AGENTS.md cross-references SPECIFICATIONS.md for these. AGENTS.md owns SDD Workflow Rules only. |
-| **Best practice vs project-specific lesson** | If the lesson references a specific module name, route, or implementation detail from this project, it goes in ARCHITECTURE.md. If it can be generalized to "always verify X after Y" without naming this project, it goes in PROJECT_BEST_PRACTICES.md. |
-| **Tech stack in README.md vs Tech stack in SPECIFICATIONS.md** | README.md gets a one-liner (e.g., "Built with FastAPI + SQLite"). SPECIFICATIONS.md gets the full tech stack with a "Why?" column for each technology. |
-| **Per-function detail in ARCHITECTURE.md vs source docstrings/JSDoc** | ARCHITECTURE.md captures function signature + one-line purpose (what the function does for the system). Source code docstrings/JSDoc capture implementation details (how it works, parameters, return values, edge cases). ARCHITECTURE.md is for navigation; source code is for depth. |
-| **Running instructions in README.md vs ARCHITECTURE.md** | README.md = condensed quick-start (minimum steps for a user to get going). ARCHITECTURE.md = full technical startup sequence (env vars, config, dependencies, service startup order). README links to ARCHITECTURE for full detail. |
-| **Privacy in README.md vs SPECIFICATIONS.md** | README.md = user-facing summary ("we don't store messages"). SPECIFICATIONS.md = full privacy model table + hard constraints (non-negotiable implementation-level rules). |
-| **Environment setup in README.md vs AGENTS.md** | AGENTS.md no longer owns environment setup. README.md = user-facing install steps (pip install, node setup, quick start). Agent-specific operational requirements (venv activation, non-interactive execution, Windows encoding) now live in README.md and PROJECT_BEST_PRACTICES.md. These serve different actors; don't merge them.
-| **Architecture overview in SPECIFICATIONS.md vs Full ARCHITECTURE.md** | SPECIFICATIONS.md gets a stakeholder-friendly system overview: frontend/backend/data model in plain language, no endpoint names, no module internals. ARCHITECTURE.md keeps all technical detail: file tree, module descriptions, endpoint tables, import graph, and design decisions. |
-
----
-
 ## Anti-Duplication Rules
 
 1. **One purpose per document** — If content fits two documents, choose the PRIMARY purpose. Don't split the same content across multiple docs.
@@ -413,12 +392,12 @@ review-implementation (1st pass)
 |------|-------------------|-------------------|--------------------|
 | **analyze-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline" | nothing (verbal) |
 | **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal only — this step produces no artifact; if issues require a revised plan, loop back to check-plan-readiness) |
-| **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `plans/PLAN_*.md` |
-| **implement-plan** | `plans/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
-| **review-implementation** (1st pass) | `plans/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
+| **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/PLAN_*.md` |
+| **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
+| **review-implementation** (1st pass) | `docs/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
 | **improve-architecture** | `AGENTS.md`, `ARCHITECTURE.md`, `implement-plan/SKILL.md` | AGENTS: "File Ownership". ARCHITECTURE: "Project Structure", relevant module descriptions. implement-plan: §3, §5, §6, test-adaptation rule | Source code (`[ARCH]`), regression tests |
 | **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |
-| **review-implementation** (clean up pass — after modularize-and-clean) | `plans/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
+| **review-implementation** (clean up pass — after modularize-and-clean) | `docs/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
 | **review-implementation** (architecture pass — after improve-architecture) | `improve-architecture` Phase 1 output (verbal, session context) | — | nothing (verbal) |
 | **update-docs** | `AGENTS.md` (Doc Sync Triggers), session diff, prior phase output | Doc Sync Triggers table in AGENTS.md | nothing (orchestrates update-* skills) |
 | **push-to-git** | *(none — git status only)* | — | Git commits |
@@ -433,7 +412,7 @@ review-implementation (1st pass)
 | **update-specifications-md** | `SPECIFICATIONS.md` (full), `README.md` | `SPECIFICATIONS.md` |
 | **update-readme-md** | `README.md` (full) | `README.md` |
 | **update-demo-guide-md** | `DEMO_GUIDE.md` (full), `README.md` | `DEMO_GUIDE.md` |
-| **update-best-practices-md** | `PROJECT_BEST_PRACTICES.md` (full), `.opencode/skills/*/SKILL.md`, `plans/PLAN_*.md`, session history, changed files only (not full codebase) | `PROJECT_BEST_PRACTICES.md` |
+| **update-best-practices-md** | `PROJECT_BEST_PRACTICES.md` (full), `.opencode/skills/*/SKILL.md`, `docs/PLAN_*.md`, session history, changed files only (not full codebase) | `PROJECT_BEST_PRACTICES.md` |
 
 ---
 
