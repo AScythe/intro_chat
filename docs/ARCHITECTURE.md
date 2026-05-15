@@ -21,6 +21,7 @@ intro_chat/
 │   ├── package.json           # Dependencies: react, react-dom, react-router-dom, vite, vitest
 │   ├── tsconfig.json          # TypeScript config (strict, jsx: react-jsx)
 │   ├── vite.config.ts         # Vite build configuration — React plugin, dev proxy to backend, Vitest integration
+│   ├── playwright.config.ts   # Playwright E2E config — chromium, webServer, temp database
 │   ├── src/
 │   │   ├── main.tsx           # React app entry point — mounts root component and imports global styles
 │   │   ├── App.tsx            # Root component — React Router setup with SocketContext and UserContext providers
@@ -52,10 +53,12 @@ intro_chat/
 │   │   │   └── QRDisplay.tsx      # QR code image display with event code shown below
 │   │   └── pages/
 │   │       ├── HomePage.tsx       # Landing page — event code input, create/join event, QR display
-│   │       ├── UserInfoPage.tsx   # Profile form — LinkedIn/Slack input, save via API, navigate to room
+│   │       ├── UserInfoPage.tsx   # Profile form — optional name, LinkedIn/Slack input, save via API, navigate to room
 │   │       ├── RoomPage.tsx       # Room selection and person matching — dropdown, person cards, match countdown
 │   │       └── ChatPage.tsx       # Chat interface — timed conversation with prompts, timer, extend, and connection exchange
 │   ├── tests/
+│   │   ├── e2e/
+│   │   │   └── userFlow.spec.ts  # Playwright E2E tests — home, join, save, match, chat
 │   │   ├── setup.ts           # Vitest test setup — imports jest-dom DOM matchers
 │   │   ├── App.test.tsx       # Tests for App root — route rendering and provider integration
 │   │   ├── utils/
@@ -97,9 +100,14 @@ intro_chat/
 │   ├── ARCHITECTURE.md        # This file (project structure reference)
 │   ├── SPECIFICATIONS.md       # Product specification (problem, solution, user flow, out of scope, privacy)
 │   ├── DEMO_GUIDE.md          # Demo guide for judges/users
-│   ├── AGENTS.md              # Agent behavioral rules, file ownership, commands, operational constraints
-│   ├── PROJECT_BEST_PRACTICES.md # Universal coding best practices
-│   └── DOCUMENT_GUIDELINES.md # Document scope & governance
+│   └── AGENTS.md              # Agent behavioral rules, file ownership, commands, operational constraints
+│
+├── plans/                        # Plan artifacts
+│   └── PLAN_*.md              # Persistent decision records (created by check-plan-readiness)
+│
+├── refs/                         # Reference documents
+│   ├── DOCUMENT_GUIDELINES.md  # Document scope & governance
+│   └── PROJECT_BEST_PRACTICES.md # Universal coding best practices
 │
 ├── data/                         # Data files
 │   └── introchat.db           # SQLite database (auto-created)
@@ -194,7 +202,7 @@ Async match-finding algorithm that pairs available users in the same room, creat
 - `create_match(user1_id, user2_id, room_id)` — async, inserts match into DB + `active_matches`, removes from `waiting_queue`, sets both to unavailable, sends `match_found` via `manager.broadcast_to_users()`
 
 ### `app/config.py` (Configuration)
-Central configuration constants module defining the database path, server host, and port — imported by database, routes, and the main entry point.
+Central configuration constants module defining the database path (supports `DB_PATH` env var override for testing), server host, and port — imported by database, routes, and the main entry point.
 
 #### Constants
 - `DB_PATH` — absolute path to `data/introchat.db`
@@ -320,7 +328,7 @@ QR code image display with event code shown below. Receives `qrCode`, `eventCode
 Landing page — event code input, create/join event, QR display. Features event code input, create event modal, QR display, success card, feature grid, privacy notice. Calls API via `client.ts`, uses `QRDisplay` component.
 
 ##### `frontend/src/pages/UserInfoPage.tsx`
-Profile form — LinkedIn/Slack input, save via API, navigate to room. Features input fields, save via API, success card, navigates to `/room/:eventId`.
+Profile form — optional name, LinkedIn/Slack input, save via API, navigate to room. Features input fields, auto-generated username fallback, save via API, success card, navigates to `/room/:eventId`.
 
 ##### `frontend/src/pages/RoomPage.tsx`
 Room selection and person matching — dropdown, person cards, match countdown. Features nearby users grid, `PersonCard` selection, chat request flow, match-found display with `MatchCountdown`, 60s countdown → navigate to `/chat/:matchId`. Uses `useDemoMode` for demo flows.
@@ -380,6 +388,9 @@ Standalone database debugging utility that tests SQLite connection, lists table 
 - `test_db_connection()` — checks database exists, lists expected tables, shows row counts
 - `reset_database()` — deletes existing database file and recreates via `init_db()`
 
+#### `frontend/tests/e2e/userFlow.spec.ts` (E2E Test Scenarios)
+5 Playwright E2E tests that verify the app in a real Chromium browser. Covers: home page load, join page with optional name field, save with auto-generated username, save with custom name, and two-user matchmaking with chat page rendering. Uses `browser.newContext()` for isolated user sessions and API polling for match detection. Run via `npm run test:e2e`.
+
 ---
 ## Critical Implementation Details
 
@@ -409,20 +420,6 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 - Same CSS class names as original `style.css` — imported once at `main.tsx` root
 - Demo logic extracted to `useDemoMode` hook, gated by `VITE_ENABLE_DEMO` env flag
 - Single persistent WebSocket in `SocketContext` — survives route changes
-
----
-
-## Key Functionalities
-
-1. **Event creation** with unique event codes (8 default rooms auto-created)
-2. **QR code generation** for easy event joining (`/api/qr/<event_id>`)
-3. **Room/table selection** for location-based matching
-4. **Person selection** from sample/demo users (demo mode)
-5. **Matchmaking system** finds available users in same room (`matchmaking.py`)
-6. **Timed chat** with conversation prompts (duration configurable via `frontend/src/config/constants.ts`, default: 30s)
-7. **Chat extension** - Extend by configured duration or continue indefinitely
-8. **Connection exchange** after chat (double opt-in)
-9. **Background cleanup** of expired matches every 60 seconds (`tasks.py`)
 
 ---
 

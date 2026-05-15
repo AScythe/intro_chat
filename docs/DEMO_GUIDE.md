@@ -1,6 +1,6 @@
 # 🎬 IntroChat Demo Guide
 
-> **Last verified:** 2026-05-13 against commit `30f409e`
+> **Last verified:** 2026-05-14
 
 ## 🚀 Quick Start Demo
 
@@ -25,10 +25,11 @@ python -m app
 3. You'll be taken to the user info page
 
 ### Step 5: Set Up Profile
-1. Enter your LinkedIn URL and/or Slack handle (both optional)
-2. Click "Save" — your user profile is created
-3. The "Select Room/Area" button becomes enabled
-4. Click "Select Room/Area"
+1. Enter your name (optional — leave blank for an anonymous username)
+2. Enter your LinkedIn URL and/or Slack handle (both optional)
+3. Click "Save" — your user profile is created
+4. The "Select Room/Area" button becomes enabled
+5. Click "Select Room/Area"
 
 ### Step 6: Select Room
 1. Choose a room from the dropdown (e.g., "Table 1")
@@ -94,7 +95,7 @@ python -m app
 3. Usernames are exchanged so they can find each other
 
 ### Scenario 4: Privacy Features
-1. Show anonymous usernames
+1. Show optional name entry (auto-generates anonymous `User_XXXXX` if left blank)
 2. Demonstrate easy cancellation
 3. Social info collected but never shared without double opt-in
 
@@ -135,7 +136,8 @@ Session state resets on page refresh — no manual cleanup needed.
 - Feature grid explanation
 
 ### User Info Page
-- Clean LinkedIn/Slack input form
+- Clean name input (optional — auto-generates anonymous username if blank)
+- LinkedIn/Slack input form
 - "Save" button creates profile
 - "Select Room/Area" activates after save
 
@@ -182,7 +184,7 @@ Session state resets on page refresh — no manual cleanup needed.
 ### For Users
 1. **Emphasize simplicity**: "Just one button, two minutes, zero pressure"
 2. **Show the beauty**: "Look how clean and modern this interface is"
-3. **Demonstrate privacy**: "No accounts, no data stored, completely anonymous"
+3. **Demonstrate privacy**: "No accounts, no data stored, anonymous by default"
 4. **Highlight the prompts**: "Never run out of things to talk about"
 
 ---

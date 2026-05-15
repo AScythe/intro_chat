@@ -20,7 +20,7 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 ## ✅ How It Works (Core Logic Flow)
 
 1. **User creates or joins an event** → receives an 8-character event code
-2. **Sets up their profile** — optionally adds LinkedIn URL and/or Slack handle (stored but never shared without double opt-in)
+2. **Sets up their profile** — optionally enters a display name, LinkedIn URL, and/or Slack handle (stored but never shared without double opt-in). If name is left blank, an anonymous `User_XXXXX` username is auto-generated.
 3. **Selects a room** (Main Hall, Table 1-5, Quiet Corner, Coffee Area) via dropdown
 4. **Toggles "I'm Ready"** to signal availability for matching
 5. **Server matches** with another available user in the same room
@@ -31,11 +31,24 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 
 ---
 
+## Core Features
+
+1. **Event creation** — unique 8-character event codes with 8 default rooms auto-created
+2. **QR code generation** — one-click event joining
+3. **Room/table selection** — coarse location-based matching at the room level
+4. **Matchmaking** — pairs available users in the same room automatically
+5. **Timed conversation** — 30-second guided chat with rotating prompts
+6. **Chat extension** — extend by the configured duration or continue indefinitely
+7. **Double opt-in connection** — both users must consent before social info is exchanged
+8. **Background cleanup** — expired matches auto-purged every 60 seconds
+
+---
+
 ## 🔒 Privacy First
 
 | Feature | Detail |
 |--------|--------|
-| Identity | Fully anonymous — auto-generated usernames only. No real names, emails, or photos. |
+| Identity | Fully anonymous — auto-generated usernames by default. Users may optionally enter a display name. No emails or photos. |
 | Location | Room-level only (manual select) |
 | Data | Chats are never stored. Social info (LinkedIn/Slack) stored but never shared without double opt-in. Match records expire after 2 minutes with background cleanup. |
 | Control | Cancel anytime. Session resets on page refresh (user ID in `localStorage`). |
@@ -43,7 +56,7 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 ### Hard Constraints
 These are non-negotiable — enforced at the implementation level:
 - **No message storage** — chat content exists only in memory during the session, never written to disk
-- **No identity exposure** — auto-generated usernames only (e.g., `User_ABC12`); real names, emails, and photos never collected
+- **No identity exposure** — auto-generated usernames by default (e.g., `User_ABC12`); users may optionally enter a display name; emails and photos never collected
 - **No single opt-in** — connection details (LinkedIn/Slack) require both parties to consent; one "no" means no exchange
 - **No IP logging** — users identified by UUIDs only; no IP addresses stored
 - **Match expiry enforced** — 2-minute initial expiry with 5-minute background cleanup
@@ -77,6 +90,14 @@ The following are explicitly NOT implemented and should not be built unless the 
 ---
 
 ## 🛠️ Tech Stack
+
+### Architecture Overview
+
+**Frontend (React SPA)** — All UI logic lives in the browser as a single-page application. The backend only provides data via REST and real-time events via WebSocket — no page reloads, keeping the server lightweight.
+
+**Backend (FastAPI + WebSocket)** — Python API server that handles events, users, matches, and real-time communication. WebSocket connections enable instant match notifications without polling or constant network overhead.
+
+**Data Model** — Four entities: Events group users by occasion, Rooms provide coarse location-based matching, Users carry optional profile info, and Matches pair two users temporarily. Chats are never stored — matches expire after 2 minutes with background cleanup at 5 minutes.
 
 | Layer | Technology | Why? |
 |-------|------------|------|

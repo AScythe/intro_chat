@@ -44,7 +44,7 @@ Think of it as *Tinder for 120-second conversations* — but only when you're ph
 - **💼 Connection Exchange**: Optional username swap after chat (double opt-in required)
 - **📱 QR Code**: Quick event joining for attendees
 - **🎮 Demo Mode**: Sample users with simulated responses
-- **🆔 User Profile**: Optional LinkedIn/Slack handle collection, stored but never shared without permission
+- **🆔 User Profile**: Optional display name (auto-generates anonymous username if left blank) + LinkedIn/Slack handle collection, stored but never shared without permission
 - **🔒 Privacy First**: Fully anonymous, opt-in only, social info collected only for connection exchange
 
 ---
@@ -97,6 +97,7 @@ python -m app
    - Scan the QR code or enter the event code
 
 2. **Set Up Your Profile**
+   - Enter your name (optional — leave blank for an anonymous username like `User_ABC12`)
    - Optionally add your LinkedIn URL and/or Slack handle (safe — never shared without double opt-in)
    - Click "Save" to create your profile
    - Click "Select Room/Area" to proceed
@@ -145,6 +146,9 @@ python tests/test_js_modules.py
 
 # Vitest component and hook tests
 cd frontend && npm test && cd ..
+
+# E2E browser tests (Playwright — auto-installs Chromium)
+cd frontend && npm run test:e2e && cd ..
 ```
 
 ---
@@ -170,7 +174,7 @@ cd frontend && npm test && cd ..
 
 ## Privacy & Security
 
-- **No user accounts**: Completely anonymous
+- **No user accounts**: Anonymous by default — optional display name
 - **Chats never stored**: Conversation content is never saved
 - **Social info stored safely**: LinkedIn/Slack handles collected but never shared without double opt-in
 - **Room-level location**: Only general location, not precise coordinates
