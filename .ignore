@@ -31,3 +31,9 @@ env/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Archived plan artifacts (completed/reviewed)
+archive/
+
+# Dependency lockfiles
+uv.lock
