@@ -552,7 +552,7 @@ Decision: ✅ Add
 **Why it matters**: Prevents scope creep. Most gaps fail one of the four questions and can be safely skipped.
 
 ### 7.9 Docs-First Analysis Pipeline
-**Context**: From revising analyze-and-plan skill to prefer docs over full codebase parsing
+**Context**: From revising brainstorm-and-plan skill to prefer docs over full codebase parsing
 
 **Principle**: Before analyzing requirements against a codebase, consult existing docs first. Docs are compact, structured, and token-efficient. Only fall back to full source code examination when the docs don't cover what's needed. Spot-check 1-2 key source files to confirm docs aren't stale — "trust but verify."
 
@@ -915,7 +915,7 @@ review-implementation: ignores self-test results, re-runs everything from scratc
 **Example**:
 ```
 Phase                          Gate                                               Next phase
-analyze-and-plan →             "Plan created. Shall I present it?"              → user approves → grill-and-refine
+brainstorm-and-plan →             "Plan created. Shall I present it?"              → user approves → grill-and-refine
 grill-and-refine →             "Grill complete. Here is the plan."              → user accepts   → check-plan-readiness
 check-plan-readiness →         "All gates pass. Ready to implement?"            → user says go   → implement-plan
 implement-plan →               "Ready for review."                              → user triggers  → review-implementation

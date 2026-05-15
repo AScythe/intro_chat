@@ -36,7 +36,7 @@
 
 Rules are organized by workflow phase. Each phase maps to the skill that owns it. For full detail on any phase, read the corresponding skill file at `.opencode/skills/<skill-name>/SKILL.md`.
 
-### Phase 1: Thinking & Analysis — `analyze-and-plan`
+### Phase 1: Thinking & Analysis — `brainstorm-and-plan`
 - **Layered analysis:** Consult `docs/` first (Grep→Read relevant sections), spot-check source files for accuracy. Fall back to full codebase only when docs don't cover the need.
 - **Confirm understanding:** Describe requirements back to the user. Surface ambiguities and assumptions explicitly. Do not proceed until confirmed.
 - **Push back:** If a simpler approach exists, say so. Check logical soundness of proposals before endorsing them.

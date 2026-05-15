@@ -1,6 +1,6 @@
 ---
 name: grill-and-refine
-description: 'Interview relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree, then produce a fool-proof revised plan with no gaps. Use when user wants to stress-test a plan/design, after analyze-and-plan, or triggered when the user says "grill the plan", "stress-test the plan", or similar.'
+description: 'Interview relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree, then produce a fool-proof revised plan with no gaps. Use when user wants to stress-test a plan/design, after brainstorm-and-plan, or triggered when the user says "grill the plan", "stress-test the plan", or similar.'
 ---
 
 ## What I do
@@ -30,7 +30,7 @@ Do not read the full documents — read only the sections listed above.
 ## How to Grill
 
 ### Phase 1: Analyze (agent only)
-1. **Start with the initial plan** (can be from the previous step analyze-and-plan output)
+1. **Start with the initial plan** (can be from the previous step brainstorm-and-plan output)
 2. **Explore the identified files/code** to explore findings for each dimension:
    - **Assumptions:** Which assumptions does the plan make? Are they validated by code?
    - **Edge cases:** What happens with empty, null, or unexpected input?

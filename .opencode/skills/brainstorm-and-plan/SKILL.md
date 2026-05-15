@@ -1,6 +1,6 @@
 ---
-name: analyze-and-plan
-description: 'Pre-implementation analysis and planning — understand context (code and requirements), surface assumptions, resolve ambiguities, confirm understanding with user, then create a concrete plan. Trigger at the start of any coding task, or when the user says "analyze the requirements", "understand before making plan", "analyze and plan", "propose a plan", or similar.'
+name: brainstorm-and-plan
+description: 'Brainstorming and exploration. Explore requirements against project docs, surface ideas and assumptions, confirm direction with user, then produce a concrete plan. Trigger at the start of any coding task, or when the user says "brainstorm and plan", "explore the requirements", "help me plan this", or similar.'
 ---
 
 ## What I do

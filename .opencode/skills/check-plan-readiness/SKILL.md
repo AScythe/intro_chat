@@ -4,7 +4,7 @@ description: 'Create the finalized plan document from conversation context, veri
 ---
 
 ## What I do
-- Gather the plan from conversation context (analyze-and-plan + grill-and-refine outputs)
+- Gather the plan from conversation context (brainstorm-and-plan + grill-and-refine outputs)
 - Create `docs/PLAN_YYYY_MM_DD_XXX.md` — write all sections
 - Verify the plan document against all 7 pre-implementation gates
 - Append gate results to the file
@@ -48,8 +48,8 @@ Create the plan file at `docs/PLAN_YYYY_MM_DD_XXX.md`:
 ```
 
 Populate each section from conversation context:
-- **Requirements / Problem** — from the user's initial request and analyze-and-plan's understanding
-- **Solution** — from analyze-and-plan's plan
+- **Requirements / Problem** — from the user's initial request and brainstorm-and-plan's understanding
+- **Solution** — from brainstorm-and-plan's plan
 - **Implementation Plan** — files, approach, edge cases, testing strategy, task breakdown, success criteria
 - **Grill Outcomes** — resolved dimensions from grill-and-refine's output
 - **Readiness Gate Results** — append after gates below

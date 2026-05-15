@@ -390,7 +390,7 @@ review-implementation (1st pass)
 
 | Step | Documents to READ | Specific Sections | Documents to WRITE |
 |------|-------------------|-------------------|--------------------|
-| **analyze-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline" | nothing (verbal) |
+| **brainstorm-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline" | nothing (verbal) |
 | **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal only — this step produces no artifact; if issues require a revised plan, loop back to check-plan-readiness) |
 | **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/PLAN_*.md` |
 | **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
