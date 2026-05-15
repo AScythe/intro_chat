@@ -40,6 +40,7 @@ intro_chat/
 │   │   │   ├── useSocket.ts   # Context and hook for managing a persistent WebSocket connection
 │   │   │   ├── useTimer.ts    # Hook providing extendable countdown timer with start/clear/extend callbacks
 │   │   │   ├── useDemoMode.ts # Hook providing demo/simulation logic gated by VITE_ENABLE_DEMO feature flag
+│   │   │   ├── useChatRequest.ts # Hook managing chat request lifecycle — send request, wait for response, ready signaling
 │   │   │   └── useUser.ts     # Context and hook for user session data (userId, eventId, username)
 │   │   ├── context/
 │   │   │   ├── SocketContext.tsx  # WebSocket context provider — connects at app root, persists across routes, auto-reconnects
@@ -297,6 +298,9 @@ Hook providing demo/simulation logic gated by `VITE_ENABLE_DEMO` feature flag. R
 #### `frontend/src/hooks/useUser.ts` (User Session)
 Context and hook for user session data (userId, eventId, username). Provides `{ userId, eventId, username, setUser, clearUser }`. Hydrates from `localStorage` on app init.
 
+#### `frontend/src/hooks/useChatRequest.ts` (Chat Request Lifecycle)
+Hook managing chat request lifecycle — send request, wait for response, ready signaling. Encapsulates `requestedPerson`, `personResponse`, `yourReady`, `theirReady` state. Provides `requestChat(person)`, `imReady()`, `cancelRequest()`. Uses `useDemoMode` for simulated response delays and acceptance logic.
+
 #### `frontend/src/context/SocketContext.tsx` (WebSocket Provider)
 WebSocket context provider — connects at app root, persists across routes, auto-reconnects. Connects on mount, disconnects on unmount. Stores `socket`, `connected` state, and `error` in context.
 
@@ -332,7 +336,7 @@ Landing page — event code input, create/join event, QR display. Features event
 Profile form — optional name, LinkedIn/Slack input, save via API, navigate to room. Features input fields, auto-generated username fallback, save via API, success card, navigates to `/room/:eventId`.
 
 ##### `frontend/src/pages/RoomPage.tsx`
-Room selection and person matching — dropdown, person cards, match countdown. Features nearby users grid, `PersonCard` selection, chat request flow, match-found display with `MatchCountdown`, 60s countdown → navigate to `/chat/:matchId`. Uses `useDemoMode` for demo flows.
+Room selection and person matching — dropdown, person cards, match countdown. Features nearby users grid, `PersonCard` selection, chat request flow, match-found display with `MatchCountdown`, 60s countdown → navigate to `/chat/:matchId`. Uses `useChatRequest` for request-accept-ready lifecycle and `useDemoMode` for demo flows.
 
 ##### `frontend/src/pages/ChatPage.tsx`
 Chat interface — timed conversation with prompts, timer, extend, and connection exchange. Features loading card, chat card with `Timer` + `PromptCard`, time-up card with extend options, extended timer, `ConnectionCard`, connection result. WebSocket listener for `connection_exchanged`/`connection_declined`.
