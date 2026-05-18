@@ -1039,6 +1039,42 @@ update-docs: single orchestrator, routes to push-to-git
 
 **Why it matters**: Without an orchestrator, each branch independently decides when and how to trigger the shared step — leading to inconsistent setups, duplicated cleanup logic, and missed edge cases.
 
+### 8.18 Granular Edits Within Batches
+**Context**: From skill restructuring where large multi-change diffs were hard to review independently
+
+**Principle**: Within a change batch, apply changes one logical unit at a time. Each unit should touch one function, one section, or one test case — never multiple unrelated concerns in a single operation. Each unit produces one independently reviewable diff.
+
+**Example**: Adding 3 new API endpoints requires 3 separate edit calls (one per endpoint + one per test) instead of one large edit that rewrites the file in its entirety.
+
+**Why it matters**: Each change is independently reviewable and approvable. No "wall of diffs" that must be approved wholesale — the reviewer can accept one unit and request changes on another.
+
+### 8.19 Step 0 Convention
+**Context**: From adding guardrails to a per-batch workflow without renumbering existing numbered steps
+
+**Principle**: Use "Step 0" for widely-applicable pre-conditions that apply across all workflow entries. This keeps existing step numbering (1, 2, 3…) unchanged while inserting universal guardrails before the main sequence begins.
+
+**Example**: A deployment checklist "1. Build → 2. Test → 3. Deploy" gets Step 0: "Verify all environment variables are set." No steps need renumbering.
+
+**Why it matters**: Adding guardrails does not require renumbering existing steps. The convention signals "this condition applies to everything that follows."
+
+### 8.20 Consistent Process Template
+**Context**: From restructuring all 9 workflow skills for predictable section ordering
+
+**Principle**: Every process or workflow document should follow the same section template. This creates predictable navigation — readers know exactly where to find purpose, boundaries, inputs/outputs, prerequisites, step-by-step instructions, verification criteria, and handoff protocol.
+
+**Example**: Skill files follow: Description → Boundaries → Pipeline Position (I/O table) → Documents to Read → Workflow (phased) → General Methodology → Hand-off → Outputs & Triggers. Every skill uses the same sections in the same order.
+
+**Why it matters**: Predictable structure saves time. No "is there a dependencies section?" guesswork across documents.
+
+### 8.21 Cross-Phase Deduplication
+**Context**: From finding the same rule duplicated across 5 independent skill files — the flag format `[PREFIX]: short_reason — what/why` appeared in every one
+
+**Principle**: When the same rule appears in multiple instruction files, extract it to a shared governance document and replace duplicates with cross-references. The canonical copy is the only one maintained; each file keeps only its phase-specific rules.
+
+**Example**: Flag format was in 5 skills. Extracted to AGENTS.md as the single canonical source. Each skill replaced its flag table with "[See Flag Annotation Convention in AGENTS.md](AGENTS.md)." One update to AGENTS.md propagates to all consumers.
+
+**Why it matters**: One source of truth. No drift across copied rules. Update one location, all consumers benefit.
+
 ---
 
 ## 9. Version Control
@@ -1203,3 +1239,7 @@ uv run pytest tests/ -v              # Tests
 57. **Consistency Pass** — after cross-cutting changes, run a dedicated consistency pass across all affected files
 58. **Hand-off Checklist** — every stage needs a verifiable pre-exit checklist before declaring completion
 59. **Orchestrator for Convergent Paths** — when multiple pipeline paths share a final step, insert an orchestrator as single entry point
+60. **Granular Edits Within Batches** — one logical unit per edit call; each produces an independently reviewable diff
+61. **Step 0 Convention** — universal pre-conditions go at step 0, not mixed into the main step sequence
+62. **Consistent Process Template** — every workflow document follows the same section template for predictable navigation
+63. **Cross-Phase Deduplication** — extract duplicated rules to a shared governance document; replace copies with cross-references
