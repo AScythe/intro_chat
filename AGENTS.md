@@ -1,9 +1,9 @@
 # AGENTS.md
 
-## Scope & Ownership
-`AGENTS.md` defines *how* agents should work — behavioral rules for thinking, planning, implementing, and verifying, organized by workflow phase. Also defines *what* agents work on — file ownership, cross-phase behavioral rules, and operational constraints.
-
-> **Key idea**: If it's about *how* to behave or *how* to implement during a task → this file. Behavioral rules are organized by workflow phase and map to the skill pipeline defined in `.opencode/skills/`. If it's about *how* the code is structured or data flows → [ARCHITECTURE.md](ARCHITECTURE.md). If it's about product vision, out-of-scope constraints, or privacy requirements → [SPECIFICATIONS.md](SPECIFICATIONS.md).
+## Scope
+`AGENTS.md` defines *what* agents work on — file ownership and operational constraints — and *how* the SDD workflow is ordered. Phase-specific behavioral rules live in each phase's skill file. Cross-phase rules that apply to every phase are here.
+ 
+> If it's about code structure or data flow → [ARCHITECTURE.md](ARCHITECTURE.md). If it's about product vision or privacy → [SPECIFICATIONS.md](SPECIFICATIONS.md). If it's about a specific phase's behavior → read that phase's skill file.
 
 ### File Ownership
 
@@ -32,79 +32,49 @@
 | `.opencode/skills/*/SKILL.md` | Workflow skill definitions | ✅ Safe to edit with explicit user permission only |
 ---
 
-## SDD Workflow Rules
+## SDD Workflow — Phase Order
 
-Rules are organized by workflow phase. Each phase maps to the skill that owns it. For full detail on any phase, read the corresponding skill file at `.opencode/skills/<skill-name>/SKILL.md`.
+Each phase maps to a skill. Read that skill for the full behavioral rules of that phase.
+ 
+| Phase | Name | Skill | Mode |
+|-------|------|-------|------|
+| 1 | Thinking & Analysis | `brainstorm-and-plan` | Plan |
+| 2 | Probing & Refinement | `grill-and-refine` | Plan |
+| 3 | Planning & Readiness | `check-plan-readiness` | Build |
+| 4 | Implementing | `implement-plan` | Build |
+| 5 | Reviewing | `review-implementation` | Plan |
+| 6 | Architecture Improvement | `improve-architecture` | Build |
+| 7 | Structuring & Cleaning | `modularize-and-clean` | Build |
+| 8 | Documentation Sync | `update-docs` | Build |
+| 9 | Committing & Pushing | `push-to-git` | Build |
+ 
+**Key ordering rules:**
+- Phases 1–3 must complete before Phase 4. Never implement without a plan that passed all 7 gates.
+- Phase 5 always follows Phase 4, 6, or 7 — every write phase routes back to review.
+- Phases 6 and 7 are optional branches after a passing Phase 5. Offer both; do not default to one.
+- Phases 8–9 run at end of session, not after every commit.
 
-### Phase 1: Thinking & Analysis — `brainstorm-and-plan`
-- **Layered analysis:** Consult `docs/` first (Grep→Read relevant sections), spot-check source files for accuracy. Fall back to full codebase only when docs don't cover the need.
-- **Confirm understanding:** Describe requirements back to the user. Surface ambiguities and assumptions explicitly. Do not proceed until confirmed.
-- **Push back:** If a simpler approach exists, say so. Check logical soundness of proposals before endorsing them.
-- **Read-only phase:** No file writes. Verbal output only.
-- **Cite sources:** Always note which docs were consulted and which sections.
-- **Investigation priority order:** Read highest-signal source first. For technical context: code → configs → CI → existing docs. For best practices: existing doc → session history → code. Prevents reading low-signal files first.
+### Skill Trigger Rules
 
-### Phase 2: Probing & Refinement — `grill-and-refine`
-- **Analyze alone first:** Before the user walkthrough, explore the codebase independently across each dimension: assumptions, edge cases, alternatives, dependencies, risks, consistency.
-- **One dimension at a time:** Present findings as concrete options. Resolve each before moving to the next. Flag skippable items upfront for user confirmation.
-- **Copy-ready outputs:** Format resolved dimensions as blocks the next stage can paste directly into the plan document.
-- **Read-only phase:** No file writes. This step produces no artifact. If issues require a revised plan, loop back to `check-plan-readiness`.
-- **Gap grilling methodology:** When comparing two sources (template vs implementation, spec vs code), test each gap against four questions: (1) Is it truly additive? (2) Does it affect output or methodology? (3) Which document owns it? (4) What's the cost/benefit? Only act on gaps that survive the grill.
+When the user says any of these trigger phrases, load the corresponding skill immediately — do not proceed without it:
 
-### Phase 3: Planning & Readiness — `check-plan-readiness`
-- **Presence check, not re-probe:** Verify each criterion is *addressed* in the plan. Do not re-analyze from scratch.
-- **Sequential numbering:** Plan files use globally unique numbers across ALL directories. Scan `docs/` and increment the highest existing number.
-- **Persistent artifacts:** Save the plan as `docs/PLAN_*.md`. This skill is the sole creator — no other step writes to plan files.
-- **Triage routing:** Minor gaps (missing doc refs, unclear wording) → fix in-place. Significant gaps (unresolved assumptions, soundness risks) → route back to `grill-and-refine`.
-
-### Phase 4: Implementing — `implement-plan`
-- **Verify gate status first:** Never start implementation unless the Readiness Gate Results in the plan show all 7 ✅.
-- **TDD: test before code:** Write a failing test → make it pass → refactor. Save all tests to `tests/` as permanent regression tests — never delete after the batch passes.
-- **Batch by logical concern:** One complete feature per batch. Each batch must be independently testable. Never split a logical change across batches.
-- **Flag every changed line:** Use `[ADDED]` `[MODIFIED]` `[FIXED]` `[REMOVED]` `[MOVED]` with a short reason. No unflagged changes.
-- **Simplicity first:** Minimum code that solves the problem. Nothing speculative. No abstractions for single-use code.
-- **Surgical changes:** Touch only what the requirement demands. Preserve all file-level `# Description:` comments — never delete or blank them.
-- **Verify per batch:** Run the batch's tests before moving to the next batch. Run full test suite + lint before handoff.
-- **Read plan as read-only:** Never modify `docs/PLAN_*.md` during implementation.
-
-### Phase 5: Reviewing — `review-implementation`
-- **Independent verification:** Re-run all checks from scratch. Never trust the implementer's self-test.
-- **Find only, don't fix:** Review and fix are separate stages. Report failures clearly and route backward.
-- **Verify against plan:** Every item in the plan must appear in the diff. Every success criterion must be met.
-- **Branching after 1st pass:** After a passing first-pass review, offer two paths — `modularize-and-clean` (structural cleanup) OR `improve-architecture` (architectural review). Do not default to one.
-- **Pass-type differentiation:**
-  - Clean-up pass (after `modularize-and-clean`): all flags must be `[CLEANUP]` only. Any non-CLEANUP flag signals a behavioral change — route back.
-  - Architecture pass (after `improve-architecture`): all flags must be `[ARCH]` only + run Section 6 Architecture Integrity Check (list completeness, no double-paths, no orphaned refs, description headers, flag consistency).
-- **Code review checklist:** Before signing off, verify: syntax compiles, imports resolve, tests pass, error paths handled, no hardcoded values, docs updated.
-
-### Phase 6: Architecture Improvement — `improve-architecture`
-- **TDD per item:** Use existing test as oracle, or write a regression test first. Record baseline test count before each change.
-- **Flag every line with `[ARCH]`:** Follow `implement-plan`'s flag format but use `[ARCH]` prefix. Update test imports in the same batch as the source change.
-- **Handle staleness:** If the evaluation list is stale (codebase changed since evaluation), re-run Phase 1 of this skill first.
-- **Handle partial completion:** Track done items in conversation; resume at the first undone item.
-- **Handle test failure:** Review if the change is logically sound. If yes → fix the test. If the change breaks intended behavior → skip and report to user.
-- **Cross-reference `implement-plan`:** Follow its batch rules, surgical changes, and flag format. Do not duplicate those guidelines here.
-
-### Phase 7: Structuring & Cleaning — `modularize-and-clean`
-- **Baseline before changes:** Run full test suite + lint before any structural change. Flag pre-existing failures — do not proceed until clean.
-- **User approval gate:** Present cleanup candidates (including dead code with evidence). Get explicit user approval before applying.
-- **Coverage tests:** When extraction creates a new module, write coverage tests that verify the extracted logic works independently.
-- **Adapt test references:** Update import paths, function names, and mock references in test files. Never change test logic or assertions.
-- **Conflict resolution:** When multiple candidates touch the same file, sort by dependency order. If ordering isn't possible, present the conflict to the user.
-- **Change-log:** Produce a markdown change-log grouped by scope with `[CLEANUP]` entries for every changed line.
-
-### Phase 8: Documentation Sync — `update-docs`
-- **Consult triggers:** Run each update-* skill whose trigger condition was met during this session (see [Doc Sync Triggers](#doc-sync-triggers) table).
-- **One pass at end:** Run all needed syncs in one batch — not after every commit or phase.
-- **Verify cross-references:** Check that all links between docs resolve and section references are correct.
-- **Hand off to push:** After docs are synced, route to `push-to-git`.
-
-### Phase 9: Committing & Pushing — `push-to-git`
-- **Group by logical concern:** A commit tells one complete story. Group files by purpose, not by file count or directory.
-- **Present groups for confirmation:** Show proposed grouping to the user before staging anything.
-- **Diff analysis over file names:** Analyze the staged diff — not just the file list — to write the commit message.
-- **Push per commit:** Push after each commit, not after a batch. One failure blocks only one commit.
-- **Commit discipline:** `.gitignore` binaries, pin dependency versions, write descriptive commit messages.
+| Trigger phrases | Skill to load |
+|----------------|---------------|
+| "analyze and plan", "explore the requirements", "help me plan this" | `brainstorm-and-plan` |
+| "grill the plan", "stress-test the plan" | `grill-and-refine` |
+| "finalize the plan", "check plan readiness", "is the plan ready?" | `check-plan-readiness` |
+| "implement", "proceed", "start coding" | `implement-plan` |
+| "review the implementation", "verify changes", "review and verify" | `review-implementation` |
+| "evaluate the architecture", "improve architecture", "review project structure" | `improve-architecture` |
+| "modularize", "clean up" | `modularize-and-clean` |
+| "sync docs", "update docs", "docs are outdated" | `update-docs` |
+| "push", "commit and push", "push to github" | `push-to-git` |
+| "update agents", "sync agents doc", "agents.md is outdated" | `update-agents-md` |
+| "update architecture", "sync architecture doc" | `update-architecture-md` |
+| "update readme", "sync readme" | `update-readme-md` |
+| "update specs", "update specifications" | `update-specifications-md` |
+| "update demo guide", "sync demo guide" | `update-demo-guide-md` |
+| "update best practices", "document lessons learned" | `update-best-practices-md` |
 
 ---
 
@@ -116,44 +86,37 @@ These apply to every phase and override phase-specific rules when they conflict.
 
 Agents must minimize context waste. Follow Grep→Read over full-file reads:
 
-1. **Grep first:** Use grep to find the section heading line number in a doc.
-2. **Read with offset:** `Read(path, offset=<line>, limit=~100)` to read only the relevant section.
-3. **Full reads only when required:** Read an entire document only if the task spans the whole file (e.g., a doc sync skill).
-4. **Specific sections per workflow step:** The "Documents to Read" section in each skill defines exactly which sections to consult for that step. Consult it before opening any doc.
-5. **Avoid low-signal files** — these rarely contribute to understanding or implementation:
-   - `frontend/dist/` — built output, not source. Always read from `frontend/src/`.
-   - `archive/` — completed plan artifacts, only read when explicitly needed
-   - `uv.lock` — auto-generated dependency lockfile
-
-### Doc Sync Triggers
-
-After implementation, doc sync is required when the following change:
-
-| Change type | Skill to run |
-|-------------|-------------|
-| New file, deleted file, renamed file, module restructure, new endpoint, changed function signature | `update-architecture-md` |
-| New feature, changed user journey, updated privacy behavior, changed Out of Scope | `update-specifications-md` |
-| Changed setup steps, new CLI command, new env var, new feature visible to users | `update-readme-md` |
-| Changed behavioral rules, new file ownership entry, updated commands | `update-agents-md` |
-| Changed demo flow, new screen, changed prerequisite | `update-demo-guide-md` |
-| Recurring pattern, new debugging lesson, new skill methodology insight | `update-best-practices-md` |
-
-Run doc sync at the **end of the session**, not after every commit. One sync pass covers the full session's changes.
-
-### Documentation Discipline
-- **Cross-reference, don't duplicate:** Use `[See ...](...)` links instead of copying content from other docs into this one.
-- **New files must have description headers:** Every new file must include a file-level description comment: `# Description:` for Python, `// Description:` for TS/TSX, `/* Description: */` for CSS. This is required for auto-extraction into ARCHITECTURE.md.
-- **Preserve source description comments:** File-level `# Description:` headers are the canonical source for ARCHITECTURE.md auto-extraction. Update them when behavior changes. Never delete them.
-- **Executable sources of truth:** When documentation conflicts with code, configs, scripts, or CI files, trust the executable source. Prose is aspirational — code is truth.
+1. **Grep first** — find the section heading line number in a doc
+2. **Read with offset** — `Read(path, offset=<line>, limit=~100)` for the relevant section only
+3. **Full reads only when required** — only if the task spans the whole file (e.g., a doc sync skill)
+4. **Sections per step** — each skill's "Documents to Read" defines exactly which sections to consult; read it before opening any doc
+Avoid low-signal files:
+- `frontend/dist/` — built output; always read from `frontend/src/` instead
+- `archive/` — completed plan artifacts; read only when explicitly needed
+- `uv.lock` — auto-generated lockfile
 
 ### Process Discipline
 - **Read before write:** Analysis and planning phases never modify files. Violating this corrupts the gate system.
 - **Exit declarations:** Every phase must state: what it produced, the verification result, and what runs next. Make the handoff explicit.
 - **Run full test suite after every change:** Not just the new test — all suites must pass before declaring done.
 - **Source and tests are one unit:** When you rename, move, or change a symbol, update ALL test references (imports, function names, mock setups, assertion expectations) in the **same batch** as the source change. Never split source and test changes across batches.
+- **No scope creep:** Only implement what the current phase specifies. No unrelated fixes, no speculative abstractions, no feature additions beyond scope.
+- **Batch discipline:** One logical change per batch. Do not mix unrelated concerns in the same batch.
+- **Granular edits:** Make one edit per logical change within a batch. Each edit call produces one diff block; keep it small enough to review independently before approval.
+- **User approval gate:** Present findings before applying changes. Never write without explicit user sign-off. Wait for approval before proceeding.
+- **Surgical edits over file rewrites:** When updating instruction files (skills, workflows, rule files), prefer `oldString→newString` replacements over full file rewrites. Rewrites risk silently dropping context that wasn't flagged as problematic.
+- **Skill audit after content restructure:** When content moves between documents, update each target document's owning skill in the same batch. A stale owning skill reverts the document fix on next run.
+- **Stale pattern audit after migration:** After a framework or technology migration, grep all skill and instruction files for the old technology's specific patterns — they survive far from where migration code changed.
+- **Consistency pass after cross-cutting changes:** After multi-file changes, read every affected file end-to-end for naming consistency and structure uniformity. Individual correctness does not guarantee collective consistency.
 - **Baseline before changes:** Before starting any modification phase, run the full test suite. All tests must pass. If pre-existing failures exist, flag them and do not proceed until resolved.
 - **Failure triage before revert:** See the [Failure Triage](#failure-triage) table. Never auto-revert on first failure.
 - **Non-interactive execution:** Never pipe commands to stdin or omit non-interactive flags (`-m`, `-y`). A command that blocks waiting for stdin will hang indefinitely in headless or agent-driven sessions.
+
+### Documentation Discipline
+- **Cross-reference, don't duplicate:** Use `[See ...](...)` links instead of copying content from other docs into this one.
+- **New files must have description headers:** Every new file must include a file-level description comment: `# Description:` for Python, `// Description:` for TS/TSX, `/* Description: */` for CSS. This is required for auto-extraction into ARCHITECTURE.md.
+- **Preserve source description comments:** File-level `# Description:` headers are the canonical source for ARCHITECTURE.md auto-extraction. Update them when behavior changes. Never delete them.
+- **Executable sources of truth:** When documentation conflicts with code, configs, scripts, or CI files, trust the executable source. Prose is aspirational — code is truth.
 
 ### Failure Triage
 
@@ -165,9 +128,55 @@ When a test fails after a change, classify before acting. Never auto-revert.
 | Test assertion fails but logic is correct | Brittle test | Update the test to match new expected behavior |
 | Test fails and the change breaks intended behavior | Behavioral regression | Revert or skip the change — report to user |
 | Pre-existing failure (failed before your change) | Baseline failure | Flag it — do not proceed until user resolves |
-| Flaky failure (intermittent, not tied to change) | Environment issue | Re-run once. If it fails again, flag as flaky — do not revert |
+| Intermittent, not tied to change | Flaky / environment issue | Re-run once; if it fails again, flag as flaky — do not revert |
 
 Always record the baseline test count before starting any modification phase. Compare at handoff to detect unexpected changes.
+
+### Flag Annotation Convention
+
+Every code change must carry an annotation so downstream skills can classify each change without re-reading the diff.
+
+#### Format
+
+```
+[PREFIX]: short_reason — what/why
+```
+
+#### Base Flags (used by implement-plan)
+
+| Flag | When to use |
+|------|-------------|
+| `[ADDED]` | New code, new file, new function |
+| `[MODIFIED]` | Changed existing code |
+| `[FIXED]` | Bug fix |
+| `[REMOVED]` | Deleted code or file |
+| `[MOVED]` | Relocated code without logic change |
+
+#### Per-Phase Prefixes
+
+Structural passes replace base flags with a phase-specific prefix:
+
+| Phase | Skill | Prefix | Replaces |
+|-------|-------|--------|----------|
+| 6 | improve-architecture | `[ARCH]` | All base flags |
+| 7 | modularize-and-clean | `[CLEANUP]` | All base flags |
+
+#### Exclusivity
+
+Every changed line must carry the correct prefix for the current phase. Zero foreign flags allowed. review-implementation enforces this as a gate: any non-phase flag triggers a route-back.
+
+### Doc Sync Triggers
+ 
+Run at end of session — one pass covers all changes. Not after every commit.
+ 
+| Change type | Skill to run |
+|-------------|-------------|
+| New/deleted/renamed file, module restructure, new endpoint, changed function signature | `update-architecture-md` |
+| New feature, changed user journey, updated privacy, changed Out of Scope | `update-specifications-md` |
+| Changed setup steps, new CLI command, new env var, new user-visible feature | `update-readme-md` |
+| Changed behavioral rules, new file ownership entry, updated commands | `update-agents-md` |
+| Changed demo flow, new screen, changed prerequisite | `update-demo-guide-md` |
+| Recurring pattern, new debugging lesson, new skill methodology insight | `update-best-practices-md` |
 
 ---
 
