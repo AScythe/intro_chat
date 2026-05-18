@@ -227,7 +227,6 @@ SDD Workflow Rules and operational guidelines. Answers "How should I think, plan
 - **SDD Workflow Rules** — organized by 9 workflow phases (Thinking & Analysis → Probing & Refinement → Planning & Readiness → Implementing → Reviewing → Architecture Improvement → Structuring & Cleaning → Documentation Sync → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
 - **Cross-Phase Universal Rules** — an H2 section with H3 subsections covering the following:
   - **Context Window Discipline** — Grep→Read patterns for minimizing context waste
-  - **Doc Sync Triggers** — table mapping change types to the doc sync skill to run
   - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
   - **Process Discipline** — read-before-write, exit declarations, full test suite after every change, source+tests as one unit
   - **Failure Triage** — classification table for test failures (import path, brittle test, behavioral regression, pre-existing, flaky)
@@ -399,14 +398,14 @@ review-implementation (1st pass)
 | **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |
 | **review-implementation** (clean up pass — after modularize-and-clean) | `docs/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
 | **review-implementation** (architecture pass — after improve-architecture) | `improve-architecture` Phase 1 output (verbal, session context) | — | nothing (verbal) |
-| **update-docs** | `AGENTS.md` (Doc Sync Triggers), session diff, prior phase output | Doc Sync Triggers table in AGENTS.md | nothing (orchestrates update-* skills) |
+| **update-docs** | `update-docs/SKILL.md` (Doc Sync Triggers), session diff, prior phase output | Doc Sync Triggers table in update-docs SKILL.md | nothing (orchestrates update-* skills) |
 | **push-to-git** | *(none — git status only)* | — | Git commits |
 
 ### Doc Sync Steps (Post-Implementation)
 
 | Step | Documents to READ | Documents to WRITE |
 |------|-------------------|--------------------|
-| **update-docs** (orchestrator) | Session diff, `AGENTS.md` (Doc Sync Triggers table) | nothing (orchestrates update-* skills below) |
+| **update-docs** (orchestrator) | Session diff, `update-docs/SKILL.md` (Doc Sync Triggers table) | nothing (orchestrates update-* skills below) |
 | **update-architecture-md** | `ARCHITECTURE.md` (full), `README.md`, all source files | `ARCHITECTURE.md` |
 | **update-agents-md** | `AGENTS.md` (full), `ARCHITECTURE.md`, `SPECIFICATIONS.md`, `README.md` | `AGENTS.md` |
 | **update-specifications-md** | `SPECIFICATIONS.md` (full), `README.md` | `SPECIFICATIONS.md` |

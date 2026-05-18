@@ -458,6 +458,32 @@ After:  │   ├── format.ts      # Utility functions for formatting values
 
 ---
 
+### 6.14 Documentation Conciseness & Anti-Bloat
+**Context**: From reducing AGENTS.md 186→99 lines while preserving all core rules — pattern extends to skill files, which face the same context-window pressure
+
+**Principle**: Apply six surgical reductions before adding or revising any document or skill file:
+
+1. **Prune safe defaults** — Omit entries describing normal/expected behavior. Document only exceptions, constraints, and non-obvious rules. In tables, remove rows marked ✅ — keep only ⚠️ and ❌.
+2. **Cut trailing noise** — If bold/emphasized text already carries the meaning, drop restatements that follow. Do not explain what the bold text already conveys.
+3. **Merge overlapping siblings** — Combine bullets that say the same thing from different angles. The merged version must be *shorter* than either original — not a longer superset.
+4. **Group under scan headers** — Flat lists of 8+ bullets get 3–5 group headers so readers find what applies without reading every bullet.
+5. **One canonical location per fact** — Every fact lives in exactly one place. If two sections overlap, pick the primary owner and replace duplicates with `[See ...](...)` using specific section anchors (e.g., `file.md#heading`).
+6. **Imperative over advisory** — Write direct instructions ("Run full test suite"), not suggestions ("Agents should consider running the full test suite").
+
+**Example**:
+| Dimension | Before (AGENTS.md) | After |
+|-----------|-------------------|-------|
+| Total lines | 186 | 99 |
+| File Ownership rows | 21 (every file with ✅/⚠️/❌) | 9 (only ⚠️ and ❌) |
+| Process Discipline bullets | 15 flat bullets | 3 group headers (Integrity / Execution / Hygiene) with concise bullets |
+| Routing info | Scope blockquote + Cross-References section (duplicate) | Scope blockquote only (upgraded with precise anchors) |
+
+Every core rule preserved — zero content loss.
+
+**Why it matters**: Documents and skill files are read under context-window pressure. Every bloat token wastes the reader's limited context. A lean document with the same signal is strictly better — faster to scan, cheaper to read, and equally correct.
+
+---
+
 ## 7. Session Lessons Learned
 
 ### 7.1 Syntax Verification
