@@ -4,22 +4,36 @@ description: 'Stage related files together by logical grouping, commit with auto
 ---
 
 ## What I do
-> **Standalone skill** — not part of the core dev workflow. Invoke manually after any implementation work.
-
 - Run `git status` and categorize every change by logical group
 - Present proposed groups and their files to the user for confirmation
-- For each group: stage files, auto-generate commit message, present for editing/approval, commit, then push
+- For each group: stage → analyze diff → generate message → present for approval → commit → push
 - Stop on any error — a failed push means the group wasn't fully committed
+- Report commit summary on success
 
-## Documents to Read
+## Boundaries
+- **Read-only file inspection.** Review diffs only — no code changes.
+- **Standalone skill.** Not part of the core dev workflow — invoke manually after any implementation work.
+- **User approval gate.** Never stage or commit without user confirmation of grouping and commit message.
+- **Push per commit.** Push after each commit, not after a batch. One failure blocks only that commit.
 
-None. Run `git status` only.
+## Pipeline Position
+
+This skill is the terminal stage — the final step after all implementation, review, and documentation work is complete.
+
+| Input | From | Format |
+|-------|------|--------|
+| All session changes | Prior skill (update-docs or direct trigger) | Source + docs |
+
+| Output | To | Format |
+|--------|----|--------|
+| Committed + pushed code | Remote repository | git commits |
 
 ## Grouping Logic
 
 Group files by their **logical nature and purpose**, not by file count. A group can be 1 file or 20 files — what matters is the story the commit tells.
 
 ### Standard Groups
+
 | Group | Includes | Example message |
 |-------|----------|-----------------|
 | **opencode skills** | `.opencode/skills/*/SKILL.md` changes | "Revise core skill pipeline: analyze, grill, readiness" |
@@ -35,7 +49,7 @@ Move files between groups if they belong to the same logical commit. For example
 ### Edge Cases
 - **Renamed files** — detect by matching deleted + new untracked pairs with similar paths. Group them together as one commit (the rename + content changes).
 - **Mixed changes across unrelated groups** — keep them in separate commits. Do not merge different logical concerns into one commit just to reduce commit count.
-- **Solo files** — a single file change can be its own commit if it's a complete logical unit (e.g., "Delete unused update-document-guidelines skill").
+- **Solo files** — a single file change can be its own commit if it's a complete logical unit.
 
 ## Auto-Generated Commit Messages
 
@@ -45,11 +59,10 @@ Commit messages come from analyzing the staged diff, not file names.
 
 **How to write the structured summary:**
 - Read the full diff line by line, not just the stat
-- Group changes by theme (e.g. "framework migration", "bug fixes", "new modules")
+- Group changes by theme (e.g., "framework migration", "bug fixes", "new modules")
 - Each bullet describes the **effect** of the change, not the file path
 - If a single file has unrelated changes, split into separate bullets
 - If multiple files implement one change, merge into one bullet
-- Diff analysis often catches subtle bugs that file names alone would miss
 
 **Format:**
 ```
@@ -102,7 +115,6 @@ For each group, one at a time:
 After all groups are committed and pushed, show the user the commit summary.
 
 State clearly on success: "✓ All commits pushed to origin/<branch>."
-
 
 ## Hand-off
 

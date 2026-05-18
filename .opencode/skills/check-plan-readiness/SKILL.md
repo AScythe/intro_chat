@@ -11,23 +11,64 @@ description: 'Create the finalized plan document from conversation context, veri
 - If all gates pass, give go signal with file path
 - If any gate fails, report and triage
 
-## Documents to Read
+## Boundaries (gate-driven phase)
+- **Plan file writes only.** This skill creates `docs/PLAN_*.md` — the sole creator of plan files.
+- **No code writes.** Plan documents only. No source code changes.
+- **Presence check, not re-probe.** Verify each criterion is *addressed*. Do not re-analyze from scratch.
+- **Gate-driven.** No plan is finalized until all 7 gates pass.
 
-None. Gates 1-7 are presence-checks on the plan file; gate 5 (Soundness) was already validated by the preceding grill-and-refine step.
+## Pipeline Position
 
-## Plan Document Creation
+This skill is the third and final planning stage. It receives structured inputs from the two upstream skills:
 
-Create the plan file at `docs/PLAN_YYYY_MM_DD_XXX.md`:
-- **YYYY_MM_DD**: today's date
-- **XXX**: next available 3-digit number (001, 002, ...). List existing files in `docs/` and increment the highest number.
-- Example: `docs/PLAN_2026_05_11_001.md`
+| Input | From | Format |
+|-------|------|--------|
+| Confirmed requirements | brainstorm Phase 1 (Layer 4) | Verbal |
+| Initial plan (approach, files, testing, success criteria) | brainstorm Phase 3 | Verbal |
+| Design quality evaluation | brainstorm Phase 2 | Verbal |
+| Resolved 6 dimensions + testability probe | grill Phases 1-3 | Copy-ready code blocks |
 
-### Template
+This skill formalizes verbal outputs into a persistent file and verifies them against the 7 readiness gates.
+
+## Plan Document Lifecycle
+
+### Phase 1: Gather from Conversation Context
+
+Collect structured inputs from the two upstream skills:
+
+1. **Requirements / Problem** — from the user's initial request + brainstorm Phase 1 confirmation
+2. **Solution / Approach** — from brainstorm Phase 3 plan
+3. **Implementation details** — files, testing strategy, success criteria from brainstorm Phase 3
+4. **Resolved dimensions** — all 6 from grill (Assumptions, Edge Cases, Alternatives, Dependencies, Risks, Consistency), with decision/rationale/impact
+5. **Design quality** — testability principles from brainstorm Phase 2
+
+#### Task Breakdown Guidelines
+
+The **Task Breakdown** subsection (written in Phase 2) must decompose the implementation into a sequence of logical, independently testable tasks organized by phase:
+
+1. **Group by phase** — organize tasks into phases (e.g., Foundation → State Layer → Components → Pages → Integration). Each phase has a clear prerequisite.
+2. **Each task must specify**:
+   - **What** — one clear unit of work (create a file, modify a module, extract logic)
+   - **Files** — every file touched by this task, with a brief purpose
+   - **Dependencies** — which earlier tasks must be complete first
+   - **Tests** — what specific test cases validate this task (use TDD: test before code)
+   - **Verification** — how to confirm the task is done (e.g., `npm test` passes, specific test names pass)
+3. **Task numbering** — sequential numbers across all phases (Task 1, Task 2, ...) makes cross-referencing easy.
+4. **Independently verifiable** — each task must be testable in isolation. Never merge two unrelated changes into one task.
+5. **Phase headers** — use `#### Phase N: Name` to separate groups. Include a brief summary of the phase's purpose.
+
+### Phase 2: Create the Plan Document
+
+**Sequential numbering** — scan `docs/` for existing `PLAN_*.md` files and increment the highest number. Use `PLAN_YYYY_MM_DD_XXX.md` format.
+
+Write the plan file using the template below. Populate each section from the structured inputs gathered in Phase 1.
+
+#### Template
 
 ```markdown
 # PLAN_YYYY_MM_DD_XXX
 
-## Requirements / Problem
+## Requirements / Problem Statement
 
 ## Solution
 
@@ -35,7 +76,6 @@ Create the plan file at `docs/PLAN_YYYY_MM_DD_XXX.md`:
 
 ### Files to Create, Modify, or Remove
 ### Approach & Design Decisions
-### Edge Cases
 ### Testing Strategy (TDD)
 ### Task Breakdown
 ### Success Criteria
@@ -44,51 +84,40 @@ Create the plan file at `docs/PLAN_YYYY_MM_DD_XXX.md`:
 
 ## Grill Outcomes
 
+[All 6 resolved dimensions — includes Edge Cases as one dimension]
+
+### Dimension: [name]
+- Decision: [what was decided]
+- Rationale: [why this choice]
+- Impact: [how it affects the plan]
+
 ## Readiness Gate Results
 ```
 
-Populate each section from conversation context:
-- **Requirements / Problem** — from the user's initial request and brainstorm-and-plan's understanding
-- **Solution** — from brainstorm-and-plan's plan
-- **Implementation Plan** — files, approach, edge cases, testing strategy, task breakdown, success criteria
-- **Grill Outcomes** — resolved dimensions from grill-and-refine's output
-- **Readiness Gate Results** — append after gates below
+Populate each section:
+- **Requirements / Problem** — from user request + brainstorm understanding
+- **Solution** — from brainstorm plan (approach and design decisions)
+- **Implementation Plan** — files, approach, testing strategy, task breakdown, success criteria; all extracted from brainstorm and grill outputs. Edge Cases live in Grill Outcomes only.
+- **Grill Outcomes** — resolved dimensions from grill's Phase 2-3 output in copy-ready code blocks. Edge Cases is one of the 6 dimensions here.
+- **Readiness Gate Results** — appended after Phase 3 verification
 
-#### Task Breakdown Guidelines
+### Phase 3: Verify Gates
 
-The **Task Breakdown** subsection must decompose the implementation into a sequence of logical, independently testable tasks organized by phase:
-
-1. **Group by phase** — organize tasks into phases (e.g., Foundation → State Layer → Components → Pages → Integration). Each phase has a clear prerequisite.
-
-2. **Each task must specify**:
-   - **What** — one clear unit of work (create a file, modify a module, extract logic)
-   - **Files** — every file touched by this task, with a brief purpose
-   - **Dependencies** — which earlier tasks must be complete first
-   - **Tests** — what specific test cases validate this task (use TDD: test before code)
-   - **Verification** — how to confirm the task is done (e.g., `npm test` passes, specific test names pass)
-
-3. **Task numbering** — sequential numbers across all phases (Task 1, Task 2, ...) makes cross-referencing easy.
-
-4. **Independently verifiable** — each task must be testable in isolation. Never merge two unrelated changes into one task.
-
-5. **Phase headers** — use `#### Phase N: Name` to separate groups. Include a brief summary of the phase's purpose.
-
-## Gates
-**Only write code when all gates are clear.**
+**Presence check, not re-probe** — verify each criterion is *addressed* in the plan file. Do not re-analyze from scratch.
 
 Check each of the following against the plan file:
 
-| # | Gate | Pass Criteria |
-|---|---|---|
-| 1 | Context | Plan references which docs/code were consulted |
-| 2 | Assumptions | Plan states confirmed assumptions |
-| 3 | Edge Cases | Plan addresses edge cases |
-| 4 | Ambiguities | Plan states resolved ambiguities |
-| 5 | Soundness | Plan is logically sound and will satisfy the intended function and purpose |
-| 6 | Testing | Plan defines specific test cases |
-| 7 | Success Criteria | Plan defines verifiable success criteria |
+| # | Gate | Pass Criteria | Verified by |
+|---|------|-------------|-------------|
+| 1 | Context | Plan references which docs/code were consulted | brainstorm Layer 4 — cite docs requirement |
+| 2 | Assumptions | Plan states confirmed assumptions | grill Phase 1 — Assumptions dimension |
+| 3 | Edge Cases | Plan addresses edge cases | grill Phase 1 — Edge Cases dimension |
+| 4 | Clarity | Plan states resolved ambiguities and has no unclear questions | brainstorm Layer 4 (clarify) + grill (gap-free criterion) |
+| 5 | Soundness | Plan is logically sound and satisfies intended function and purpose | grill Phase 3 — quality criterion |
+| 6 | Testing | Plan defines specific test cases | brainstorm Phase 3 + grill Phase 3 — Testable criterion |
+| 7 | Success Criteria | Plan defines verifiable success criteria | brainstorm Phase 3 — plan template |
 
-After checking all gates, append a summary under **## Readiness Gate Results** in the plan file:
+After checking all gates, append the results table under **## Readiness Gate Results** in the plan file:
 
 ```markdown
 ## Readiness Gate Results
@@ -98,7 +127,7 @@ After checking all gates, append a summary under **## Readiness Gate Results** i
 | Context | ✅ / ❌ | ... |
 | Assumptions | ✅ / ❌ | ... |
 | Edge Cases | ✅ / ❌ | ... |
-| Ambiguities | ✅ / ❌ | ... |
+| Clarity | ✅ / ❌ | ... |
 | Soundness | ✅ / ❌ | ... |
 | Testing | ✅ / ❌ | ... |
 | Success Criteria | ✅ / ❌ | ... |
@@ -113,14 +142,14 @@ When a gate fails:
    - **Significant** (unresolved assumption, edge case, soundness risk) — interactively ask the user about the affected dimension
 3. Re-check all gates after resolution
 
-
 ## Hand-off
 
 Before declaring completion:
-- Plan file created at `docs/PLAN_*.md` with all sections populated
-- All 7 gates checked and results appended to plan file
-- All gates pass: route to implementation
-- Gate failure: triaged (minor fixed in-place, significant routed back to grill-and-refine)
+- Phase 1: Structured inputs gathered from brainstorm and grill outputs
+- Phase 2: Plan file created at `docs/PLAN_*.md` with all sections populated
+- Phase 3: All 7 gates checked and results appended to plan file
+- All gates pass → route to implement-plan
+- Gate failure → triaged (minor: fixed in-place; significant: route to grill-and-refine)
 
 ---
 

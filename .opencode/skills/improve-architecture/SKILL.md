@@ -1,34 +1,47 @@
 ---
 name: improve-architecture
-description: 'Scan the project structure against best practices, produce a prioritized list of structural improvements, then apply them in TDD-backed batches with [ARCH] flags. Two-phase: Phase 1 is read-only analysis (verbal output); Phase 2 applies changes after user approval. Trigger after review-implementation (first pass), or when the user says "evaluate the architecture", "improve architecture", "review project structure", or similar.'
+description: 'Scan the project structure and architecture against best practices, produce a prioritized list of structural improvements, then apply them in TDD-backed batches with [ARCH] flags. Trigger after review-implementation (first pass), or when the user says "evaluate the architecture", "improve architecture", "review project structure", or similar.'
 ---
 
 ## What I do
-- Scan the full project structure across 10 areas (directory layout, import hygiene, config placement, module boundaries, naming, dead code, and more)
-- Evaluate against general software engineering conventions
-- Produce a verbal prioritized list (P0–P2) with `file:line` references, findings, and recommendations
+- Scan the full project structure against conventions across directory layout, import hygiene, config placement, module boundaries, naming, dead code, and more
+- Produce a verbal prioritized list (P0–P2) with file:line references, findings, and recommendations
 - After user approval, apply structural changes in TDD-backed batches with `[ARCH]` flags — no behavior or logic changes
-- Two phases, always in order: **Evaluate (read-only)** → user approval gate → **Improve (write)**
+- Route back to review-implementation for architecture pass
 
 ## Boundaries
 - **Phase 1 is strictly read-only.** No file writes, no code changes, no notes files.
 - **Phase 2 is structural changes only.** No behavior changes, no bug fixes, no feature additions.
+- **Cross-reference implement-plan.** Shared rules for batch discipline, surgical changes, flag format, and test adaptation live in `implement-plan` — this skill documents only what differs.
 
----
+## Pipeline Position
 
-## Guidelines
+This skill runs after a successful first-pass review. It routes back to review-implementation for an architecture pass.
+
+| Input | From | Format |
+|-------|------|--------|
+| Approved, implemented code | review-implementation (first pass) | Source + tests |
+| Architecture conventions | `docs/ARCHITECTURE.md` | Read-only reference |
+
+| Output | To | Format |
+|--------|----|--------|
+| Structural changes with `[ARCH]` flags | review-implementation (architecture pass) | Source + tests |
+| Verbal prioritized list (P0–P2) | User / plan context | Text |
+
+## Documents to Read
+
+Use Grep→Read for all sources (grep heading line number, then `Read(offset=line, limit=~100)`):
+
+- **`ARCHITECTURE.md`** — "Project Structure", "Module Descriptions", "Import Structure"
+- **Source files** — spot-check 2-3 key files per scan area to verify docs reflect reality
+
+## Workflow
 
 ### Phase 1: Evaluate (Read-Only)
 
-#### Documents to Read
-Use Grep→Read for all sources (grep heading line number, then `Read(offset=line, limit=~100)`):
-
-- `ARCHITECTURE.md` — "Project Structure", "Module Descriptions", "Import Structure"
-- Source files — spot-check 2-3 key files per area to verify docs reflect reality
-
-#### Scan Checklist
-
-Examine each area in order. For every finding: note priority, `file:line`, and a clear recommendation.
+1. Read `ARCHITECTURE.md` sections listed in Documents to Read
+2. Spot-check source files to confirm docs are current
+3. Work through all 10 areas in order:
 
 | # | Area | What to Check | Priority Guide |
 |---|------|---------------|----------------|
@@ -39,11 +52,11 @@ Examine each area in order. For every finding: note priority, `file:line`, and a
 | 5 | **Test structure** | Tests mirror source tree? Tests in unexpected locations? Tests for modules that no longer exist? | P0 = orphaned test files, P1 = non-mirroring layout, P2 = missing test dir |
 | 6 | **Monolithic patterns** | Files over ~200 lines with multiple distinct concerns? Single files handling too many responsibilities? | P0 = mixed concerns blocking extension, P1 = large but single-purpose, P2 = borderline |
 | 7 | **Dead/deprecated code** | Exported symbols, files, or directories with zero imports? Unused config, templates, or assets? | P0 = dead code in active build path, P1 = orphaned docs/notes, P2 = dead comments |
-| 8 | **Naming conventions** | All source files have `# Description:`/`// Description:`/`/* Description: */` headers? Consistent casing (camelCase TS, snake_case Python)? | P0 = missing headers, P1 = inconsistent casing, P2 = minor style |
-| 9 | **Module boundaries** | Feature modules clearly separated? Pages importing from the wrong layer (e.g., component imports from pages)? | P0 = layer violation, P1 = unclear boundary, P2 = minor cross-ref |
+| 8 | **Naming conventions** | All source files have `# Description:`/`// Description:`/`/* Description: */` headers? Consistent casing? | P0 = missing headers, P1 = inconsistent casing, P2 = minor style |
+| 9 | **Module boundaries** | Feature modules clearly separated? Pages importing from the wrong layer? | P0 = layer violation, P1 = unclear boundary, P2 = minor cross-ref |
 | 10 | **Config vs convention gaps** | Project conventions that the codebase doesn't follow? | P0 = safety issue, P1 = maintainability, P2 = style |
 
-#### Priority Definitions
+4. Apply priority definitions:
 
 | Priority | Meaning |
 |----------|---------|
@@ -51,9 +64,7 @@ Examine each area in order. For every finding: note priority, `file:line`, and a
 | **P1** | Should fix — increases cognitive load or refactoring risk |
 | **P2** | Nice to fix — style or convention inconsistency with low impact |
 
-#### Output Format
-
-Group findings by area. Format each item:
+5. Present findings grouped by area. Format each item:
 
 ```
 [P0/P1/P2] file:line — finding → Recommend: action
@@ -66,8 +77,6 @@ P1: frontend/src/pages/ChatPage.tsx — relative imports when @/ alias is config
 P2: frontend/src/hooks/useTimer.ts — missing // Description: header → Recommend: add header
 ```
 
----
-
 ### Gate: User Approval
 
 After presenting findings, ask: **"Shall I apply these changes? You can approve all, select specific items, or reorder."**
@@ -76,37 +85,30 @@ After presenting findings, ask: **"Shall I apply these changes? You can approve 
 - If the codebase changes significantly between evaluation and improvement, re-run Phase 1 first.
 - If zero findings: report **"Architecture evaluation complete. Codebase structure is clean — no issues found."** Workflow ends here.
 
----
-
 ### Phase 2: Improve (Write)
 
-> **Mode switch required.** Phase 2 writes files — switch to Build mode before proceeding.
-
-Cross-reference **`implement-plan/SKILL.md`** for shared rules: batch discipline (§3), surgical changes (§5), flag format (§6), and test-adaptation (line 62). This skill documents only what differs.
-
-#### Per-Item Workflow
+> Cross-reference `implement-plan/SKILL.md` for shared rules: batch discipline (§3), surgical changes (§5), flag format (§6), and test-adaptation. This section documents only what differs.
 
 Work through approved items in P0 → P1 → P2 order. For each item:
 
-**1. Baseline** — Run the full test suite. All must pass. Record test counts: *"Backend: N, Frontend: M."* Do not proceed if pre-existing failures exist.
+1. **Baseline** — Run the full test suite. All must pass. Record test counts. Do not proceed if pre-existing failures exist.
 
-**2. TDD oracle** — If an existing test covers this code's behavior, use it as the oracle. If not, write a regression test that captures current behavior, save it to `tests/`, and confirm it passes. Structural-only changes need tests that verify the code still works as before (import resolves, function returns expected type, etc.).
+2. **TDD oracle** — If an existing test covers this code's behavior, use it as the oracle. If not, write a regression test that captures current behavior, save it to `tests/`, and confirm it passes.
 
-**3. Apply the change** — Move, rename, reorganize, fix import, add header, etc. Do NOT change behavior or logic. Do NOT fix unrelated bugs. Follow implement-plan §5 (surgical changes) and §3 (batch discipline).
+3. **Apply the change** — Move, rename, reorganize, fix import, add header. Do NOT change behavior or logic. Do NOT fix unrelated bugs.
 
-**4. Flag every changed line with `[ARCH]`**
-```
-[ARCH]: short_reason — what/why
-# Example: [ARCH]: relocate CSS — moved from app/static/css/ to frontend/src/styles/
-```
-Test adaptation flags too: `[ARCH]: update test import — reflect new file path`
+4. **Flag every changed line with `[ARCH]`**
+   ```
+   [ARCH]: short_reason — what/why
+   ```
+   Test adaptation flags too: `[ARCH]: update test import — reflect new file path`
 
-**5. Update test references** — If files moved or renamed, update all import paths in test files in the same batch as the source change (implement-plan test-adaptation rule).
+5. **Update test references** — If files moved or renamed, update all import paths in test files in the same batch as the source change.
 
-**6. Verify** — Run the full test suite. Compare to baseline counts:
-- Same count, all passing → item verified ✅
-- Count changed (test added/removed) → flag and explain
-- Any failure → see Failure Handling below
+6. **Verify** — Run the full test suite. Compare to baseline counts:
+   - Same count, all passing → item verified ✅
+   - Count changed (test added/removed) → flag and explain
+   - Any failure → see Failure Handling below
 
 #### Failure Handling
 
@@ -123,39 +125,22 @@ Never silently revert. Review first, decide based on logic.
 - **Partial:** Track done items in-conversation. On resume, pick up at the first undone item.
 - **Stale evaluation:** If the codebase changed significantly since Phase 1, re-run Phase 1 before continuing.
 
-
-
-## Workflow
-
-### Phase 1: Evaluate
-1. Read documents via Grep→Read per the Documents to Read list above
-2. Spot-check 2-3 source files per scan area to confirm doc accuracy
-3. Work through all 10 areas in the Scan Checklist
-4. Present findings grouped by area in the output format
-5. State exit declaration and prompt for approval
-
-### Phase 2: Improve
-1. Confirm approved items and order
-2. For each item: baseline → TDD oracle → apply change → flag `[ARCH]` → update test refs → verify
-3. Track done/skipped in-conversation
-4. Verify hand-off checklist before declaring completion
-
-
 ## Hand-off
 
 Before declaring completion:
-- All approved items applied or explicitly skipped (with reason)
+- Phase 1: All 10 areas evaluated, findings presented with priorities
+- Gate: User approved (or selected specific items)
+- Phase 2: All approved items applied or explicitly skipped (with reason)
 - Full test suite passes with same or documented test count change
-- Frontend build succeeds
-- Typecheck passes
 - Every changed line carries `[ARCH]` flag — zero non-ARCH flags
+- Frontend build and typecheck pass
 
 ---
 
 ## Outputs & Triggers
 
 ### Output
-Verbal prioritized list (P0–P2) with `file:line` references and recommendations. Then: structural changes with `[ARCH]` flags, updated test imports, regression tests for uncovered behavior, and a summary of applied and skipped items.
+Verbal prioritized list (P0–P2) with file:line references and recommendations. Then: structural changes with `[ARCH]` flags, updated test imports, regression tests for uncovered behavior, and a summary of applied and skipped items.
 
 ### Exit Declaration
 State clearly: "**Architecture improvements complete. Review implementation?**"

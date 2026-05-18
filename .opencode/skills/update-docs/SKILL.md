@@ -3,20 +3,30 @@ name: update-docs
 description: 'Analyze session changes and run the matching update-* skills to sync all project documentation. Trigger when a documentation sync phase completes, or when the user says "sync docs", "update docs", "docs are outdated", or similar.'
 ---
 
-## Purpose
-Coordinate the documentation sync pass at the end of a session. Consults the Doc Sync Triggers table in `AGENTS.md` to determine which update-* skills to run based on what changed during the session.
+## What I do
+- Review session changes to determine which docs need updating
+- Consult the Doc Sync Triggers table to match change types to skills
+- Run each update-* skill in dependency order
+- Verify cross-reference integrity across all project docs after syncs
+- Route to push-to-git
 
-Answers "Which docs need updating?", "Which update-* skills should I run?", "Are cross-references still valid?".
+## Boundaries
+- **Read-only analysis.** Review session changes and trigger syncs — do not create content for docs that had no changes.
+- **One pass at end.** Sync all docs in one batch at end of session, not after every commit or phase.
+- **Cross-reference integrity.** All `[See ...](...)` links must resolve after syncs complete.
 
-Handles the Phase 8 hand-off: receives completion from `modularize-and-clean`, runs matching syncs, then routes to `push-to-git`.
+## Pipeline Position
 
----
+This skill is the penultimate stage — a documentation orchestration point that runs before the final push.
 
-## Audience
-- AI agents running the SDD workflow
-- Developers verifying documentation is up-to-date before committing
+| Input | From | Format |
+|-------|------|--------|
+| Session changes | Prior skill's output (review-implementation or direct trigger) | Git diff + conversation flags |
+| Doc Sync Triggers | `AGENTS.md` | Reference table |
 
----
+| Output | To | Format |
+|--------|----|--------|
+| Updated documentation | push-to-git | `docs/*.md` |
 
 ## Content Rules
 
@@ -52,39 +62,33 @@ Every piece of content must pass these three checks:
 - Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
 - This skill does NOT own individual doc content — it delegates to the appropriate update-* skill
 
----
-
 ## Workflow
 
-### 1. Review Session Changes
+### Phase 1: Inventory
 
-Capture the session scope from the prior phase (receives completion from `modularize-and-clean`, `improve-architecture`, `review-implementation`, or equivalent).
+1. **Review session changes** — capture the session scope from the prior phase. Review:
+   - Session conversation — what files were discussed, what behaviors changed
+   - Git diff — staged and unstaged changes across the session
+   - Any `[MODIFIED]`, `[ADDED]`, `[REMOVED]`, `[ARCH]`, `[CLEANUP]` flags from prior phases
 
-Capture the session's scope by reviewing:
-- Session conversation — what files were discussed, what behaviors changed
-- Git diff — staged and unstaged changes across the session
-- Any `[MODIFIED]`, `[ADDED]`, `[REMOVED]`, `[ARCH]`, `[CLEANUP]` flags from prior phases
+2. **Match against Doc Sync Triggers** — consult the table in `AGENTS.md`:
 
-### 2. Inventory Changes Against Doc Sync Triggers
+   | Change type | Skill to run |
+   |-------------|-------------|
+   | New/deleted/renamed file, module restructure, new endpoint, changed function signature | `update-architecture-md` |
+   | New feature, changed user journey, updated privacy, changed Out of Scope | `update-specifications-md` |
+   | Changed setup steps, new CLI command, new env var, new user-visible feature | `update-readme-md` |
+   | Changed behavioral rules, new file ownership entry, updated commands | `update-agents-md` |
+   | Changed demo flow, new screen, changed prerequisite | `update-demo-guide-md` |
+   | Recurring pattern, new debugging lesson, new skill methodology insight | `update-best-practices-md` |
 
-Consult the [Doc Sync Triggers](#doc-sync-triggers) table in `AGENTS.md`:
+3. **List which skills to run** — for each change type that occurred, note the corresponding skill. If none match, skip to Phase 3.
 
-| Change type | Skill to run |
-|-------------|-------------|
-| New file, deleted file, renamed file, module restructure, new endpoint, changed function signature | `update-architecture-md` |
-| New feature, changed user journey, updated privacy behavior, changed Out of Scope | `update-specifications-md` |
-| Changed setup steps, new CLI command, new env var, new feature visible to users | `update-readme-md` |
-| Changed behavioral rules, new file ownership entry, updated commands | `update-agents-md` |
-| Changed demo flow, new screen, changed prerequisite | `update-demo-guide-md` |
-| Recurring pattern, new debugging lesson, new skill methodology insight | `update-best-practices-md` |
+### Phase 2: Sync
 
-For each change type that occurred during this session, note the corresponding skill. If none match, skip to Step 4.
+Run each applicable update-* skill identified in Phase 1. Follow each skill's full workflow — investigation, reading, gap identification, update, verification.
 
-### 3. Run Each Applicable update-* Skill
-
-Run each skill identified in Step 2. Follow the skill's full workflow — investigation, reading, gap identification, update, verification.
-
-**One pass at end:** Run all needed syncs in one batch — not after every commit or phase. If multiple skills match, run them in dependency order:
+**One pass at end:** Run all needed syncs in one batch. If multiple skills match, run them in dependency order:
 
 1. `update-architecture-md` — architectural changes affect README, SPECS, DEMO_GUIDE
 2. `update-specifications-md` — spec changes affect DEMO_GUIDE, README
@@ -93,7 +97,7 @@ Run each skill identified in Step 2. Follow the skill's full workflow — invest
 5. `update-demo-guide-md` — demo guide references features, setup, spec
 6. `update-best-practices-md` — best practices are self-contained
 
-### 4. Verify Cross-References
+### Phase 3: Verify
 
 After all syncs are complete, verify document integrity:
 
@@ -102,13 +106,12 @@ After all syncs are complete, verify document integrity:
 - [ ] No orphaned sections — every section in each doc is reachable from another doc or from the doc's own TOC
 - [ ] No stale redirects — `→ Redirect to <filename>` markers are removed if the target document no longer exists
 
-
 ## Hand-off
 
 Before declaring completion:
-- All applicable update-* skills run based on session changes
-- Cross-references verified across all project docs
-- No dead links, orphaned sections, or stale redirects
+- Phase 1: Session changes inventoried and matched against Doc Sync Triggers
+- Phase 2: All applicable update-* skills run in dependency order
+- Phase 3: Cross-references verified — no dead links, orphaned sections, or stale redirects
 
 ---
 
