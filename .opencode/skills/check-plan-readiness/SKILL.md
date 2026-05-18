@@ -1,67 +1,41 @@
 ---
 name: check-plan-readiness
-description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. This step creates the plan document. Use after grill-and-refine, triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
+description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. This step creates the plan document. Use after grill-and-refine, or triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
 ---
 
 ## What I do
-- Gather the plan from conversation context (brainstorm-and-plan + grill-and-refine outputs)
-- Create `docs/PLAN_YYYY_MM_DD_XXX.md` — write all sections
-- Verify the plan document against all 7 pre-implementation gates
-- Append gate results to the file
-- If all gates pass, give go signal with file path
-- If any gate fails, report and triage
+- Gather the plan from conversation context (brainstorm + grill outputs)
+- Create `docs/PLAN_YYYY_MM_DD_XXX.md` with all sections populated
+- Verify the plan against all 7 pre-implementation gates and append results
+- All pass → give go signal with file path. Any fail → report and triage
 
 ## Boundaries (gate-driven phase)
-- **Plan file writes only.** This skill creates `docs/PLAN_*.md` — the sole creator of plan files.
-- **No code writes.** Plan documents only. No source code changes.
-- **Presence check, not re-probe.** Verify each criterion is *addressed*. Do not re-analyze from scratch.
-- **Gate-driven.** No plan is finalized until all 7 gates pass.
-
-## Pipeline Position
-
-This skill is the third and final planning stage. It receives structured inputs from the two upstream skills:
-
-| Input | From | Format |
-|-------|------|--------|
-| Confirmed requirements | brainstorm Phase 1 (Layer 4) | Verbal |
-| Initial plan (approach, files, testing, success criteria) | brainstorm Phase 3 | Verbal |
-| Design quality evaluation | brainstorm Phase 2 | Verbal |
-| Resolved 6 dimensions + testability probe | grill Phases 1-3 | Copy-ready code blocks |
-
-This skill formalizes verbal outputs into a persistent file and verifies them against the 7 readiness gates.
+- **Plan file writes only** — creates `docs/PLAN_*.md` (sole creator)
+- **No code writes** — plan documents only, no source code changes
+- **Presence check, not re-probe** — verify each criterion is addressed, not re-analyzed
+- **Gate-driven** — no plan finalized until all 7 gates pass
 
 ## Plan Document Lifecycle
 
 ### Phase 1: Gather from Conversation Context
 
-Collect structured inputs from the two upstream skills:
-
-1. **Requirements / Problem** — from the user's initial request + brainstorm Phase 1 confirmation
-2. **Solution / Approach** — from brainstorm Phase 3 plan
-3. **Implementation details** — files, testing strategy, success criteria from brainstorm Phase 3
-4. **Resolved dimensions** — all 6 from grill (Assumptions, Edge Cases, Alternatives, Dependencies, Risks, Consistency), with decision/rationale/impact
-5. **Design quality** — testability principles from brainstorm Phase 2
+Collect from upstream skill outputs (brainstorm + grill). No additional analysis needed.
 
 #### Task Breakdown Guidelines
 
-The **Task Breakdown** subsection (written in Phase 2) must decompose the implementation into a sequence of logical, independently testable tasks organized by phase:
+The **Task Breakdown** subsection (written in Phase 2) must decompose the implementation into logical, independently testable tasks:
 
-1. **Group by phase** — organize tasks into phases (e.g., Foundation → State Layer → Components → Pages → Integration). Each phase has a clear prerequisite.
-2. **Each task must specify**:
-   - **What** — one clear unit of work (create a file, modify a module, extract logic)
-   - **Files** — every file touched by this task, with a brief purpose
-   - **Dependencies** — which earlier tasks must be complete first
-   - **Tests** — what specific test cases validate this task (use TDD: test before code)
-   - **Verification** — how to confirm the task is done (e.g., `npm test` passes, specific test names pass)
-3. **Task numbering** — sequential numbers across all phases (Task 1, Task 2, ...) makes cross-referencing easy.
-4. **Independently verifiable** — each task must be testable in isolation. Never merge two unrelated changes into one task.
-5. **Phase headers** — use `#### Phase N: Name` to separate groups. Include a brief summary of the phase's purpose.
+1. **Group by phase** — e.g., Foundation → State Layer → Components → Pages → Integration. Each phase has a clear prerequisite.
+2. **Each task specifies** — What (unit of work), Files (every file touched), Dependencies (prior tasks), Tests (TDD: test before code), Verification (how to confirm done)
+3. **Task numbering** — sequential across all phases (Task 1, Task 2, ...)
+4. **Independently verifiable** — each task testable in isolation. Never merge unrelated changes into one.
+5. **Phase headers** — use `#### Phase N: Name` with a brief purpose summary.
 
 ### Phase 2: Create the Plan Document
 
-**Sequential numbering** — scan `docs/` for existing `PLAN_*.md` files and increment the highest number. Use `PLAN_YYYY_MM_DD_XXX.md` format.
+**Sequential numbering** — scan `docs/` for existing `PLAN_*.md` files and increment the highest. Use `PLAN_YYYY_MM_DD_XXX.md` format.
 
-Write the plan file using the template below. Populate each section from the structured inputs gathered in Phase 1.
+Populate each section from Phase 1 inputs using this template:
 
 #### Template
 
@@ -94,12 +68,12 @@ Write the plan file using the template below. Populate each section from the str
 ## Readiness Gate Results
 ```
 
-Populate each section:
-- **Requirements / Problem** — from user request + brainstorm understanding
-- **Solution** — from brainstorm plan (approach and design decisions)
-- **Implementation Plan** — files, approach, testing strategy, task breakdown, success criteria; all extracted from brainstorm and grill outputs. Edge Cases live in Grill Outcomes only.
-- **Grill Outcomes** — resolved dimensions from grill's Phase 2-3 output in copy-ready code blocks. Edge Cases is one of the 6 dimensions here.
-- **Readiness Gate Results** — appended after Phase 3 verification
+Section sources:
+- **Requirements / Problem** → brainstorm understanding
+- **Solution** → brainstorm plan
+- **Implementation Plan** → brainstorm (files, approach, testing, tasks). Edge Cases in Grill Outcomes only.
+- **Grill Outcomes** → grill resolved dimensions (copy-ready blocks)
+- **Readiness Gate Results** → appended after Phase 3
 
 ### Phase 3: Verify Gates
 
@@ -117,7 +91,7 @@ Check each of the following against the plan file:
 | 6 | Testing | Plan defines specific test cases | brainstorm Phase 3 + grill Phase 3 — Testable criterion |
 | 7 | Success Criteria | Plan defines verifiable success criteria | brainstorm Phase 3 — plan template |
 
-After checking all gates, append the results table under **## Readiness Gate Results** in the plan file:
+After checking all gates, append the results table:
 
 ```markdown
 ## Readiness Gate Results
@@ -135,21 +109,20 @@ After checking all gates, append the results table under **## Readiness Gate Res
 
 ## On Failure
 
-When a gate fails:
-1. Clearly list which gates failed and why
+1. List which gates failed and why
 2. Assess severity:
-   - **Minor** (missing documentation, unclear wording) — suggest the fix, update the plan file, and re-check without leaving check-plan-readiness
-   - **Significant** (unresolved assumption, edge case, soundness risk) — interactively ask the user about the affected dimension
+   - **Minor** (missing doc, unclear wording) — fix in place, re-check
+   - **Significant** (unresolved assumption, edge case, soundness) — **ask user interactively:**
+     1. State which gate failed and why
+     2. Present the unresolved dimension with concrete options
+     3. Get user input and resolve before proceeding
 3. Re-check all gates after resolution
 
 ## Hand-off
-
-Before declaring completion:
-- Phase 1: Structured inputs gathered from brainstorm and grill outputs
-- Phase 2: Plan file created at `docs/PLAN_*.md` with all sections populated
-- Phase 3: All 7 gates checked and results appended to plan file
-- All gates pass → route to implement-plan
-- Gate failure → triaged (minor: fixed in-place; significant: route to grill-and-refine)
+- Phase 1: Inputs gathered from upstream skills
+- Phase 2: Plan file at `docs/PLAN_*.md` with all sections populated
+- Phase 3: All 7 gates checked, results appended
+- Pass → route to `implement-plan`. Fail → triaged (minor: fixed in place; significant: route to `grill-and-refine`)
 
 ---
 

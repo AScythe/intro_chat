@@ -29,14 +29,13 @@ Every piece of content must pass these checks:
 ### What to Include
 - File ownership table — location, role, agent policy (⚠️ caution / ❌ forbidden). Include only files with non-default agent policies — omit ✅ safe files.
 - SDD Workflow Rules — explicit always/never directives organized by 9 workflow phases. Verification requirements embedded within each phase's rules, not in a separate section.
-- Skill Trigger Rules — table mapping user trigger phrases to the skill to load immediately.
+
 - Cross-Phase Universal Rules sub-sections:
   - Context Window Discipline — Grep→Read patterns for minimizing context waste.
   - Process Discipline — read-before-write, exit declarations, test discipline, scope guard, batching, editing technique, approval gate, hygiene audits, baseline checks, failure triage, execution constraints.
   - Documentation Discipline — cross-referencing, description headers, executable truth.
   - Failure Triage — classification table for test failures with action for each type.
-  - Flag Annotation Convention — format, base flags table, per-phase prefixes, exclusivity rule.
-  - Doc Sync Triggers — table mapping change types to the doc sync skill to run.
+
 
 ### What NOT to Include
 
@@ -139,5 +138,5 @@ Read `refs/PROJECT_BEST_PRACTICES.md` and identify entries that are universal ag
 - [ ] Agent behavioral rules are imperative — "always/never", not "consider" or "try to"
 - [ ] Cross-phase universal rules are not duplicated in phase-specific sections
 - [ ] Cross-references to `ARCHITECTURE.md` and `SPECIFICATIONS.md` are accurate
-- [ ] Flag Annotation Convention matches current skill conventions — base flags, per-phase prefixes, and exclusivity rule reflect actual skill usage
+
 - [ ] Framework/toolchain quirks are documented if present

@@ -1,38 +1,23 @@
 ---
 name: brainstorm-and-plan
-description: 'Brainstorming and exploration. Explore requirements against project docs, surface ideas and assumptions, confirm direction with user, then produce a concrete plan. Trigger at the start of any coding task, or when the user says "brainstorm and plan", "analyze the requirements", "analyze the plan", or similar.'
+description: 'Brainstorming and planning stage. Analyze requirements against project docs, surface ideas and assumptions, confirm direction with user, then produce an initial plan. Use at the beginning of any tasks, or triggered when the user says "brainstorm and plan", "analyze and plan", "analyze the requirements", or similar.'
 ---
 
 ## What I do
-- Analyze requirements against existing project materials using a layered approach: consult `docs/` first, spot-check against 1-2 key source files to verify accuracy, fall back to full codebase examination only when no relevant docs exist
-- Surface assumptions, ambiguities, and missing information explicitly
-- Describe the requirements back to the user as you understood them for confirmation
-- Once confirmed, produce an **initial broad-strokes plan** covering files, approach, testing strategy, and success criteria
-- Block implementation until understanding is confirmed and plan is accepted
+- Analyze requirements via layered doc→code reading; surface assumptions, ambiguities, and missing information explicitly
+- Describe requirements back to the user for confirmation; block implementation until plan is accepted
+- Produce an **initial broad-strokes plan** covering files, approach, testing strategy, and success criteria
 
 ## Boundaries (read-only phase)
-- **No file writes.** Do NOT create, modify, or write any files — including plan documents, analysis notes, or code changes.
-- **No implementation.** This skill only understands and plans.
-- **Broad strokes, not deep scrutiny.** Deep edge-case analysis, risk probing, and alternative evaluation are handled by `grill-and-refine`.
-- **Verbal output only.** Present the plan as text in the conversation. Formal plan documents (`docs/PLAN_*.md`) are written later by `check-plan-readiness`.
-
-## Pipeline Position
-
-This skill is the first planning stage. It receives the user's request and produces a broad-strokes plan for the next stage.
-
-| Input | From | Format |
-|-------|------|--------|
-| User's request / task | User (conversation) | Verbal |
-| Project docs (SPECS, ARCH) | `docs/` | Reference sections |
-
-| Output | To | Format |
-|--------|----|--------|
-| Initial broad-strokes plan | grill-and-refine or check-plan-readiness | Verbal |
-| Confirmed requirements understanding | grill-and-refine or check-plan-readiness | Verbal |
+- **No file writes** — including plans, analysis notes, or code changes.
+- **No implementation** — understand and plan only.
+- **Broad strokes only** — deep edge-case analysis handled by `grill-and-refine`.
+- **Interactive** — Phase 2 requires user input. Do not produce final plan without walking through and confirming with the user.
+- **Verbal output only** — formal plan documents written by `check-plan-readiness`.
 
 ## Guidelines
 
-### Phase 1: Understand and Analyze
+### Phase 1: Analyze (agent only)
 
 Follow this layered analysis pipeline — all read-only:
 
@@ -51,55 +36,45 @@ Follow this layered analysis pipeline — all read-only:
 **Layer 3: Fallback (only if no relevant docs exist)**
 - Examine the relevant source code files directly.
 
-**Layer 4: Clarify understanding**
-- Fully describe your understanding of the requirements back to the user.
-- If something is unclear, state what's confusing, surface assumptions explicitly, and ask interactively.
-- If multiple interpretations exist, present them interactively — don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted — if the solution introduces a new external dependency, ask whether the benefit clearly outweighs the maintenance cost. Check logical soundness before endorsing.
-- Make sure the proposal is logically sound and satisfies the intended functionalities.
-- Cite which docs were consulted (and which sections) — or note that no relevant docs existed.
-- Do not proceed until the user has confirmed your understanding.
+**Layer 4: Evaluate design approach**
 
-### Phase 2: Shape the Approach
+Evaluate the proposed approach against these principles. Surface concerns here — fixing at `grill-and-refine` is cheaper than reversing during implementation.
 
-**Before writing a plan, evaluate what makes the design testable and maintainable.** Use these principles and questions to shape your thinking about the approach. The output of this phase is a design direction — not a written plan.
-
-#### Design for Testability and Quality
-
-When shaping the approach, evaluate whether the proposed design produces testable, maintainable code. Flag shallow or tangled designs before they reach implementation. Prefer:
-
-- **Deep modules** — simple public interface, complex logic hidden inside. The caller (and test) should pass simple inputs and assert final outcomes, with no setup ceremony required.
-- **Pure functions** — same input always produces the same output, no side effects. If a function fetches data, modifies global state, or writes to a database, it mixes concerns and requires mocking to test.
-- **Injected dependencies** — DB clients, HTTP clients, clocks, and RNG should be passed in, not instantiated inside the function. This lets tests substitute lightweight fakes without touching a live server.
-- **Single responsibility** — a function that fetches, parses, validates, and saves has four responsibilities. Each added responsibility multiplies the test cases required. Flag multi-responsibility functions and propose a split.
-- **Minimal dependencies** — every external dependency is a maintenance liability. Before proposing one, ask whether the benefit clearly outweighs the cost. Prefer self-contained solutions; add a dependency only when it's clearly the right tool.
-- **Elegance and efficiency** — these reinforce each other. A clean design is easier to optimize correctly later. A design that requires workarounds to be fast enough is wrong from the start.
+- **Deep modules** — simple public interface, complex logic hidden inside. Pass simple inputs, assert final outcomes.
+- **Pure functions** — same input → same output, no side effects. Flag functions that fetch data, modify global state, or write to DB (requires mocking).
+- **Injected dependencies** — pass in DB clients, HTTP clients, clocks, RNG. Tests substitute fakes without live servers.
+- **Single responsibility** — a function that fetches, parses, validates, and saves has four responsibilities. Flag multi-responsibility functions; propose splits.
+- **Minimal dependencies** — every dependency is a maintenance liability. Ask: does benefit outweigh cost? Prefer self-contained solutions.
+- **Elegance and efficiency** — clean design is easier to optimize correctly later. A design requiring workarounds to be fast enough is wrong from the start.
 
 #### Questions to Ask During Planning
 
-Is the control flow of the proposed solution easy to follow at a glance? If not, flag it — convoluted logic is a design problem, not an implementation detail.
+Is the control flow easy to follow at a glance? Convoluted logic is a design problem, not an implementation detail.
 
-Surface these concerns now — resolving them at the `grill-and-refine` stage is far cheaper than reversing them during implementation.
+### Phase 2: Interactive Walkthrough (with user)
+
+Present all Phase 1 findings to the user. Walk through each step sequentially; resolve before moving on.
+
+1. **Clarify understanding** — restate requirements back to the user. Do not proceed until confirmed.
+2. **Surface ambiguities** — state unclear points explicitly. Present multiple interpretations if they exist; do not pick silently.
+3. **Discuss design approach** — present findings from Phase 1 evaluation (design principles, control flow). Discuss trade-offs, alternatives, and risks. Push back on questionable approaches.
+4. **Confirm direction** — ensure the user agrees with the approach before producing the plan.
+5. **Document sources** — cite which docs/sections were consulted.
 
 ### Phase 3: Produce the Plan
 
-**Once the approach is shaped, produce an initial plan verbally.**
-
-The initial plan must include:
-- The approach and high-level design decisions.
-- Which files need to be created, modified, or removed.
-- Testing strategy (test framework, key scenarios).
-- Initial success criteria (verifiable).
-- Cite which docs were consulted (or note that no relevant docs existed).
+**Produce an initial plan verbally.** The plan must specify:
+- Approach and high-level design decisions
+- Files to create, modify, or remove
+- Testing strategy (framework, key scenarios)
+- Success criteria (verifiable)
+- Consulted docs (or note: no relevant docs existed)
 
 ## Hand-off
-
-Before declaring completion:
-- Requirements understood and confirmed by the user (Phase 1)
-- Design approach evaluated against testability and quality principles (Phase 2)
-- Initial broad-strokes plan covers approach, files, testing strategy, and success criteria (Phase 3)
-- No file writes occurred (read-only phase)
-- Plan presented verbally with cited document sources
+- Analysis complete, approach evaluated (Phase 1)
+- Requirements, ambiguities, and design approach discussed and confirmed with user (Phase 2)
+- Plan presented verbally, no file writes (Phase 3)
+- Document sources cited
 
 ---
 
@@ -109,7 +84,7 @@ Before declaring completion:
 Initial (broad-strokes) plan (verbal).
 
 ### Exit Declaration
-State clearly: "**Initial plan ready. Want to grill the plan or check for readiness?**"
+State clearly: "**Initial plan ready. Want to grill the plan or check for readiness? Say 'grill' to trigger grilling the plan.**"
 
 ### Next Step
 User invokes `grill-and-refine` (Plan mode) or `check-plan-readiness` (Build mode — switch needed).

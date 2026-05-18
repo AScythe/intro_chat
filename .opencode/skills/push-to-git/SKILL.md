@@ -16,18 +16,6 @@ description: 'Stage related files together by logical grouping, commit with auto
 - **User approval gate.** Never stage or commit without user confirmation of grouping and commit message.
 - **Push per commit.** Push after each commit, not after a batch. One failure blocks only that commit.
 
-## Pipeline Position
-
-This skill is the terminal stage — the final step after all implementation, review, and documentation work is complete.
-
-| Input | From | Format |
-|-------|------|--------|
-| All session changes | Prior skill (update-docs or direct trigger) | Source + docs |
-
-| Output | To | Format |
-|--------|----|--------|
-| Committed + pushed code | Remote repository | git commits |
-
 ## Grouping Logic
 
 Group files by their **logical nature and purpose**, not by file count. A group can be 1 file or 20 files — what matters is the story the commit tells.
@@ -132,7 +120,7 @@ Before declaring completion:
 All changes committed and pushed to remote. Each commit is a coherent logical group with an auto-generated message.
 
 ### Exit Declaration
-State clearly: "**All commits pushed to origin/<branch>.**"
+State clearly: "**All commits pushed to origin/<branch>. Ready for next tasks**"
 
 ### Next Step
 Standalone skill — no automatic next step. Return to previous workflow or wrap up.
