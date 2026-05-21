@@ -4,7 +4,7 @@
   "mcp": {
     "cocoindex-code": {
       "type": "local",
-      "command": ["ccc", "mcp"]
+      "command": ["C:\\Users\\Alvin\\.local\\bin\\ccc.exe", "mcp"]
     },
     "graphify": {
       "type": "local",

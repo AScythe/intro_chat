@@ -448,7 +448,18 @@ pip install 'graphifyy[mcp]'
 
 ### `ccc mcp` fails on OpenCode startup
 
-OpenCode was started before `~/.local/bin` was added to PATH. Restart OpenCode after fixing PATH.
+**Cause:** OpenCode was started before `~/.local/bin` was added to PATH. Child processes inherit the parent's environment, so even if the user PATH is set in the registry, already-running processes and their children won't see it.
+
+**Fix option A (recommended):** In `opencode.json`, use the absolute path to `ccc.exe` instead of relying on PATH:
+
+```json
+"cocoindex-code": {
+  "type": "local",
+  "command": ["C:\\Users\\<YOUR_USERNAME>\\.local\\bin\\ccc.exe", "mcp"]
+}
+```
+
+**Fix option B:** Restart the host application (Cursor, VS Code, or terminal) after setting the PATH — this forces a fresh environment from the registry.
 
 ### Graph is stale or has no data
 

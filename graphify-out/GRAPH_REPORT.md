@@ -1,16 +1,16 @@
 # Graph Report - intro_chat  (2026-05-21)
 
 ## Corpus Check
-- 105 files · ~79,384 words
+- 105 files · ~79,501 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1340 nodes · 1464 edges · 90 communities (86 shown, 4 thin omitted)
+- 1351 nodes · 1476 edges · 84 communities (80 shown, 4 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `3ddb8e3b`
+- Built from commit: `b998c10c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -85,6 +85,7 @@
 - [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
 - [[_COMMUNITY_Community 72|Community 72]]
 - [[_COMMUNITY_Community 73|Community 73]]
 - [[_COMMUNITY_Community 74|Community 74]]
@@ -93,15 +94,9 @@
 - [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 79|Community 79]]
-- [[_COMMUNITY_Community 80|Community 80]]
 - [[_COMMUNITY_Community 81|Community 81]]
-- [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 83|Community 83]]
-- [[_COMMUNITY_Community 84|Community 84]]
-- [[_COMMUNITY_Community 85|Community 85]]
 - [[_COMMUNITY_Community 86|Community 86]]
-- [[_COMMUNITY_Community 87|Community 87]]
-- [[_COMMUNITY_Community 88|Community 88]]
 - [[_COMMUNITY_Community 89|Community 89]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -109,12 +104,12 @@
 2. `compilerOptions` - 19 edges
 3. `🌟 IntroChat - The Secret Icebreaker for Introverts` - 16 edges
 4. `Frontend Modules (React SPA)` - 16 edges
-5. `main()` - 15 edges
-6. `6. Documentation` - 15 edges
-7. `Module Descriptions` - 14 edges
-8. `Task Breakdown` - 13 edges
-9. `🌟 IntroChat: The Secret Icebreaker for Introverts at Events` - 13 edges
-10. `Document Guidelines - IntroChat` - 12 edges
+5. `6. Documentation` - 15 edges
+6. `main()` - 15 edges
+7. `8. Automation & Process Design` - 14 edges
+8. `Module Descriptions` - 14 edges
+9. `Task Breakdown` - 13 edges
+10. `🌟 IntroChat: The Secret Icebreaker for Introverts at Events` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_database()` --calls--> `init_db()`  [INFERRED]
@@ -128,7 +123,7 @@
 - `set_availability()` --calls--> `find_match()`  [INFERRED]
   app/routes.py → app/matchmaking.py
 
-## Communities (90 total, 4 thin omitted)
+## Communities (84 total, 4 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -151,8 +146,8 @@ Cohesion: 0.17
 Nodes (12): 1.1 Module Responsibility Pattern, 1.2 Separation of Concerns, 1.3 Frontend Modularization, 1.4 Module Communication, 1.5 When to Split a Module, 1. Modularization Techniques, code:block1 (app/), code:block2 (Configuration  → config.py / state.py (constants)) (+4 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.12
-Nodes (16): `app/config.py` (Configuration), `app/connection_manager.py` (WebSocket Manager), `app/__init__.py` (Orchestrator), `app/__main__.py` (Entry Point), `app/matchmaking.py` (Match Logic), `app/routes.py` (HTTP Routes + WebSocket), `app/schemas.py` (Request Models), `app/tasks.py` (Background Tasks) (+8 more)
+Cohesion: 0.07
+Nodes (30): `app/config.py` (Configuration), `app/connection_manager.py` (WebSocket Manager), `app/database.py` (Database Schema), `app/__init__.py` (Orchestrator), `app/__main__.py` (Entry Point), `app/matchmaking.py` (Match Logic), `app/routes.py` (HTTP Routes + WebSocket), `app/schemas.py` (Request Models) (+22 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.07
@@ -168,15 +163,15 @@ Nodes (26): dependencies, react, react-dom, react-router-dom, devDependencies, j
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
-Nodes (27): 8.10 Batch by Logical Concern, Not Line Count, 8.11 Persistent Decision Artifacts, 8.1 Permission Control, 8.2 Executable Sources of Truth, 8.3 Filename as Stable Key, 8.4 Preserve Manual, Regenerate Auto, 8.5 Diff Logging for Automation, 8.6 Cross-Language Extraction Pattern (+19 more)
+Nodes (29): 8.10 Batch by Logical Concern, Not Line Count, 8.11 Persistent Decision Artifacts, 8.1 Permission Control, 8.2 Executable Sources of Truth, 8.3 Filename as Stable Key, 8.4 Preserve Manual, Regenerate Auto, 8.5 Diff Logging for Automation, 8.6 Cross-Language Extraction Pattern (+21 more)
 
 ### Community 10 - "Community 10"
 Cohesion: 0.10
 Nodes (21): 6.10 Verify Presence and Quality, Not Absence, 6.11 Single Canonical Location for Artifacts, 6.14 Documentation Conciseness & Anti-Bloat, 6.1 One Purpose Per Document, 6.2 Key Differentiator Per Document, 6.3 Quality Gates Before Content, 6.4 Routing Table Over Decision Tree, 6.5 Document Boundary Tensions (+13 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.14
-Nodes (14): Frontend Modules (React SPA), `frontend/src/api/client.ts` (API Client), `frontend/src/config/constants.ts` (Configuration), `frontend/src/context/SocketContext.tsx` (WebSocket Provider), `frontend/src/context/UserContext.tsx` (User Session Provider), `frontend/src/hooks/useChatRequest.ts` (Chat Request Lifecycle), `frontend/src/hooks/useDemoMode.ts` (Demo Mode), `frontend/src/hooks/useSocket.ts` (WebSocket Hook) (+6 more)
+Cohesion: 0.08
+Nodes (26): Components, Frontend Modules (React SPA), `frontend/src/api/client.ts` (API Client), `frontend/src/components/ConnectionCard.tsx`, `frontend/src/components/MatchCountdown.tsx`, `frontend/src/components/PersonCard.tsx`, `frontend/src/components/PromptCard.tsx`, `frontend/src/components/QRDisplay.tsx` (+18 more)
 
 ### Community 12 - "Community 12"
 Cohesion: 0.08
@@ -199,8 +194,8 @@ Cohesion: 0.08
 Nodes (23): Approach & Design Decisions, Edge Cases, Grill Outcomes, Implementation Plan, PLAN_2026_05_14_010, Readiness Gate Results, Requirements / Problem, Solution (+15 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.13
-Nodes (13): QRDisplay(), QRDisplayProps, img, HomePage(), input, joinEventHeaders, mockResponse, nameInput (+5 more)
+Cohesion: 0.12
+Nodes (16): fetchJSON(), fetchWithTimeout(), parseJSON(), QRDisplay(), QRDisplayProps, img, HomePage(), input (+8 more)
 
 ### Community 18 - "Community 18"
 Cohesion: 0.16
@@ -398,6 +393,10 @@ Nodes (5): 8. Workflow-to-Document Dependency, code:block2 (review-implementatio
 Cohesion: 0.50
 Nodes (3): dependencies, @opencode-ai/plugin, opencode-ast-grep
 
+### Community 70 - "Community 70"
+Cohesion: 0.20
+Nodes (9): command, type, command, type, mcp, cocoindex-code, graphify, plugin (+1 more)
+
 ### Community 72 - "Community 72"
 Cohesion: 0.14
 Nodes (13): 1. Install OpenCode CLI, 2. Configure OpenCode Global Permissions, 3. Install MCP Servers, 4. Add uv Tool Binaries to PATH, 5. Set Default Embedding Model for cocoindex-code, code:powershell (npm install -g opencode-ai), code:powershell (opencode --version), code:json ({) (+5 more)
@@ -430,44 +429,20 @@ Nodes (8): Agent Development Environment Setup, code:powershell (# OpenCode), Cu
 Cohesion: 0.22
 Nodes (9): `ccc mcp` fails on OpenCode startup, `ccc` or `graphify` command not found, `.cocoindex_code/settings.yml` doesn't exist, code:powershell ([Environment]::SetEnvironmentVariable("Path", "$env:Path;$en), code:powershell (pip install 'graphifyy[mcp]'), code:powershell (graphify .), Graph is stale or has no data, `python -m graphify.serve` fails with ModuleNotFoundError (+1 more)
 
-### Community 80 - "Community 80"
-Cohesion: 0.25
-Nodes (8): `frontend/tests/e2e/userFlow.spec.ts` (E2E Test Scenarios), Functions, Functions, Functions, Tests, `tests/test_app.py`, `tests/test_db.py`, `tests/test_js_modules.py`
-
 ### Community 81 - "Community 81"
 Cohesion: 0.25
 Nodes (8): 5.1 TestClient Over Live Server, 5.2 TDD Tests Are Permanent Regression Tests, 5.3 Test References Updated in Same Batch as Code Changes, 5. Testing, code:bash (uv run python -c "from app import app"  # Syntax check), code:python (# ✅ Use TestClient — no server process needed), code:block13 (# ✅ Each TDD batch produces code AND a saved test), code:block14 (✅ Same batch: rename getUser → fetchUser in source + update )
-
-### Community 82 - "Community 82"
-Cohesion: 0.29
-Nodes (7): Components, `frontend/src/components/ConnectionCard.tsx`, `frontend/src/components/MatchCountdown.tsx`, `frontend/src/components/PersonCard.tsx`, `frontend/src/components/PromptCard.tsx`, `frontend/src/components/QRDisplay.tsx`, `frontend/src/components/Timer.tsx`
 
 ### Community 83 - "Community 83"
 Cohesion: 0.33
 Nodes (6): code:block58, code:block59, code:block60, code:block61, code:block62, Pin: fastapi==0.115.0 (never fastapi without version)
 
-### Community 84 - "Community 84"
-Cohesion: 0.40
-Nodes (5): `frontend/src/pages/ChatPage.tsx`, `frontend/src/pages/HomePage.tsx`, `frontend/src/pages/RoomPage.tsx`, `frontend/src/pages/UserInfoPage.tsx`, Pages
-
-### Community 85 - "Community 85"
-Cohesion: 0.83
-Nodes (3): fetchJSON(), fetchWithTimeout(), parseJSON()
-
 ### Community 86 - "Community 86"
 Cohesion: 0.50
 Nodes (4): 6.12 File Description Convention Across All Languages, code:typescript (// Timer.tsx), code:python (# matchmaking.py), code:css (/* style.css */)
 
-### Community 87 - "Community 87"
-Cohesion: 0.67
-Nodes (3): `app/database.py` (Database Schema), Functions, Tables
-
-### Community 88 - "Community 88"
-Cohesion: 0.67
-Nodes (3): `app/state.py` (Shared State), Constants, Data Structures
-
 ## Knowledge Gaps
-- **817 isolated node(s):** `@opencode-ai/plugin`, `opencode-ast-grep`, `Purpose`, `Audience`, `Quality Gates` (+812 more)
+- **823 isolated node(s):** `Table of Contents`, `What This Covers`, `Prerequisites`, `code:powershell (npm install -g opencode-ai)`, `code:powershell (opencode --version)` (+818 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -475,13 +450,13 @@ Nodes (3): `app/state.py` (Shared State), Constants, Data Structures
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Universal Project Best Practices` connect `Community 77` to `Community 0`, `Community 4`, `Community 9`, `Community 10`, `Community 81`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **Why does `7. Session Lessons Learned` connect `Community 0` to `Community 77`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `8. Automation & Process Design` connect `Community 9` to `Community 77`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **What connects `@opencode-ai/plugin`, `opencode-ast-grep`, `Purpose` to the rest of the system?**
-  _846 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `Table of Contents`, `What This Covers`, `Prerequisites` to the rest of the system?**
+  _852 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
