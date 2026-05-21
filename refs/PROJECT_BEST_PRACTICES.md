@@ -1101,6 +1101,15 @@ update-docs: single orchestrator, routes to push-to-git
 
 **Why it matters**: One source of truth. No drift across copied rules. Update one location, all consumers benefit.
 
+### 8.22 Three-Layer Code Exploration Stack
+**Context**: From integrating Graphify (knowledge graph) alongside cocoindex-code (semantic search) and ast-grep (AST rewriting) into the SDD workflow
+
+**Principle**: Structure codebase analysis tools into three complementary layers that each answer a different question. Layer 1 (macro) maps concepts and communities via a knowledge graph — answers "WHERE is the relevant code?" Layer 2 (meso) searches by natural language intent — answers "WHAT does it do?" Layer 3 (micro) searches and rewrites by AST structure — answers "HOW is it structured?" Use tools in layer order: understand the landscape first, then find the code, then modify it.
+
+**Example**: Graphify (`graphify query "matchmaking"`) discovers all connected concepts across the project → cocoindex-code (`ccc search "how are user sessions created"`) finds the specific function → ast-grep (`ast_grep_search(pattern: "def $NAME($$$):")`) finds all structural variants.
+
+**Why it matters**: Each layer catches what others miss. Macro prevents blind spots, meso finds intent-matches that literal grep can't, micro enables syntax-safe rewrites. Using only grep is like navigating with only a street-level map — the knowledge graph gives you a satellite view.
+
 ---
 
 ## 9. Version Control
@@ -1269,3 +1278,4 @@ uv run pytest tests/ -v              # Tests
 61. **Step 0 Convention** — universal pre-conditions go at step 0, not mixed into the main step sequence
 62. **Consistent Process Template** — every workflow document follows the same section template for predictable navigation
 63. **Cross-Phase Deduplication** — extract duplicated rules to a shared governance document; replace copies with cross-references
+64. **Three-Layer Code Exploration Stack** — knowledge graph (macro) → semantic search (meso) → AST rewriting (micro); use in layer order

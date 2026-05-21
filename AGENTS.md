@@ -18,6 +18,9 @@
 | `docs/PLAN_*.md` | Active plan (during implementation/review) | ⚠️ Read-only — only `check-plan-readiness` writes these; moved to `archive/` after review |
 | `archive/PLAN_*.md` | Completed/reviewed plan artifacts | ⚠️ Archived — moved here after successful review; in `.ignore` to avoid context waste |
 | `.opencode/skills/*/SKILL.md` | Workflow skill definitions | ⚠️ Require explicit user permission |
+| `opencode.json` | Plugin and MCP server configuration | ⚠️ Edit only for plugin/MCP config changes — verify JSON validity |
+| `.cocoindex_code/` | CocoIndex code index (auto-generated) | ❌ Never edit manually — rebuild via `ccc index` |
+| `graphify-out/` | Graphify knowledge graph outputs (auto-generated) | ⚠️ Commit graph.json/GRAPH_REPORT.md for team sharing; gitignored: manifest.json, cost.json |
 ---
 
 ## SDD Workflow — Phase Order
@@ -50,13 +53,16 @@ These apply to every phase and override phase-specific rules when they conflict.
 
 ### Context Window Discipline
 
-Prefer Grep→Read over full-file reads:
-1. **Grep first** — find the heading line number
-2. **Read with offset** — `Read(path, offset=<line>, limit=~100)`
-3. **Full reads only when required**
-4. **Sections per step** — consult only what "Documents to Read" prescribes
+Prefer structured search tools over grep for code-specific queries:
+1. **graphify first** — knowledge graph for macro-level architecture map. Query `graphify query "<intent>"` to discover concepts, communities, and relationships before diving into file-level searches
+2. **cocoindex-code next** — semantic search by intent when you don't know exact names
+3. **ast-grep next** — structural pattern search when you know the pattern shape but not exact locations
+3. **Grep next** — fall back for simple keyword or text search
+4. **Read with offset** — `Read(path, offset=<line>, limit=~100)`
+5. **Full reads only when required**
+6. **Sections per step** — consult only what "Documents to Read" prescribes
 
-Avoid low-signal files: `frontend/dist/`, `archive/`, `uv.lock`
+Avoid low-signal files: `frontend/dist/`, `archive/`, `cocoindex_code/`, `graphify-out/cache/`, `uv.lock`
 
 ### Process Discipline
 
