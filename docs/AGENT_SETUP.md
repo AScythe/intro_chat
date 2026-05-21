@@ -1,4 +1,3 @@
-// Description: Complete agent development environment setup — OpenCode, MCP servers, plugins, skills, and custom commands. Ensures reproducible tooling across devices.
 # Agent Development Environment Setup
 
 This document captures every global and project-level configuration needed to reproduce this project's AI coding assistant environment on any device.

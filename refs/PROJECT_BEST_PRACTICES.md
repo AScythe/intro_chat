@@ -898,7 +898,22 @@ Missing entry → insert at correct position in ordering
 
 **Why it matters**: One regex, one extraction function, no per-language maintenance. Simple, correct, and easy to extend to new file types.
 
-### 8.7 One Verb Per Skill
+### 8.7 Description Headers Go in Source Code Only
+
+**Context**: From finding a `// Description:` comment in `opencode.json` (invalid JSON) and `docs/AGENT_SETUP.md` (not a source file).
+
+**Principle**: File-level `Description:` headers belong only in source code files where the comment syntax is valid:
+- `# Description:` → Python (`.py`)
+- `// Description:` → TypeScript/TSX (`.ts`, `.tsx`)
+
+Do NOT add description headers to:
+- **Config files** — JSON, YAML, TOML don't universally support comments. A `// Description:` in a JSON file breaks parsing for any JSON parser that doesn't accept comments.
+- **Documentation files** — Markdown (`.md`) files. Description headers are for auto-extraction into `ARCHITECTURE.md`; docs don't need to extract from themselves.
+- **Generated/auto files** — `package.json`, `package-lock.json`, `tsconfig.json`, etc. Their purpose is self-evident from the filename.
+
+**Why it matters**: Invalid JSON breaks tooling (`ConvertFrom-Json`, schema validators, linters). Cross-file consistency means the extraction regex only needs to look in Python and TS/TSX files, keeping the pattern simple and reliable.
+
+### 8.8 One Verb Per Skill
 **Context**: From separating implement-plan (TDD+code) from review-implementation (verify+sign-off) into two distinct skills
 
 **Principle**: Each skill or component should do exactly one thing. If a skill description uses "and" to connect distinct responsibilities ("creates plans AND verifies them"), split it. One verb per skill prevents overlap, makes the pipeline obvious, and forces clear stage boundaries.

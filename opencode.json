@@ -1,4 +1,3 @@
-// Description: Plugin and MCP server configuration for OpenCode — enables ast-grep structural search/replace and cocoindex-code semantic search tools
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": ["opencode-ast-grep"],
