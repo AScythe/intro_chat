@@ -21,6 +21,12 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 Follow this layered analysis pipeline — all read-only:
 
+**Smart Tools**
+Use these to discover relevant code before fallback reading:
+- **graphify** — query the knowledge graph for concepts, communities, and connections
+- **cocoindex-code** — search by natural language intent to find functions even when key terms don't match
+- **ast_grep_search** — understand structural patterns (e.g. all `@app.route(...)` decorators) before diving into files
+
 **Layer 1: Consult docs (`docs/`)**
 - Read only the sections relevant to the task (Grep→Read pattern — grep for heading line number, Read with offset/limit). Do not read entire docs.
 - Map the task type to the right document:
@@ -38,18 +44,20 @@ Follow this layered analysis pipeline — all read-only:
 
 **Layer 4: Evaluate design approach**
 
-Evaluate the proposed approach against these principles. Surface concerns here — fixing at `grill-and-refine` is cheaper than reversing during implementation.
+Evaluate the proposed approach against these principles. Surface concerns here.
 
-- **Deep modules** — simple public interface, complex logic hidden inside. Pass simple inputs, assert final outcomes.
-- **Pure functions** — same input → same output, no side effects. Flag functions that fetch data, modify global state, or write to DB (requires mocking).
-- **Injected dependencies** — pass in DB clients, HTTP clients, clocks, RNG. Tests substitute fakes without live servers.
-- **Single responsibility** — a function that fetches, parses, validates, and saves has four responsibilities. Flag multi-responsibility functions; propose splits.
-- **Minimal dependencies** — every dependency is a maintenance liability. Ask: does benefit outweigh cost? Prefer self-contained solutions.
-- **Elegance and efficiency** — clean design is easier to optimize correctly later. A design requiring workarounds to be fast enough is wrong from the start.
-
-#### Questions to Ask During Planning
-
-Is the control flow easy to follow at a glance? Convoluted logic is a design problem, not an implementation detail.
+- **Deep modules** — simple public interface, complex logic hidden inside
+- **Pure functions** — same input → same output, no side effects
+- **Injected dependencies** — pass in DB clients, HTTP clients, clocks, RNG
+- **Single responsibility** — each module or function does one thing
+- **Minimal dependencies** — every dependency is a maintenance liability
+- **Elegance and efficiency** — clean design is easier to optimize
+- **Immutability** — create data once, never mutate
+- **Strict type safety** — explicit types over dynamic typing
+- **Idempotent operations** — same result whether run once or twice
+- **Self-documenting names** — name reveals intent
+- **Small functional footprint** — short functions are scannable and testable
+- **Control flow clarity** — straightforward flow; convoluted logic is a design problem
 
 ### Phase 2: Interactive Walkthrough (with user)
 

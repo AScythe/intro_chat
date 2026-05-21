@@ -1,35 +1,34 @@
 ---
 name: check-plan-readiness
-description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. This step creates the plan document. Use after grill-and-refine, or triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
+description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. Use after grill-and-refine or brainstorm and plan, or triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
 ---
 
 ## What I do
-- Gather the plan from conversation context (brainstorm + grill outputs)
+- Gather from upstream (brainstorm + grill)
 - Create `docs/PLAN_YYYY_MM_DD_XXX.md` with all sections populated
-- Verify the plan against all 7 pre-implementation gates and append results
-- All pass → give go signal with file path. Any fail → report and triage
+- Verify against all 8 gates and append results
+- All pass → declare ready with file path. Fail → report and triage
 
 ## Boundaries (gate-driven phase)
-- **Plan file writes only** — creates `docs/PLAN_*.md` (sole creator)
-- **No code writes** — plan documents only, no source code changes
-- **Presence check, not re-probe** — verify each criterion is addressed, not re-analyzed
-- **Gate-driven** — no plan finalized until all 7 gates pass
+- **Plan file writes only** — creates `docs/PLAN_*.md`
+- **No code writes**
+- **Presence check, not re-probe** — verify each criterion is present in the plan file
+- **Gate-driven** — no plan finalized until all 8 gates pass
 
 ## Plan Document Lifecycle
 
 ### Phase 1: Gather from Conversation Context
 
-Collect from upstream skill outputs (brainstorm + grill). No additional analysis needed.
+Collect from upstream skills. No additional analysis needed.
 
-#### Task Breakdown Guidelines
+**From brainstorm:**
+- **Problem Statement, Goals/Non-Goals** → clarified requirements (Phase 2 walkthrough)
+- **Technical Approach, Files, Testing Strategy, Success Criteria** → initial plan output (Phase 3)
+- **Consulted docs** → feeds Gate 1 (Context)
 
-The **Task Breakdown** subsection (written in Phase 2) must decompose the implementation into logical, independently testable tasks:
-
-1. **Group by phase** — e.g., Foundation → State Layer → Components → Pages → Integration. Each phase has a clear prerequisite.
-2. **Each task specifies** — What (unit of work), Files (every file touched), Dependencies (prior tasks), Tests (TDD: test before code), Verification (how to confirm done)
-3. **Task numbering** — sequential across all phases (Task 1, Task 2, ...)
-4. **Independently verifiable** — each task testable in isolation. Never merge unrelated changes into one.
-5. **Phase headers** — use `#### Phase N: Name` with a brief purpose summary.
+**From grill:**
+- **Grill Outcomes** → copy-ready dimension blocks (Phase 3) — paste directly into the template
+- **Resolved dimensions** → feeds Gates 2–7
 
 ### Phase 2: Create the Plan Document
 
@@ -42,23 +41,30 @@ Populate each section from Phase 1 inputs using this template:
 ```markdown
 # PLAN_YYYY_MM_DD_XXX
 
-## Requirements / Problem Statement
+## Problem Statement
 
-## Solution
+## Goals & Non-Goals
+
+### Goals
+### Non-Goals
+
+## Success Metrics
+
+## Technical Approach
 
 ## Implementation Plan
 
 ### Files to Create, Modify, or Remove
-### Approach & Design Decisions
-### Testing Strategy (TDD)
+### Architecture & Design Decisions
+### Testing Strategy
 ### Task Breakdown
 ### Success Criteria
+
+## Open Questions & Risks
 
 ---
 
 ## Grill Outcomes
-
-[All 6 resolved dimensions — includes Edge Cases as one dimension]
 
 ### Dimension: [name]
 - Decision: [what was decided]
@@ -68,28 +74,31 @@ Populate each section from Phase 1 inputs using this template:
 ## Readiness Gate Results
 ```
 
-Section sources:
-- **Requirements / Problem** → brainstorm understanding
-- **Solution** → brainstorm plan
-- **Implementation Plan** → brainstorm (files, approach, testing, tasks). Edge Cases in Grill Outcomes only.
-- **Grill Outcomes** → grill resolved dimensions (copy-ready blocks)
-- **Readiness Gate Results** → appended after Phase 3
+#### Task Breakdown
+
+Each task must be independently testable and map 1:1 to a batch:
+
+1. **Group by phase** — e.g., Foundation → State Layer → Components → Pages. Each phase has a clear prerequisite.
+2. **Each task specifies** — What, Files, Dependencies, Tests, Verification
+3. **Sequential numbering** across all phases (Task 1, Task 2, ...)
+4. **Phase headers** — use `#### Phase N: Name`
 
 ### Phase 3: Verify Gates
 
-**Presence check, not re-probe** — verify each criterion is *addressed* in the plan file. Do not re-analyze from scratch.
+**Presence check, not re-probe** — verify each criterion is present in the plan file.
 
 Check each of the following against the plan file:
 
-| # | Gate | Pass Criteria | Verified by |
-|---|------|-------------|-------------|
-| 1 | Context | Plan references which docs/code were consulted | brainstorm Layer 4 — cite docs requirement |
-| 2 | Assumptions | Plan states confirmed assumptions | grill Phase 1 — Assumptions dimension |
-| 3 | Edge Cases | Plan addresses edge cases | grill Phase 1 — Edge Cases dimension |
-| 4 | Clarity | Plan states resolved ambiguities and has no unclear questions | brainstorm Layer 4 (clarify) + grill (gap-free criterion) |
-| 5 | Soundness | Plan is logically sound and satisfies intended function and purpose | grill Phase 3 — quality criterion |
-| 6 | Testing | Plan defines specific test cases | brainstorm Phase 3 + grill Phase 3 — Testable criterion |
-| 7 | Success Criteria | Plan defines verifiable success criteria | brainstorm Phase 3 — plan template |
+| # | Gate | Pass Criteria |
+|---|------|-------------|
+| 1 | Context | Plan cites which docs/code were consulted |
+| 2 | Assumptions | Plan states confirmed assumptions |
+| 3 | Edge Cases | Plan addresses edge cases |
+| 4 | Clarity | Plan has no unresolved ambiguities |
+| 5 | Soundness | Plan satisfies intended function |
+| 6 | Testing | Plan defines specific test cases |
+| 7 | Success Criteria | Plan defines verifiable success criteria |
+| 8 | Community Coverage | Graph query confirms all related communities addressed |
 
 After checking all gates, append the results table:
 
@@ -105,31 +114,27 @@ After checking all gates, append the results table:
 | Soundness | ✅ / ❌ | ... |
 | Testing | ✅ / ❌ | ... |
 | Success Criteria | ✅ / ❌ | ... |
+| Community Coverage | ✅ / ❌ | ... |
 ```
 
 ## On Failure
 
 1. List which gates failed and why
-2. Assess severity:
-   - **Minor** (missing doc, unclear wording) — fix in place, re-check
-   - **Significant** (unresolved assumption, edge case, soundness) — **ask user interactively:**
-     1. State which gate failed and why
-     2. Present the unresolved dimension with concrete options
-     3. Get user input and resolve before proceeding
+2. Assess severity: **Minor** (missing doc, unclear wording) → fix in place, re-check. **Significant** (unresolved assumption, edge case, soundness) → ask user interactively: state the failure, present unresolved options, get input, resolve.
 3. Re-check all gates after resolution
 
 ## Hand-off
-- Phase 1: Inputs gathered from upstream skills
-- Phase 2: Plan file at `docs/PLAN_*.md` with all sections populated
-- Phase 3: All 7 gates checked, results appended
-- Pass → route to `implement-plan`. Fail → triaged (minor: fixed in place; significant: route to `grill-and-refine`)
+- Phase 1: Inputs gathered from brainstorm + grill
+- Phase 2: Plan file created with all sections populated
+- Phase 3: All 8 gates checked, results appended
+- Pass → route to implement-plan. Fail → triaged (minor: fixed; significant: route to grill-and-refine)
 
 ---
 
 ## Outputs & Triggers
 
 ### Output
-Persistent plan file at `docs/PLAN_*.md` with all sections populated and gate results appended. This skill is the sole creator of the plan file — no other step writes to it.
+Persistent plan file at `docs/PLAN_*.md` with all sections populated and gate results appended.
 
 ### Exit Declaration (pass)
 State clearly: "**All planning gates pass. Plan saved at `docs/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implementation of the plan.**"

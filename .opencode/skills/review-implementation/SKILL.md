@@ -49,6 +49,10 @@ Run `git status` to list all modified, added, and deleted files. Verify only exp
 
 ### Phase 2: Verify Execution
 
+#### Smart Verification
+
+Use **graphify** to verify the graph reflects intended structure. Use **ast_grep_search** with the old pattern to confirm zero stale occurrences. Use **cocoindex-code** to verify nothing semantically related was missed.
+
 #### Run All Tests
 All must pass. On failure: list what failed and why — do not fix here.
 
@@ -59,10 +63,7 @@ uv run python tests/test_js_modules.py
 cd frontend && npx vitest run
 ```
 
-**Diff test count**: Before running, note the count per suite. After, compare. Flag unexpected changes:
-- Tests removed without explanation (regression risk)
-- Tests added without a planned batch (scope creep)
-- Report: *"Test count changed: [suite]: [N before] → [N after] ([+/-]N)"*
+**Diff test count** — note count per suite before and after. Flag: tests removed without explanation (regression risk) or added without planned batch (scope creep). Report: *"Test count changed: [suite]: [N before] → [N after] ([+/-]N)"*
 
 #### Run Build
 After tests pass, run the production build:
@@ -83,46 +84,48 @@ Must pass. On failure: list files and issues — do not fix here.
 ### Phase 3: Audit & Sign Off
 
 #### Check Test Quality
-**A passing test suite is not enough — verify assertions are meaningful.**
 
 For each new or modified test:
 
-- **Assertion strength** — verifies expected value, not just non-null? `assertEqual(result, 42)` ✅. `assertIsNotNone(result)` where 42 is expected ❌.
+- **Assertion strength** — verifies expected value, not just non-null? `assertEqual(result, 42)` ✅. `assertIsNotNone(result)` where 42 is expected ❌ (false positive — route back).
 - **Non-determinism** — clocks, RNG, or network injected rather than called internally?
 - **Mock count** — mocking 3+ collaborators for one unit? Signals shallow design. Route back.
 - **Test doubles usage** — mock used where stub/fake suffices? Flag for modularize-and-clean.
 
-A test that passes with weak assertions is a false positive. Treat as failure, route back to `implement-plan`.
+#### Code Property Audit
+
+For each new or modified file, check these 11 properties. Route back to `implement-plan` for any fail:
+
+| Property | Pass criteria |
+|----------|--------------|
+| **Deep Modules** | Public surface is small; internals hidden |
+| **High Cohesion** | Each module/function does one thing |
+| **Referential Transparency** | Core logic is pure; I/O pushed to edges |
+| **Idempotency** | Re-running same operation produces same result |
+| **Strict Type Safety** | Typed dataclass/Pydantic for all data; no `Any` |
+| **Dependency Injection** | External services/clocks/RNG injected as params |
+| **Immutability** | Data created once, never mutated; returned copies not references |
+| **Low Coupling** | Few well-defined dependencies |
+| **Self-Documenting Naming** | Name reveals intent; no comments explaining what |
+| **Deterministic** | Same input always produces same output |
+| **Small Footprint** | Functions scannable in one screen (~40 lines max) |
 
 #### Verify Against Plan or Evaluation List
 
-Identify which pass this is by the prior skill, then verify against the appropriate target:
+Identify the pass type by prior skill, then verify against the appropriate target:
 
 **First pass** (prior: `implement-plan`):
-Read `docs/PLAN_*.md`. Check every Implementation Plan item against the code. Every planned change must be accounted for; every success criterion met.
-
-Also check:
-- **Error strategy** — error paths handled per a stated strategy, not ad hoc patches?
-- **No hardcoded values** — configuration-like values parameterized?
-- **Control flow** — no tangled logic or nested conditions hiding bugs?
-- **No unprincipled optimizations** — no brittle performance hacks?
-- **Docs updated** — relevant docs in sync with changes?
+Read `docs/PLAN_*.md`. Check every Implementation Plan item against the code. Every planned change must be accounted for; every success criterion met. Also check: error strategy is consistent, configuration is parameterized, control flow is straightforward, and docs are in sync.
 
 **Clean-up pass** (prior: `modularize-and-clean`):
-Read the verbal change-log produced by `modularize-and-clean`. Verify every `[CLEANUP]` entry was applied correctly. Confirm all approved batches are either applied or explicitly skipped with a reason. Check that no behavioral changes snuck in (flags must be `[CLEANUP]` only).
+Read the verbal change-log. Verify every `[CLEANUP]` entry was applied correctly. Confirm all approved batches applied or explicitly skipped. No behavioral changes (flags must be `[CLEANUP]` only).
 
 **Architecture pass** (prior: `improve-architecture`):
-Read the evaluation list from session context. Verify:
-- Every P0/P1 item addressed or explicitly skipped with reason
-- No double-paths — old path removed, not left as ghost
-- No orphaned references — imports, mounts, config updated from old locations
-- Description headers match new locations for moved/created files
-- All flags are `[ARCH]` with valid reasons
+Read the evaluation list from session context. Verify: every P0/P1 item addressed or skipped with reason, no double-paths, no orphaned references, Description headers match new locations, all flags are `[ARCH]`.
 
 #### Sign Off or Route
 
-All pass → see Exit Declaration below (scoped to pass type).
-Any fail → see Exit Declaration below.
+All pass or any fail → see Exit Declaration below.
 
 #### Archive Plan (on success)
 
@@ -140,7 +143,7 @@ If yes:
 - Phase 1: Diff reviewed, git status clean — only expected files touched
 - Phase 2: All tests pass (count compared), build succeeds, lint clean
 - Phase 3: Test quality verified, plan/evaluation criteria met, archive moved
-- Route declared to next skill
+- Pass → route to modularize-and-clean (first pass), improve-architecture (first pass), or update-docs (clean-up/arch pass). Fail → route back to the prior skill that produced the diff.
 
 ---
 
@@ -151,24 +154,15 @@ Verbal verification report: pass (all items implemented, all criteria met) or fa
 
 ### Exit Declaration
 
-**First pass (after `implement-plan`) — pass:**
-State clearly: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (structural cleanup), improve-architecture (architectural review), or update-docs (skip to documentation sync). Proceed?**"
+**Pass** — state clearly:
+- First pass: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (structural cleanup), improve-architecture (architectural review), or update-docs (skip to documentation sync). Proceed?**"
+- Clean-up pass: "**All checks pass. Cleanup verified. Proceed to update-docs?**"
+- Architecture pass: "**All checks pass. Architecture improvements verified. Proceed to update-docs?**"
 
-**Clean-up pass (after `modularize-and-clean`) — pass:**
-State clearly: "**All checks pass. Cleanup verified. Proceed to update-docs?**"
-
-**Architecture pass (after `improve-architecture`) — pass:**
-State clearly: "**All checks pass. Architecture improvements verified. Proceed to update-docs?**"
-
-**Any pass — fail:**
-State clearly: "**Review failed. [List specific items not met.] Route back to implement-plan (features), modularize-and-clean (cleanup), or improve-architecture (architecture) to resolve.**"
+**Fail** — state clearly: "**Review failed. [List items not met.] Route back to [prior skill: implement-plan / modularize-and-clean / improve-architecture] to resolve.**"
 
 ### Next Step
 
-**First pass — pass:** User invokes `modularize-and-clean` (Build mode), `improve-architecture` (Plan mode), or `update-docs` (Build mode) to skip cleanup/arch review.
-
-**Clean-up pass — pass:** User invokes `update-docs` to orchestrate documentation sync.
-
-**Architecture pass — pass:** User invokes `update-docs` to orchestrate documentation sync.
-
-**Any pass — fail:** User invokes the prior skill that produced the diff to resolve the failing items.
+- **First pass — pass:** User invokes `modularize-and-clean` (Build mode), `improve-architecture` (Plan mode), or `update-docs` (Build mode).
+- **Clean-up/Architecture pass — pass:** User invokes `update-docs`.
+- **Any fail:** User invokes the prior skill that produced the diff.

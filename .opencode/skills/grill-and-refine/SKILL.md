@@ -4,7 +4,7 @@ description: 'Interview relentlessly about a plan or design until reaching share
 ---
 
 ## What I do
-- Interrogate the plan across all six dimensions (assumptions, edge cases, alternatives, dependencies, risks, consistency)
+- Interrogate the plan across all seven dimensions (assumptions, edge cases, alternatives, dependencies, risks, consistency, code discovery)
 - Walk through each dimension interactively — present findings as options, gather input, resolve before moving on
 - After all branches resolved, produce a fool-proof revised plan with no gaps
 
@@ -24,9 +24,20 @@ description: 'Interview relentlessly about a plan or design until reaching share
 
 ### Phase 1: Analyze (agent only)
 
-**Analyze alone first** — before the user walkthrough, explore the codebase independently across all dimensions. Do not jump to interactive mode prematurely.
+**Analyze alone first** — explore the codebase independently before the user walkthrough.
 
 Start with the initial plan (from `brainstorm-and-plan` output). Explore identified files/code for each dimension:
+
+Use the smart tools per [brainstorm Layer 0 + Layer 2.5] to verify the plan's coverage completeness across all dimensions.
+
+**Gap grilling** — when comparing two sources (template vs implementation, spec vs code), test each gap against four questions:
+
+1. Is it truly additive?
+2. Does it affect output or methodology?
+3. Which document owns it?
+4. What's the cost/benefit?
+
+Only act on gaps that survive the grill.
 
 | Dimension | What to probe |
 |-----------|--------------|
@@ -36,21 +47,25 @@ Start with the initial plan (from `brainstorm-and-plan` output). Explore identif
 | **Dependencies** | Breaks anything? Order-dependent? Injected or hardcoded? |
 | **Risks** | Blast radius? Error strategy defined? Performance implications? |
 | **Consistency** | Conflicts with existing patterns? Straightforward control flow? |
+| **Code Discovery** | Plan missed related concepts? `graphify path "X" "Y"` for blast radius between planned and missed modules. |
 
-#### Testability Probe (embedded in Dependencies and Risks)
+#### Testability Probe
 
-During **Dependencies**, probe for five anti-patterns:
+During **Dependencies**, probe for eight anti-patterns:
 
-- **AP1: Non-determinism** — clocks, RNG, or network calls make tests non-repeatable unless injected as defaulted parameters.
-- **AP2: I/O mixed with logic** — a function that fetches, transforms, AND persists. Split for isolated testing without mocking.
-- **AP3: Tight coupling** — mocking 3+ collaborators to test one unit? Flag and propose injection via defaulted-parameter pattern.
-- **AP4: Shared mutable state** — global state modified by multiple tests causes order-dependent flaky tests.
+- **AP1: Non-determinism** — clocks, RNG, or network calls make tests non-repeatable?
+- **AP2: Untestable I/O fusion** — a function that reads external state AND contains decision logic based on that state?
+- **AP3: Tight coupling** — mocking 3+ collaborators to test one unit?
+- **AP4: Shared mutable state** — global state modified by multiple tests causes order-dependent flaky tests?
 - **AP5: Missing seams** — no place to substitute behavior without patching internals?
+- **AP6: Type ambiguity** — `Any`/`any` types, untyped dicts, or missing schemas in function signatures?
+- **AP7: Non-idempotent writes** — running the same write operation twice produces different state?
+- **AP8: Mutable outputs** — function returns a list/dict the caller can accidentally mutate?
 
 During **Risks**, probe for test fragility:
 
 - **Brittle assertions** — testing type rather than value?
-- **Test doubles confusion** — "mocking" when a stub or fake would do? Over-mocking signals a coupling problem.
+- **Test doubles confusion** — mocking when a stub or fake would do?
 
 ### Phase 2: Interactive Walkthrough (with user)
 
@@ -80,22 +95,11 @@ After all dimensions, produce the full revised plan summary. Must be:
 - **Complete** — approach, design decisions, files, resolved dimensions, testing strategy, success criteria
 - **Gap-free** — no unresolved questions or skipped branches
 - **Logically sound** — straightforward control flow
-- **Error strategy defined** — what can fail and how. No ad hoc patches.
+- **Error strategy defined** — what can fail and how
 - **Testable** — specific test cases; core logic testable without external systems
 
-### General Methodology
-
-**Gap grilling** — when comparing two sources (template vs implementation, spec vs code), test each gap against four questions:
-
-1. Is it truly additive?
-2. Does it affect output or methodology?
-3. Which document owns it?
-4. What's the cost/benefit?
-
-Only act on gaps that survive the grill.
-
 ## Hand-off
-- All six dimensions probed and resolved (Phase 1)
+- All seven dimensions probed and resolved (Phase 1)
 - Each dimension walked through interactively (Phase 2)
 - Revised plan compiled with copy-ready blocks, quality criteria met (Phase 3)
 - No file writes occurred
