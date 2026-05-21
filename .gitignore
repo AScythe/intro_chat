@@ -63,3 +63,9 @@ build/
 node_modules/
 frontend/dist/
 frontend/tsconfig.tsbuildinfo
+# CocoIndex Code (ccc)
+/.cocoindex_code/
+
+# Graphify — knowledge graph outputs (only generated artifacts to ignore)
+graphify-out/manifest.json
+graphify-out/cost.json
