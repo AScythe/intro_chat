@@ -31,21 +31,23 @@ Mine the global system state and the project codebase, then update or create `do
 
 ### What to Include
 
-- Prerequisites — foundational tools (Python, Node.js, uv, OpenCode CLI) with install commands
-- Global tool installations — MCP servers (`cocoindex-code`, `graphifyy`), their versions, install commands
-- PATH configuration — where tool executables live, how to add to PATH per platform
-- Global config files — OpenCode global permissions (`\~/.config/opencode/opencode.json`), cocoindex global settings (`\~/.cocoindex_code/global_settings.yml`), any global custom commands or skills
-- Project config files — `opencode.json`, `.opencode/package.json`, `.opencode/package-lock.json`, `.opencode/.gitignore`, skill directory
-- Gitignore configuration — what's ignored and why, how ignore rules map to transferability vs regeneratability
-- MCP server configuration — server names, their commands, what each provides
-- Plugin configuration — ast-grep and other OpenCode plugins with their npm packages
-- Skill inventory — list of all SDD workflow skills with phase mapping
-- Custom commands — `/scaffold` and any other global or project-local commands
-- One-time global setup steps — what must happen once per machine
-- Per-clone project setup steps — what must happen for each repo clone
-- First-time flow — complete end-to-end sequence from blank machine to working setup
-- Verification steps — commands to confirm each component works after setup
-- Troubleshooting — common failures and how to fix them
+**Universal (always present):**
+- **Prerequisites** — foundational tools (language runtimes, package managers, AI assistant CLI) with install commands
+- **Global tool installations** — MCP servers, AI assistant plugins, their install commands
+- **PATH configuration** — where tool executables live, how to add to PATH per platform
+- **Global config files** — AI assistant global permissions, tool-level global settings, any global custom commands or skills
+- **Project config files** — AI assistant root config (`opencode.json`), plugin dependency manifests, skill directories
+- **One-time global setup steps** — what must happen once per machine (install AI assistant, install MCP servers, configure global settings, register system-level configs)
+- **Per-clone project setup steps** — dependency install, index/build initialization, MCP/server registration
+- **First-time flow** — complete end-to-end sequence from blank machine to working setup
+- **Verification steps** — commands to confirm each component works after setup (version checks, status commands, connectivity tests)
+- **Troubleshooting** — common failures (tool not found, path issues, MCP errors, stale indexes) with actionable fixes
+
+**Optional (include only if applicable):**
+- **Configuration reference** — tables of global and project config files with purpose and check-in status
+- **Gitignore configuration** — what's ignored and why per tool, tracked vs ignored files with rationale, nested gitignore files
+- **Custom commands** — project-specific or global CLI commands with usage syntax and examples
+- **Skill/workflow inventory** — list of all agent skills with phase mapping and descriptions
 
 ### What NOT to Include
 
@@ -65,7 +67,44 @@ Mine the global system state and the project codebase, then update or create `do
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
 **Boundary rules** (document-specific guardrails):
-- Setup covers only the agent toolchain (OpenCode, MCP, cocoindex, graphify) — application dependencies and pipeline commands belong in README.md
+- Setup covers only the agent toolchain (AI assistant CLI, MCP servers, semantic search, knowledge graph, workflow skills) — application dependencies and run commands belong in README.md
+
+---
+
+## Universal Template
+
+The skeleton below is used for every project's `AGENT_SETUP.md`. Markers like `<!-- FILL: name -->` indicate where project-specific content is injected. Sections without markers are included verbatim.
+
+```markdown
+# [Project Name] Agent Setup
+
+> **Last verified:** [date]
+
+## What This Covers
+| Layer | Tools |
+
+## Prerequisites
+| Tool | Version | Install |
+
+## Global Setup (One-Time Per Machine)
+[Steps that run once per machine — AI assistant CLI, MCP servers, config files, PATH]
+
+## Project Setup (Per Repository Clone)
+[Steps per clone — dependency install, index initialization, MCP registration]
+
+## First-Time Flow From Scratch
+[Complete end-to-end sequence from blank machine to working setup]
+
+## Verification
+[Commands to confirm each component works — version checks, index status, MCP connectivity]
+
+## Troubleshooting
+[Common failures — tool not found, path issues, MCP errors — with actionable fixes]
+
+<!-- FILL: optional-sections -->
+```
+
+Optional sections (include only if applicable): Configuration reference (tables of global and project config files), Gitignore explanation (what's tracked vs ignored per tool with rationale), Custom commands (project-specific `/scaffold` or similar), Skill/workflow inventory (agent skills with phase mapping).
 
 ---
 
@@ -76,6 +115,8 @@ Mine the global system state and the project codebase, then update or create `do
 - [ ] Check for new tools/dependencies added since last sync
 
 ## Workflow
+
+> **Investigation Protocol:** Investigation scans the current system and project state, then compares against the current document — not against previous session changes. Session git diff is supplementary context only. Pre-existing discrepancies (stale tool versions, wrong PATH config, missing setup steps) are gaps to flag regardless of when they were introduced.
 
 ### 1. Scan Global State
 Collect from the developer's system:
@@ -102,13 +143,19 @@ Read the project's committed files:
 ### 4. Identify Gaps and Issues
 For each **What to Include** item: does it exist? Is it accurate?
 
-### 5. Update the Document
-- Add missing sections
-- Fix outdated content
-- Remove or redirect out-of-scope content
-- Keep language instructional
-- Include platform notes inline
-- Don't rewrite the entire document — only update what's necessary
+### 5. Assemble or Update the Document
+
+**If AGENT_SETUP.md doesn't exist (create from scratch):**
+1. Start with the **Universal Template** from this skill
+2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
+3. Fill each universal section with discovered tool-specific content
+4. Verify no `<!-- FILL:` markers remain
+5. Write the result to `docs/AGENT_SETUP.md`
+
+**If AGENT_SETUP.md already exists (surgical update):**
+- For each universal section: compare against discovered system state and update only what changed (tool versions, commands, config paths, setup steps)
+- For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
+- Never rewrite the whole file — use targeted edits on changed sections only
 
 ### 6. Verify
 

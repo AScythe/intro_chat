@@ -27,17 +27,23 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 - **Minimum necessary detail:** If a first-time visitor wouldn't care about it, it doesn't belong here
 
 ### What to Include
-- Project description and tagline — what it is and why it exists, in one paragraph
-- Feature list — user-facing benefits, not technical internals.
-- Quick start instructions — condensed only: install dependencies, run the app, minimum steps to get going.
-- How to use — step-by-step for each user type (organizer, attendee). Show the workflow from their perspective.
-- Technical details — high-level only: tech stack and simplified architecture, max 2-3 paragraphs. One-liner per technology.
-- Testing instructions — inline runnable commands for common test suites.
-- Deployment options — how to deploy for production use.
-- Privacy and security information — user-facing summary only: what data is collected, what is not, and what users control.
-- Value proposition and success metrics — user-facing description of what users gain from the product.
-- Pitch line — one-sentence summary of the product's core value, expressed in user-facing language.
-- Troubleshooting common issues — problems users have encountered and how to resolve them.
+
+**Universal sections** (present in every project's README.md):
+- **Project description and tagline** — what it is and why it exists, in one paragraph
+- **Feature list** — user-facing benefits, not technical internals
+- **Quick start instructions** — condensed: install dependencies, run the app, minimum steps to get going
+- **How to use** — step-by-step for each user type. Show the workflow from their perspective
+- **Tech stack** — high-level only: one-liner per technology, max 2-3 paragraphs
+- **Testing instructions** — inline runnable commands for common test suites
+
+**Optional sections** (include only if the project has them):
+- **Deployment options** — how to deploy for production use
+- **Privacy and security information** — user-facing summary: what data is collected, what is not, what users control
+- **Troubleshooting common issues** — problems users have encountered and how to resolve them
+- **Requirements** — system dependencies, API keys, environment setup
+- **Pipeline or stage breakdown** — table of processing steps (for pipeline-style projects)
+- **Documentation links** — references to ARCHITECTURE.md, SPECIFICATIONS.md, etc.
+- **Value proposition and success metrics** — user-facing description of what users gain
 
 ### What NOT to Include
 
@@ -58,6 +64,37 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 
 ---
 
+## Universal Template
+
+The skeleton below is used for every project's `README.md`. Markers like `<!-- FILL: name -->` indicate where project-specific content is injected. Sections without markers are included verbatim.
+
+```markdown
+# [Project Name]
+
+[Project description and tagline]
+
+## Features
+[User-facing benefits, not technical internals]
+
+## Quick Start
+[Prerequisites + install + run — minimum steps to get going]
+
+## How to Use
+[Step-by-step for each user type]
+
+## Tech Stack
+[High-level: one-liner per technology]
+
+## Testing
+[Inline runnable commands]
+
+<!-- FILL: optional-sections -->
+```
+
+Optional sections (include only if applicable): Deployment, Privacy/Security, Troubleshooting, Requirements (system dependencies, API keys), Pipeline stages, Documentation links, Value proposition.
+
+---
+
 ## Phase 0: Prerequisites
 
 - [ ] Verify source code and project state are current
@@ -65,6 +102,8 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 - [ ] Verify all setup instructions against actual environment
 
 ## Workflow
+
+> **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Session git diff is supplementary context only. Pre-existing discrepancies (wrong setup steps, outdated feature claims, stale quick-start instructions) are gaps to flag regardless of when they were introduced.
 
 ### 1. Investigate the Codebase
 Read highest-value sources first:
@@ -81,10 +120,17 @@ Read highest-value sources first:
 ### 3. Identify Gaps and Issues
 For each **What to Include** item: does it exist? Is it accurate?
 
-### 4. Update the Document
-- Add missing sections
-- Fix outdated content
-- Remove or redirect out-of-scope content
+### 4. Assemble or Update the Document
+
+**If README.md doesn't exist (create from scratch):**
+1. Start with the **Universal Template** from this skill
+2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
+3. Fill in each section with discovered project-specific content
+
+**If README.md already exists (surgical update):**
+- For each universal section: compare against discovered data and update only what changed (description, features, quick start, how to use, tech stack, testing)
+- For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
+- Never rewrite the whole file — use targeted edits on changed sections only
 - Keep language user-facing
 - Quick start steps must work based on actual project files
 

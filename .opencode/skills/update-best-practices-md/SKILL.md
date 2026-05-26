@@ -36,32 +36,17 @@ Mine session conversations, changed files, skills, and plan files for reusable, 
 ```
 
 ### What to Include
-Practices are organized into 6 category clusters:
 
-**Code Structure**
-- **Modularization** — responsibility patterns, circular import prevention, leaf vs internal modules
-- **Architecture Decisions** — universal patterns only (e.g., "separate I/O from business logic")
+**Universal (always present):**
+- **Entry Format** — Every entry must follow: Context (1 line), Principle (2-3 lines), Example (short snippet), Why it matters (1 line)
+- **Code Structure** — Modularization patterns, responsibility separation, circular import prevention, leaf vs internal modules
+- **Quality** — Error handling types, fix strategies; Testing patterns (syntax checks, unit tests, integration tests, test-coordination patterns); State management (in-memory vs persistent, recovery, queue management)
+- **Operations** — Configuration patterns, environment setup, non-interactive execution, version control patterns
+- **Process** — Debugging process, documentation methodology, skills/workflow methodology, AI-assisted development patterns
+- **Meta** — Session Lessons Learned: cross-cutting process meta-lessons that don't fit named categories
 
-**Quality**
-- **Error Handling** — error types encountered, fix strategies, prevention patterns
-- **Testing** — syntax checks, unit tests, integration tests, verification steps used, test-coordination patterns (updating tests in same batch as code changes)
-- **State Management** — in-memory vs persistent state, recovery patterns, queue management
-
-**Operations**
-- **Configuration** — tool configs, environment setup (e.g., `.opencode/opencode.json`), non-interactive execution (use `-y` flags, suppress stdin prompts)
-- **Version Control** — commit grouping logic, per-commit push discipline, auto-generated commit messages from change type, rename detection via deleted+untracked pairs, branching, what to never commit
-
-**Process**
-- **Debugging Process** — how issues were isolated, tools used (grep, read, bash)
-- **Documentation** — doc structure, scope distinctions, cross-referencing, doc generation methodology, auto-extraction patterns from source comments
-- **Skills Methodology** — skill architecture patterns (one verb per skill, stage gates, triage routing), workflow patterns (interactive walkthrough, docs-first analysis), handoff patterns (persistent artifacts, file-based stage communication), review methodology patterns (build step, test count diff, escalation routing), cleanup methodology patterns (dead code detection protocol, batch conflict resolution)
-- **AI-Assisted Development** — prompting patterns, skill usage, agent behavior, automation safety patterns, idempotent update rules, diff logging for traceability
-
-**UI**
-- **Frontend Practices** — UI patterns, JS/TS module rules, React/SPA conventions
-
-**Meta**
-- **Session Lessons Learned** — process meta-lessons that are genuinely cross-cutting and don't fit any named category above. Categorize at entry time; only lessons that span multiple categories or describe the development process itself belong here.
+**Optional (include only if applicable):**
+- **UI/Frontend Practices** — UI patterns, JS/TS module rules, React/SPA conventions (only for projects with frontend code)
 
 ### What NOT to Include
 
@@ -82,6 +67,30 @@ Practices are organized into 6 category clusters:
 
 ---
 
+## Universal Template
+
+The skeleton below is used for every project's `PROJECT_BEST_PRACTICES.md`. Markers like `<!-- FILL: name -->` indicate where project-specific content is injected. The Entry Format (Context + Principle + Example + Why it matters) is fixed.
+
+```markdown
+# [Project Name] Best Practices
+
+> Derived from real-world development — applies to ALL projects
+
+## [Category Name — e.g., "Code Structure", "Quality", "Operations", "Process"]
+
+### X.Y Practice Name
+**Context**: When/where this applies
+**Principle**: The universal rule
+**Example**: Short code snippet or command
+**Why it matters**: Impact on future work
+
+<!-- FILL: categories -->
+```
+
+Optional categories (include only if applicable): UI/Frontend Practices (for projects with frontend code).
+
+---
+
 ## Phase 0: Prerequisites
 
 - [ ] Review session conversation for new lessons learned
@@ -91,12 +100,14 @@ Practices are organized into 6 category clusters:
 
 ## Workflow
 
+> **Investigation Protocol:** Investigation compares the current document against the current codebase and session — not just against previous session changes. Pre-existing discrepancies (missing practices, stale entries, format violations) are gaps to flag regardless of when they were introduced. Session changes are one source, not the only trigger.
+
 ### Phase 1: Plan (read-only)
 
 #### 1. Investigate
 Read sources in this priority order:
 
-1. Existing `PROJECT_BEST_PRACTICES.md`
+1. Existing `PROJECT_BEST_PRACTICES.md` — compare every section against current codebase reality
 2. Session conversation — extract new lessons
 3. Skills directory — extract methodology patterns
 4. Plan files — design rationale
@@ -106,7 +117,7 @@ Read sources in this priority order:
 - Check if `refs/PROJECT_BEST_PRACTICES.md` exists — create it if not
 
 #### 3. Identify Gaps and Issues
-For each **What to Include** category: are there new practices from this session?
+For each **What to Include** category and each existing entry: is it still accurate? Are there missing entries? Are existing entries stale?
 
 #### 4. Present Candidates
 
@@ -114,10 +125,20 @@ For each **What to Include** category: are there new practices from this session
 
 ### Phase 2: Implement
 
-#### 5. Update the Document
-- Add missing sections
-- Fix outdated content
-- Remove or redirect out-of-scope content
+#### 5. Assemble or Update the Document
+
+**If PROJECT_BEST_PRACTICES.md doesn't exist (create from scratch):**
+1. Start with the **Universal Template** from this skill
+2. Replace `<!-- FILL: categories -->` with applicable categories from **What to Include**
+3. For each category, add entries following the **Entry Format** (Context + Principle + Example + Why it matters)
+4. Verify no `<!-- FILL:` markers remain
+5. Write the result to `refs/PROJECT_BEST_PRACTICES.md`
+
+**If PROJECT_BEST_PRACTICES.md already exists (surgical update):**
+- For each changed category: update only the entries that changed — add new, remove stale, improve existing
+- For each optional category (UI/Frontend): add if applicable and missing, remove if no longer applicable
+- Never rewrite the whole file — use targeted edits on changed entries only
+- Follow the triage: existing entries get improved (merged or tightened) over creating duplicates
 
 #### 6. Verify
 

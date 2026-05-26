@@ -27,16 +27,23 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 - **Conciseness:** File tree gets ~10-word descriptions; per-function entries are one-line-only. Full detail belongs in source docstrings, not here.
 
 ### What to Include
-- **Complete project file tree** — concise (1-line) descriptions per directory and key file for quick navigation
+
+**Universal sections** (present in every project's ARCHITECTURE.md):
+- **Project file tree** — concise (1-line) descriptions per directory and key file for quick navigation
 - **Module Descriptions** — organized into subsections matching the project's directory structure. Each entry: 1-sentence lead line from source file's description header, bullet points for key responsibilities, and a per-function detail subsection
 - **Data flow** — describe the main data path through the system (processing pipeline, request lifecycle, or event flow)
-- **Key design decisions** — include the *why*, not just the *what*. Technical rationale only
 - **Import structure and dependency graph** — how modules depend on each other
+- **Key design decisions** — include the *why*, not just the *what*. Technical rationale only
 - **Running instructions** — full technical startup sequence: environment setup, dependencies, configuration, commands
 - **Modifying instructions** — how to add modules, extend functionality, change providers or configuration
-- **Test structure** — test file naming convention, framework, approach (cross-reference canonical source: AGENTS.md)
 - **Per-function detail** — every named function/class in every module with signature and one-line purpose (navigation map, not a manual)
+
+**Optional sections** (include only if the project has them):
+- **Test structure** — test file naming convention, framework, approach (cross-reference canonical source: AGENTS.md)
 - **Critical implementation details** — any non-obvious runtime behavior: resource management, thread safety, state management, configuration conventions, data schemas
+- **API/WebSocket endpoint tables** — for web servers or APIs with documented endpoints
+- **Pipeline stage diagrams** — for multi-stage data processing pipelines
+- **Sub-architecture references** — links to specialized architecture docs for subsystems
 
 ### What NOT to Include
 
@@ -57,6 +64,41 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 
 ---
 
+## Universal Template
+
+The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `<!-- FILL: name -->` indicate where project-specific content is injected. Sections without markers are included verbatim.
+
+```markdown
+# Architecture - [Project Name]
+
+## Project Structure
+[Complete file tree with descriptions]
+
+## Module Descriptions
+[Organized by directory/subsystem; each entry: lead line, bullets, per-function detail]
+
+## Data Flow
+[Main data path: processing pipeline, request lifecycle, or event flow]
+
+## Import Structure
+[Dependency graph showing how modules depend on each other]
+
+## Key Design Decisions
+[Technical rationale — why, not just what]
+
+## Running Instructions
+[Startup sequence: env, dependencies, config, commands]
+
+## Modifying Instructions
+[How to add modules, extend functionality, change configuration]
+
+<!-- FILL: optional-sections -->
+```
+
+Optional sections (include only if applicable): Test Structure, API/WebSocket endpoint tables, Critical Implementation Details, sub-architecture reference links, pipeline stage diagrams.
+
+---
+
 ## Phase 0: Prerequisites
 
 - [ ] Verify source code exists and matches current project state
@@ -65,6 +107,8 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 - [ ] Consult docs/README.md for project overview
 
 ## Workflow
+
+> **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Session git diff is supplementary context only. Pre-existing discrepancies (stale paths, outdated descriptions, missing sections, incorrect claims) are gaps to flag regardless of when they were introduced.
 
 ### 1. Investigate the Codebase
 Read highest-value sources first in this priority order:
@@ -160,12 +204,17 @@ For every source file that contains functions/classes:
 - Does the running instructions section cover the full startup sequence?
 - Are design decisions up to date?
 
-### 4. Update the Document
-- Add missing sections from **What to Include**
-- Fix outdated content to match the codebase
-- Remove or redirect out-of-scope content per the **What NOT to Include** table
-- Preserve existing sub-architecture docs as detailed references if they exist
-- Don't rewrite the entire document — only update what's changed
+### 4. Assemble or Update the Document
+
+**If ARCHITECTURE.md doesn't exist (create from scratch):**
+1. Start with the **Universal Template** from this skill
+2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
+3. Fill in each section with discovered project-specific content
+
+**If ARCHITECTURE.md already exists (surgical update):**
+- For each universal section: compare against discovered data and update only what changed (file tree, module descriptions, data flow, import structure, etc.)
+- For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
+- Never rewrite the whole file — use targeted edits on changed sections only
 
 **Module Descriptions — lead line replacement:**
 For each entry in the Module Descriptions section, match by filename:

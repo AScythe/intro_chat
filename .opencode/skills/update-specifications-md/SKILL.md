@@ -26,17 +26,22 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 - **Actionable for development:** Feature descriptions must include purpose and rationale
 
 ### What to Include
-- Problem statement and context (what pain point exists, who experiences it, why it matters)
-- Solution description and pitch (what the product does at a high level, why it solves the problem)
-- User journey / core logic flow — product-focused steps in plain language, readable by a non-technical evaluator.
-- Feature descriptions with purpose and rationale — what each feature does and **why** it exists.
-- Product decisions and rationale — why certain approaches were chosen (e.g., timer duration, anonymity model). Vision rationale.
-- Target user personas — who the product serves and why they benefit.
-- Feature priority and status — what's implemented vs. planned, to guide what to build next
-- Product constraints / Out of Scope — standalone section listing what the product explicitly does NOT do and why.
-- Privacy and trust model — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section.
-- Tech stack with rationale — include a "Why?" column for each technology.
-- Future enhancements / bonus features — clearly marked as not yet implemented
+
+**Universal sections** (present in every project's SPECIFICATIONS.md):
+- **Problem statement and context** — what pain point exists, who experiences it, why it matters
+- **Solution description and pitch** — what the product does at a high level, why it solves the problem
+- **User journey / core logic flow** — product-focused steps in plain language, readable by a non-technical evaluator
+- **Feature descriptions** — with purpose and rationale: what each feature does and **why** it exists
+- **Product decisions and rationale** — why certain approaches were chosen (vision rationale, not technical trade-offs)
+- **Product constraints / Out of Scope** — standalone section listing what the product explicitly does NOT do and why
+
+**Optional sections** (include only if the project has them):
+- **Target user personas** — who the product serves and why they benefit
+- **Feature priority and status** — what's implemented vs. planned, to guide what to build next
+- **Privacy and trust model** — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section
+- **Tech stack with rationale** — include a "Why?" column for each technology
+- **Future enhancements / bonus features** — clearly marked as not yet implemented
+- **Sample user flow** — narrative walkthrough showing the product in action
 
 ### What NOT to Include
 
@@ -60,6 +65,37 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 - Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
+---
+
+## Universal Template
+
+The skeleton below is used for every project's `SPECIFICATIONS.md`. Markers like `<!-- FILL: name -->` indicate where project-specific content is injected. Sections without markers are included verbatim.
+
+```markdown
+# Specifications — [Project Name]
+
+## Problem
+[What pain point exists, who experiences it, why it matters]
+
+## Solution
+[What the product does at a high level, why it solves the problem]
+
+## How It Works
+[Core flow in plain language — readable by a non-technical evaluator]
+
+## Features
+[Feature descriptions with purpose and rationale]
+
+## Out of Scope
+[What the product explicitly does NOT do and why]
+
+<!-- FILL: optional-sections -->
+```
+
+Optional sections (include only if applicable): Privacy/Trust model, Target user personas, Tech stack rationale, Sample user flow, Future enhancements, Demo setup.
+
+---
+
 ## Phase 0: Prerequisites
 
 - [ ] Verify source code and product state are current
@@ -67,6 +103,8 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 - [ ] Consult docs/ARCHITECTURE.md and AGENTS.md for cross-reference integrity
 
 ## Workflow
+
+> **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Session git diff is supplementary context only. Pre-existing discrepancies (stale descriptions, missing features, incorrect scope boundaries) are gaps to flag regardless of when they were introduced.
 
 ### 1. Investigate the Codebase
 Read highest-value sources first:
@@ -76,7 +114,7 @@ Read highest-value sources first:
 3. `README*` for feature descriptions
 4. Architecture document — to know what NOT to duplicate
 
-**Check session history** for new features, changed Out of Scope, or updated product direction.
+**Review session history** as supplementary context — capture any feature decisions, rationale, or scope discussions that occurred during conversation. Do not limit investigation to session changes.
 
 ### 2. Read the Current Document
 - Check if `docs/SPECIFICATIONS.md` exists — create it if not
@@ -87,10 +125,17 @@ Read highest-value sources first:
 For each **What to Include** item: does it exist? Is it accurate?
 For each existing section: does it belong here per **What NOT to Include**? If not → redirect.
 
-### 4. Update the Document
-- Add missing sections from **What to Include**
-- Fix outdated content to match the current product state
-- Remove or redirect out-of-scope content per the **What NOT to Include** table
+### 4. Assemble or Update the Document
+
+**If SPECIFICATIONS.md doesn't exist (create from scratch):**
+1. Start with the **Universal Template** from this skill
+2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
+3. Fill in each section with discovered project-specific content
+
+**If SPECIFICATIONS.md already exists (surgical update):**
+- For each universal section: compare against discovered data and update only what changed (problem, solution, flow, features, scope, decisions)
+- For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
+- Never rewrite the whole file — use targeted edits on changed sections only
 - Keep language product-focused — benefits and outcomes, not implementation
 - Feature descriptions must state purpose and benefit
 - Architecture Overview must be 2 lines max + cross-reference

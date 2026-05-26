@@ -129,7 +129,14 @@ After checking all gates, append the results table:
 ## On Failure
 
 1. List which gates failed and why
-2. Assess severity: **Minor** (missing doc, unclear wording) → fix in place, re-check. **Significant** (unresolved assumption, edge case, soundness) → ask user interactively: state the failure, present unresolved options, get input, resolve.
+2. Assess severity:
+   - **Minor** (missing doc, unclear wording) → fix in place, re-check.
+   - **Significant** (unresolved assumption, edge case, soundness) → follow the User Interaction Pattern:
+     1. State which gates failed and why — one gate at a time, do not dump all at once
+     2. For each failed gate, present the unresolved issue with concrete options (e.g., "Option A: extend the plan to cover this, Option B: mark as out of scope, Option C: route back to grill-and-refine")
+     3. Accept free-form input beyond offered options
+     4. Resolve before moving to the next gate — do not revisit
+     5. After all resolved, summarize confirmed decisions
 3. Re-check all gates after resolution
 
 ## Hand-off
