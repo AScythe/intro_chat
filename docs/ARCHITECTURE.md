@@ -52,6 +52,8 @@ intro_chat/
 │   │   │   ├── MatchCountdown.tsx # 60-second countdown display shown after a match is found before navigating to chat
 │   │   │   ├── ConnectionCard.tsx # Post-chat connection card with yes/no buttons for Slack connection exchange
 │   │   │   └── QRDisplay.tsx      # QR code image display with event code shown below
+│   │   ├── styles/
+│   │   │   └── global.css        # Global stylesheet — imported at `main.tsx` root via `import './styles/global.css'`
 │   │   └── pages/
 │   │       ├── HomePage.tsx       # Landing page — event code input, create/join event, QR display
 │   │       ├── UserInfoPage.tsx   # Profile form — optional name, LinkedIn/Slack input, save via API, navigate to room
@@ -86,10 +88,6 @@ intro_chat/
 │   └── dist/
 │       ├── index.html          # Built SPA entry HTML served by FastAPI catch-all
 │       └── assets/             # Built and optimized JS/CSS bundles
-│
-├── app/static/                    # Static assets (served at /static)
-│   └── css/
-│       └── style.css           # Global stylesheet for IntroChat — reset, layout, component styles, and responsive rules
 │
 ├── tests/                        # Backend test suite
 │   ├── test_app.py            # Backend, database, and SPA serving tests
@@ -126,7 +124,6 @@ intro_chat/
 FastAPI app factory that initializes the server, mounts static files, registers routes via APIRouter, starts the background cleanup thread, and initializes the database on startup.
 
 - Initializes FastAPI app with `FastAPI(title="IntroChat")`
-- Mounts `/static` directory via `StaticFiles`
 - Mounts `/assets` from `frontend/dist/assets/` for built JS bundles (if exists)
 - Registers SPA catch-all via 404 exception handler (serves `frontend/dist/index.html` for non-API/non-WS paths)
 - Imports and includes `router` from `.routes` via `app.include_router(router)`
@@ -348,8 +345,7 @@ Chat interface — timed conversation with prompts, timer, extend, and connectio
 The React SPA is served by the FastAPI backend:
 1. **`/` route** in `app/routes.py` reads and returns `frontend/dist/index.html`
 2. **`/assets/` mount** in `app/__init__.py` serves built JS bundles from `frontend/dist/assets/`
-3. **`/static/` mount** serves `app/static/` files (CSS, images)
-4. **404 exception handler** in `app/__init__.py` serves `index.html` for all non-API, non-WS paths (client-side routing via React Router)
+3. **404 exception handler** in `app/__init__.py` serves `index.html` for all non-API, non-WS paths (client-side routing via React Router)
 
 ---
 

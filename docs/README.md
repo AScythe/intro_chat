@@ -28,9 +28,9 @@
 
 ## What is IntroChat?
 
-IntroChat is a lightweight, browser-based web app that lets introverts initiate low-pressure, 2-minute face-to-face micro-chats with nearby attendees at events — no awkward approaches required.
+IntroChat is a lightweight, browser-based web app that lets introverts initiate low-pressure, 30-second face-to-face micro-chats with nearby attendees at events — no awkward approaches required.
 
-Think of it as *Tinder for 120-second conversations* — but only when you're physically near someone else who's also ready to chat.
+Think of it as *Tinder for 30-second conversations* — but only when you're physically near someone else who's also ready to chat.
 
 ---
 

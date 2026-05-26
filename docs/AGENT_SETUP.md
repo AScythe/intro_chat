@@ -450,16 +450,16 @@ pip install 'graphifyy[mcp]'
 
 **Cause:** OpenCode was started before `~/.local/bin` was added to PATH. Child processes inherit the parent's environment, so even if the user PATH is set in the registry, already-running processes and their children won't see it.
 
-**Fix option A (recommended):** In `opencode.json`, use the absolute path to `ccc.exe` instead of relying on PATH:
+**Fix:** Run `ccc --help` in a new terminal. If it works, the PATH is correct — restart your OpenCode host (Cursor, VS Code, terminal) so it picks up the new environment. If `ccc --help` fails, re-run the PATH setup step in [§4](#4-add-uv-tool-binaries-to-path) and open a fresh terminal.
 
+If you genuinely cannot modify PATH (restricted machine), fall back to an absolute path in `opencode.json`:
 ```json
 "cocoindex-code": {
   "type": "local",
   "command": ["C:\\Users\\<YOUR_USERNAME>\\.local\\bin\\ccc.exe", "mcp"]
 }
 ```
-
-**Fix option B:** Restart the host application (Cursor, VS Code, or terminal) after setting the PATH — this forces a fresh environment from the registry.
+But note: absolute paths are **machine-specific** — they break when the same repository is cloned on a different device. Prefer bare `"ccc"` (PATH-based) for portability.
 
 ### Graph is stale or has no data
 

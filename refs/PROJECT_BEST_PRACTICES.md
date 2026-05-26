@@ -137,6 +137,12 @@ HOST = '0.0.0.0'
 ```
 **Why it matters**: `localhost:5000` works in a browser; `0.0.0.0:5000` doesn't.
 
+### 2.2 Portable Config Paths
+**Context**: Hardcoded user home path (`C:\\Users\\Alvin\\.local\\bin\\ccc.exe`) broke cocoindex-code MCP on a machine with a different username
+**Principle**: When writing config files committed to version control, use PATH-resolved commands (`ccc`) instead of hardcoded absolute paths (`C:\\Users\\<user>\\.local\\bin\\ccc.exe`). Absolute paths are machine-specific — they work on one device but break every clone on another.
+**Example**: `["ccc", "mcp"]` ✅ vs `["C:\\Users\\<username>\\.local\\bin\\ccc.exe", "mcp"]` ❌
+**Why it matters**: Portable configs survive machine migration, team checkout, and CI execution without per-machine edits.
+
 ---
 
 ## 3. Error Handling
@@ -592,22 +598,24 @@ Task: Add a new API endpoint
 
 **Why it matters**: Saves tokens, builds on existing knowledge, catches stale docs cheaply.
 
-### 7.10 Interactive Walkthrough with Skip Confirmation
-**Context**: From redesigning grill-and-refine's user interaction model
+### 7.10 Interactive Walkthrough — One Item at a Time, Names Only
+**Context**: From revising brainstorm-and-plan and grill-and-refine interaction models; user enforced "one item at a time" discipline after being presented 6 assumptions in one message
 
-**Principle**: When probing a plan or design with a user, don't dump all findings at once or ask open-ended questions. Structure the walkthrough: one dimension at a time, present findings as concrete options, accept free-form input beyond options, and resolve before moving on. Before starting, flag which dimensions are skippable and confirm with the user — prevents tedious drilling on obvious items.
+**Principle**: When probing a plan or design with a user, never present multiple items in a single message. Walk through decision-points ONE AT A TIME. For skip confirmation: present only dimension NAMES upfront — do not describe their contents or list items within them. The agent chooses the order and walks through sequentially. Within each dimension, present one finding at a time, offer concrete options, accept free-form input, resolve before moving to the next.
 
 **Example**:
 ```
-Before: "Let me check assumptions, edge cases, alternatives..." (dumps all)
-After:
-  "I found 6 dimensions. 3 need discussion (Assumptions, Risks, Consistency),
-   3 are straightforward (Edge Cases, Alternatives, Dependencies). Shall I skip
-   the straightforward ones? [Yes / No / Custom]"
-  Then walks through each flagged dimension one at a time with options.
+✅ One item at a time:
+  You: "Assumption #1 — UserInfoPage button. Options: Green or Gray?"
+  User: "Green"
+  You: "Resolved. Next: Assumption #2 — HomePage two CTAs..."
+
+❌ Before (dumps all):
+  You: "6 assumptions to resolve... [lists all 6 with options in one message]"
+  User: "Stop, walk me through one by one"
 ```
 
-**Why it matters**: Keeps the conversation structured and efficient. No open-ended questions, no skipped-in-silence items.
+**Why it matters**: Dumping multiple items in one message overwhelms the user and forces them to re-teach the agent how to interact. One-at-a-time keeps the conversation structured and efficient.
 
 ### 7.11 Presence Check Over Re-Probe
 **Context**: From reframing readiness-check as document verifier instead of deep analyzer
@@ -1112,7 +1120,7 @@ update-docs: single orchestrator, routes to push-to-git
 
 **Principle**: When the same rule appears in multiple instruction files, extract it to a shared governance document and replace duplicates with cross-references. The canonical copy is the only one maintained; each file keeps only its phase-specific rules.
 
-**Example**: Flag format was in 5 skills. Extracted to AGENTS.md as the single canonical source. Each skill replaced its flag table with "[See Flag Annotation Convention in AGENTS.md](AGENTS.md)." One update to AGENTS.md propagates to all consumers.
+**Example**: Flag format was in 5 skills. Extracted to AGENTS.md as the single canonical source. Each skill replaced its flag table with "[See Flag Annotation Convention in AGENTS.md](../AGENTS.md)." One update to AGENTS.md propagates to all consumers.
 
 **Why it matters**: One source of truth. No drift across copied rules. Update one location, all consumers benefit.
 
