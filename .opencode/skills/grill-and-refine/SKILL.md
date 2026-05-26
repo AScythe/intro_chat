@@ -87,14 +87,14 @@ During **Risks**, probe for test fragility:
 
 ### Phase 2: Interactive Walkthrough (with user)
 
-**Present all Phase 1 findings to the user.** One dimension at a time — address sequentially. Flag skippable items upfront; resolve each before moving on.
+Follow the User Interaction Pattern in AGENTS.md: present one decision-point at a time, resolve, then present the next. Never present multiple items in a single message.
 
-1. **Before starting:** flag each dimension as "needs discussion" or "skippable" based on Phase 1 analysis. Confirm skip list with the user.
+1. **Before starting:** flag each dimension by NAME only as "needs discussion" or "skippable" — do not describe contents or list individual items within dimensions. Confirm skip list with the user.
 2. Walk through each non-skipped dimension in order. For each:
-   - State finding and recommendation
+   - State ONE finding and recommendation at a time
    - Offer concrete options (e.g., "server-side, client-side, or something else")
    - Accept free-form input beyond offered options
-   - Resolve before moving to the next — do not revisit
+   - Resolve before moving to the next item within this dimension — do not revisit
 3. After all dimensions, summarize confirmed decisions
 
 ### Phase 3: Produce the Revised Plan

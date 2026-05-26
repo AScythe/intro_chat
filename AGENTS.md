@@ -3,7 +3,7 @@
 ## Scope
 `AGENTS.md` defines *what* agents work on — file ownership and operational constraints — and *how* the SDD workflow is ordered. Phase-specific behavioral rules live in each phase's skill file. Cross-phase rules that apply to every phase are here.
  
-> If it's about code structure or data flow (API endpoints, WebSocket events) → [ARCHITECTURE.md](ARCHITECTURE.md#data-flow-technical). If it's about product vision, privacy, or out-of-scope boundaries → [SPECIFICATIONS.md](SPECIFICATIONS.md). If it's about a specific phase's behavior → `.opencode/skills/<skill-name>/SKILL.md`.
+> If it's about code structure or data flow (API endpoints, WebSocket events) → [ARCHITECTURE.md](docs/ARCHITECTURE.md#data-flow-technical). If it's about product vision, privacy, or out-of-scope boundaries → [SPECIFICATIONS.md](docs/SPECIFICATIONS.md). If it's about a specific phase's behavior → `.opencode/skills/<skill-name>/SKILL.md`.
 
 ### File Ownership
 
@@ -78,6 +78,8 @@ Avoid low-signal files: `frontend/dist/`, `archive/`, `cocoindex_code/`, `graphi
 - **Batch discipline + granular edits** — one logical change per edit, one concern per batch.
 - **Surgical edits** — prefer `oldString→newString` over full-file rewrites.
 - **Non-interactive execution** — never pipe to stdin or omit `-m`/`-y`.
+- **Skill Loading Protocol** — when user input matches a skill's trigger keywords (`description` field in the skill's frontmatter), load that skill via the `skill` tool before proceeding. This ensures the skill's workflow rules, boundaries, and interaction patterns are in context. If user input matches multiple skills, load the one corresponding to the current SDD phase. If no match, proceed normally.
+- **User Interaction Pattern** — skills that require user input must walk through decision-points ONE AT A TIME. After resolving a topic, state the next topic explicitly. Never present multiple items in a single message and ask the user to respond to all at once. Within each topic, follow the structured sequential walkthrough: (1) state finding concisely, (2) offer concrete options, (3) accept free-form input beyond offered options, (4) resolve before moving to the next topic. To determine which topics need discussion: present only topic NAMES upfront — do not describe their contents or list items within them. The agent chooses the order and walks through sequentially.
 
 **Hygiene:** Quality and cross-cutting checks.
 - **Run full test suite after every change** — all suites, not just new tests.
@@ -102,4 +104,67 @@ When a test fails after a change, classify before acting. Never auto-revert.
 | Test fails and the change breaks intended behavior | Behavioral regression | Revert or skip the change — report to user |
 | Pre-existing failure (failed before your change) | Baseline failure | Flag it — do not proceed until user resolves |
 | Intermittent, not tied to change | Flaky / environment issue | Re-run once; if it fails again, flag as flaky — do not revert |
+
+---
+
+## Commands Reference
+
+| Operation | Command | Notes |
+|-----------|---------|-------|
+| Install Python deps | `uv sync` | Run from project root |
+| Install frontend deps | `cd frontend ; npm install` | |
+| Build frontend | `cd frontend ; npm run build` | Required after any frontend change |
+| Run app (dev) | `uv run python -m app` | Serves on `localhost:5000` |
+| Run frontend dev server | `cd frontend ; npm run dev` | Vite on port 3000, proxies to backend |
+| Run all backend tests | `uv run python tests/test_app.py` | |
+| Run JS module validation | `uv run python tests/test_js_modules.py` | |
+| Run DB utilities | `uv run python tests/test_db.py` | |
+| Run frontend unit tests | `cd frontend ; npm test` | Vitest runner |
+| Run E2E tests | `cd frontend ; npm run test:e2e` | Playwright — see [skill](.opencode/skills/run-e2e-tests/SKILL.md) |
+| Type-check frontend | `cd frontend ; npx tsc --noEmit` | TypeScript strict mode |
+| Rebuild code index | `ccc index` | Cocoindex — updates `.cocoindex_code/` |
+| Build knowledge graph | See [skill](.opencode/skills/update-agents-md/SKILL.md) | Graphify — updates `graphify-out/` |
+
+---
+
+## Test Suite Structure
+
+See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file breakdown and function-level detail.
+
+| Location | Naming convention | Run command |
+|----------|------------------|-------------|
+| `tests/test_*.py` | `test_<topic>.py` — Python unittest | `uv run python tests/<file>.py` |
+| `frontend/tests/*.test.tsx` | `<Module>.test.tsx` — Vitest per-component | `npm test` (from `frontend/`) |
+| `frontend/tests/e2e/userFlow.spec.ts` | `<flow>.spec.ts` — Playwright E2E | `npm run test:e2e` (from `frontend/`) |
+
+**Policies:**
+- Backend test files (`tests/test_*.py`) — **run only**, do not modify unless explicitly asked
+- Frontend test files — **update in same batch** as source changes per source-and-tests rule
+- E2E tests — **edit only** when adding new user flows; verify all tests pass
+
+---
+
+## Documentation Structure
+
+See [Quick Reference Table in DOCUMENT_GUIDELINES.md](refs/DOCUMENT_GUIDELINES.md#quick-reference-table) for document scope boundaries.
+
+| Document | Location | Purpose |
+|----------|----------|---------|
+| README | `docs/README.md` | User-facing setup, features, quick-start |
+| ARCHITECTURE | `docs/ARCHITECTURE.md` | Technical module reference, data flow |
+| SPECIFICATIONS | `docs/SPECIFICATIONS.md` | Product vision, user journey, privacy |
+| DEMO_GUIDE | `docs/DEMO_GUIDE.md` | Demo walkthrough for judges |
+| AGENTS.md | `AGENTS.md` | Agent behavioral rules, file ownership |
+| AGENT_SETUP | `docs/AGENT_SETUP.md` | Tooling setup, env requirements |
+| PROJECT_BEST_PRACTICES | `refs/PROJECT_BEST_PRACTICES.md` | Universal coding patterns, lessons learned |
+| DOCUMENT_GUIDELINES | `refs/DOCUMENT_GUIDELINES.md` | Document scope governance |
+
+---
+
+## Tooling Rules
+
+- **Code index (CocoIndex):** Auto-generated in `.cocoindex_code/`. Rebuild via `ccc index`. ❌ Never edit manually.
+- **Knowledge graph (Graphify):** Outputs to `graphify-out/`. Commit `graph.json` and `GRAPH_REPORT.md` for team sharing.`manifest.json` and `cost.json` are gitignored.
+- **ccc MCP:** Configured as bare `"ccc"` command in `opencode.json` — relies on `~/.local/bin` being on `PATH`. If `ccc doctor` fails with `UnicodeEncodeError` on Windows, prepend `$env:PYTHONIOENCODING='utf-8'`.
+- **Package manager:** `uv` pipelined to backend Python, `npm` for frontend Node.js. Never use pip or yarn directly.
 

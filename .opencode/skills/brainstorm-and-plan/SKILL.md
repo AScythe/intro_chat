@@ -78,11 +78,11 @@ Evaluate the proposed approach against these principles. Surface concerns here.
 
 ### Phase 2: Interactive Walkthrough (with user)
 
-Present all Phase 1 findings to the user. Walk through each step sequentially; resolve before moving on.
+Follow the User Interaction Pattern in AGENTS.md: present one decision-point at a time, resolve, then present the next. Never present multiple items in a single message and ask the user to respond to all at once.
 
 1. **Clarify understanding** — restate requirements back to the user. Do not proceed until confirmed.
-2. **Surface ambiguities** — state unclear points explicitly. Present multiple interpretations if they exist; do not pick silently.
-3. **Discuss design approach** — present findings from Phase 1 evaluation (design principles, control flow). Discuss trade-offs, alternatives, and risks. Push back on questionable approaches.
+2. **Surface ambiguities** — state ONE unclear point at a time. Present multiple interpretations if they exist for that point; do not pick silently. Resolve before moving to the next ambiguity.
+3. **Discuss design approach** — present findings from Phase 1 evaluation (design principles, control flow). Discuss ONE trade-off or risk at a time. Push back on questionable approaches.
 4. **Confirm direction** — ensure the user agrees with the approach before producing the plan.
 5. **Document sources** — cite which docs/sections were consulted.
 
