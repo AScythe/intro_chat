@@ -129,4 +129,138 @@ test.describe('IntroChat E2E', () => {
     await expect(chatPage).toHaveURL(/\/chat\//);
     await context.close();
   });
+
+  test('6a: Full chat flow — connection exchanged', async ({ page, request }) => {
+    const eventResp = await request.post('/api/events', {
+      data: { name: 'Conn Exchange E2E' },
+    });
+    expect(eventResp.ok()).toBeTruthy();
+    const { event_id } = await eventResp.json();
+
+    const roomsResp = await request.get(`/api/events/${event_id}/rooms`);
+    expect(roomsResp.ok()).toBeTruthy();
+    const rooms = await roomsResp.json();
+    const roomId = rooms[Math.floor(Math.random() * rooms.length)].id;
+
+    const joinRespA = await request.post(`/api/events/${event_id}/join`, {
+      data: { username: 'UserA', linkedin_url: 'https://linkedin.com/in/usera', slack_handle: '@usera' },
+    });
+    expect(joinRespA.ok()).toBeTruthy();
+    const { user_id: userIdA } = await joinRespA.json();
+
+    const joinRespB = await request.post(`/api/events/${event_id}/join`, {
+      data: { username: 'UserB', linkedin_url: 'https://linkedin.com/in/userb', slack_handle: '@userb' },
+    });
+    expect(joinRespB.ok()).toBeTruthy();
+    const { user_id: userIdB } = await joinRespB.json();
+
+    await request.post(`/api/users/${userIdA}/room`, { data: { room_id: roomId } });
+    await request.post(`/api/users/${userIdB}/room`, { data: { room_id: roomId } });
+    await request.post(`/api/users/${userIdA}/available`, { data: { available: true } });
+    await request.post(`/api/users/${userIdB}/available`, { data: { available: true } });
+
+    let matchId: string | null = null;
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 500));
+      const matchResp = await request.get(`/api/users/${userIdA}/match`);
+      if (matchResp.ok()) {
+        const matchData = await matchResp.json();
+        matchId = matchData.match_id;
+        break;
+      }
+    }
+    expect(matchId).toBeTruthy();
+
+    await page.goto('/');
+    await page.evaluate((args: { userId: string; eventId: string }) => {
+      localStorage.setItem('introchat_user_id', args.userId);
+      localStorage.setItem('introchat_event_id', args.eventId);
+      localStorage.setItem('introchat_username', 'UserA');
+    }, { userId: userIdA, eventId: event_id });
+
+    await page.goto(`/chat/${matchId}`);
+    await expect(page.getByText('Chatting with')).toBeVisible({ timeout: 10000 });
+
+    await expect(page.getByText("Time's Up!")).toBeVisible({ timeout: 45000 });
+
+    await page.getByText('End chat and connect').click();
+    await expect(page.getByText('Would you like to exchange usernames')).toBeVisible({ timeout: 5000 });
+
+    await request.post(`/api/matches/${matchId}/connect`, {
+      data: { user_id: userIdB, wants_to_connect: true },
+    });
+
+    await page.getByText("Yes, let's connect!").click();
+    await expect(page.getByText('Connection Exchanged!')).toBeVisible({ timeout: 10000 });
+
+    await page.getByText('Back to Home').click();
+    await expect(page).toHaveURL('/');
+  });
+
+  test('6b: Full chat flow — connection declined', async ({ page, request }) => {
+    const eventResp = await request.post('/api/events', {
+      data: { name: 'Conn Decline E2E' },
+    });
+    expect(eventResp.ok()).toBeTruthy();
+    const { event_id } = await eventResp.json();
+
+    const roomsResp = await request.get(`/api/events/${event_id}/rooms`);
+    expect(roomsResp.ok()).toBeTruthy();
+    const rooms = await roomsResp.json();
+    const roomId = rooms[Math.floor(Math.random() * rooms.length)].id;
+
+    const joinRespA = await request.post(`/api/events/${event_id}/join`, {
+      data: { username: 'UserA', linkedin_url: '', slack_handle: '' },
+    });
+    expect(joinRespA.ok()).toBeTruthy();
+    const { user_id: userIdA } = await joinRespA.json();
+
+    const joinRespB = await request.post(`/api/events/${event_id}/join`, {
+      data: { username: 'UserB', linkedin_url: '', slack_handle: '' },
+    });
+    expect(joinRespB.ok()).toBeTruthy();
+    const { user_id: userIdB } = await joinRespB.json();
+
+    await request.post(`/api/users/${userIdA}/room`, { data: { room_id: roomId } });
+    await request.post(`/api/users/${userIdB}/room`, { data: { room_id: roomId } });
+    await request.post(`/api/users/${userIdA}/available`, { data: { available: true } });
+    await request.post(`/api/users/${userIdB}/available`, { data: { available: true } });
+
+    let matchId: string | null = null;
+    for (let i = 0; i < 20; i++) {
+      await new Promise((r) => setTimeout(r, 500));
+      const matchResp = await request.get(`/api/users/${userIdA}/match`);
+      if (matchResp.ok()) {
+        const matchData = await matchResp.json();
+        matchId = matchData.match_id;
+        break;
+      }
+    }
+    expect(matchId).toBeTruthy();
+
+    await page.goto('/');
+    await page.evaluate((args: { userId: string; eventId: string }) => {
+      localStorage.setItem('introchat_user_id', args.userId);
+      localStorage.setItem('introchat_event_id', args.eventId);
+      localStorage.setItem('introchat_username', 'UserA');
+    }, { userId: userIdA, eventId: event_id });
+
+    await page.goto(`/chat/${matchId}`);
+    await expect(page.getByText('Chatting with')).toBeVisible({ timeout: 10000 });
+
+    await expect(page.getByText("Time's Up!")).toBeVisible({ timeout: 45000 });
+
+    await page.getByText('End chat and connect').click();
+    await expect(page.getByText('Would you like to exchange usernames')).toBeVisible({ timeout: 5000 });
+
+    await request.post(`/api/matches/${matchId}/connect`, {
+      data: { user_id: userIdB, wants_to_connect: false },
+    });
+
+    await page.getByText('No thanks').click();
+    await expect(page.getByText('Chat Complete')).toBeVisible({ timeout: 10000 });
+
+    await page.getByText('Back to Home').click();
+    await expect(page).toHaveURL('/');
+  });
 });

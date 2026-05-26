@@ -61,7 +61,7 @@ intro_chat/
 │   │       └── ChatPage.tsx       # Chat interface — timed conversation with prompts, timer, extend, and connection exchange
 │   ├── tests/
 │   │   ├── e2e/
-│   │   │   └── userFlow.spec.ts  # Playwright E2E tests — home, join, save, match, chat
+│   │   │   └── userFlow.spec.ts  # Playwright E2E tests — home, join, save, match, chat, full chat lifecycle
 │   │   ├── setup.ts           # Vitest test setup — imports jest-dom DOM matchers
 │   │   ├── App.test.tsx       # Tests for App root — route rendering and provider integration
 │   │   ├── utils/
@@ -390,7 +390,7 @@ Standalone database debugging utility that tests SQLite connection, lists table 
 - `reset_database()` — deletes existing database file and recreates via `init_db()`
 
 #### `frontend/tests/e2e/userFlow.spec.ts` (E2E Test Scenarios)
-5 Playwright E2E tests that verify the app in a real Chromium browser. Covers: home page load, join page with optional name field, save with auto-generated username, save with custom name, and two-user matchmaking with chat page rendering. Uses `browser.newContext()` for isolated user sessions and API polling for match detection. Run via `npm run test:e2e`.
+7 Playwright E2E tests that verify the app in a real Chromium browser. Covers: home page load, join page with optional name field, save with auto-generated username, save with custom name, two-user matchmaking with chat page rendering, and full chat lifecycle with connection exchange (both users connect and one declines). Tests 6a/6b use localStorage hydration for user context, real 30s timer wait, random room selection from all 8 default rooms, and the footer "Back to Home" navigation. Run via `npm run test:e2e`. Per-test timeout: 90s (configurable in `playwright.config.ts`).
 
 ---
 ## Critical Implementation Details
