@@ -142,7 +142,7 @@ export function ChatPage() {
         {error && (
           <div className="card">
             <p style={{ color: 'red' }}>{error}</p>
-            <button className="btn btn-primary" onClick={() => navigate('/')}>
+            <button className="btn btn-secondary" onClick={() => navigate('/')}>
               Back to Home
             </button>
           </div>
@@ -203,7 +203,7 @@ export function ChatPage() {
                   Extend for 2 more minutes
                 </button>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-affirmative"
                   onClick={() => handleExtend(-1)}
                 >
                   Continue indefinitely

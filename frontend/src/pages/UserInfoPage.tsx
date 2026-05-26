@@ -112,7 +112,7 @@ export function UserInfoPage() {
                 {saving ? 'Saving...' : 'Save Profile'}
               </button>
               <button
-                className="btn btn-chat"
+                className="btn btn-affirmative"
                 disabled={!saved}
                 onClick={() => eventId && navigate(`/room/${eventId}`)}
               >

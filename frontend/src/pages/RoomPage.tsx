@@ -198,7 +198,7 @@ export function RoomPage() {
 
             <div className="action-section">
               <button
-                className="btn btn-chat"
+                className="btn btn-primary"
                 disabled={!selectedPerson}
                 onClick={handleRequestChat}
               >
@@ -265,7 +265,7 @@ export function RoomPage() {
                 </button>
               )}
               <button
-                className="btn btn-chat"
+                className={yourReady && theirReady ? 'btn btn-primary' : 'btn btn-affirmative'}
                 disabled={!yourReady || !theirReady}
                 onClick={handleGoToChat}
               >

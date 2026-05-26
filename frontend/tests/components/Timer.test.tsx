@@ -8,18 +8,17 @@ import { Timer } from '@/components/Timer';
 describe('Timer', () => {
   it('renders minutes and seconds', () => {
     render(<Timer timeLeft={90} />);
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('30')).toBeInTheDocument();
+    expect(screen.getByText('1:30')).toBeInTheDocument();
   });
 
   it('renders colon separator', () => {
     render(<Timer timeLeft={0} />);
-    expect(screen.getByText(':')).toBeInTheDocument();
+    expect(screen.getByText('0:00')).toBeInTheDocument();
   });
 
   it('pads seconds with leading zero', () => {
     render(<Timer timeLeft={5} />);
-    expect(screen.getByText('05')).toBeInTheDocument();
+    expect(screen.getByText('0:05')).toBeInTheDocument();
   });
 
   it('applies timer class', () => {

@@ -75,7 +75,7 @@ export function HomePage() {
           </div>
 
           <div className="qr-section">
-            <button className="btn btn-secondary"> Scan QR Code</button>
+            <button className="btn btn-secondary"> 🔳 Scan QR Code</button>
           </div>
         </div>
 
@@ -94,7 +94,7 @@ export function HomePage() {
                 onChange={(e) => setEventName(e.target.value)}
               />
               <button
-                className="btn btn-primary"
+                className="btn btn-affirmative"
                 onClick={handleCreate}
                 disabled={creating || !eventName.trim()}
               >
