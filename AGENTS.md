@@ -155,7 +155,7 @@ See [Quick Reference Table in DOCUMENT_GUIDELINES.md](refs/DOCUMENT_GUIDELINES.m
 | SPECIFICATIONS | `docs/SPECIFICATIONS.md` | Product vision, user journey, privacy |
 | DEMO_GUIDE | `docs/DEMO_GUIDE.md` | Demo walkthrough for judges |
 | AGENTS.md | `AGENTS.md` | Agent behavioral rules, file ownership |
-| AGENT_SETUP | `docs/AGENT_SETUP.md` | Tooling setup, env requirements |
+| AGENT_SETUP | `refs/AGENT_SETUP.md` | Tooling setup, env requirements |
 | PROJECT_BEST_PRACTICES | `refs/PROJECT_BEST_PRACTICES.md` | Universal coding patterns, lessons learned |
 | DOCUMENT_GUIDELINES | `refs/DOCUMENT_GUIDELINES.md` | Document scope governance |
 

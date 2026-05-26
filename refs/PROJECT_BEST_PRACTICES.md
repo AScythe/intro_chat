@@ -908,7 +908,7 @@ Missing entry → insert at correct position in ordering
 
 ### 8.7 Description Headers Go in Source Code Only
 
-**Context**: From finding a `// Description:` comment in `opencode.json` (invalid JSON) and `docs/AGENT_SETUP.md` (not a source file).
+**Context**: From finding a `// Description:` comment in `opencode.json` (invalid JSON) and `refs/AGENT_SETUP.md` (not a source file).
 
 **Principle**: File-level `Description:` headers belong only in source code files where the comment syntax is valid:
 - `# Description:` → Python (`.py`)

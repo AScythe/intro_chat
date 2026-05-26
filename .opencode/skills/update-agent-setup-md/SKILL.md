@@ -1,14 +1,14 @@
 ---
 name: update-agent-setup-md
 type: subskill
-description: Analyze the current agent development environment (global + project state) and update `docs/AGENT_SETUP.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update agent setup", "sync agent setup", "agent setup is outdated", or similar.
+description: Analyze the current agent development environment (global + project state) and update `refs/AGENT_SETUP.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update agent setup", "sync agent setup", "agent setup is outdated", or similar.
 ---
 
 ## Purpose
 
 Agent development environment setup guide. Answers "How do I reproduce this project's AI coding assistant environment on any machine?"
 
-Mine the global system state and the project codebase, then update or create `docs/AGENT_SETUP.md` so any developer can clone the repo and have the same OpenCode + MCP + skills experience on any device.
+Mine the global system state and the project codebase, then update or create `refs/AGENT_SETUP.md` so any developer can clone the repo and have the same OpenCode + MCP + skills experience on any device.
 
 ---
 
@@ -137,7 +137,7 @@ Read the project's committed files:
 - `graphify-out/` (if present)
 
 ### 3. Read the Current Document
-- Check if `docs/AGENT_SETUP.md` exists
+- Check if `refs/AGENT_SETUP.md` exists
 - Flag outdated content
 
 ### 4. Identify Gaps and Issues
@@ -150,7 +150,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
 3. Fill each universal section with discovered tool-specific content
 4. Verify no `<!-- FILL:` markers remain
-5. Write the result to `docs/AGENT_SETUP.md`
+5. Write the result to `refs/AGENT_SETUP.md`
 
 **If AGENT_SETUP.md already exists (surgical update):**
 - For each universal section: compare against discovered system state and update only what changed (tool versions, commands, config paths, setup steps)

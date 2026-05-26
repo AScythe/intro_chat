@@ -52,7 +52,7 @@ This skill delegates to the appropriate update-* skill.
    | New feature, changed user journey, updated privacy, changed Out of Scope | `update-specifications-md` | `docs/SPECIFICATIONS.md` |
    | Changed setup steps, new CLI command, new env var, new user-visible feature | `update-readme-md` | `docs/README.md` |
    | Changed behavioral rules, new file ownership entry, updated commands | `update-agents-md` | `AGENTS.md` |
-   | Changed tooling setup, new MCP server, changed env requirements | `update-agent-setup-md` | `docs/AGENT_SETUP.md` |
+   | Changed tooling setup, new MCP server, changed env requirements | `update-agent-setup-md` | `refs/AGENT_SETUP.md` |
    | Changed demo flow, new screen, changed prerequisite | `update-demo-guide-md` | `docs/DEMO_GUIDE.md` |
    | Recurring pattern, new debugging lesson, new skill methodology insight | `update-best-practices-md` | `refs/PROJECT_BEST_PRACTICES.md` |
    | New document added, document scope/boundary change, doc structure change | inline in `update-docs` | `refs/DOCUMENT_GUIDELINES.md` |

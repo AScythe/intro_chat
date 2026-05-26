@@ -57,7 +57,7 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 - Node.js 18+ and npm
 - Virtual environment: `uv venv` (auto-creates `.venv/`)
 
-> For the complete AI-assisted development environment (OpenCode, MCP servers, plugins, skills, and custom commands), see [AGENT_SETUP.md](AGENT_SETUP.md).
+> For the complete AI-assisted development environment (OpenCode, MCP servers, plugins, skills, and custom commands), see [AGENT_SETUP.md](../refs/AGENT_SETUP.md).
 
 ### Installation & Run
 ```bash
@@ -190,7 +190,7 @@ For the full privacy model and hard constraints, see [SPECIFICATIONS.md](SPECIFI
 ## Contributing
 
 1. Fork the repository
-2. Set up your development environment — see [AGENT_SETUP.md](AGENT_SETUP.md) for the full tooling setup
+2. Set up your development environment — see [AGENT_SETUP.md](../refs/AGENT_SETUP.md) for the full tooling setup
 3. Create a feature branch
 4. Make your changes
 5. Test thoroughly
