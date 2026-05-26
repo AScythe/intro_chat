@@ -1,5 +1,7 @@
 ---
 name: modularize-and-clean
+type: workflow
+upstream: [review-implementation]
 description: 'Scan code-level quality — DRY violations, mixed concerns, naming, large files, dead code, type safety, idempotency, immutability, deep modules, and referential transparency — then apply cleanup in batches with [CLEANUP] flags. Use after review-implementation passes, or triggered when user says "modularize", "clean up", or similar.'
 ---
 
@@ -17,11 +19,18 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 - **Structural changes only.** No behavior changes, bug fixes, or new features.
 - **Dead code requires user approval.** Evidence (zero imports/references) required.
 - **Coverage tests required.** When extraction creates a new module.
-- **Cross-reference implement-plan.** Shared rules for batch discipline, flag format, and test adaptation live there.
+- **Self-contained workflow.** Batch discipline, flag format, and test adaptation rules are documented below in the per-batch workflow.
+
+## Phase 0: Prerequisites
+
+- [ ] Read the review pass findings (from review-implementation)
+- [ ] Run baseline tests — all must pass
+- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Read ARCHITECTURE.md for current documented structure
 
 ## Documents to Read
 
-- **`ARCHITECTURE.md`**: "Project Structure", "Import Structure", relevant module descriptions
+- **`docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", relevant module descriptions
 - **Source files** — read files identified during scanning to confirm structural issues before reporting
 
 ## Modularization and Cleanup Workflow
@@ -101,9 +110,6 @@ For each approved candidate, in order:
    - Apply changes one logical unit at a time within each file
 
 2. **Flag every changed line with `[CLEANUP]`**
-   ```
-   [CLEANUP]: short_reason — what changed
-   ```
 
 3. **Write coverage tests for new modules** (only if extraction created a new file)
    - Verify extracted logic works independently
@@ -116,7 +122,7 @@ For each approved candidate, in order:
    - Do NOT change test logic, assertions, or test names
    - Update every occurrence in the same batch — imports, calls, mocks
 
-5. **Run full test suite** — all must pass. On failure: import path issue → fix and re-run. Any other cause → revert batch, skip, move to next. See "Failure Triage" in AGENTS.md.
+5. **Run full test suite** — all must pass. On failure: import path issue → fix and re-run. Any other cause → revert batch, skip, move to next.
 
 6. **Proceed to next batch**
 
@@ -131,6 +137,9 @@ After all batches, produce a verbal markdown change-log grouped by scope with `[
 - All changed lines carry [CLEANUP]
 - Full test suite and lint pass
 - Verbal change-log produced
+
+### Abort Paths
+If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
 
 ---
 

@@ -1,5 +1,7 @@
 ---
 name: improve-architecture
+type: workflow
+upstream: [review-implementation]
 description: 'Scan project-level structure — directory layout, package organization, cross-module boundaries, and naming/file conventions — then apply structural improvements in TDD-backed batches with [ARCH] flags. Use after review-implementation (first pass), or triggered when the user says "evaluate the architecture", "improve architecture", "review project structure", or similar.'
 ---
 
@@ -12,11 +14,18 @@ description: 'Scan project-level structure — directory layout, package organiz
 ## Boundaries
 - **Phase 1 is strictly read-only.** No file writes, no code changes, no notes files.
 - **Phase 2 is structural changes only.** No behavior changes, no bug fixes, no feature additions.
-- **Cross-reference implement-plan.** Shared rules for batch discipline, surgical changes, flag format, and test adaptation live in `implement-plan` — this skill documents only what differs.
+- **Self-contained TDD.** TDD principles, test double discipline, and non-determinism injection patterns are documented below in the Phase 2 workflow.
+
+## Phase 0: Prerequisites
+
+- [ ] Read the review pass findings (from review-implementation)
+- [ ] Run baseline tests — all must pass
+- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Read ARCHITECTURE.md for current documented structure
 
 ## Documents to Read
 
-- **`ARCHITECTURE.md`** — "Project Structure", "Module Descriptions", "Import Structure"
+- **`docs/ARCHITECTURE.md`** — "Project Structure", "Module Descriptions", "Import Structure"
 - **Source files** — read key files per scan area to verify documented structure matches actual codebase
 
 ## Architecture Improvement Workflow
@@ -45,12 +54,6 @@ Layer separation (config → state → logic → persistence) and leaf module pa
 
 Present findings as: `[P0/P1/P2] file:line — finding → Recommend: action`
 
-Example:
-```
-P0: app/static/css/style.css — frontend CSS in backend package → Recommend: move to frontend/src/styles/
-P1: frontend/src/pages/ChatPage.tsx — relative imports when @/ alias is configured → Recommend: convert to @/
-P2: frontend/src/hooks/useTimer.ts — missing // Description: header → Recommend: add header
-```
 ### Gate: User Approval
 
 Present findings and ask: **"Shall I apply these changes?"**
@@ -59,18 +62,35 @@ Wait for explicit approval before Phase 2. If zero findings, report **"Architect
 
 ### Phase 2: Improve (Write)
 
-> Cross-reference `implement-plan/SKILL.md` for shared rules: batch discipline, surgical changes, flag format, test-adaptation.
+#### TDD Principles
+
+Architecture changes must not alter behavior. Test discipline is about preserving existing behavior, not creating new specs.
+
+**Test oracle approach** — for every item:
+1. If an existing test covers this code, use it as the oracle (test passes before and after)
+2. If no test covers it, write a regression test capturing current behavior first — save to `tests/`, confirm it passes
+3. Apply the structural change
+4. Run all tests — same count, all passing
+5. If count changes (tests broke), flag and explain
+
+**Test double discipline** — use the simplest substitute:
+- **Stub** — return canned data, no assertions
+- **Fake** — in-memory/lightweight real implementation
+- **Spy** — record calls, assert after the fact
+- **Mock** — assert specific interaction (use sparingly)
+
+**Non-determinism injection** — inject clocks, RNG, network, and filesystem as parameters:
+```python
+def create_session(now=None, new_id=None):
+    return {"id": str(new_id or uuid4()), "created_at": now or datetime.now()}
+```
 
 For each approved item (P0 → P1 → P2 order):
 
 1. **Baseline** — Run full test suite. All must pass.
-2. **TDD oracle** — If existing test covers this code, use as oracle. If not, write a regression test capturing current behavior, save to `tests/`, confirm it passes.
+2. **TDD oracle** — Apply the test oracle approach above.
 3. **Apply change** — Move, rename, reorganize, fix import, add header. Do NOT change behavior/logic or fix unrelated bugs. Apply changes one logical unit at a time within each file.
 4. **Flag every changed line with `[ARCH]`**
-   ```
-   [ARCH]: short_reason — what/why
-   ```
-   Test adaptation flags too: `[ARCH]: update test import — reflect new file path`
 5. **Update test references** in same batch as source change.
 6. **Verify** — Run full test suite. Compare to baseline counts:
    - Same count, all passing ✅
@@ -99,7 +119,9 @@ When multiple approved items touch the same file or directory, sort by dependenc
 - Phase 2: All approved items applied or explicitly skipped (with reason)
 - Full test suite passes with same or documented test count change
 - Every changed line carries `[ARCH]` flag — zero non-ARCH flags
-- Frontend build and typecheck pass
+
+### Abort Paths
+If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
 
 ---
 

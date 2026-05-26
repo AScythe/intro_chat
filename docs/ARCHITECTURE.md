@@ -141,7 +141,7 @@ Server-global in-memory state — active users, active matches, waiting queue, c
 - `active_matches = {}` — tracks active chat matches
 - `waiting_queue = {}` — users waiting for matches
 - `CONVERSATION_PROMPTS = [...]` — list of conversation prompts
-- Timer constants: `MATCH_EXPIRY_MINUTES`, `CLEANUP_INTERVAL_SECONDS`, `CLEANUP_THRESHOLD_SECONDS`
+- Timer constants: `MATCH_EXPIRY_SECONDS`, `CLEANUP_INTERVAL_SECONDS`, `CLEANUP_THRESHOLD_SECONDS`
 
 #### Data Structures
 - `active_users = {}` — `{user_id: {event_id, username, room_id, linkedin_url, slack_handle, is_available, last_seen}}`
@@ -151,7 +151,7 @@ Server-global in-memory state — active users, active matches, waiting queue, c
 
 #### Constants
 - `CONVERSATION_PROMPTS` — array of 10 icebreaker strings
-- `MATCH_EXPIRY_MINUTES = 2` — how long a match is valid in DB
+- `MATCH_EXPIRY_SECONDS = 30` — how long a match is valid in DB
 - `CLEANUP_INTERVAL_SECONDS = 60` — how often cleanup thread checks for expired matches
 - `CLEANUP_THRESHOLD_SECONDS = 300` — remove matches older than this (5 minutes)
 
@@ -363,7 +363,7 @@ End-to-end integration test suite that tests page rendering, API endpoints, matc
 - `test_file_structure()` — checks 25 required files exist
 - `test_database()` — tests DB init, 4 tables exist, insert/delete operations
 - `test_conversation_prompts()` — checks prompts list is non-empty
-- `test_state_constants()` — verifies `MATCH_EXPIRY_MINUTES=2`, `CLEANUP_INTERVAL_SECONDS=60`, `CLEANUP_THRESHOLD_SECONDS=300`
+- `test_state_constants()` — verifies `MATCH_EXPIRY_SECONDS=30`, `CLEANUP_INTERVAL_SECONDS=60`, `CLEANUP_THRESHOLD_SECONDS=300`
 - `test_home_page()` — `GET /` returns 200 with "IntroChat" in body
 - `test_api_endpoints()` — tests create event, get rooms (8), join, select room, toggle availability, QR, prompts (10)
 - `test_social_info()` — verifies `linkedin_url` and `slack_handle` saved to `active_users`
@@ -400,7 +400,7 @@ Standalone database debugging utility that tests SQLite connection, lists table 
 ## Critical Implementation Details
 
 ### Match Expiry
-- **Initial expiry:** 2 minutes (set in `create_match()` function)
+- **Initial expiry:** 30 seconds (set via `MATCH_EXPIRY_SECONDS` in `create_match()` function)
 - **Cleanup threshold:** 5 minutes (cleanup thread runs every 60 seconds)
 - Cleanup thread is daemonized and starts automatically
 

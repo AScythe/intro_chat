@@ -1,11 +1,12 @@
 ---
 name: update-agent-setup-md
+type: subskill
 description: Analyze the current agent development environment (global + project state) and update `docs/AGENT_SETUP.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update agent setup", "sync agent setup", "agent setup is outdated", or similar.
 ---
 
 ## Purpose
 
-Agent development environment setup guide. Answers "How do I reproduce this project's AI coding assistant environment on any machine?", "What tools are needed globally and per-project?", "How do I verify everything works?"
+Agent development environment setup guide. Answers "How do I reproduce this project's AI coding assistant environment on any machine?"
 
 Mine the global system state and the project codebase, then update or create `docs/AGENT_SETUP.md` so any developer can clone the repo and have the same OpenCode + MCP + skills experience on any device.
 
@@ -15,7 +16,7 @@ Mine the global system state and the project codebase, then update or create `do
 
 - Developers setting up a new machine for this project
 - AI agents needing tooling context to operate correctly
-- Teams wanting consistent, reproducible development environments across devices
+- Teams wanting consistent, reproducible development environments
 
 ---
 
@@ -23,12 +24,10 @@ Mine the global system state and the project codebase, then update or create `do
 
 ### Quality Gates
 
-Every piece of content must pass these four checks:
-
-- **"Would a developer setting up a new machine miss this?" litmus test:** Every line must answer "Would a developer likely fail to set up correctly without this instruction?" If not, leave it out.
-- **Verifiable against actual system state:** Every tool version, config path, and command must be verified against the live environment or the project's committed files. Never guess or extrapolate.
-- **Cross-platform awareness:** Document platform-specific paths and commands inline. Use `\~/.local/bin` as the canonical uv-bin path with a platform note.
-- **No secrets:** Never capture API keys, tokens, or credentials. Only document config structure and tool presence.
+- **"Would a developer setting up a new machine miss this?" litmus test**
+- **Verifiable against actual system state:** Every tool version, config path, and command must be verified
+- **Cross-platform awareness:** Document platform-specific paths and commands
+- **No secrets:** Never capture API keys, tokens, or credentials
 
 ### What to Include
 
@@ -52,102 +51,64 @@ Every piece of content must pass these four checks:
 
 | Document | Scope | Audience | Content Type | Canonical Source Of |
 |----------|-------|----------|--------------|-------------------|
-| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start, troubleshooting |
-| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | API endpoints, WebSocket events, module descriptions, import graph, design decisions (technical) |
-| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product / Vision | Product vision, user journey, feature rationale, privacy model, design decisions (product), out-of-scope boundaries |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options, reset instructions |
-| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership policies, doc sync triggers, failure triage, cross-phase universal rules |
-| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies, transferable patterns |
-| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries (no dedicated skill) |
-| **AGENT_SETUP.md** | Agent dev environment setup, tooling config, cross-machine reproducibility | Developers setting up new machines, AI agents | Setup | Global + project tool config, MCP servers, plugins, skills, PATH, verification |
+| **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
+| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
+| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
+| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options |
+| **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
+| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
+| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` instead of duplicating
-- Summary here, details there — each document gets its appropriate level of detail; cross-reference for full content
-- Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
+- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
+**Boundary rules** (document-specific guardrails):
+- Setup covers only the agent toolchain (OpenCode, MCP, cocoindex, graphify) — application dependencies and pipeline commands belong in README.md
+
 ---
+
+## Phase 0: Prerequisites
+
+- [ ] Verify agent environment is accessible (global config, project config)
+- [ ] Read existing AGENT_SETUP.md — understand current documented state
+- [ ] Check for new tools/dependencies added since last sync
 
 ## Workflow
 
 ### 1. Scan Global State
-
-Collect from the developer's system. These are one-time-per-machine configurations.
-
-**Before scanning, ask the user:** "May I read global config directories (\~/.config/opencode/, \~/.cocoindex_code/) to capture your environment?" If declined, skip global scanning and write those sections generically.
-
-If approved, collect:
-
-1. **OpenCode global config** — Read `\~/.config/opencode/opencode.json`. Extract permissions and LSP settings. If the file doesn't exist, note that it should be created.
-2. **Global commands** — List the `\~/.config/opencode/commands/` directory. Read each command's frontmatter (description). Document names and purposes.
-3. **Global skills** — Check `\~/.config/opencode/skills/` directory. List any global skills with their descriptions.
-4. **cocoindex global settings** — Read `\~/.cocoindex_code/global_settings.yml`. Extract embedding provider and model.
-5. **Tool installations** — Run `uv tool list` for versioned tool names. Run `npm list -g --depth=0` for global npm packages. Run `pip list 2>$null | Select-String -Pattern "graphifyy"` to verify graphifyy pip install.
-6. **PATH check** — Verify whether `\~/.local/bin` (or platform equivalent) is on the system PATH. Check that `ccc` and `graphify` resolve.
-7. **graphify platform install** — Check for config files written by `graphify opencode install` (e.g., `\~/.config/opencode/.graphify_prompt` or OpenCode platform instruction files).
+Collect from the developer's system:
+- OpenCode global config
+- Global commands and skills
+- cocoindex global settings
+- Tool installations
+- PATH check
+- graphify platform install
 
 ### 2. Scan Project State
-
-Read the project's committed files. These are available on every clone.
-
-Read in this priority order:
-
-1. `opencode.json` — plugin list, MCP server commands
-2. `.opencode/package.json` — plugin npm dependencies
-3. `.opencode/skills/` — list all skill directories; read each `SKILL.md` frontmatter (name, description)
-4. `.gitignore` — extract tool-related ignore rules
-4a. `.opencode/.gitignore` — validate that essential files (`package.json`, `package-lock.json`) are NOT gitignored. Note the nested ignore strategy (only `node_modules` and `bun.lock` should be ignored).
-5. `.cocoindex_code/settings.yml` — if present, read index patterns (created by `ccc init`)
-6. `graphify-out/` — check for committed artifacts: `graph.json`, `GRAPH_REPORT.md`, `graph.html`
-7. Existing `docs/AGENT_SETUP.md` — read current content for diffing
-8. `docs/README.md` — check existing cross-references to AGENT_SETUP.md
-
-For each source, extract:
-- Tool names and versions
-- Configuration values (structure only — no secrets)
-- File paths relative to project root
-- Any setup steps implied by the config
+Read the project's committed files:
+- `opencode.json`
+- `.opencode/package.json`
+- `.opencode/skills/`
+- `.gitignore`
+- `.cocoindex_code/settings.yml` (if present)
+- `graphify-out/` (if present)
 
 ### 3. Read the Current Document
-
 - Check if `docs/AGENT_SETUP.md` exists
-- Read existing content section by section
-- Flag anything outdated (wrong versions, missing tools, stale paths, removed tools)
-- Flag missing items from **What to Include**
-- Flag content that violates the boundary rules above
+- Flag outdated content
 
 ### 4. Identify Gaps and Issues
-
-For each item in **What to Include**:
-- Does it exist in the current document?
-- Is it accurate against actual system/project state?
-- Is it written for the right audience (developers setting up a new machine)?
-- Does it respect the boundary rules?
-
-For each existing section:
-- Does it belong here per **What NOT to Include**?
-- If not → mark for redirect to the appropriate document
-
-Additional gaps to check:
-- Does the current setup doc explain the gitignore rationale for each tool artifact (tracked vs ignored)?
-- Are the nested `.opencode/.gitignore` rules documented alongside the root `.gitignore` rules?
+For each **What to Include** item: does it exist? Is it accurate?
 
 ### 5. Update the Document
-
 - Add missing sections
-- Fix outdated content to match the current state (versions, paths, tool names)
-- Remove or redirect out-of-scope content per the **What NOT to Include** table
-- Don't rewrite the entire document — only update what's changed, section by section
-- Keep language instructional — clear step-by-step sequences, not marketing prose
-- Global configs: say "Create this file:" with content blocks — don't assume the file already exists on the reader's machine
-- Project configs: reference the committed files — the reader already has them after cloning (`opencode.json`, `.opencode/package.json`)
-- Tool versions: capture actual installed version but write setup steps generically (e.g., `pip install 'graphifyy[mcp]'` without pinning)
-- Cross-reference to `docs/README.md` for app setup steps — don't duplicate them
-- Include platform notes inline where commands differ (Windows PowerShell vs Linux/Mac bash)
-- Document gitignore principle for each tool — for each artifact, state whether it's tracked (cross-device transfer) or gitignored (regeneratable). Cover both root `.gitignore` and nested `.opencode/.gitignore`.
-- Keep it concise — a developer setting up should get through it in one sitting
+- Fix outdated content
+- Remove or redirect out-of-scope content
+- Keep language instructional
+- Include platform notes inline
+- Don't rewrite the entire document — only update what's necessary
 
 ### 6. Verify
 

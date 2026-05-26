@@ -1,30 +1,29 @@
 ---
 name: update-demo-guide-md
-description: Analyze the current app state and update `DEMO_GUIDE.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update demo guide", "sync demo guide", "demo guide is outdated", or similar.
+type: subskill
+description: Analyze the current app state and update `docs/DEMO_GUIDE.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update demo guide", "sync demo guide", "demo guide is outdated", or similar.
 ---
 
 ## Purpose
 Practical demo execution guide for the project. Answers "How do I demonstrate this?", "What should I highlight?", "What are the test scenarios?".
 
-Verify demo steps against the actual running app, then update or create `docs/DEMO_GUIDE.md` so a presenter can run a reliable demo without surprises.
+Verify demo steps against the actual running pipeline, then update or create `docs/DEMO_GUIDE.md` so a presenter can run a reliable demo without surprises.
 
 ---
 
 ## Audience
-- Presenters demonstrating the app
-- Evaluators and reviewers assessing the demo (judges, stakeholders, technical reviewers)
+- Presenters demonstrating the media pipeline
+- Evaluators and reviewers assessing the pipeline output
 
 ---
 
 ## Content Rules
 
 ### Quality Gates
-Every piece of content must pass these four checks:
-
-- **"Would a presenter miss this?" litmus test:** Every step must answer "Would a presenter likely miss this without help?" If not, leave it out.
-- **Actionability:** Every step must have a clear expected result ("you should see X"). Fallback options must be actionable ("if X breaks, do Y"), not vague reassurance.
-- **Accuracy against running app:** All steps must be verified against the actual app behavior — never inferred from code alone.
-- **Currency:** The document must include a header stating when it was last verified and against which version/commit. Demo guides go stale fast.
+- **"Would a presenter miss this?" litmus test**
+- **Actionability:** Every step must have a clear expected result
+- **Accuracy against running pipeline:** All steps must be verified against actual behavior
+- **Currency:** Include a header stating when it was last verified
 
 ### What to Include
 - **Document header** — "Last verified: [date] against [version/commit]". Required. Update on every demo flow change.
@@ -42,72 +41,52 @@ Every piece of content must pass these four checks:
 
 | Document | Scope | Audience | Content Type | Canonical Source Of |
 |----------|-------|----------|--------------|-------------------|
-| **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start, troubleshooting |
-| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | API endpoints, WebSocket events, module descriptions, import graph, design decisions (technical) |
-| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product / Vision | Product vision, user journey, feature rationale, privacy model, design decisions (product), out-of-scope boundaries |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options, reset instructions |
-| **AGENTS.md** | AI agent permissions, rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership policies, doc sync triggers, failure triage, cross-phase universal rules |
-| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies, transferable patterns |
-| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries (no dedicated skill) |
+| **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
+| **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
+| **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
+| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options |
+| **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
+| **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
+| **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` instead of duplicating
-- Summary here, details there — each document gets its appropriate level of detail; cross-reference for full content
-- Audience-first — if audience overlaps, choose the document with the MOST RELEVANT audience
+- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
+
+**Boundary rules** (document-specific guardrails):
+- Demo steps must be presenter-focused with expected outcomes at each step — reference README.md for setup details and ARCHITECTURE.md for implementation internals; do not reproduce them
 
 ---
 
+## Phase 0: Prerequisites
+
+- [ ] Verify pipeline code and sample media are available
+- [ ] Read existing DEMO_GUIDE.md — understand current documented walkthrough
+- [ ] Run a quick end-to-end test to verify pipeline works
+
 ## Workflow
 
-### 1. Investigate the App
-Read highest-value sources first in this priority order:
+### 1. Investigate the Pipeline
+Read highest-value sources first:
 
-1. Source code entrypoints and UI templates — what does the running app look like at each stage?
-2. Existing `DEMO_GUIDE.md` (check what needs updating, verify the currency header)
-3. Root manifests (`package.json`, `pyproject.toml`, etc.) and requirements
-4. `README*` for setup instructions and feature descriptions
-
-For each source, extract:
-- What is the actual startup sequence? (commands, env vars needed)
-- What features are live and demo-able right now?
-- What are the known failure points or fragile flows?
-- What does the UI look like at each stage?
-- Has anything changed since the last verified date in the document header?
-
-**Ask the user** only when the running app can't answer: demo-specific configuration, expected presenter behavior. One short batch. Never ask what the app makes clear.
+1. Source code entrypoints — `process_orchestrator.py`, `query_orchestrator.py`
+2. Existing `docs/DEMO_GUIDE.md`
+3. `README*` for setup instructions
 
 ### 2. Read the Current Document
 - Check if `docs/DEMO_GUIDE.md` exists — create it if not
-- Check the currency header — is it stale?
-- Read existing content section by section
-- Flag any steps that no longer match the current app behavior
-- Flag missing sections from **What to Include**
-- Flag content that violates the boundary rules above
+- Flag outdated content
 
 ### 3. Identify Gaps and Issues
-For each item in **What to Include**:
-- Does it exist in the current document?
-- Are the steps accurate against the current app?
-- Are fallback options present and actionable for fragile steps?
-- Is the currency header present and current?
-
-For each existing section:
-- Does it belong here per **What NOT to Include**?
-- If not → mark for redirect
+For each **What to Include** item: does it exist? Are steps accurate?
 
 ### 4. Update the Document
 - Add missing sections
-- Fix outdated content to match current app behavior
-- Remove or redirect out-of-scope content per the **What NOT to Include** table
-- Don't rewrite the entire document — only update what's changed
-- Update or add the currency header first: "Last verified: [date] against [version/commit]"
-- Every step must have a clear expected result ("you should see X")
-- Fallback options must be actionable ("if X breaks, do Y"), not vague reassurance
-- Demo tips must have separate sections for technical evaluators vs. general audience
-- Keep language presenter-focused — assume they are on stage with people watching
-- Don't rewrite the entire document — only update outdated or missing sections
+- Fix outdated content
+- Remove or redirect out-of-scope content
+- Keep language presenter-focused
+- Every step must have a clear expected result
 
 ### 5. Verify
 

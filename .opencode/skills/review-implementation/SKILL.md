@@ -1,5 +1,7 @@
 ---
 name: review-implementation
+type: workflow
+upstream: [implement-plan, improve-architecture, modularize-and-clean]
 description: 'Verify the completed implementation meets all success criteria — review diff, run tests, run lint, confirm intended function. Use after implement-plan, improve-architecture, or modularize-and-clean; or when the user says "review the implementation", "verify changes", "review and verify", or similar.'
 ---
 
@@ -18,9 +20,16 @@ description: 'Verify the completed implementation meets all success criteria —
 - **Read-only and verbal** — no file writes, no fixes
 - **Independent verification** — re-run all checks from scratch, never trust the implementer's self-test
 
+## Phase 0: Prerequisites
+
+- [ ] Confirm which prior skill produced the diff (implement-plan, improve-architecture, or modularize-and-clean)
+- [ ] Read the prior plan or evaluation list
+- [ ] Run baseline tests — all must pass before review
+- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+
 ## Documents to Read
 
-- **First pass** (after `implement-plan`): `docs/PLAN_*.md` + `ARCHITECTURE.md` ("Import Structure", relevant module descriptions)
+- **First pass** (after `implement-plan`): `docs/PLAN_*.md` + `docs/ARCHITECTURE.md` ("Import Structure", relevant module descriptions)
 - **Clean-up pass** (after `modularize-and-clean`): `docs/PLAN_*.md` (success criteria) — fall back to `archive/` if already moved. Change-log is the primary target.
 - **Architecture pass** (after `improve-architecture`): `improve-architecture` session output — the evaluation list is the target.
 
@@ -49,17 +58,24 @@ Run `git status` to list all modified, added, and deleted files. Verify only exp
 
 ### Phase 2: Verify Execution
 
-#### Smart Verification
+#### Smart Tools
 
-Use **graphify** to verify the graph reflects intended structure. Use **ast_grep_search** with the old pattern to confirm zero stale occurrences. Use **cocoindex-code** to verify nothing semantically related was missed.
+Use these in priority order for efficient review verification:
+
+**1. graphify** — verify the graph reflects intended structure. Query the knowledge graph to confirm changed modules have expected connections.
+
+**2. cocoindex-code** — search by intent to verify nothing semantically related was missed. Find code that _should_ have been changed but wasn't.
+
+**3. ast_grep_search** — confirm zero stale occurrences of old patterns. Structural search catches what text search misses.
+
+**4. grep / read** — fall back for exact-text verification and detailed file inspection.
 
 #### Run All Tests
 All must pass. On failure: list what failed and why — do not fix here.
 
 Exact commands:
 ```bash
-uv run python tests/test_app.py
-uv run python tests/test_js_modules.py
+python -m pytest tests/ -v
 cd frontend && npx vitest run
 ```
 
@@ -73,12 +89,14 @@ cd frontend && npm run build
 Must succeed. On failure: list errors — do not fix here.
 
 #### Run Lint and Typecheck
-Execute all lint/typecheck commands. Must pass. On failure: list files and issues.
+Execute all lint/typecheck commands. Must pass. On failure: list files and issues. Do not fix here.
 
 Exact commands:
 ```bash
+python -m py_compile <changed_file>.py
 cd frontend && npx tsc --noEmit
 ```
+
 Must pass. On failure: list files and issues — do not fix here.
 
 ### Phase 3: Audit & Sign Off
@@ -88,13 +106,20 @@ Must pass. On failure: list files and issues — do not fix here.
 For each new or modified test:
 
 - **Assertion strength** — verifies expected value, not just non-null? `assertEqual(result, 42)` ✅. `assertIsNotNone(result)` where 42 is expected ❌ (false positive — route back).
-- **Non-determinism** — clocks, RNG, or network injected rather than called internally?
+- **Non-determinism (AP1)** — clocks, RNG, or network injected rather than called internally?
+- **Untestable I/O fusion (AP2)** — function reads external state AND contains decision logic based on that state?
+- **Tight coupling (AP3)** — mocking 3+ collaborators for one unit?
+- **Shared mutable state (AP4)** — global state modified by multiple tests?
+- **Missing seams (AP5)** — no way to substitute behavior without patching internals?
+- **Type ambiguity (AP6)** — `Any` types, untyped dicts, or missing schemas in signatures?
+- **Non-idempotent writes (AP7)** — running same write twice produces different state?
+- **Mutable outputs (AP8)** — function returns a list/dict the caller can accidentally mutate?
 - **Mock count** — mocking 3+ collaborators for one unit? Signals shallow design. Route back.
 - **Test doubles usage** — mock used where stub/fake suffices? Flag for modularize-and-clean.
 
 #### Code Property Audit
 
-For each new or modified file, check these 11 properties. Route back to `implement-plan` for any fail:
+For each new or modified file, check these 12 properties. Route back to `implement-plan` for any fail:
 
 | Property | Pass criteria |
 |----------|--------------|
@@ -109,6 +134,7 @@ For each new or modified file, check these 11 properties. Route back to `impleme
 | **Self-Documenting Naming** | Name reveals intent; no comments explaining what |
 | **Deterministic** | Same input always produces same output |
 | **Small Footprint** | Functions scannable in one screen (~40 lines max) |
+| **Logging Convention** | Standard logging setup block present; bare `print()` only for CLI output/menus/structured stdout — never for operational logging |
 
 #### Verify Against Plan or Evaluation List
 
@@ -144,6 +170,9 @@ If yes:
 - Phase 2: All tests pass (count compared), build succeeds, lint clean
 - Phase 3: Test quality verified, plan/evaluation criteria met, archive moved
 - Pass → route to modularize-and-clean (first pass), improve-architecture (first pass), or update-docs (clean-up/arch pass). Fail → route back to the prior skill that produced the diff.
+
+### Abort Paths
+If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
 
 ---
 

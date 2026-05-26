@@ -1,16 +1,16 @@
 # Graph Report - intro_chat  (2026-05-21)
 
 ## Corpus Check
-- 105 files · ~79,501 words
+- 105 files · ~79,574 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1351 nodes · 1476 edges · 84 communities (80 shown, 4 thin omitted)
+- 1352 nodes · 1478 edges · 84 communities (80 shown, 4 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 5 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b998c10c`
+- Built from commit: `43673973`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -112,12 +112,12 @@
 10. `🌟 IntroChat: The Secret Icebreaker for Introverts at Events` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `test_matchmaking_lifecycle()` --calls--> `create_match()`  [INFERRED]
+  tests/test_app.py → app/matchmaking.py
 - `test_database()` --calls--> `init_db()`  [INFERRED]
   tests/test_app.py → app/database.py
 - `reset_database()` --calls--> `init_db()`  [INFERRED]
   tests/test_db.py → app/database.py
-- `test_matchmaking_lifecycle()` --calls--> `create_match()`  [INFERRED]
-  tests/test_app.py → app/matchmaking.py
 - `on_startup()` --calls--> `init_db()`  [INFERRED]
   app/__init__.py → app/database.py
 - `set_availability()` --calls--> `find_match()`  [INFERRED]
@@ -130,8 +130,8 @@ Cohesion: 0.05
 Nodes (43): 7.10 Interactive Walkthrough with Skip Confirmation, 7.11 Presence Check Over Re-Probe, 7.12 Triage Routing, 7.13 Preserve File Description Comments, 7.14 Windows Shell Quoting Workaround, 7.15 Matchmaking Queue Filter Direction, 7.16 Root Pattern Extraction, 7.17 Sequential Numbering for Plan Files (+35 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.07
-Nodes (13): ConnectionManager, find_match(), set_availability(), CreateEventRequest, ExchangeConnectionRequest, JoinEventRequest, SetAvailabilityRequest, SetUserRoomRequest (+5 more)
+Cohesion: 0.06
+Nodes (14): ConnectionManager, create_match(), find_match(), set_availability(), CreateEventRequest, ExchangeConnectionRequest, JoinEventRequest, SetAvailabilityRequest (+6 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
@@ -139,7 +139,7 @@ Nodes (39): Architecture, Backend, ✨ Beautiful UI, Chat Interface, Chat Timer 
 
 ### Community 3 - "Community 3"
 Cohesion: 0.07
-Nodes (37): init_db(), on_startup(), create_match(), main(), Test that all required files exist, Test database initialization and basic operations, Test conversation prompts, Test that state constants are correctly defined (+29 more)
+Nodes (36): init_db(), on_startup(), main(), Test that all required files exist, Test database initialization and basic operations, Test conversation prompts, Test that state constants are correctly defined, Test that all modular components can be imported (+28 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.17
@@ -427,7 +427,7 @@ Nodes (8): Agent Development Environment Setup, code:powershell (# OpenCode), Cu
 
 ### Community 79 - "Community 79"
 Cohesion: 0.22
-Nodes (9): `ccc mcp` fails on OpenCode startup, `ccc` or `graphify` command not found, `.cocoindex_code/settings.yml` doesn't exist, code:powershell ([Environment]::SetEnvironmentVariable("Path", "$env:Path;$en), code:powershell (pip install 'graphifyy[mcp]'), code:powershell (graphify .), Graph is stale or has no data, `python -m graphify.serve` fails with ModuleNotFoundError (+1 more)
+Nodes (10): `ccc mcp` fails on OpenCode startup, `ccc` or `graphify` command not found, `.cocoindex_code/settings.yml` doesn't exist, code:powershell ([Environment]::SetEnvironmentVariable("Path", "$env:Path;$en), code:powershell (pip install 'graphifyy[mcp]'), code:json ("cocoindex-code": {), code:powershell (graphify .), Graph is stale or has no data (+2 more)
 
 ### Community 81 - "Community 81"
 Cohesion: 0.25
@@ -442,7 +442,7 @@ Cohesion: 0.50
 Nodes (4): 6.12 File Description Convention Across All Languages, code:typescript (// Timer.tsx), code:python (# matchmaking.py), code:css (/* style.css */)
 
 ## Knowledge Gaps
-- **823 isolated node(s):** `Table of Contents`, `What This Covers`, `Prerequisites`, `code:powershell (npm install -g opencode-ai)`, `code:powershell (opencode --version)` (+818 more)
+- **822 isolated node(s):** `Table of Contents`, `What This Covers`, `Prerequisites`, `code:powershell (npm install -g opencode-ai)`, `code:powershell (opencode --version)` (+817 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -456,10 +456,10 @@ _Questions this graph is uniquely positioned to answer:_
 - **Why does `8. Automation & Process Design` connect `Community 9` to `Community 77`?**
   _High betweenness centrality (0.006) - this node is a cross-community bridge._
 - **What connects `Table of Contents`, `What This Covers`, `Prerequisites` to the rest of the system?**
-  _852 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _851 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.06538461538461539 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06463414634146342 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.05 - nodes in this community are weakly interconnected._

@@ -1,5 +1,7 @@
 ---
 name: push-to-git
+type: workflow
+standalone-entry: true
 description: 'Stage related files together by logical grouping, commit with auto-generated messages (user-approved), then push. Use when the user says "push", "commit and push", "push to github", or similar.'
 ---
 
@@ -16,6 +18,12 @@ description: 'Stage related files together by logical grouping, commit with auto
 - **User approval gate.** Never stage or commit without user confirmation of grouping and commit message.
 - **Push per commit.** Push after each commit, not after a batch. One failure blocks only that commit.
 
+## Phase 0: Prerequisites
+
+- [ ] Run `git status` — verify working tree has changes to commit
+- [ ] Review all diffs — confirm nothing unexpected
+- [ ] Verify no secrets or generated files would be committed
+
 ## Grouping Logic
 
 Group files by their **logical nature and purpose**, not by file count. A group can be 1 file or 20 files — what matters is the story the commit tells.
@@ -25,18 +33,17 @@ Group files by their **logical nature and purpose**, not by file count. A group 
 | Group | Includes | Example message |
 |-------|----------|-----------------|
 | **opencode skills** | `.opencode/skills/*/SKILL.md` changes | "Revise core skill pipeline: analyze, grill, readiness" |
-| **python backend** | `app/*.py` | "Add input validation to matchmaking endpoints" |
-| **javascript frontend** | `app/static/js/*.js` | "Refactor timer logic into reusable module" |
-| **html templates** | `app/templates/*.html` | "Add user info page between home and room selection" |
+| **python modules** | `*.py` files | "Add input validation to processing pipeline" |
+| **html templates** | `*.html` | "Add user info page between home and room selection" |
 | **tests** | `tests/*.py` | "Add regression tests for matchmaking edge cases" |
-| **documentation** | `docs/*.md` | "Update ARCHITECTURE.md with new component flow" |
-| **config** | Root config files (`.gitignore`, `pyproject.toml`, etc.) | "Pin Flask and Flask-SocketIO versions" |
+| **documentation** | `*.md` files | "Update docs/ARCHITECTURE.md with new component flow" |
+| **config** | Root config files (`.gitignore`, `opencode.json`, etc.) | "Configure OpenCode plugins and MCP servers" |
 
-Move files between groups if they belong to the same logical commit. For example, a Python backend change that also updates tests should be a single commit: "Add input validation + regression tests."
+Move files between groups if they belong to the same logical commit.
 
 ### Edge Cases
-- **Renamed files** — detect by matching deleted + new untracked pairs with similar paths. Group them together as one commit (the rename + content changes).
-- **Mixed changes across unrelated groups** — keep them in separate commits. Do not merge different logical concerns into one commit just to reduce commit count.
+- **Renamed files** — detect by matching deleted + new untracked pairs with similar paths. Group them together as one commit.
+- **Mixed changes across unrelated groups** — keep them in separate commits.
 - **Solo files** — a single file change can be its own commit if it's a complete logical unit.
 
 ## Auto-Generated Commit Messages
@@ -47,7 +54,7 @@ Commit messages come from analyzing the staged diff, not file names.
 
 **How to write the structured summary:**
 - Read the full diff line by line, not just the stat
-- Group changes by theme (e.g., "framework migration", "bug fixes", "new modules")
+- Group changes by theme
 - Each bullet describes the **effect** of the change, not the file path
 - If a single file has unrelated changes, split into separate bullets
 - If multiple files implement one change, merge into one bullet
@@ -71,38 +78,26 @@ Commit messages come from analyzing the staged diff, not file names.
 Run `git status` to identify all modified, deleted, and untracked files.
 
 ### 2. Categorize
-Assign each file to a group based on its path and the logical nature of the change. Detect renames by matching deleted + new untracked paths.
+Assign each file to a group based on its path and the logical nature of the change.
 
 ### 3. Present Groups
-Show the user the proposed grouping as a numbered list:
-
-```
-Proposed commits:
-1. [opencode skills] Revise core skill pipeline — 4 files (2 new, 1 modified, 1 deleted)
-2. [python backend] Add Description headers — 8 files (all modified)
-3. [docs] Update docs — 2 files (all modified)
-...
-```
-
-Ask: "Does this grouping look correct? [Y]es / [R]earrange / [C]ustomize"
+Show the user the proposed grouping as a numbered list. Ask: "Does this grouping look correct? [Y]es / [R]earrange / [C]ustomize"
 
 ### 4. Commit and Push Each Group
 For each group, one at a time:
 
 1. Stage the files: `git add <file1> <file2> ...`
-2. **Read the staged diff** — `git diff --cached --stat` then `git diff --cached` to analyze actual changes
-3. **Write a structured summary** from the diff — 1 sentence per logical change, grouped by theme
-4. **Generate a commit message** from the summary — title line + bullet list
+2. Read the staged diff — `git diff --cached --stat` then `git diff --cached` to analyze actual changes
+3. Write a structured summary from the diff
+4. Generate a commit message from the summary
 5. Show user: "**Commit <N>: <auto-generated message>**"
 6. Ask: "[A]ccept & commit, [E]dit message, [S]kip this group"
 7. If Edit: accept user's revised message, then commit
 8. After commit succeeds: push to `origin/<branch>`
-9. If commit or push fails: stop and report. Do not continue to next group.
+9. If commit or push fails: stop and report.
 
 ### 5. Done
 After all groups are committed and pushed, show the user the commit summary.
-
-State clearly on success: "✓ All commits pushed to origin/<branch>."
 
 ## Hand-off
 

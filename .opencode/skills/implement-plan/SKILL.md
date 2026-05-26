@@ -1,5 +1,7 @@
 ---
 name: implement-plan
+type: workflow
+upstream: [check-plan-readiness, review-implementation]
 description: 'Execute the approved plan following TDD in reviewable batches. Flag every change. Verify locally per batch. Use after check-plan-readiness passes, or when the user says "implement", "implement plan", "proceed", "start coding", or similar. Reads the plan file as read-only — never writes to it.'
 ---
 
@@ -17,8 +19,15 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 ## Documents to Read
 
 - **`SPECIFICATIONS.md`**: "Out of Scope"
-- **`ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only
+- **`docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only
 - **`docs/PLAN_*.md`**: Task Breakdown section (batches map 1:1)
+
+## Phase 0: Prerequisites
+
+- [ ] Read the approved plan (docs/PLAN_*) — verify all 8 gates pass
+- [ ] Run baseline tests — all must pass before any changes
+- [ ] Identify all files to create/modify/remove
+- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
 
 ## Implementation Workflow
 
@@ -87,6 +96,23 @@ Every file requires a file-level `# Description:`/`// Description:`/`/* Descript
 - Avoid `Any`/`any` in new code; if a type is truly unknown, narrow it explicitly
 - Schema-validate external data at the boundary; core logic operates on validated types only
 
+#### Logging Convention
+- Every Python file requires the standard logging setup block after imports:
+  ```python
+  import logging
+
+  logging.basicConfig(
+      level=logging.INFO,
+      format='%(asctime)s - %(levelname)s - %(message)s',
+      handlers=[logging.StreamHandler()]
+  )
+  logger = logging.getLogger(__name__)
+  ```
+- Use `logger.info()`, `logger.warning()`, `logger.error()`, `logger.debug()` for all operational messages
+- Pass `exc_info=True` on `logger.exception()` to capture tracebacks
+- Never use bare `print()` for operational output
+- User-facing CLI output (menus, prompts, structured JSON to stdout) stays as `print()` — it is not operational logging
+
 #### Failure Triage
 When a test fails after a change, classify before acting. See "Failure Triage" table in `AGENTS.md`. Never auto-revert on first failure.
 
@@ -116,7 +142,7 @@ For each batch in order:
 | **Spy** | Records calls, asserts after the fact | Need to observe behavior without replacing it |
 | **Mock** | Asserts it was called in a specific way | Need to verify an interaction (use sparingly) |
 
-Over-mocking 3+ collaborators for one test signals tight coupling (see grill's AP3).
+Over-mocking 3+ collaborators for one test signals tight coupling (see Testability Anti-Patterns: AP3 above).
 
 **Non-Determinism Injection:**
 
@@ -132,10 +158,23 @@ def create_session(now=None, new_id=None):
     return {"id": str(new_id or uuid4()), "created_at": now or datetime.now()}
 ```
 
+**Testability Anti-Patterns** — watch for these 8 during test design:
+
+| # | Anti-Pattern | Symptom |
+|---|-------------|---------|
+| AP1 | Non-determinism | Clocks, RNG, or network calls make tests non-repeatable |
+| AP2 | Untestable I/O fusion | A function reads external state AND contains decision logic based on that state |
+| AP3 | Tight coupling | Mocking 3+ collaborators to test one unit |
+| AP4 | Shared mutable state | Global state modified by multiple tests causes order-dependent flaky tests |
+| AP5 | Missing seams | No place to substitute behavior without patching internals |
+| AP6 | Type ambiguity | `Any`/`any` types, untyped dicts, or missing schemas in function signatures |
+| AP7 | Non-idempotent writes | Running the same write operation twice produces different state |
+| AP8 | Mutable outputs | Function returns a list/dict the caller can accidentally mutate |
+
 **Characterization Tests (for untested code)** — when existing code has no tests:
 - Run against known input, record output → write test asserting that exact oracle
 - Must pass before and after your change
-- If full infrastructure required, that's coupling (see grill's AP3, AP5). Write a mock-based bridge test, fix coupling, then replace with injection-proof test.
+- If full infrastructure required, that's coupling (see Testability Anti-Patterns: AP3, AP5 above). Write a mock-based bridge test, fix coupling, then replace with injection-proof test.
 - Save as permanent regression test in `tests/`.
 
 **Non-Testable Changes** — config changes, renames, typo fixes, infra with no observable behavior. When in doubt, write the test.
@@ -177,6 +216,9 @@ Every batch that adds or modifies logic must include its test file(s) in `tests/
 - Phase 2: All batches implemented with TDD + flags, verified per batch
 - Phase 3: Full test suite passes, lint clean, all audits passed
 - Pass → route to review-implementation. Plan file unchanged. Tests saved in `tests/`.
+
+### Abort Paths
+If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
 
 ---
 

@@ -11,7 +11,7 @@ import { Timer } from '@/components/Timer';
 import { PromptCard } from '@/components/PromptCard';
 import { ConnectionCard } from '@/components/ConnectionCard';
 import { CONFIG, FALLBACK_PROMPTS } from '@/config/constants';
-import { formatTime } from '@/utils/format';
+import { formatTime, formatDuration } from '@/utils/format';
 
 type ChatState = 'loading' | 'chatting' | 'timeUp' | 'extended' | 'connecting' | 'result';
 
@@ -153,7 +153,7 @@ export function ChatPage() {
             <h2>Setting up your chat...</h2>
             <div className="waiting-animation">
               <div className="pulse-dot"></div>
-              <p>Getting everything ready for your 2-minute conversation</p>
+              <p>Getting everything ready for your {formatDuration(CONFIG.CHAT_DURATION)} conversation</p>
             </div>
           </div>
         )}
@@ -183,7 +183,7 @@ export function ChatPage() {
 
             <div className="chat-timer-info">
               <p>
-                <strong>2 minutes</strong> to connect and chat
+                <strong>{formatDuration(CONFIG.CHAT_DURATION)}</strong> to connect and chat
               </p>
               <p>No pressure — just be yourself!</p>
             </div>

@@ -39,8 +39,8 @@ Think of it as *Tinder for 120-second conversations* — but only when you're ph
 - **🎯 Event-based**: Join events with simple codes or QR codes
 - **📍 Room Selection**: Choose your location for location-based matching
 - **🤝 Smart Matching**: Real-time matching with people in the same room
-- **💬 Guided Conversations**: 2-minute timer with conversation prompts
-- **🔄 Chat Extension**: Extend by 2 minutes or continue indefinitely
+- **💬 Guided Conversations**: Timed conversations (30 seconds by default) with conversation prompts
+- **🔄 Chat Extension**: Extend or continue indefinitely
 - **💼 Connection Exchange**: Optional username swap after chat (double opt-in required)
 - **📱 QR Code**: Quick event joining for attendees
 - **🎮 Demo Mode**: Sample users with simulated responses
@@ -238,7 +238,7 @@ IntroChat solves a real problem that affects millions of people at events:
 
 - ❌ **"I don't know how to start talking"** → Guided prompts do the work
 - ❌ **"I'm scared of awkward silence"** → Timer + questions eliminate dead air
-- ❌ **"What if they're rude?"** → Only 2 minutes — easy to walk away
+- ❌ **"What if they're rude?"** → Short timebox — easy to walk away
 - ❌ **"I don't want to be 'networking'"** → Feels like a game, not a chore
 - ❌ **"Too many people — where do I start?"** → Matches you with someone right here
 

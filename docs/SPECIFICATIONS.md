@@ -50,7 +50,7 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 |--------|--------|
 | Identity | Fully anonymous — auto-generated usernames by default. Users may optionally enter a display name. No emails or photos. |
 | Location | Room-level only (manual select) |
-| Data | Chats are never stored. Social info (LinkedIn/Slack) stored but never shared without double opt-in. Match records expire after 2 minutes with background cleanup. |
+| Data | Chats are never stored. Social info (LinkedIn/Slack) stored but never shared without double opt-in. Match records expire after 30 seconds with background cleanup. |
 | Control | Cancel anytime. Session resets on page refresh (user ID in `localStorage`). |
 
 ### Hard Constraints
@@ -97,7 +97,7 @@ The following are explicitly NOT implemented and should not be built unless the 
 
 **Backend (FastAPI + WebSocket)** — Python API server that handles events, users, matches, and real-time communication. WebSocket connections enable instant match notifications without polling or constant network overhead.
 
-**Data Model** — Four entities: Events group users by occasion, Rooms provide coarse location-based matching, Users carry optional profile info, and Matches pair two users temporarily. Chats are never stored — matches expire after 2 minutes with background cleanup at 5 minutes.
+**Data Model** — Four entities: Events group users by occasion, Rooms provide coarse location-based matching, Users carry optional profile info, and Matches pair two users temporarily. Chats are never stored — matches expire after 30 seconds with background cleanup at 5 minutes.
 
 | Layer | Technology | Why? |
 |-------|------------|------|

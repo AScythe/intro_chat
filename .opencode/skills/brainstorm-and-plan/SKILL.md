@@ -1,5 +1,6 @@
 ---
 name: brainstorm-and-plan
+type: workflow
 description: 'Brainstorming and planning stage. Analyze requirements against project docs, surface ideas and assumptions, confirm direction with user, then produce an initial plan. Use at the beginning of any tasks, or triggered when the user says "brainstorm and plan", "analyze and plan", "analyze the requirements", or similar.'
 ---
 
@@ -15,27 +16,43 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 - **Interactive** — Phase 2 requires user input. Do not produce final plan without walking through and confirming with the user.
 - **Verbal output only** — formal plan documents written by `check-plan-readiness`.
 
+## Phase 0: Prerequisites
+
+- [ ] Read the upstream problem description or prior plan document
+- [ ] Run baseline tests — all must pass
+- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
+
 ## Guidelines
 
 ### Phase 1: Analyze (agent only)
 
 Follow this layered analysis pipeline — all read-only:
 
-**Smart Tools**
-Use these to discover relevant code before fallback reading:
-- **graphify** — query the knowledge graph for concepts, communities, and connections
-- **cocoindex-code** — search by natural language intent to find functions even when key terms don't match
-- **ast_grep_search** — understand structural patterns (e.g. all `@app.route(...)` decorators) before diving into files
+**Smart Tools** — use in order of priority to discover relevant code before fallback reading:
+
+- **graphify** — macro-level architecture map before diving into files:
+  - `graphify_query_graph "..."` — broad concept search (e.g. "which modules handle SRT processing")
+  - `graphify_god_nodes` — discover core abstractions (most-connected modules in the project)
+  - `graphify_get_community <id>` — see all files in a dependency community
+  - `graphify_shortest_path "A" "B"` — relationship mapping between two modules
+
+- **cocoindex-code** — search by natural language intent (e.g. "where are user sessions created" or "how are tracking logs saved"):
+  - Set `refresh_index: False` for faster consecutive queries when code hasn't changed
+
+- **ast_grep_search** — understand structural patterns (e.g. `load_*_log($$$)` to find JSON tracking log loaders across stages, or `def main()` to identify all pipeline entry points) before diving into files
 
 **Layer 1: Consult docs (`docs/`)**
 - Read only the sections relevant to the task (Grep→Read pattern — grep for heading line number, Read with offset/limit). Do not read entire docs.
 - Map the task type to the right document:
   - Product context, user flow, feature scope, privacy → `SPECIFICATIONS.md` (read: "Problem", "Solution", "How It Works", "Core Features", "User Flow", "Out of Scope", "Hard Constraints")
-  - Module structure, data flow, API design → `ARCHITECTURE.md` (read: "Project Structure", "Module Descriptions" relevant entries, "Import Structure", "Modifying Instructions")
+  - Module structure, data flow, API design → `docs/ARCHITECTURE.md` (read: "Project Structure", "Module Descriptions" relevant entries, "Import Structure", "Modifying Instructions")
 - `PROJECT_BEST_PRACTICES.md` is excluded at this stage — coding patterns are implementation concerns, not planning concerns.
 
 **Layer 2: Spot-check doc accuracy**
-- Read key source files referenced in the docs to confirm the doc is not stale. Use the project tree in `ARCHITECTURE.md` to locate the right file.
+- Read key source files referenced in the docs to confirm the doc is not stale. Use the project tree in `docs/ARCHITECTURE.md` to locate the right file.
+- Use `cocoindex-code_search` to verify functions mentioned in docs still exist under those names
+- Use `graphify_query_graph "module_name"` to verify documented module relationships match the graph
 - If the doc matches the code → extract relevant info and proceed to planning.
 - If the doc is stale or wrong → note the gap, then examine more files to understand the full picture before planning.
 

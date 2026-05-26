@@ -571,10 +571,19 @@
       "norm_label": "`ccc mcp` fails on opencode startup"
     },
     {
+      "label": "code:json (\"cocoindex-code\": {)",
+      "file_type": "document",
+      "source_file": "docs/AGENT_SETUP.md",
+      "source_location": "L455",
+      "id": "docs_agent_setup_codeblock_23",
+      "community": 79,
+      "norm_label": "code:json (\"cocoindex-code\": {)"
+    },
+    {
       "label": "Graph is stale or has no data",
       "file_type": "document",
       "source_file": "docs/AGENT_SETUP.md",
-      "source_location": "L453",
+      "source_location": "L464",
       "id": "docs_agent_setup_graph_is_stale_or_has_no_data",
       "community": 79,
       "norm_label": "graph is stale or has no data"
@@ -583,8 +592,8 @@
       "label": "code:powershell (graphify .)",
       "file_type": "document",
       "source_file": "docs/AGENT_SETUP.md",
-      "source_location": "L457",
-      "id": "docs_agent_setup_codeblock_23",
+      "source_location": "L468",
+      "id": "docs_agent_setup_codeblock_24",
       "community": 79,
       "norm_label": "code:powershell (graphify .)"
     },
@@ -592,7 +601,7 @@
       "label": "`.cocoindex_code/settings.yml` doesn't exist",
       "file_type": "document",
       "source_file": "docs/AGENT_SETUP.md",
-      "source_location": "L463",
+      "source_location": "L474",
       "id": "docs_agent_setup_cocoindex_code_settings_yml_doesn_t_exist",
       "community": 79,
       "norm_label": "`.cocoindex_code/settings.yml` doesn't exist"
@@ -692,1206 +701,1206 @@
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1",
-      "id": "refs_project_best_practices_md",
       "community": 77,
-      "norm_label": "project_best_practices.md"
+      "norm_label": "project_best_practices.md",
+      "id": "refs_project_best_practices_md"
     },
     {
       "label": "Universal Project Best Practices",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1",
-      "id": "refs_project_best_practices_universal_project_best_practices",
       "community": 77,
-      "norm_label": "universal project best practices"
+      "norm_label": "universal project best practices",
+      "id": "refs_project_best_practices_universal_project_best_practices"
     },
     {
       "label": "1. Modularization Techniques",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L11",
-      "id": "refs_project_best_practices_1_modularization_techniques",
       "community": 4,
-      "norm_label": "1. modularization techniques"
+      "norm_label": "1. modularization techniques",
+      "id": "refs_project_best_practices_1_modularization_techniques"
     },
     {
       "label": "1.1 Module Responsibility Pattern",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L13",
-      "id": "refs_project_best_practices_1_1_module_responsibility_pattern",
       "community": 4,
-      "norm_label": "1.1 module responsibility pattern"
+      "norm_label": "1.1 module responsibility pattern",
+      "id": "refs_project_best_practices_1_1_module_responsibility_pattern"
     },
     {
       "label": "code:block1 (app/)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L19",
-      "id": "refs_project_best_practices_codeblock_1",
       "community": 4,
-      "norm_label": "code:block1 (app/)"
+      "norm_label": "code:block1 (app/)",
+      "id": "refs_project_best_practices_codeblock_1"
     },
     {
       "label": "1.2 Separation of Concerns",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L34",
-      "id": "refs_project_best_practices_1_2_separation_of_concerns",
       "community": 4,
-      "norm_label": "1.2 separation of concerns"
+      "norm_label": "1.2 separation of concerns",
+      "id": "refs_project_best_practices_1_2_separation_of_concerns"
     },
     {
       "label": "code:block2 (Configuration  \u2192 config.py / state.py (constants))",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L40",
-      "id": "refs_project_best_practices_codeblock_2",
       "community": 4,
-      "norm_label": "code:block2 (configuration  \u2192 config.py / state.py (constants))"
+      "norm_label": "code:block2 (configuration  \u2192 config.py / state.py (constants))",
+      "id": "refs_project_best_practices_codeblock_2"
     },
     {
       "label": "1.3 Frontend Modularization",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L50",
-      "id": "refs_project_best_practices_1_3_frontend_modularization",
       "community": 4,
-      "norm_label": "1.3 frontend modularization"
+      "norm_label": "1.3 frontend modularization",
+      "id": "refs_project_best_practices_1_3_frontend_modularization"
     },
     {
       "label": "code:block3 (app/static/js/)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L56",
-      "id": "refs_project_best_practices_codeblock_3",
       "community": 4,
-      "norm_label": "code:block3 (app/static/js/)"
+      "norm_label": "code:block3 (app/static/js/)",
+      "id": "refs_project_best_practices_codeblock_3"
     },
     {
       "label": "code:javascript (// api-utils.js ONLY: API calls \u2014 no UI, no timers, no confi)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L68",
-      "id": "refs_project_best_practices_codeblock_4",
       "community": 4,
-      "norm_label": "code:javascript (// api-utils.js only: api calls \u2014 no ui, no timers, no confi)"
+      "norm_label": "code:javascript (// api-utils.js only: api calls \u2014 no ui, no timers, no confi)",
+      "id": "refs_project_best_practices_codeblock_4"
     },
     {
       "label": "1.4 Module Communication",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L77",
-      "id": "refs_project_best_practices_1_4_module_communication",
       "community": 4,
-      "norm_label": "1.4 module communication"
+      "norm_label": "1.4 module communication",
+      "id": "refs_project_best_practices_1_4_module_communication"
     },
     {
       "label": "code:python (# \u2705 Good \u2014 leaf modules export, internal modules import from)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L83",
-      "id": "refs_project_best_practices_codeblock_5",
       "community": 4,
-      "norm_label": "code:python (# \u2705 good \u2014 leaf modules export, internal modules import from)"
+      "norm_label": "code:python (# \u2705 good \u2014 leaf modules export, internal modules import from)",
+      "id": "refs_project_best_practices_codeblock_5"
     },
     {
       "label": "code:block6 (routes.py \u2192 imports from \u2192 state.py, schemas.py, connection_)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L92",
-      "id": "refs_project_best_practices_codeblock_6",
       "community": 4,
-      "norm_label": "code:block6 (routes.py \u2192 imports from \u2192 state.py, schemas.py, connection_)"
+      "norm_label": "code:block6 (routes.py \u2192 imports from \u2192 state.py, schemas.py, connection_)",
+      "id": "refs_project_best_practices_codeblock_6"
     },
     {
       "label": "1.5 When to Split a Module",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L102",
-      "id": "refs_project_best_practices_1_5_when_to_split_a_module",
       "community": 4,
-      "norm_label": "1.5 when to split a module"
+      "norm_label": "1.5 when to split a module",
+      "id": "refs_project_best_practices_1_5_when_to_split_a_module"
     },
     {
       "label": "2. Configuration",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L113",
-      "id": "refs_project_best_practices_2_configuration",
       "community": 77,
-      "norm_label": "2. configuration"
+      "norm_label": "2. configuration",
+      "id": "refs_project_best_practices_2_configuration"
     },
     {
       "label": "code:python (# \u274c Bad)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L119",
-      "id": "refs_project_best_practices_codeblock_7",
       "community": 77,
-      "norm_label": "code:python (# \u274c bad)"
+      "norm_label": "code:python (# \u274c bad)",
+      "id": "refs_project_best_practices_codeblock_7"
     },
     {
       "label": "2.1 Server Binding for Browser Access",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L128",
-      "id": "refs_project_best_practices_2_1_server_binding_for_browser_access",
       "community": 77,
-      "norm_label": "2.1 server binding for browser access"
+      "norm_label": "2.1 server binding for browser access",
+      "id": "refs_project_best_practices_2_1_server_binding_for_browser_access"
     },
     {
       "label": "code:python (# \u2705 Local dev \u2014 browser-ready)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L132",
-      "id": "refs_project_best_practices_codeblock_8",
       "community": 77,
-      "norm_label": "code:python (# \u2705 local dev \u2014 browser-ready)"
+      "norm_label": "code:python (# \u2705 local dev \u2014 browser-ready)",
+      "id": "refs_project_best_practices_codeblock_8"
     },
     {
       "label": "3. Error Handling",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L142",
-      "id": "refs_project_best_practices_3_error_handling",
       "community": 77,
-      "norm_label": "3. error handling"
+      "norm_label": "3. error handling",
+      "id": "refs_project_best_practices_3_error_handling"
     },
     {
       "label": "code:python (if not input: return {'error': 'No data'}, 400)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L148",
-      "id": "refs_project_best_practices_codeblock_9",
       "community": 77,
-      "norm_label": "code:python (if not input: return {'error': 'no data'}, 400)"
+      "norm_label": "code:python (if not input: return {'error': 'no data'}, 400)",
+      "id": "refs_project_best_practices_codeblock_9"
     },
     {
       "label": "4. State Management",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L158",
-      "id": "refs_project_best_practices_4_state_management",
       "community": 77,
-      "norm_label": "4. state management"
+      "norm_label": "4. state management",
+      "id": "refs_project_best_practices_4_state_management"
     },
     {
       "label": "code:python (if user_id not in active_users:)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L164",
-      "id": "refs_project_best_practices_codeblock_10",
       "community": 77,
-      "norm_label": "code:python (if user_id not in active_users:)"
+      "norm_label": "code:python (if user_id not in active_users:)",
+      "id": "refs_project_best_practices_codeblock_10"
     },
     {
       "label": "5. Testing",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L174",
-      "id": "refs_project_best_practices_5_testing",
       "community": 81,
-      "norm_label": "5. testing"
+      "norm_label": "5. testing",
+      "id": "refs_project_best_practices_5_testing"
     },
     {
       "label": "code:bash (uv run python -c \"from app import app\"  # Syntax check)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L180",
-      "id": "refs_project_best_practices_codeblock_11",
       "community": 81,
-      "norm_label": "code:bash (uv run python -c \"from app import app\"  # syntax check)"
+      "norm_label": "code:bash (uv run python -c \"from app import app\"  # syntax check)",
+      "id": "refs_project_best_practices_codeblock_11"
     },
     {
       "label": "5.1 TestClient Over Live Server",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L187",
-      "id": "refs_project_best_practices_5_1_testclient_over_live_server",
       "community": 81,
-      "norm_label": "5.1 testclient over live server"
+      "norm_label": "5.1 testclient over live server",
+      "id": "refs_project_best_practices_5_1_testclient_over_live_server"
     },
     {
       "label": "code:python (# \u2705 Use TestClient \u2014 no server process needed)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L191",
-      "id": "refs_project_best_practices_codeblock_12",
       "community": 81,
-      "norm_label": "code:python (# \u2705 use testclient \u2014 no server process needed)"
+      "norm_label": "code:python (# \u2705 use testclient \u2014 no server process needed)",
+      "id": "refs_project_best_practices_codeblock_12"
     },
     {
       "label": "5.2 TDD Tests Are Permanent Regression Tests",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L205",
-      "id": "refs_project_best_practices_5_2_tdd_tests_are_permanent_regression_tests",
       "community": 81,
-      "norm_label": "5.2 tdd tests are permanent regression tests"
+      "norm_label": "5.2 tdd tests are permanent regression tests",
+      "id": "refs_project_best_practices_5_2_tdd_tests_are_permanent_regression_tests"
     },
     {
       "label": "code:block13 (# \u2705 Each TDD batch produces code AND a saved test)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L211",
-      "id": "refs_project_best_practices_codeblock_13",
       "community": 81,
-      "norm_label": "code:block13 (# \u2705 each tdd batch produces code and a saved test)"
+      "norm_label": "code:block13 (# \u2705 each tdd batch produces code and a saved test)",
+      "id": "refs_project_best_practices_codeblock_13"
     },
     {
       "label": "5.3 Test References Updated in Same Batch as Code Changes",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L220",
-      "id": "refs_project_best_practices_5_3_test_references_updated_in_same_batch_as_code_changes",
       "community": 81,
-      "norm_label": "5.3 test references updated in same batch as code changes"
+      "norm_label": "5.3 test references updated in same batch as code changes",
+      "id": "refs_project_best_practices_5_3_test_references_updated_in_same_batch_as_code_changes"
     },
     {
       "label": "code:block14 (\u2705 Same batch: rename getUser \u2192 fetchUser in source + update )",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L226",
-      "id": "refs_project_best_practices_codeblock_14",
       "community": 81,
-      "norm_label": "code:block14 (\u2705 same batch: rename getuser \u2192 fetchuser in source + update )"
+      "norm_label": "code:block14 (\u2705 same batch: rename getuser \u2192 fetchuser in source + update )",
+      "id": "refs_project_best_practices_codeblock_14"
     },
     {
       "label": "6. Documentation",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L235",
-      "id": "refs_project_best_practices_6_documentation",
       "community": 10,
-      "norm_label": "6. documentation"
+      "norm_label": "6. documentation",
+      "id": "refs_project_best_practices_6_documentation"
     },
     {
       "label": "6.1 One Purpose Per Document",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L237",
-      "id": "refs_project_best_practices_6_1_one_purpose_per_document",
       "community": 10,
-      "norm_label": "6.1 one purpose per document"
+      "norm_label": "6.1 one purpose per document",
+      "id": "refs_project_best_practices_6_1_one_purpose_per_document"
     },
     {
       "label": "6.2 Key Differentiator Per Document",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L255",
-      "id": "refs_project_best_practices_6_2_key_differentiator_per_document",
       "community": 10,
-      "norm_label": "6.2 key differentiator per document"
+      "norm_label": "6.2 key differentiator per document",
+      "id": "refs_project_best_practices_6_2_key_differentiator_per_document"
     },
     {
       "label": "6.3 Quality Gates Before Content",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L268",
-      "id": "refs_project_best_practices_6_3_quality_gates_before_content",
       "community": 10,
-      "norm_label": "6.3 quality gates before content"
+      "norm_label": "6.3 quality gates before content",
+      "id": "refs_project_best_practices_6_3_quality_gates_before_content"
     },
     {
       "label": "code:markdown (# Before applying gates (would be rejected):)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L279",
-      "id": "refs_project_best_practices_codeblock_15",
       "community": 10,
-      "norm_label": "code:markdown (# before applying gates (would be rejected):)"
+      "norm_label": "code:markdown (# before applying gates (would be rejected):)",
+      "id": "refs_project_best_practices_codeblock_15"
     },
     {
       "label": "6.4 Routing Table Over Decision Tree",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L290",
-      "id": "refs_project_best_practices_6_4_routing_table_over_decision_tree",
       "community": 10,
-      "norm_label": "6.4 routing table over decision tree"
+      "norm_label": "6.4 routing table over decision tree",
+      "id": "refs_project_best_practices_6_4_routing_table_over_decision_tree"
     },
     {
       "label": "6.5 Document Boundary Tensions",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L306",
-      "id": "refs_project_best_practices_6_5_document_boundary_tensions",
       "community": 10,
-      "norm_label": "6.5 document boundary tensions"
+      "norm_label": "6.5 document boundary tensions",
+      "id": "refs_project_best_practices_6_5_document_boundary_tensions"
     },
     {
       "label": "code:block16 (Tension: API endpoints in AGENTS.md vs ARCHITECTURE.md)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L312",
-      "id": "refs_project_best_practices_codeblock_16",
       "community": 10,
-      "norm_label": "code:block16 (tension: api endpoints in agents.md vs architecture.md)"
+      "norm_label": "code:block16 (tension: api endpoints in agents.md vs architecture.md)",
+      "id": "refs_project_best_practices_codeblock_16"
     },
     {
       "label": "6.6 Comments-First Documentation",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L325",
-      "id": "refs_project_best_practices_6_6_comments_first_documentation",
       "community": 10,
-      "norm_label": "6.6 comments-first documentation"
+      "norm_label": "6.6 comments-first documentation",
+      "id": "refs_project_best_practices_6_6_comments_first_documentation"
     },
     {
       "label": "code:python (# database.py)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L331",
-      "id": "refs_project_best_practices_codeblock_17",
       "community": 10,
-      "norm_label": "code:python (# database.py)"
+      "norm_label": "code:python (# database.py)",
+      "id": "refs_project_best_practices_codeblock_17"
     },
     {
       "label": "6.7 Lead Line + Bullets Split",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L340",
-      "id": "refs_project_best_practices_6_7_lead_line_bullets_split",
       "community": 10,
-      "norm_label": "6.7 lead line + bullets split"
+      "norm_label": "6.7 lead line + bullets split",
+      "id": "refs_project_best_practices_6_7_lead_line_bullets_split"
     },
     {
       "label": "code:markdown (### `app/routes.py` (HTTP Routes + WebSocket))",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L346",
-      "id": "refs_project_best_practices_codeblock_18",
       "community": 10,
-      "norm_label": "code:markdown (### `app/routes.py` (http routes + websocket))"
+      "norm_label": "code:markdown (### `app/routes.py` (http routes + websocket))",
+      "id": "refs_project_best_practices_codeblock_18"
     },
     {
       "label": "6.8 Strict Subsection Ordering",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L355",
-      "id": "refs_project_best_practices_6_8_strict_subsection_ordering",
       "community": 10,
-      "norm_label": "6.8 strict subsection ordering"
+      "norm_label": "6.8 strict subsection ordering",
+      "id": "refs_project_best_practices_6_8_strict_subsection_ordering"
     },
     {
       "label": "code:block19 (Python Modules: __init__ \u2192 state \u2192 database \u2192 config \u2192 schem)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L361",
-      "id": "refs_project_best_practices_codeblock_19",
       "community": 10,
-      "norm_label": "code:block19 (python modules: __init__ \u2192 state \u2192 database \u2192 config \u2192 schem)"
+      "norm_label": "code:block19 (python modules: __init__ \u2192 state \u2192 database \u2192 config \u2192 schem)",
+      "id": "refs_project_best_practices_codeblock_19"
     },
     {
       "label": "6.9 Standalone Cross-Cutting Sections",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L369",
-      "id": "refs_project_best_practices_6_9_standalone_cross_cutting_sections",
       "community": 10,
-      "norm_label": "6.9 standalone cross-cutting sections"
+      "norm_label": "6.9 standalone cross-cutting sections",
+      "id": "refs_project_best_practices_6_9_standalone_cross_cutting_sections"
     },
     {
       "label": "code:block20 (\u274c ## Module Descriptions (auto-generated))",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L375",
-      "id": "refs_project_best_practices_codeblock_20",
       "community": 10,
-      "norm_label": "code:block20 (\u274c ## module descriptions (auto-generated))"
+      "norm_label": "code:block20 (\u274c ## module descriptions (auto-generated))",
+      "id": "refs_project_best_practices_codeblock_20"
     },
     {
       "label": "6.10 Verify Presence and Quality, Not Absence",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L389",
-      "id": "refs_project_best_practices_6_10_verify_presence_and_quality_not_absence",
       "community": 10,
-      "norm_label": "6.10 verify presence and quality, not absence"
+      "norm_label": "6.10 verify presence and quality, not absence",
+      "id": "refs_project_best_practices_6_10_verify_presence_and_quality_not_absence"
     },
     {
       "label": "code:block21 (\u2705 Keep: \"Content's PRIMARY purpose identified and routed to )",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L395",
-      "id": "refs_project_best_practices_codeblock_21",
       "community": 10,
-      "norm_label": "code:block21 (\u2705 keep: \"content's primary purpose identified and routed to )"
+      "norm_label": "code:block21 (\u2705 keep: \"content's primary purpose identified and routed to )",
+      "id": "refs_project_best_practices_codeblock_21"
     },
     {
       "label": "6.11 Single Canonical Location for Artifacts",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L404",
-      "id": "refs_project_best_practices_6_11_single_canonical_location_for_artifacts",
       "community": 10,
-      "norm_label": "6.11 single canonical location for artifacts"
+      "norm_label": "6.11 single canonical location for artifacts",
+      "id": "refs_project_best_practices_6_11_single_canonical_location_for_artifacts"
     },
     {
       "label": "code:block22 (# \u2705 All archive plan files in archive/)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L410",
-      "id": "refs_project_best_practices_codeblock_22",
       "community": 10,
-      "norm_label": "code:block22 (# \u2705 all archive plan files in archive/)"
+      "norm_label": "code:block22 (# \u2705 all archive plan files in archive/)",
+      "id": "refs_project_best_practices_codeblock_22"
     },
     {
       "label": "6.12 File Description Convention Across All Languages",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L420",
-      "id": "refs_project_best_practices_6_12_file_description_convention_across_all_languages",
       "community": 86,
-      "norm_label": "6.12 file description convention across all languages"
+      "norm_label": "6.12 file description convention across all languages",
+      "id": "refs_project_best_practices_6_12_file_description_convention_across_all_languages"
     },
     {
       "label": "code:typescript (// Timer.tsx)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L426",
-      "id": "refs_project_best_practices_codeblock_23",
       "community": 86,
-      "norm_label": "code:typescript (// timer.tsx)"
+      "norm_label": "code:typescript (// timer.tsx)",
+      "id": "refs_project_best_practices_codeblock_23"
     },
     {
       "label": "code:python (# matchmaking.py)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L432",
-      "id": "refs_project_best_practices_codeblock_24",
       "community": 86,
-      "norm_label": "code:python (# matchmaking.py)"
+      "norm_label": "code:python (# matchmaking.py)",
+      "id": "refs_project_best_practices_codeblock_24"
     },
     {
       "label": "code:css (/* style.css */)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L438",
-      "id": "refs_project_best_practices_codeblock_25",
       "community": 86,
-      "norm_label": "code:css (/* style.css */)"
+      "norm_label": "code:css (/* style.css */)",
+      "id": "refs_project_best_practices_codeblock_25"
     },
     {
       "label": "6.13 ARCHITECTURE.md Project Structure Tree Synced from Source",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L446",
-      "id": "refs_project_best_practices_6_13_architecture_md_project_structure_tree_synced_from_source",
       "community": 89,
-      "norm_label": "6.13 architecture.md project structure tree synced from source"
+      "norm_label": "6.13 architecture.md project structure tree synced from source",
+      "id": "refs_project_best_practices_6_13_architecture_md_project_structure_tree_synced_from_source"
     },
     {
       "label": "code:block26 (Before: \u2502   \u251c\u2500\u2500 format.ts      # formatTime() \u2014 seconds to M)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L452",
-      "id": "refs_project_best_practices_codeblock_26",
       "community": 89,
-      "norm_label": "code:block26 (before: \u2502   \u251c\u2500\u2500 format.ts      # formattime() \u2014 seconds to m)"
+      "norm_label": "code:block26 (before: \u2502   \u251c\u2500\u2500 format.ts      # formattime() \u2014 seconds to m)",
+      "id": "refs_project_best_practices_codeblock_26"
     },
     {
       "label": "6.14 Documentation Conciseness & Anti-Bloat",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L461",
-      "id": "refs_project_best_practices_6_14_documentation_conciseness_anti_bloat",
       "community": 10,
-      "norm_label": "6.14 documentation conciseness & anti-bloat"
+      "norm_label": "6.14 documentation conciseness & anti-bloat",
+      "id": "refs_project_best_practices_6_14_documentation_conciseness_anti_bloat"
     },
     {
       "label": "7. Session Lessons Learned",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L487",
-      "id": "refs_project_best_practices_7_session_lessons_learned",
       "community": 0,
-      "norm_label": "7. session lessons learned"
+      "norm_label": "7. session lessons learned",
+      "id": "refs_project_best_practices_7_session_lessons_learned"
     },
     {
       "label": "7.1 Syntax Verification",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L489",
-      "id": "refs_project_best_practices_7_1_syntax_verification",
       "community": 0,
-      "norm_label": "7.1 syntax verification"
+      "norm_label": "7.1 syntax verification",
+      "id": "refs_project_best_practices_7_1_syntax_verification"
     },
     {
       "label": "code:bash (uv run python -m py_compile **/*.py)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L495",
-      "id": "refs_project_best_practices_codeblock_27",
       "community": 0,
-      "norm_label": "code:bash (uv run python -m py_compile **/*.py)"
+      "norm_label": "code:bash (uv run python -m py_compile **/*.py)",
+      "id": "refs_project_best_practices_codeblock_27"
     },
     {
       "label": "7.2 Import Discipline",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L502",
-      "id": "refs_project_best_practices_7_2_import_discipline",
       "community": 0,
-      "norm_label": "7.2 import discipline"
+      "norm_label": "7.2 import discipline",
+      "id": "refs_project_best_practices_7_2_import_discipline"
     },
     {
       "label": "code:python (# \u2705 import sqlite3; from .state import active_users)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L508",
-      "id": "refs_project_best_practices_codeblock_28",
       "community": 0,
-      "norm_label": "code:python (# \u2705 import sqlite3; from .state import active_users)"
+      "norm_label": "code:python (# \u2705 import sqlite3; from .state import active_users)",
+      "id": "refs_project_best_practices_codeblock_28"
     },
     {
       "label": "7.3 API Contract First",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L515",
-      "id": "refs_project_best_practices_7_3_api_contract_first",
       "community": 0,
-      "norm_label": "7.3 api contract first"
+      "norm_label": "7.3 api contract first",
+      "id": "refs_project_best_practices_7_3_api_contract_first"
     },
     {
       "label": "7.4 Immediate Verification",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L522",
-      "id": "refs_project_best_practices_7_4_immediate_verification",
       "community": 0,
-      "norm_label": "7.4 immediate verification"
+      "norm_label": "7.4 immediate verification",
+      "id": "refs_project_best_practices_7_4_immediate_verification"
     },
     {
       "label": "7.5 Investigation Priority Order",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L529",
-      "id": "refs_project_best_practices_7_5_investigation_priority_order",
       "community": 0,
-      "norm_label": "7.5 investigation priority order"
+      "norm_label": "7.5 investigation priority order",
+      "id": "refs_project_best_practices_7_5_investigation_priority_order"
     },
     {
       "label": "7.6 Inline Constraints With Items",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L541",
-      "id": "refs_project_best_practices_7_6_inline_constraints_with_items",
       "community": 0,
-      "norm_label": "7.6 inline constraints with items"
+      "norm_label": "7.6 inline constraints with items",
+      "id": "refs_project_best_practices_7_6_inline_constraints_with_items"
     },
     {
       "label": "7.7 Merge Pre-Verification With Post-Verification",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L552",
-      "id": "refs_project_best_practices_7_7_merge_pre_verification_with_post_verification",
       "community": 0,
-      "norm_label": "7.7 merge pre-verification with post-verification"
+      "norm_label": "7.7 merge pre-verification with post-verification",
+      "id": "refs_project_best_practices_7_7_merge_pre_verification_with_post_verification"
     },
     {
       "label": "7.8 Gap Grilling Methodology",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L563",
-      "id": "refs_project_best_practices_7_8_gap_grilling_methodology",
       "community": 0,
-      "norm_label": "7.8 gap grilling methodology"
+      "norm_label": "7.8 gap grilling methodology",
+      "id": "refs_project_best_practices_7_8_gap_grilling_methodology"
     },
     {
       "label": "code:block29 (Gap found: \"Prefer wiring files over leaf files\")",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L569",
-      "id": "refs_project_best_practices_codeblock_29",
       "community": 0,
-      "norm_label": "code:block29 (gap found: \"prefer wiring files over leaf files\")"
+      "norm_label": "code:block29 (gap found: \"prefer wiring files over leaf files\")",
+      "id": "refs_project_best_practices_codeblock_29"
     },
     {
       "label": "7.9 Docs-First Analysis Pipeline",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L580",
-      "id": "refs_project_best_practices_7_9_docs_first_analysis_pipeline",
       "community": 0,
-      "norm_label": "7.9 docs-first analysis pipeline"
+      "norm_label": "7.9 docs-first analysis pipeline",
+      "id": "refs_project_best_practices_7_9_docs_first_analysis_pipeline"
     },
     {
       "label": "code:block30 (Task: Add a new API endpoint)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L586",
-      "id": "refs_project_best_practices_codeblock_30",
       "community": 0,
-      "norm_label": "code:block30 (task: add a new api endpoint)"
+      "norm_label": "code:block30 (task: add a new api endpoint)",
+      "id": "refs_project_best_practices_codeblock_30"
     },
     {
       "label": "7.10 Interactive Walkthrough with Skip Confirmation",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L595",
-      "id": "refs_project_best_practices_7_10_interactive_walkthrough_with_skip_confirmation",
       "community": 0,
-      "norm_label": "7.10 interactive walkthrough with skip confirmation"
+      "norm_label": "7.10 interactive walkthrough with skip confirmation",
+      "id": "refs_project_best_practices_7_10_interactive_walkthrough_with_skip_confirmation"
     },
     {
       "label": "code:block31 (Before: \"Let me check assumptions, edge cases, alternatives.)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L601",
-      "id": "refs_project_best_practices_codeblock_31",
       "community": 0,
-      "norm_label": "code:block31 (before: \"let me check assumptions, edge cases, alternatives.)"
+      "norm_label": "code:block31 (before: \"let me check assumptions, edge cases, alternatives.)",
+      "id": "refs_project_best_practices_codeblock_31"
     },
     {
       "label": "7.11 Presence Check Over Re-Probe",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L612",
-      "id": "refs_project_best_practices_7_11_presence_check_over_re_probe",
       "community": 0,
-      "norm_label": "7.11 presence check over re-probe"
+      "norm_label": "7.11 presence check over re-probe",
+      "id": "refs_project_best_practices_7_11_presence_check_over_re_probe"
     },
     {
       "label": "code:block32 (\u2705 Presence check: \"Does the plan state confirmed assumptions)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L618",
-      "id": "refs_project_best_practices_codeblock_32",
       "community": 0,
-      "norm_label": "code:block32 (\u2705 presence check: \"does the plan state confirmed assumptions)"
+      "norm_label": "code:block32 (\u2705 presence check: \"does the plan state confirmed assumptions)",
+      "id": "refs_project_best_practices_codeblock_32"
     },
     {
       "label": "7.12 Triage Routing",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L626",
-      "id": "refs_project_best_practices_7_12_triage_routing",
       "community": 0,
-      "norm_label": "7.12 triage routing"
+      "norm_label": "7.12 triage routing",
+      "id": "refs_project_best_practices_7_12_triage_routing"
     },
     {
       "label": "code:block33 (readiness-check finds:)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L632",
-      "id": "refs_project_best_practices_codeblock_33",
       "community": 0,
-      "norm_label": "code:block33 (readiness-check finds:)"
+      "norm_label": "code:block33 (readiness-check finds:)",
+      "id": "refs_project_best_practices_codeblock_33"
     },
     {
       "label": "7.13 Preserve File Description Comments",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L644",
-      "id": "refs_project_best_practices_7_13_preserve_file_description_comments",
       "community": 0,
-      "norm_label": "7.13 preserve file description comments"
+      "norm_label": "7.13 preserve file description comments",
+      "id": "refs_project_best_practices_7_13_preserve_file_description_comments"
     },
     {
       "label": "code:python (# \u2705 Preserve and update)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L648",
-      "id": "refs_project_best_practices_codeblock_34",
       "community": 0,
-      "norm_label": "code:python (# \u2705 preserve and update)"
+      "norm_label": "code:python (# \u2705 preserve and update)",
+      "id": "refs_project_best_practices_codeblock_34"
     },
     {
       "label": "7.14 Windows Shell Quoting Workaround",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L656",
-      "id": "refs_project_best_practices_7_14_windows_shell_quoting_workaround",
       "community": 0,
-      "norm_label": "7.14 windows shell quoting workaround"
+      "norm_label": "7.14 windows shell quoting workaround",
+      "id": "refs_project_best_practices_7_14_windows_shell_quoting_workaround"
     },
     {
       "label": "code:powershell (# \u274c PowerShell mangles embedded double quotes in f-strings)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L660",
-      "id": "refs_project_best_practices_codeblock_35",
       "community": 0,
-      "norm_label": "code:powershell (# \u274c powershell mangles embedded double quotes in f-strings)"
+      "norm_label": "code:powershell (# \u274c powershell mangles embedded double quotes in f-strings)",
+      "id": "refs_project_best_practices_codeblock_35"
     },
     {
       "label": "7.15 Matchmaking Queue Filter Direction",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L672",
-      "id": "refs_project_best_practices_7_15_matchmaking_queue_filter_direction",
       "community": 0,
-      "norm_label": "7.15 matchmaking queue filter direction"
+      "norm_label": "7.15 matchmaking queue filter direction",
+      "id": "refs_project_best_practices_7_15_matchmaking_queue_filter_direction"
     },
     {
       "label": "code:python (# \u2705 Find users who ARE waiting for a match)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L676",
-      "id": "refs_project_best_practices_codeblock_36",
       "community": 0,
-      "norm_label": "code:python (# \u2705 find users who are waiting for a match)"
+      "norm_label": "code:python (# \u2705 find users who are waiting for a match)",
+      "id": "refs_project_best_practices_codeblock_36"
     },
     {
       "label": "7.16 Root Pattern Extraction",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L687",
-      "id": "refs_project_best_practices_7_16_root_pattern_extraction",
       "community": 0,
-      "norm_label": "7.16 root pattern extraction"
+      "norm_label": "7.16 root pattern extraction",
+      "id": "refs_project_best_practices_7_16_root_pattern_extraction"
     },
     {
       "label": "code:block37 (Symptom: \"Don't accept a WebSocket twice.\")",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L693",
-      "id": "refs_project_best_practices_codeblock_37",
       "community": 0,
-      "norm_label": "code:block37 (symptom: \"don't accept a websocket twice.\")"
+      "norm_label": "code:block37 (symptom: \"don't accept a websocket twice.\")",
+      "id": "refs_project_best_practices_codeblock_37"
     },
     {
       "label": "7.17 Sequential Numbering for Plan Files",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L706",
-      "id": "refs_project_best_practices_7_17_sequential_numbering_for_plan_files",
       "community": 0,
-      "norm_label": "7.17 sequential numbering for plan files"
+      "norm_label": "7.17 sequential numbering for plan files",
+      "id": "refs_project_best_practices_7_17_sequential_numbering_for_plan_files"
     },
     {
       "label": "code:block38 (# \u2705 docs/ has 001, 002 \u2192 next is 003)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L712",
-      "id": "refs_project_best_practices_codeblock_38",
       "community": 0,
-      "norm_label": "code:block38 (# \u2705 docs/ has 001, 002 \u2192 next is 003)"
+      "norm_label": "code:block38 (# \u2705 docs/ has 001, 002 \u2192 next is 003)",
+      "id": "refs_project_best_practices_codeblock_38"
     },
     {
       "label": "7.18 Skill Rename Protocol",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L719",
-      "id": "refs_project_best_practices_7_18_skill_rename_protocol",
       "community": 0,
-      "norm_label": "7.18 skill rename protocol"
+      "norm_label": "7.18 skill rename protocol",
+      "id": "refs_project_best_practices_7_18_skill_rename_protocol"
     },
     {
       "label": "code:block39 (# After rename, verify with:)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L725",
-      "id": "refs_project_best_practices_codeblock_39",
       "community": 0,
-      "norm_label": "code:block39 (# after rename, verify with:)"
+      "norm_label": "code:block39 (# after rename, verify with:)",
+      "id": "refs_project_best_practices_codeblock_39"
     },
     {
       "label": "7.19 Workflow Handoff with Outputs & Triggers + Hand-off Checklists",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L732",
-      "id": "refs_project_best_practices_7_19_workflow_handoff_with_outputs_triggers_hand_off_checklists",
       "community": 0,
-      "norm_label": "7.19 workflow handoff with outputs & triggers + hand-off checklists"
+      "norm_label": "7.19 workflow handoff with outputs & triggers + hand-off checklists",
+      "id": "refs_project_best_practices_7_19_workflow_handoff_with_outputs_triggers_hand_off_checklists"
     },
     {
       "label": "code:block40 (improve-architecture)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L738",
-      "id": "refs_project_best_practices_codeblock_40",
       "community": 0,
-      "norm_label": "code:block40 (improve-architecture)"
+      "norm_label": "code:block40 (improve-architecture)",
+      "id": "refs_project_best_practices_codeblock_40"
     },
     {
       "label": "7.20 WebSocket Accept Once",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L751",
-      "id": "refs_project_best_practices_7_20_websocket_accept_once",
       "community": 0,
-      "norm_label": "7.20 websocket accept once"
+      "norm_label": "7.20 websocket accept once",
+      "id": "refs_project_best_practices_7_20_websocket_accept_once"
     },
     {
       "label": "code:python (# \u2705 Route handler accepts, manager only registers)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L755",
-      "id": "refs_project_best_practices_codeblock_41",
       "community": 0,
-      "norm_label": "code:python (# \u2705 route handler accepts, manager only registers)"
+      "norm_label": "code:python (# \u2705 route handler accepts, manager only registers)",
+      "id": "refs_project_best_practices_codeblock_41"
     },
     {
       "label": "7.21 Skill Audit After Content Restructure",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L769",
-      "id": "refs_project_best_practices_7_21_skill_audit_after_content_restructure",
       "community": 0,
-      "norm_label": "7.21 skill audit after content restructure"
+      "norm_label": "7.21 skill audit after content restructure",
+      "id": "refs_project_best_practices_7_21_skill_audit_after_content_restructure"
     },
     {
       "label": "7.22 Exhaustive Section Mapping",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L775",
-      "id": "refs_project_best_practices_7_22_exhaustive_section_mapping",
       "community": 0,
-      "norm_label": "7.22 exhaustive section mapping"
+      "norm_label": "7.22 exhaustive section mapping",
+      "id": "refs_project_best_practices_7_22_exhaustive_section_mapping"
     },
     {
       "label": "7.23 Stale Pattern Audit After Migration",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L781",
-      "id": "refs_project_best_practices_7_23_stale_pattern_audit_after_migration",
       "community": 0,
-      "norm_label": "7.23 stale pattern audit after migration"
+      "norm_label": "7.23 stale pattern audit after migration",
+      "id": "refs_project_best_practices_7_23_stale_pattern_audit_after_migration"
     },
     {
       "label": "7.24 Consistency Pass as Final Cross-Cutting Step",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L787",
-      "id": "refs_project_best_practices_7_24_consistency_pass_as_final_cross_cutting_step",
       "community": 0,
-      "norm_label": "7.24 consistency pass as final cross-cutting step"
+      "norm_label": "7.24 consistency pass as final cross-cutting step",
+      "id": "refs_project_best_practices_7_24_consistency_pass_as_final_cross_cutting_step"
     },
     {
       "label": "code:block42 (Individual edits: added Hand-off sections to 9 skills)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L793",
-      "id": "refs_project_best_practices_codeblock_42",
       "community": 0,
-      "norm_label": "code:block42 (individual edits: added hand-off sections to 9 skills)"
+      "norm_label": "code:block42 (individual edits: added hand-off sections to 9 skills)",
+      "id": "refs_project_best_practices_codeblock_42"
     },
     {
       "label": "7.26 Surgical Edits Over File Rewrites",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L804",
-      "id": "refs_project_best_practices_7_26_surgical_edits_over_file_rewrites",
       "community": 0,
-      "norm_label": "7.26 surgical edits over file rewrites"
+      "norm_label": "7.26 surgical edits over file rewrites",
+      "id": "refs_project_best_practices_7_26_surgical_edits_over_file_rewrites"
     },
     {
       "label": "7.25 Three-Layer Verification After Bulk Edits",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L810",
-      "id": "refs_project_best_practices_7_25_three_layer_verification_after_bulk_edits",
       "community": 0,
-      "norm_label": "7.25 three-layer verification after bulk edits"
+      "norm_label": "7.25 three-layer verification after bulk edits",
+      "id": "refs_project_best_practices_7_25_three_layer_verification_after_bulk_edits"
     },
     {
       "label": "8. Automation & Process Design",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L818",
-      "id": "refs_project_best_practices_8_automation_process_design",
       "community": 9,
-      "norm_label": "8. automation & process design"
+      "norm_label": "8. automation & process design",
+      "id": "refs_project_best_practices_8_automation_process_design"
     },
     {
       "label": "8.1 Permission Control",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L820",
-      "id": "refs_project_best_practices_8_1_permission_control",
       "community": 9,
-      "norm_label": "8.1 permission control"
+      "norm_label": "8.1 permission control",
+      "id": "refs_project_best_practices_8_1_permission_control"
     },
     {
       "label": "code:json ({\"agent\":{\"build\":{\"permission\":{\"edit\":\"ask\",\"write\":\"ask\",)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L826",
-      "id": "refs_project_best_practices_codeblock_43",
       "community": 9,
-      "norm_label": "code:json ({\"agent\":{\"build\":{\"permission\":{\"edit\":\"ask\",\"write\":\"ask\",)"
+      "norm_label": "code:json ({\"agent\":{\"build\":{\"permission\":{\"edit\":\"ask\",\"write\":\"ask\",)",
+      "id": "refs_project_best_practices_codeblock_43"
     },
     {
       "label": "8.2 Executable Sources of Truth",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L832",
-      "id": "refs_project_best_practices_8_2_executable_sources_of_truth",
       "community": 9,
-      "norm_label": "8.2 executable sources of truth"
+      "norm_label": "8.2 executable sources of truth",
+      "id": "refs_project_best_practices_8_2_executable_sources_of_truth"
     },
     {
       "label": "8.3 Filename as Stable Key",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L843",
-      "id": "refs_project_best_practices_8_3_filename_as_stable_key",
       "community": 9,
-      "norm_label": "8.3 filename as stable key"
+      "norm_label": "8.3 filename as stable key",
+      "id": "refs_project_best_practices_8_3_filename_as_stable_key"
     },
     {
       "label": "code:markdown (### `app/routes.py` (HTTP Routes)   \u2190 match on `app/routes.p)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L849",
-      "id": "refs_project_best_practices_codeblock_44",
       "community": 9,
-      "norm_label": "code:markdown (### `app/routes.py` (http routes)   \u2190 match on `app/routes.p)"
+      "norm_label": "code:markdown (### `app/routes.py` (http routes)   \u2190 match on `app/routes.p)",
+      "id": "refs_project_best_practices_codeblock_44"
     },
     {
       "label": "8.4 Preserve Manual, Regenerate Auto",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L857",
-      "id": "refs_project_best_practices_8_4_preserve_manual_regenerate_auto",
       "community": 9,
-      "norm_label": "8.4 preserve manual, regenerate auto"
+      "norm_label": "8.4 preserve manual, regenerate auto",
+      "id": "refs_project_best_practices_8_4_preserve_manual_regenerate_auto"
     },
     {
       "label": "code:markdown (### `app/routes.py` (HTTP Routes))",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L863",
-      "id": "refs_project_best_practices_codeblock_45",
       "community": 9,
-      "norm_label": "code:markdown (### `app/routes.py` (http routes))"
+      "norm_label": "code:markdown (### `app/routes.py` (http routes))",
+      "id": "refs_project_best_practices_codeblock_45"
     },
     {
       "label": "8.5 Diff Logging for Automation",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L871",
-      "id": "refs_project_best_practices_8_5_diff_logging_for_automation",
       "community": 9,
-      "norm_label": "8.5 diff logging for automation"
+      "norm_label": "8.5 diff logging for automation",
+      "id": "refs_project_best_practices_8_5_diff_logging_for_automation"
     },
     {
       "label": "code:block46 ([diff] app/routes.py: 'Old lead line' \u2192 'New lead line')",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L877",
-      "id": "refs_project_best_practices_codeblock_46",
       "community": 9,
-      "norm_label": "code:block46 ([diff] app/routes.py: 'old lead line' \u2192 'new lead line')"
+      "norm_label": "code:block46 ([diff] app/routes.py: 'old lead line' \u2192 'new lead line')",
+      "id": "refs_project_best_practices_codeblock_46"
     },
     {
       "label": "8.6 Cross-Language Extraction Pattern",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L885",
-      "id": "refs_project_best_practices_8_6_cross_language_extraction_pattern",
       "community": 9,
-      "norm_label": "8.6 cross-language extraction pattern"
+      "norm_label": "8.6 cross-language extraction pattern",
+      "id": "refs_project_best_practices_8_6_cross_language_extraction_pattern"
     },
     {
       "label": "code:regex (/Description: (.+)/   \u2190 matches all of:)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L891",
-      "id": "refs_project_best_practices_codeblock_47",
       "community": 9,
-      "norm_label": "code:regex (/description: (.+)/   \u2190 matches all of:)"
+      "norm_label": "code:regex (/description: (.+)/   \u2190 matches all of:)",
+      "id": "refs_project_best_practices_codeblock_47"
     },
     {
       "label": "8.7 Description Headers Go in Source Code Only",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L901",
-      "id": "refs_project_best_practices_8_7_description_headers_go_in_source_code_only",
       "community": 9,
-      "norm_label": "8.7 description headers go in source code only"
+      "norm_label": "8.7 description headers go in source code only",
+      "id": "refs_project_best_practices_8_7_description_headers_go_in_source_code_only"
     },
     {
       "label": "8.8 One Verb Per Skill",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L916",
-      "id": "refs_project_best_practices_8_8_one_verb_per_skill",
       "community": 9,
-      "norm_label": "8.8 one verb per skill"
+      "norm_label": "8.8 one verb per skill",
+      "id": "refs_project_best_practices_8_8_one_verb_per_skill"
     },
     {
       "label": "code:block48 (\u274c implement-guide: \"Code, test, debug, verify, and document\")",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L922",
-      "id": "refs_project_best_practices_codeblock_48",
       "community": 9,
-      "norm_label": "code:block48 (\u274c implement-guide: \"code, test, debug, verify, and document\")"
+      "norm_label": "code:block48 (\u274c implement-guide: \"code, test, debug, verify, and document\")",
+      "id": "refs_project_best_practices_codeblock_48"
     },
     {
       "label": "8.8 Independent Re-Verification",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L933",
-      "id": "refs_project_best_practices_8_8_independent_re_verification",
       "community": 9,
-      "norm_label": "8.8 independent re-verification"
+      "norm_label": "8.8 independent re-verification",
+      "id": "refs_project_best_practices_8_8_independent_re_verification"
     },
     {
       "label": "code:block49 (implement-plan: codes, tests locally per batch, hands off \"R)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L939",
-      "id": "refs_project_best_practices_codeblock_49",
       "community": 9,
-      "norm_label": "code:block49 (implement-plan: codes, tests locally per batch, hands off \"r)"
+      "norm_label": "code:block49 (implement-plan: codes, tests locally per batch, hands off \"r)",
+      "id": "refs_project_best_practices_codeblock_49"
     },
     {
       "label": "8.9 Stage Gate Pattern",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L951",
-      "id": "refs_project_best_practices_8_9_stage_gate_pattern",
       "community": 9,
-      "norm_label": "8.9 stage gate pattern"
+      "norm_label": "8.9 stage gate pattern",
+      "id": "refs_project_best_practices_8_9_stage_gate_pattern"
     },
     {
       "label": "code:block50 (Phase                          Gate                         )",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L957",
-      "id": "refs_project_best_practices_codeblock_50",
       "community": 9,
-      "norm_label": "code:block50 (phase                          gate                         )"
+      "norm_label": "code:block50 (phase                          gate                         )",
+      "id": "refs_project_best_practices_codeblock_50"
     },
     {
       "label": "8.10 Batch by Logical Concern, Not Line Count",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L970",
-      "id": "refs_project_best_practices_8_10_batch_by_logical_concern_not_line_count",
       "community": 9,
-      "norm_label": "8.10 batch by logical concern, not line count"
+      "norm_label": "8.10 batch by logical concern, not line count",
+      "id": "refs_project_best_practices_8_10_batch_by_logical_concern_not_line_count"
     },
     {
       "label": "code:block51 (\u2705 Good batch: \"Add POST /api/users endpoint + its test\" (3 f)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L976",
-      "id": "refs_project_best_practices_codeblock_51",
       "community": 9,
-      "norm_label": "code:block51 (\u2705 good batch: \"add post /api/users endpoint + its test\" (3 f)"
+      "norm_label": "code:block51 (\u2705 good batch: \"add post /api/users endpoint + its test\" (3 f)",
+      "id": "refs_project_best_practices_codeblock_51"
     },
     {
       "label": "8.11 Persistent Decision Artifacts",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L985",
-      "id": "refs_project_best_practices_8_11_persistent_decision_artifacts",
       "community": 9,
-      "norm_label": "8.11 persistent decision artifacts"
+      "norm_label": "8.11 persistent decision artifacts",
+      "id": "refs_project_best_practices_8_11_persistent_decision_artifacts"
     },
     {
       "label": "code:block52 (docs/)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L991",
-      "id": "refs_project_best_practices_codeblock_52",
       "community": 9,
-      "norm_label": "code:block52 (docs/)"
+      "norm_label": "code:block52 (docs/)",
+      "id": "refs_project_best_practices_codeblock_52"
     },
     {
       "label": "code:block53",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1009",
-      "id": "refs_project_best_practices_codeblock_53",
       "community": 9,
-      "norm_label": "code:block53"
+      "norm_label": "code:block53",
+      "id": "refs_project_best_practices_codeblock_53"
     },
     {
       "label": "code:block54",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1021",
-      "id": "refs_project_best_practices_codeblock_54",
       "community": 9,
-      "norm_label": "code:block54"
+      "norm_label": "code:block54",
+      "id": "refs_project_best_practices_codeblock_54"
     },
     {
       "label": "code:block55",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1035",
-      "id": "refs_project_best_practices_codeblock_55",
       "community": 9,
-      "norm_label": "code:block55"
+      "norm_label": "code:block55",
+      "id": "refs_project_best_practices_codeblock_55"
     },
     {
       "label": "code:block56",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1050",
-      "id": "refs_project_best_practices_codeblock_56",
       "community": 9,
-      "norm_label": "code:block56"
+      "norm_label": "code:block56",
+      "id": "refs_project_best_practices_codeblock_56"
     },
     {
       "label": "code:block57",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1079",
-      "id": "refs_project_best_practices_codeblock_57",
       "community": 9,
-      "norm_label": "code:block57"
+      "norm_label": "code:block57",
+      "id": "refs_project_best_practices_codeblock_57"
     },
     {
       "label": "Pin: fastapi==0.115.0 (never fastapi without version)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1140",
-      "id": "refs_project_best_practices_pin_fastapi_0_115_0_never_fastapi_without_version",
       "community": 83,
-      "norm_label": "pin: fastapi==0.115.0 (never fastapi without version)"
+      "norm_label": "pin: fastapi==0.115.0 (never fastapi without version)",
+      "id": "refs_project_best_practices_pin_fastapi_0_115_0_never_fastapi_without_version"
     },
     {
       "label": "code:block58",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1141",
-      "id": "refs_project_best_practices_codeblock_58",
       "community": 83,
-      "norm_label": "code:block58"
+      "norm_label": "code:block58",
+      "id": "refs_project_best_practices_codeblock_58"
     },
     {
       "label": "code:block59",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1156",
-      "id": "refs_project_best_practices_codeblock_59",
       "community": 83,
-      "norm_label": "code:block59"
+      "norm_label": "code:block59",
+      "id": "refs_project_best_practices_codeblock_59"
     },
     {
       "label": "code:block60",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1169",
-      "id": "refs_project_best_practices_codeblock_60",
       "community": 83,
-      "norm_label": "code:block60"
+      "norm_label": "code:block60",
+      "id": "refs_project_best_practices_codeblock_60"
     },
     {
       "label": "code:block61",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1185",
-      "id": "refs_project_best_practices_codeblock_61",
       "community": 83,
-      "norm_label": "code:block61"
+      "norm_label": "code:block61",
+      "id": "refs_project_best_practices_codeblock_61"
     },
     {
       "label": "code:block62",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1202",
-      "id": "refs_project_best_practices_codeblock_62",
       "community": 83,
-      "norm_label": "code:block62"
+      "norm_label": "code:block62",
+      "id": "refs_project_best_practices_codeblock_62"
     },
     {
       "label": "package.json",
@@ -2447,7 +2456,7 @@
       "file_type": "code",
       "source_file": "app/matchmaking.py",
       "source_location": "L36",
-      "community": 3,
+      "community": 1,
       "norm_label": "create_match()",
       "id": "app_matchmaking_create_match"
     },
@@ -12808,6 +12817,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/AGENT_SETUP.md",
+      "source_location": "L455",
+      "weight": 1.0,
+      "source": "docs_agent_setup_ccc_mcp_fails_on_opencode_startup",
+      "target": "docs_agent_setup_codeblock_23",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/AGENT_SETUP.md",
       "source_location": "L458",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -12817,12 +12836,22 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/AGENT_SETUP.md",
+      "source_location": "L468",
+      "weight": 1.0,
+      "source": "docs_agent_setup_graph_is_stale_or_has_no_data",
+      "target": "docs_agent_setup_codeblock_24",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "opencode.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "opencode_json",
-      "target": "intro_chat_opencode_schema",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_schema"
     },
     {
       "relation": "contains",
@@ -12830,9 +12859,9 @@
       "source_file": "opencode.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "opencode_json",
-      "target": "intro_chat_opencode_plugin",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_plugin"
     },
     {
       "relation": "contains",
@@ -12840,9 +12869,9 @@
       "source_file": "opencode.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "opencode_json",
-      "target": "intro_chat_opencode_mcp",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_mcp"
     },
     {
       "relation": "contains",
@@ -12850,9 +12879,9 @@
       "source_file": "opencode.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "intro_chat_opencode_mcp",
-      "target": "intro_chat_opencode_mcp_cocoindex_code",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_mcp_cocoindex_code"
     },
     {
       "relation": "contains",
@@ -12860,9 +12889,9 @@
       "source_file": "opencode.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "intro_chat_opencode_mcp",
-      "target": "intro_chat_opencode_mcp_graphify",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_mcp_graphify"
     },
     {
       "relation": "contains",
@@ -12870,9 +12899,9 @@
       "source_file": "opencode.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "intro_chat_opencode_mcp_cocoindex_code",
-      "target": "intro_chat_opencode_cocoindex_code_type",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_cocoindex_code_type"
     },
     {
       "relation": "contains",
@@ -12880,9 +12909,9 @@
       "source_file": "opencode.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "intro_chat_opencode_mcp_cocoindex_code",
-      "target": "intro_chat_opencode_cocoindex_code_command",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_cocoindex_code_command"
     },
     {
       "relation": "contains",
@@ -12890,9 +12919,9 @@
       "source_file": "opencode.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "intro_chat_opencode_mcp_graphify",
-      "target": "intro_chat_opencode_graphify_type",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_graphify_type"
     },
     {
       "relation": "contains",
@@ -12900,9 +12929,9 @@
       "source_file": "opencode.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "intro_chat_opencode_mcp_graphify",
-      "target": "intro_chat_opencode_graphify_command",
-      "confidence_score": 1.0
+      "target": "intro_chat_opencode_graphify_command"
     },
     {
       "relation": "contains",
@@ -13980,9 +14009,9 @@
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L901",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "refs_project_best_practices_8_automation_process_design",
-      "target": "refs_project_best_practices_8_7_description_headers_go_in_source_code_only",
-      "confidence_score": 1.0
+      "target": "refs_project_best_practices_8_7_description_headers_go_in_source_code_only"
     },
     {
       "relation": "contains",
@@ -13990,9 +14019,9 @@
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L916",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "refs_project_best_practices_8_automation_process_design",
-      "target": "refs_project_best_practices_8_8_one_verb_per_skill",
-      "confidence_score": 1.0
+      "target": "refs_project_best_practices_8_8_one_verb_per_skill"
     },
     {
       "relation": "contains",
@@ -14100,9 +14129,9 @@
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L922",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "refs_project_best_practices_8_8_one_verb_per_skill",
-      "target": "refs_project_best_practices_codeblock_48",
-      "confidence_score": 1.0
+      "target": "refs_project_best_practices_codeblock_48"
     },
     {
       "relation": "contains",
@@ -27151,5 +27180,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b998c10cfc42bdf4a7c8149140cf148463e058d2"
+  "built_at_commit": "43673973d825f189c7ddb82c9bff570e6981a102"
 }

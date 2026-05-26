@@ -212,12 +212,12 @@ def test_state_constants():
     """Test that state constants are correctly defined"""
     print("🧪 Testing state constants...")
 
-    from app.config import MATCH_EXPIRY_MINUTES, CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
+    from app.config import MATCH_EXPIRY_SECONDS, CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
 
-    if MATCH_EXPIRY_MINUTES == 2:
-        print(f"✅ MATCH_EXPIRY_MINUTES = {MATCH_EXPIRY_MINUTES}")
+    if MATCH_EXPIRY_SECONDS == 30:
+        print(f"✅ MATCH_EXPIRY_SECONDS = {MATCH_EXPIRY_SECONDS}")
     else:
-        print(f"❌ MATCH_EXPIRY_MINUTES should be 2, got {MATCH_EXPIRY_MINUTES}")
+        print(f"❌ MATCH_EXPIRY_SECONDS should be 30, got {MATCH_EXPIRY_SECONDS}")
 
     if CLEANUP_INTERVAL_SECONDS == 60:
         print(f"✅ CLEANUP_INTERVAL_SECONDS = {CLEANUP_INTERVAL_SECONDS}")

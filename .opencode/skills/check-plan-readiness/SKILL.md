@@ -1,5 +1,7 @@
 ---
 name: check-plan-readiness
+type: workflow
+upstream: [brainstorm-and-plan, grill-and-refine]
 description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. Use after grill-and-refine or brainstorm and plan, or triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
 ---
 
@@ -14,6 +16,13 @@ description: 'Create the finalized plan document from conversation context, veri
 - **No code writes**
 - **Presence check, not re-probe** — verify each criterion is present in the plan file
 - **Gate-driven** — no plan finalized until all 8 gates pass
+
+## Phase 0: Prerequisites
+
+- [ ] Read the upstream plan (from brainstorm-and-plan or grill-and-refine) — all sections
+- [ ] Verify all 8 gates from the prior plan are closed
+- [ ] Confirm the plan document does not already exist in docs/
+- [ ] Read ARCHITECTURE.md for plan structure conventions
 
 ## Plan Document Lifecycle
 
