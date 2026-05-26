@@ -66,6 +66,9 @@ Create `~/.config/opencode/opencode.json`:
 {
   "$schema": "https://opencode.ai/config.json",
   "lsp": true,
+  "compaction": {
+    "reserved": 20000
+  },
   "agent": {
     "build": {
       "permission": {
@@ -78,7 +81,7 @@ Create `~/.config/opencode/opencode.json`:
 }
 ```
 
-This sets build-mode to ask before editing, writing, or running shell commands.
+This sets build-mode to ask before editing, writing, or running shell commands, and reserves 20k tokens as compaction buffer (~90% threshold for 200k-context models).
 
 ### 3. Install MCP Servers
 
@@ -199,7 +202,7 @@ This writes a config file that tells OpenCode to consult the knowledge graph for
 
 | File | Purpose |
 |------|---------|
-| `~/.config/opencode/opencode.json` | OpenCode global permissions (build mode: edit/write/bash = ask) |
+| `~/.config/opencode/opencode.json` | OpenCode global config: permissions (build mode: edit/write/bash = ask), compaction reserved=20000 (~90% threshold) |
 | `~/.config/opencode/commands/scaffold.md` | Custom `/scaffold` command for generating skills and commands |
 | `~/.cocoindex_code/global_settings.yml` | Default embedding model for semantic search |
 
