@@ -1,9 +1,9 @@
 # AGENTS.md
 
 ## Scope
-`AGENTS.md` defines *what* agents work on — file ownership and operational constraints — and *how* the SDD workflow is ordered. Phase-specific behavioral rules live in each phase's skill file. Cross-phase rules that apply to every phase are here.
+`AGENTS.md` defines *what* agents work on — file ownership and operational constraints — and *how* the SDD workflow is ordered. Phase-specific behavioral rules live in each phase's skill file (loaded via the `skill` tool). Cross-phase rules that apply to every phase are here.
  
-> If it's about code structure or data flow (API endpoints, WebSocket events) → [ARCHITECTURE.md](docs/ARCHITECTURE.md#data-flow-technical). If it's about product vision, privacy, or out-of-scope boundaries → [SPECIFICATIONS.md](docs/SPECIFICATIONS.md). If it's about a specific phase's behavior → `.opencode/skills/<skill-name>/SKILL.md`.
+> If it's about code structure or data flow (API endpoints, WebSocket events) → [ARCHITECTURE.md](docs/ARCHITECTURE.md#data-flow-technical). If it's about product vision, privacy, or out-of-scope boundaries → [SPECIFICATIONS.md](docs/SPECIFICATIONS.md). If it's about a specific phase's behavior → load the matching skill via `skill(name: "<skill-name>")`.
 
 ### File Ownership
 
@@ -17,27 +17,33 @@
 | `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless explicitly asked |
 | `docs/PLAN_*.md` | Active plan (during implementation/review) | ⚠️ Read-only — only `check-plan-readiness` writes these; moved to `archive/` after review |
 | `archive/PLAN_*.md` | Completed/reviewed plan artifacts | ⚠️ Archived — moved here after successful review; in `.ignore` to avoid context waste |
-| `.opencode/skills/*/SKILL.md` | Workflow skill definitions | ⚠️ Require explicit user permission |
 | `opencode.json` | Plugin and MCP server configuration | ⚠️ Edit only for plugin/MCP config changes — verify JSON validity |
 | `.cocoindex_code/` | CocoIndex code index (auto-generated) | ❌ Never edit manually — rebuild via `ccc index` |
 | `graphify-out/` | Graphify knowledge graph outputs (auto-generated) | ⚠️ Commit graph.json/GRAPH_REPORT.md for team sharing; gitignored: manifest.json, cost.json |
+| `.ignore` | Context ignore rules (avoids low-signal files) | ⚠️ Edit when adding/removing low-signal file patterns |
+| `.opencode/skills/*/SKILL.md` | SDD workflow skill definitions | ⚠️ Replicable — copy to new projects (see [AGENT_SETUP.md](refs/AGENT_SETUP.md#replicating-to-another-project)) |
+| `refs/*.md` | Reference docs — agent guidelines, best practices | ⚠️ Replicable — copy to new projects (see [AGENT_SETUP.md](refs/AGENT_SETUP.md#replicating-to-another-project)) |
+| `tests/test_agent_guidelines.py` | Agent guideline compliance tests | ⚠️ Replicable — copy to new projects (see [AGENT_SETUP.md](refs/AGENT_SETUP.md#replicating-to-another-project)) |
 ---
 
-## SDD Workflow — Phase Order
+## SDD Workflow Skills
 
-Each phase maps to a skill. Read that skill for the full behavioral rules of that phase.
+Every time the user communicates requirements, asks to make a plan, or requests implementation, invoke the appropriate SDD workflow skill below.
+Each skill corresponds to a specific phase in the agentic development process.
+Load it via `skill(name: "<skill-name>")` for the full behavioral rules of that phase.
+NEVER act on any phase without first invoking its skill.
  
 | Phase | Name | Skill | Mode |
 |-------|------|-------|------|
-| 1 | Thinking & Analysis | `brainstorm-and-plan` | Plan |
-| 2 | Probing & Refinement | `grill-and-refine` | Plan |
-| 3 | Planning & Readiness | `check-plan-readiness` | Build |
-| 4 | Implementing | `implement-plan` | Build |
-| 5 | Reviewing | `review-implementation` | Plan |
+| 1 | Discovery, Analysis, and Planning | `brainstorm-and-plan` | Plan |
+| 2 | Probing and Refinement of Plan | `grill-and-refine` | Plan |
+| 3 | Checking for Readiness of Plan | `check-plan-readiness` | Build |
+| 4 | Implementing of Plan | `implement-plan` | Build |
+| 5 | Reviewing of Implementation | `review-implementation` | Plan |
 | 6 | Architecture Improvement | `improve-architecture` | Build |
-| 7 | Structuring & Cleaning | `modularize-and-clean` | Build |
+| 7 | Structuring and Cleaning | `modularize-and-clean` | Build |
 | 8 | Documentation Sync | `update-docs` | Build |
-| 9 | Committing & Pushing | `push-to-git` | Build |
+| 9 | Committing and Pushing | `push-to-git` | Build |
  
 **Key ordering rules:**
 - Phases 1–3 must complete before Phase 4. Never implement without a plan that passed all 7 gates.
@@ -47,20 +53,97 @@ Each phase maps to a skill. Read that skill for the full behavioral rules of tha
 
 ---
 
+## Utility Skills
+
+Non-phase skills invoked as sub-steps within SDD phases or on-demand.
+
+| Skill | Trigger | Mode |
+|-------|---------|------|
+| `rebuild-indexes` | Phase 0 of `review-implementation`, or standalone "rebuild indexes" | Build |
+| `frontend-design` | Starting a new frontend component/page, or standalone "design" | Plan |
+| `shadcn` | After frontend-design spec is ready, or standalone "shadcn" | Build |
+
+---
+
+## UI/UX Skill Usage
+
+Two skills are available for frontend work: `frontend-design` and `shadcn`.
+Use them sequentially, never simultaneously.
+
+### Phase 1 — Design (invoke `frontend-design`)
+
+Trigger this skill first when:
+- Starting a new page, view, or component from scratch
+- Making aesthetic decisions (colors, typography, spacing, motion, layout)
+- Establishing or extending the visual identity of the project
+
+Use it to define: aesthetic direction, color system, typography scale, motion principles, and layout philosophy. Output is a design spec, not code.
+
+**Trivial-change carveout:** For purely mechanical changes (e.g. moving an element a few pixels, changing a single text label) where no aesthetic decision is needed, the agent may skip `frontend-design` and go directly to `shadcn`.
+
+### Phase 2 — Implementation (invoke `shadcn`)
+
+Trigger this skill after the design spec is established when:
+- Selecting and adding components
+- Writing or refactoring component code
+
+Rules:
+- Use shadcn for component STRUCTURE and composition only
+- Override shadcn's default variants/colors with the spec from Phase 1
+- When shadcn says "use built-in variants" and it conflicts with the design spec — the design spec wins for visual style, shadcn wins for API/composition patterns
+
+### Conflict Resolution
+
+If both skills give contradicting instructions:
+
+| `frontend-design` owns | `shadcn` owns |
+|------------------------|---------------|
+| Color, typography, spacing, motion, aesthetics | Component selection, imports, composition, accessibility |
+
+Never let shadcn's defaults override an intentional design decision.
+
+**Edge case — no spec exists:** If `shadcn` is invoked without a prior `frontend-design` spec and the change is non-trivial, it raises: "No design spec found, run frontend-design first." For trivial mechanical changes, it proceeds with shadcn defaults.
+
+---
+
 ## Cross-Phase Universal Rules
 
 These apply to every phase and override phase-specific rules when they conflict.
 
-### Context Window Discipline
+### Skill Loading Priority
+Before every response, scan all skill descriptions to determine if user input matches a skill's trigger keywords (`description` field in the skill's frontmatter). If a match is found, load that skill via the `skill` tool before proceeding.
 
-Prefer structured search tools over grep for code-specific queries:
-1. **graphify first** — knowledge graph for macro-level architecture map. Query `graphify query "<intent>"` to discover concepts, communities, and relationships before diving into file-level searches
-2. **cocoindex-code next** — semantic search by intent when you don't know exact names
-3. **ast-grep next** — structural pattern search when you know the pattern shape but not exact locations
-3. **Grep next** — fall back for simple keyword or text search
-4. **Read with offset** — `Read(path, offset=<line>, limit=~100)`
-5. **Full reads only when required**
-6. **Sections per step** — consult only what "Documents to Read" prescribes
+**Priority chain:** Skill loading > opencode.ai help lookup > Task tool delegation > default response
+**Pre-Task gate:** Before using the Task tool or delegating to a subagent, verify that no skill matches the user's intent. Skills have priority over subagent delegation.
+**Ambiguous matches:** When uncertain whether a skill matches, err on the side of loading it. Loading an irrelevant skill wastes context; missing a needed skill breaks workflow compliance.
+**Multiple matches:** If user input matches multiple skills, load the skill corresponding to the current [SDD phase](#sdd-workflow-skills). If none corresponds, ask the user which skill to use.
+**No match:** If no skill matches, proceed with the default response.
+
+### Smart Tool Selection
+
+Choose tools by task type, not by a fixed priority chain. Layers are not mutually exclusive — use multiple when a task crosses types.
+
+| Layer | Tool | Best for | Works on |
+|-------|------|----------|----------|
+| 1 — Structural | **ast-grep** | Exact code patterns, structural rewrites | 25 languages (.py, .ts, .js, .tsx, .css, .rs, .go, .java, etc.) |
+| 2 — Semantic | **cocoindex-code** | Natural language intent, fuzzy concept search | All text — code and docs |
+| 3 — Architectural | **graphify** | Relationship mapping, blast radius, community detection | All text — indexed docs + code |
+| Fallback | **grep / Read** | Simple keyword search, file content inspection | Everything |
+
+**Phase 0 Hard Gate:** Before any search, classify the task by type:
+1. Structural/exact pattern → ast-grep first
+2. Semantic/fuzzy intent → cocoindex-code first
+3. Architectural/relational → graphify first
+4. Mixed → combine applicable layers
+5. None of the above → grep
+
+**Exit Declaration:** After each phase, state: "Tools used: [tool]. Why not the others: [reason for each skipped layer]."
+
+**Tool applicability note:** ast-grep supports only 25 programming languages. For .md, .json, .yaml, or any file outside those 25, skip to cocoindex-code or graphify.
+
+**Token accountability:** Flag when grep was used but a smarter tool was applicable — wasted context is a process violation.
+
+Prefer `Read` with offset over full-file reads: `Read(path, offset=<line>, limit=~100)`.
 
 Avoid low-signal files: `frontend/dist/`, `archive/`, `cocoindex_code/`, `graphify-out/cache/`, `uv.lock`
 
@@ -78,14 +161,15 @@ Avoid low-signal files: `frontend/dist/`, `archive/`, `cocoindex_code/`, `graphi
 - **Batch discipline + granular edits** — one logical change per edit, one concern per batch.
 - **Surgical edits** — prefer `oldString→newString` over full-file rewrites.
 - **Non-interactive execution** — never pipe to stdin or omit `-m`/`-y`.
-- **Skill Loading Protocol** — when user input matches a skill's trigger keywords (`description` field in the skill's frontmatter), load that skill via the `skill` tool before proceeding. This ensures the skill's workflow rules, boundaries, and interaction patterns are in context. If user input matches multiple skills, load the one corresponding to the current SDD phase. If no match, proceed normally.
 - **User Interaction Pattern** — skills that require user input must walk through decision-points ONE AT A TIME. After resolving a topic, state the next topic explicitly. Never present multiple items in a single message and ask the user to respond to all at once. Within each topic, follow the structured sequential walkthrough: (1) state finding concisely, (2) offer concrete options, (3) accept free-form input beyond offered options, (4) resolve before moving to the next topic. To determine which topics need discussion: present only topic NAMES upfront — do not describe their contents or list items within them. The agent chooses the order and walks through sequentially.
 
 **Hygiene:** Quality and cross-cutting checks.
 - **Run full test suite after every change** — all suites, not just new tests.
 - **Source and tests are one unit** — update all test references in the same batch as source changes.
+- **Periodic test health audit** — inspect test files for stale file paths, misleading comments, and coverage gaps (files tested for exports but missing from existence checks). A passing test suite can still have stale references.
 - **Audit after restructure/migration** — update owning skills; grep for stale patterns.
 - **Consistency pass** — after multi-file changes, read affected files end-to-end.
+- **Keep index/graph current** — always run `rebuild-indexes` before review verification (handled by Phase 0 of `review-implementation`). If querying graph/index mid-implementation, rebuild manually.
 
 ### Documentation Discipline
 - **Cross-reference, don't duplicate:** Use `[See ...](...)` links instead of copying content from other docs into this one.
@@ -115,15 +199,16 @@ When a test fails after a change, classify before acting. Never auto-revert.
 | Install frontend deps | `cd frontend ; npm install` | |
 | Build frontend | `cd frontend ; npm run build` | Required after any frontend change |
 | Run app (dev) | `uv run python -m app` | Serves on `localhost:5000` |
+| Run backend tests with emoji output | `$env:PYTHONIOENCODING='utf-8'; uv run python tests/<file>.py` | Prevents UnicodeEncodeError on Windows cp1252 console |
 | Run frontend dev server | `cd frontend ; npm run dev` | Vite on port 3000, proxies to backend |
 | Run all backend tests | `uv run python tests/test_app.py` | |
 | Run JS module validation | `uv run python tests/test_js_modules.py` | |
 | Run DB utilities | `uv run python tests/test_db.py` | |
 | Run frontend unit tests | `cd frontend ; npm test` | Vitest runner |
-| Run E2E tests | `cd frontend ; npm run test:e2e` | Playwright — see [skill](.opencode/skills/run-e2e-tests/SKILL.md) |
+| Run E2E tests | `cd frontend ; npm run test:e2e` | Playwright — auto-installs Chromium, builds SPA, starts app with temp DB |
 | Type-check frontend | `cd frontend ; npx tsc --noEmit` | TypeScript strict mode |
 | Rebuild code index | `ccc index` | Cocoindex — updates `.cocoindex_code/` |
-| Build knowledge graph | See [skill](.opencode/skills/update-agents-md/SKILL.md) | Graphify — updates `graphify-out/` |
+| Build knowledge graph | See [skill](.opencode/skills/brainstorm-and-plan/SKILL.md) | Graphify — updates `graphify-out/` |
 
 ---
 
@@ -153,9 +238,8 @@ See [Quick Reference Table in DOCUMENT_GUIDELINES.md](refs/DOCUMENT_GUIDELINES.m
 | README | `docs/README.md` | User-facing setup, features, quick-start |
 | ARCHITECTURE | `docs/ARCHITECTURE.md` | Technical module reference, data flow |
 | SPECIFICATIONS | `docs/SPECIFICATIONS.md` | Product vision, user journey, privacy |
-| DEMO_GUIDE | `docs/DEMO_GUIDE.md` | Demo walkthrough for judges |
 | AGENTS.md | `AGENTS.md` | Agent behavioral rules, file ownership |
-| AGENT_SETUP | `refs/AGENT_SETUP.md` | Tooling setup, env requirements |
+| AGENT_SETUP | `refs/AGENT_SETUP.md` | Tooling setup, env requirements, replicating to other projects |
 | PROJECT_BEST_PRACTICES | `refs/PROJECT_BEST_PRACTICES.md` | Universal coding patterns, lessons learned |
 | DOCUMENT_GUIDELINES | `refs/DOCUMENT_GUIDELINES.md` | Document scope governance |
 

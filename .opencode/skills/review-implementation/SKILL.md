@@ -1,7 +1,5 @@
 ---
 name: review-implementation
-type: workflow
-upstream: [implement-plan, improve-architecture, modularize-and-clean]
 description: 'Verify the completed implementation meets all success criteria — review diff, run tests, run lint, confirm intended function. Use after implement-plan, improve-architecture, or modularize-and-clean; or when the user says "review the implementation", "verify changes", "review and verify", or similar.'
 ---
 
@@ -17,15 +15,16 @@ description: 'Verify the completed implementation meets all success criteria —
 
 ## Boundaries
 - **Find only, don't fix** — report failures and route backward, do not resolve here
-- **Read-only and verbal** — no file writes, no fixes
+- **Read-only and verbal** — no file writes, no fixes. Exception: rebuilding CocoIndex/Graphify indexes (auto-generated artifacts in `.cocoindex_code/` and `graphify-out/`) — not source code.
 - **Independent verification** — re-run all checks from scratch, never trust the implementer's self-test
 
 ## Phase 0: Prerequisites
 
 - [ ] Confirm which prior skill produced the diff (implement-plan, improve-architecture, or modularize-and-clean)
 - [ ] Read the prior plan or evaluation list
+- [ ] Load and execute `rebuild-indexes` skill — conditionally rebuilds CocoIndex and Graphify
 - [ ] Run baseline tests — all must pass before review
-- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
 
 ## Documents to Read
 
@@ -58,17 +57,17 @@ Run `git status` to list all modified, added, and deleted files. Verify only exp
 
 ### Phase 2: Verify Execution
 
-#### Smart Tools
+#### Smart Tool Selection
 
-Use these in priority order for efficient review verification:
+See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection) for the full decision framework. Use these tools for review verification:
 
-**1. graphify** — verify the graph reflects intended structure. Query the knowledge graph to confirm changed modules have expected connections.
+**graphify** — verify the graph reflects intended structure. Query the knowledge graph to confirm changed modules have expected connections.
 
-**2. cocoindex-code** — search by intent to verify nothing semantically related was missed. Find code that _should_ have been changed but wasn't.
+**cocoindex-code** — search by intent to verify nothing semantically related was missed. Find code that _should_ have been changed but wasn't.
 
-**3. ast_grep_search** — confirm zero stale occurrences of old patterns. Structural search catches what text search misses.
+**ast_grep_search** — confirm zero stale occurrences of old patterns. Structural search catches what text search misses.
 
-**4. grep / read** — fall back for exact-text verification and detailed file inspection.
+**grep / read** — fall back for exact-text verification and detailed file inspection.
 
 #### Run All Tests
 All must pass. On failure: list what failed and why — do not fix here.
@@ -80,6 +79,16 @@ cd frontend && npx vitest run
 ```
 
 **Diff test count** — note count per suite before and after. Flag: tests removed without explanation (regression risk) or added without planned batch (scope creep). Report: *"Test count changed: [suite]: [N before] → [N after] ([+/-]N)"*
+
+#### Test Health Audit
+
+Beyond pass/fail, audit tests for structural health. Check for:
+
+- **Stale file paths** — do file-existence checks in tests reference files that no longer exist? (e.g., `test_file_structure()` listing a deleted file like `requirements.txt` or relocated files)
+- **Misleading comments** — do inline comments accurately describe what the test actually verifies? (e.g., "# Returns empty list" when the endpoint returns 8 default rooms)
+- **Coverage gaps** — are files tested for exports in one test section but missing from the file-existence check and code-quality check in another section? (e.g., `hooks/useChatRequest.ts` tested in `test_hook_exports()` but absent from `required_files` and `test_code_quality()` lists)
+
+Flag any findings: *"Test health: [N issues found] — stale paths, misleading comments, coverage gaps."* Route back if structural issues would cause test failures. Report only (no fix) for cosmetic issues like stale comments. The implementer resolves these.
 
 #### Run Build
 After tests pass, run the production build:
@@ -160,10 +169,9 @@ Skip if plan already in `archive/`.
 Ask: **"Move plan to archive? (y/n)"**
 
 If yes:
-- Scan `archive/` for highest `PLAN_*` number → increment by 1
-- Read `docs/PLAN_xxx.md`, update internal header to match new archive filename
-- Move: `docs/PLAN_xxx.md` → `archive/PLAN_yyy.md`
-- Confirm: "Plan archived as `archive/PLAN_yyy.md`."
+- Scan `archive/` for the globally highest NNN number across all `PLAN_*.md` files → increment by 1 (MMM)
+- Move: `docs/PLAN_<date>_<NNN>.md` → `archive/PLAN_<date>_<MMM>.md` (preserves original creation date, assigns global sequential archive number)
+- Confirm: "Plan archived as `archive/PLAN_<date>_<MMM>.md`."
 
 ## Hand-off
 - Phase 1: Diff reviewed, git status clean — only expected files touched

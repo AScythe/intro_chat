@@ -250,7 +250,7 @@ This writes a config file that tells OpenCode to consult the knowledge graph for
 
 ### SDD Workflow Skills
 
-The `.opencode/skills/` directory contains 16 skills implementing a Specification-Driven Development pipeline:
+The `.opencode/skills/` directory contains 19 skills implementing a Specification-Driven Development pipeline:
 
 | Phase | Skill | Mode |
 |-------|-------|------|
@@ -267,9 +267,11 @@ The `.opencode/skills/` directory contains 16 skills implementing a Specificatio
 | — | `update-agents-md` | Build |
 | — | `update-architecture-md` | Build |
 | — | `update-best-practices-md` | Build |
-| — | `update-demo-guide-md` | Build |
 | — | `update-readme-md` | Build |
 | — | `update-specifications-md` | Build |
+| — | `rebuild-indexes` | Build |
+| — | `frontend-design` | Plan |
+| — | `shadcn` | Build |
 
 Skills are auto-loaded by OpenCode when the task description matches their `name` and `description` fields.
 
@@ -394,6 +396,46 @@ graphify opencode install
 ### Step 6: Restart OpenCode
 
 Restart your OpenCode session. Both MCP servers should connect automatically.
+
+---
+
+## Replicating to Another Project
+
+To reuse this project's agent development environment in a **new project** (not a clone of a repo that already has it), manually copy the following files from a source project that already has them set up.
+
+### Instructions
+
+1. **Create the directory structure** in your new project:
+   ```
+   .opencode/skills/
+   tests/
+   refs/
+   ```
+
+2. **Copy skills** — From the source project's `.opencode/skills/`, copy every `<skill-name>/SKILL.md` folder into your new project's `.opencode/skills/`. Keep the same folder structure.
+
+3. **Copy OpenCode plugin manifests** — From the source project's `.opencode/`, copy `package.json` and `package-lock.json` into your new project's `.opencode/`.
+
+4. **Copy agent guidelines test** — From the source project's `tests/`, copy `test_agent_guidelines.py` into your new project's `tests/`.
+
+5. **Copy reference documents** — From the source project's `refs/`, copy all `.md` files (`AGENT_SETUP.md`, `PROJECT_BEST_PRACTICES.md`, `DOCUMENT_GUIDELINES.md`) into your new project's `refs/`.
+
+6. **Copy project config** — From the source project root, copy `opencode.json` into your new project's root.
+
+7. **Add gitignore rules** — Append these tool-related rules to your new project's `.gitignore`:
+   ```gitignore
+   .opencode/node_modules/
+   /.cocoindex_code/
+   graphify-out/manifest.json
+   graphify-out/cost.json
+   graphify-out/cache/
+   graphify-out/.graphify_labels.json
+   graphify-out/.graphify_root
+   ```
+
+### Post-Copy Setup
+
+After copying the files, run the standard [Project Setup](#project-setup-per-repository-clone) steps (install dependencies, init CocoIndex, build Graphify).
 
 ---
 
