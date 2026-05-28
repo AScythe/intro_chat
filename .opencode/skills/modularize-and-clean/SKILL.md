@@ -1,7 +1,5 @@
 ---
 name: modularize-and-clean
-type: workflow
-upstream: [review-implementation]
 description: 'Scan code-level quality — DRY violations, mixed concerns, naming, large files, dead code, type safety, idempotency, immutability, deep modules, and referential transparency — then apply cleanup in batches with [CLEANUP] flags. Use after review-implementation passes, or triggered when user says "modularize", "clean up", "refactor", "code quality", "restructure", or similar.'
 ---
 
@@ -25,7 +23,7 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 
 - [ ] Read the review pass findings (from review-implementation)
 - [ ] Run baseline tests — all must pass
-- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
 - [ ] Read ARCHITECTURE.md for current documented structure
 
 ## Documents to Read
@@ -39,7 +37,7 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 
 First, read the test suite — imports will be adapted during cleanup.
 
-Use **graphify** community detection to identify strongly-connected components — same communities stay together, different communities are extraction candidates. Query `graphify path "A" "B"` to assess coupling before splitting. Use **ast_grep_search** for DRY analysis and **ast_grep_replace** with `dryRun: true` for rename preview. Use **cocoindex-code** to find related functions with different naming conventions.
+Apply Smart Tool Selection (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection)). Use **graphify** community detection to identify strongly-connected components — same communities stay together, different communities are extraction candidates. Query `graphify path "A" "B"` to assess coupling before splitting. Use **ast_grep_search** for DRY analysis and **ast_grep_replace** with `dryRun: true` for rename preview. Use **cocoindex-code** to find related functions with different naming conventions.
 
 Then examine source files across 11 scopes:
 

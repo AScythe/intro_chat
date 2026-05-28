@@ -1,7 +1,5 @@
 ---
 name: grill-and-refine
-type: workflow
-upstream: [brainstorm-and-plan]
 description: 'Interview relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree, then produce a fool-proof revised plan with no gaps. Use when user wants to stress-test a plan/design, after brainstorm-and-plan, or triggered when the user says "grill the plan", "stress-test the plan", or similar.'
 ---
 
@@ -22,7 +20,7 @@ description: 'Interview relentlessly about a plan or design until reaching share
 - [ ] Read the upstream plan (from brainstorm-and-plan) — all sections
 - [ ] Verify the plan has all required sections (approach, files, testing, success criteria)
 - [ ] Run baseline tests — all must pass
-- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
 - [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
 
 ## Documents to Read
@@ -38,15 +36,15 @@ description: 'Interview relentlessly about a plan or design until reaching share
 
 Start with the initial plan (from `brainstorm-and-plan` output). Explore identified files/code for each dimension:
 
-Use smart tools in order of priority to verify the plan's coverage completeness across all dimensions:
+Use Smart Tool Selection to verify the plan's coverage completeness across all dimensions (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection)):
 
-**1. graphify** — query the knowledge graph for concepts, communities, and connections across the entire codebase. Use `graphify query "..."` for broad context, `graphify path "X" "Y"` for blast radius between modules.
+**graphify** — query the knowledge graph for concepts, communities, and connections across the entire codebase. Use `graphify query "..."` for broad context, `graphify path "X" "Y"` for blast radius between modules.
 
-**2. cocoindex-code** — search by natural language intent to find functions even when key terms don't match the plan. Verify the plan mentions all relevant code paths.
+**cocoindex-code** — search by natural language intent to find functions even when key terms don't match the plan. Verify the plan mentions all relevant code paths.
 
-**3. ast_grep_search** — understand structural patterns (e.g. all `try/except` blocks, all calls to a deprecated function) to validate the plan's assumptions about code structure.
+**ast_grep_search** — understand structural patterns (e.g. all `try/except` blocks, all calls to a deprecated function) to validate the plan's assumptions about code structure.
 
-**4. grep / read** — fall back to exact-text search and file reading for details uncovered by the tools above.
+**grep / read** — fall back to exact-text search and file reading for details uncovered by the tools above.
 
 **Gap grilling** — when comparing two sources (template vs implementation, spec vs code), test each gap against four questions:
 

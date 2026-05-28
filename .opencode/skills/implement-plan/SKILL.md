@@ -1,7 +1,5 @@
 ---
 name: implement-plan
-type: workflow
-upstream: [check-plan-readiness, review-implementation]
 description: 'Execute the approved plan following TDD in reviewable batches. Flag every change. Verify locally per batch. Use after check-plan-readiness passes, or when the user says "implement", "implement plan", "proceed", "start coding", or similar. Reads the plan file as read-only — never writes to it.'
 ---
 
@@ -27,7 +25,7 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 - [ ] Read the approved plan (docs/PLAN_*) — verify all 8 gates pass
 - [ ] Run baseline tests — all must pass before any changes
 - [ ] Identify all files to create/modify/remove
-- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
 
 ## Implementation Workflow
 
@@ -40,9 +38,9 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 - Identify files to create, modify, or remove. Map each test file to a plan task.
 - If anything is unclear, ask before proceeding.
 
-### Smart Tools: Graphify + AST-Grep + Semantic Search
+### Smart Tool Selection
 
-Use these tools for safer, more precise code operations than text-based grep/edit:
+See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection) for the full decision framework. This skill has additional tool guidance specific to implementation work:
 
 **Assessing impact:** Before starting a batch, use **graphify** to understand the blast radius: `graphify query "impact of changing $MODULE"` to discover all connected concepts, or `graphify path "X" "Y"` to find the relationship path between two modules. This prevents missing downstream effects.
 

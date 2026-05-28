@@ -1,7 +1,5 @@
 ---
 name: check-plan-readiness
-type: workflow
-upstream: [brainstorm-and-plan, grill-and-refine]
 description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. Use after grill-and-refine or brainstorm and plan, or triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
 ---
 

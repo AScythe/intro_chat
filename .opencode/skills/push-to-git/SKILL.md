@@ -1,7 +1,5 @@
 ---
 name: push-to-git
-type: workflow
-standalone-entry: true
 description: 'Stage related files together by logical grouping, commit with auto-generated messages (user-approved), then push. Use when the user says "push", "commit and push", "push to github", or similar.'
 ---
 

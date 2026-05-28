@@ -1,6 +1,5 @@
 ---
 name: brainstorm-and-plan
-type: workflow
 description: 'Brainstorming and planning stage. Analyze requirements against project docs, surface ideas and assumptions, confirm direction with user, then produce an initial plan. Use at the beginning of any tasks, or triggered when the user says "brainstorm and plan", "analyze and plan", "analyze the requirements", or similar.'
 ---
 
@@ -20,7 +19,7 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 - [ ] Read the upstream problem description or prior plan document
 - [ ] Run baseline tests — all must pass
-- [ ] Consult tools in order of priority: graphify → cocoindex → ast-grep → grep
+- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
 - [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
 
 ## Guidelines
@@ -29,7 +28,7 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 Follow this layered analysis pipeline — all read-only:
 
-**Smart Tools** — use in order of priority to discover relevant code before fallback reading:
+**Smart Tool Selection** — See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection) for the full decision framework. Use these skill-specific commands during analysis:
 
 - **graphify** — macro-level architecture map before diving into files:
   - `graphify_query_graph "..."` — broad concept search (e.g. "which modules handle SRT processing")
