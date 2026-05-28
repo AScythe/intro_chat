@@ -1,6 +1,5 @@
 ---
 name: run-e2e-tests
-mode: build
 description: '[Build mode — standalone] Run Playwright E2E tests against all app pages — Home, Join (optional name), Save, Room, Chat — including a two-user matchmaking flow. Auto-installs Playwright + Chromium, builds the SPA, starts the app with a temp database, runs tests, reports results. Use when the user says "run e2e tests", "run e2e", "end to end", "playwright", or similar.'
 ---
 
