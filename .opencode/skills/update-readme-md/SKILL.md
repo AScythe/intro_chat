@@ -1,6 +1,5 @@
 ---
 name: update-readme-md
-type: subskill
 description: Analyze the current codebase and update `docs/README.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update readme", "sync readme", "readme is outdated", or similar.
 ---
 
@@ -52,7 +51,6 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 | **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options |
 | **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
@@ -150,5 +148,5 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] Technical details are high-level only (max 2-3 paragraphs, one-liner per technology)
 - [ ] Quick start is the canonical source for install/run commands — condensed and accurate
 - [ ] Install and run steps work based on actual project files
-- [ ] If features were added/removed/renamed, verify README (benefits), SPECS (rationale), and DEMO_GUIDE (demo steps) are all synced
+- [ ] If features were added/removed/renamed, verify README (benefits) and SPECS (rationale) are both synced
 - [ ] Language is appropriate for a non-technical first-time visitor

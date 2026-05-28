@@ -1,6 +1,5 @@
 ---
 name: update-agents-md
-type: subskill
 description: 'Analyze the current codebase and update `AGENTS.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update agents", "sync agents doc", "agents.md is outdated", or similar.'
 ---
 
@@ -32,7 +31,7 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 - **File ownership table** — location, role, agent policy (⚠️ caution / ❌ forbidden). Include only files with non-default policies — omit ✅ safe files
 - **Universal Template** — start from the reusable template with `<!-- FILL: -->` markers for project-specific injection
 - **SDD Workflow Rules** — phase order table with explicit always/never directives
-- **Cross-Phase Universal Rules** — Context Window Discipline, Process Discipline, Documentation Discipline, Failure Triage
+- **Cross-Phase Universal Rules** — Smart Tool Selection, Process Discipline, Documentation Discipline, Failure Triage
 - **Project-specific behavioral rules** — extract from the project's entry points, configuration files, and operational constraints. Cover: modification constraints, resource management, configuration conventions
 - **Commands reference** — exact CLI commands for common operations (build, run, test, deploy, clean up)
 - **Test Suite** — if the project has a `tests/` directory, document: naming convention, file-to-module table with approach column, conventions, and run command
@@ -47,7 +46,6 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 | **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, evaluators | Practical | Demo walkthrough, testing scenarios, fallback options |
 | **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
@@ -79,11 +77,8 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 [Standard 9-phase table + 4 ordering rules]
 
 ## Cross-Phase Universal Rules
-[Context Window Discipline | Process Discipline | Documentation Discipline | Failure Triage]
+[Smart Tool Selection | Process Discipline | Documentation Discipline | Failure Triage]
 <!-- FILL: project-failure-triage -->
-
-## Skill Frontmatter Convention
-[YAML type/upstream/standalone-entry]
 
 <!-- FILL: commands-section -->
 <!-- FILL: test-suite-section -->
