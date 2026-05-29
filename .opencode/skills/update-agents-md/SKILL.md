@@ -128,6 +128,10 @@ For each **What to Include** item, collect the data. This fills the `<!-- FILL: 
 ### 3. Identify Gaps and Issues
 For each **What to Include** item and each **Universal Template** marker: does it exist? Is it accurate?
 
+**Cross-reference checks:**
+- Does the file ownership table account for all files added or removed since last sync? Cross-reference every entry against current filesystem
+- Does the test suite structure match actual test files on disk? Verify every entry in the test table exists in the filesystem
+
 ### 4. Assemble or Update the Document
 
 **If AGENTS.md doesn't exist (create from scratch):**
@@ -156,6 +160,8 @@ For each **What to Include** item and each **Universal Template** marker: does i
 
 **Document-Specific Checks:**
 - [ ] File ownership table covers all files with non-default policies (⚠️ / ❌) — accurate and complete
+- [ ] File ownership table cross-referenced against current filesystem — no missing entries for new files, no stale entries for removed files
+- [ ] Test suite structure matches actual test files on disk — every test file entry in the table verified against filesystem
 - [ ] All commands are accurate and runnable with exact syntax
 - [ ] Agent behavioral rules are imperative — "always/never", not "consider" or "try to"
 - [ ] Cross-phase universal rules are not duplicated in phase-specific skill files

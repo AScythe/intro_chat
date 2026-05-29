@@ -123,6 +123,10 @@ Read highest-value sources first:
 For each **What to Include** item: does it exist? Is it accurate?
 For each existing section: does it belong here per **What NOT to Include**? If not → redirect.
 
+**Cross-reference checks:**
+- Map every step in "How It Works" to an actual code flow path — each step must correspond to real pages/routes/user-facing behavior
+- For the sample user flow narrative (if present), verify each scene corresponds to an actual page/route/state in the app — no fictional or deprecated scenes
+
 ### 4. Assemble or Update the Document
 
 **If SPECIFICATIONS.md doesn't exist (create from scratch):**
@@ -150,6 +154,8 @@ For each existing section: does it belong here per **What NOT to Include**? If n
 **Document-Specific Checks:**
 - [ ] Problem statement is clear and compelling
 - [ ] User journey described in plain language — no endpoint names
+- [ ] Every step in "How It Works" maps to an actual user-facing page or route — no fictional or merged steps
+- [ ] Sample user flow narrative (if present) matches actual app page flow — each scene verified against real pages/states
 - [ ] Feature descriptions include purpose/rationale suitable for guiding development decisions
 - [ ] Product decisions capture vision rationale (not technical trade-offs)
 - [ ] Privacy section includes both user-facing table and Hard Constraints sub-section

@@ -118,6 +118,10 @@ Read highest-value sources first:
 ### 3. Identify Gaps and Issues
 For each **What to Include** item: does it exist? Is it accurate?
 
+**Cross-reference checks:**
+- Does "How to Use" match actual app pages and navigation order? Map each step to a route/page — no skipped or merged steps
+- Do all features in the feature list still exist in the app? Verify each against actual user-facing functionality
+
 ### 4. Assemble or Update the Document
 
 **If README.md doesn't exist (create from scratch):**
@@ -148,5 +152,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] Technical details are high-level only (max 2-3 paragraphs, one-liner per technology)
 - [ ] Quick start is the canonical source for install/run commands — condensed and accurate
 - [ ] Install and run steps work based on actual project files
+- [ ] "How to Use" steps match actual app pages and navigation order — each step maps to a real route
+- [ ] All feature list items verified against actual app — no removed or renamed features
 - [ ] If features were added/removed/renamed, verify README (benefits) and SPECS (rationale) are both synced
 - [ ] Language is appropriate for a non-technical first-time visitor

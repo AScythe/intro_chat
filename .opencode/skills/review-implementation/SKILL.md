@@ -7,6 +7,7 @@ description: 'Verify the completed implementation meets all success criteria —
 - Review the diff — confirm every change has a valid [FLAG] with reason
 - Run all test suites — all must pass (compare test count to baseline)
 - Run build + lint/typecheck — all must succeed
+- Sync structural validation test files — update file-existence checks, export/import references, and code-quality scan targets to match current project structure
 - Check git status — only expected files touched
 - Check test quality — assertions semantically tight, non-determinism injected
 - Verify against plan or evaluation list — every criterion met
@@ -15,15 +16,16 @@ description: 'Verify the completed implementation meets all success criteria —
 
 ## Boundaries
 - **Find only, don't fix** — report failures and route backward, do not resolve here
-- **Read-only and verbal** — no file writes, no fixes. Exception: rebuilding CocoIndex/Graphify indexes (auto-generated artifacts in `.cocoindex_code/` and `graphify-out/`) — not source code.
+- **Read-only and verbal** — no file writes, no fixes. Exception 1: rebuilding CocoIndex/Graphify indexes (auto-generated artifacts in `.cocoindex_code/` and `graphify-out/`) — not source code. Exception 2: syncing structural validation tests (file-existence lists, export/import references, code-quality scan targets) — updating file lists to match current project structure, not test logic.
 - **Independent verification** — re-run all checks from scratch, never trust the implementer's self-test
 
 ## Phase 0: Prerequisites
 
 - [ ] Confirm which prior skill produced the diff (implement-plan, improve-architecture, or modularize-and-clean)
 - [ ] Read the prior plan or evaluation list
+- [ ] Run baseline tests — all must pass before proceeding
+- [ ] Sync structural validation tests — scan test files for hardcoded file-extension + path-separator lists or function names matching `file_structure|file_exist|exports|imports|code_quality`. Diff current vs project state, fix only mismatched entries, print delta. Immediately re-run affected tests after syncing; repeat until clean. Skip business-logic tests (those without the above patterns).
 - [ ] Load and execute `rebuild-indexes` skill — conditionally rebuilds CocoIndex and Graphify
-- [ ] Run baseline tests — all must pass before review
 - [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
 
 ## Documents to Read

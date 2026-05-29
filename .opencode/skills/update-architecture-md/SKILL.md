@@ -201,6 +201,9 @@ For every source file that contains functions/classes:
 - Does the data flow reflect all current pipeline stages?
 - Does the running instructions section cover the full startup sequence?
 - Are design decisions up to date?
+- Is the project tree complete compared to actual filesystem listing? Compare every directory and file in the tree against actual filesystem entries — no phantom entries (documented but deleted) and no missing entries (exist but undocumented)
+- Are all numeric claims (file counts, page export counts, test file counts, etc.) verified against actual source? Cross-reference each number against the real codebase
+- Are cross-references between files in the tree and their documented descriptions accurate? Every file path in the tree must correspond to an actual existing file
 
 ### 4. Assemble or Update the Document
 
@@ -234,6 +237,8 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 - [ ] Document omits everything a developer or agent doesn't need — no speculative, aspirational, or unverifiable content
 
 **Content checks:**
+- [ ] File tree cross-referenced against actual filesystem entries — no missing or phantom entries
+- [ ] All numeric claims verified against actual source (file counts, export counts, test counts)
 - [ ] File tree is current and complete — all source directories and key files described
 - [ ] Data flow reflects the current system — this is the authoritative reference
 - [ ] Module Descriptions section organized by directory/subsystem with accurate lead lines
