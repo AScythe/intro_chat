@@ -6,6 +6,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchJSON } from '@/api/client';
 import { useUser } from '@/hooks/useUser';
 import { generateUsername } from '@/utils/random';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { JoinEventResponse } from '@/types/api';
 
 export function UserInfoPage() {
@@ -46,106 +50,90 @@ export function UserInfoPage() {
   }
 
   return (
-    <div className="container">
-      <header className="page-header">
-        <h1>Your Profile</h1>
-        <p>Add your information so others can connect with you after chatting</p>
+    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 py-5">
+      <header className="mb-8 text-center text-foreground">
+        <h1 className="mb-2 text-4xl font-semibold drop-shadow-sm">Your Profile</h1>
+        <p className="text-base text-foreground/90">
+          Add your information so others can connect with you after chatting
+        </p>
       </header>
 
-      <main className="main-content">
-        <div className="card">
-          <h2>Connect Details</h2>
-          <p className="card-description">
-            These will be shared only when both you and your chat partner agree to connect.
-          </p>
-
-          <div className="profile-form">
-            <div className="input-group" style={{ marginBottom: 15 }}>
-              <label style={{ display: 'block', marginBottom: 5, fontWeight: 500, color: '#4a5568' }}>
-                Your Name
-              </label>
-              <input
+      <main className="flex-1">
+        <Card>
+          <CardHeader>
+            <CardTitle>Connect Details</CardTitle>
+            <CardDescription>
+              These will be shared only when both you and your chat partner agree to connect.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="nameInput">Your Name</Label>
+              <Input
                 type="text"
                 id="nameInput"
                 placeholder="e.g. Alex"
                 maxLength={50}
-                style={{ width: '100%' }}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
 
-            <div className="input-group" style={{ marginBottom: 15 }}>
-              <label style={{ display: 'block', marginBottom: 5, fontWeight: 500, color: '#4a5568' }}>
-                LinkedIn Profile URL
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="linkedinInput">LinkedIn Profile URL</Label>
+              <Input
                 type="url"
                 id="linkedinInput"
                 placeholder="https://linkedin.com/in/yourname"
-                style={{ width: '100%' }}
                 value={linkedinUrl}
                 onChange={(e) => setLinkedinUrl(e.target.value)}
               />
             </div>
 
-            <div className="input-group" style={{ marginBottom: 15 }}>
-              <label style={{ display: 'block', marginBottom: 5, fontWeight: 500, color: '#4a5568' }}>
-                Slack Handle
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="slackInput">Slack Handle</Label>
+              <Input
                 type="text"
                 id="slackInput"
                 placeholder="@username or email@company.slack.com"
-                style={{ width: '100%' }}
                 value={slackHandle}
                 onChange={(e) => setSlackHandle(e.target.value)}
               />
             </div>
 
-            <p className="card-description" style={{ fontSize: '0.9rem', color: '#718096', margin: '10px 0 20px 0' }}>
+            <p className="text-sm text-muted-foreground">
               Name is optional — leave blank for an anonymous username. LinkedIn and Slack are optional too.
             </p>
 
-            <div className="form-actions" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+            <div className="flex flex-col gap-3 pt-2">
+              <Button onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving...' : 'Save Profile'}
-              </button>
-              <button
-                className="btn btn-affirmative"
+              </Button>
+              <Button
+                variant="outline"
                 disabled={!saved}
                 onClick={() => eventId && navigate(`/room/${eventId}`)}
               >
                 Select Room / Area
-              </button>
+              </Button>
             </div>
 
             {saved && (
-              <div
-                style={{
-                  marginTop: 15,
-                  padding: 10,
-                  background: '#f0fff4',
-                  border: '1px solid #c6f6d5',
-                  borderRadius: 8,
-                  textAlign: 'center',
-                  color: '#276749',
-                }}
-              >
+              <div className="rounded-[8px] border border-sage/30 bg-sage/10 p-3 text-center text-sm text-sage">
                 Profile saved! You can now select a room.
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </main>
 
-      <footer className="page-footer">
+      <footer className="mt-auto pt-5 text-center text-sm text-foreground/80">
         <p>
           <strong>Privacy:</strong> Your info is only shared when you opt in after a chat.
         </p>
-        <button className="btn btn-secondary" style={{ marginTop: 10 }} onClick={() => navigate('/')}>
+        <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate('/')}>
           Back to Home
-        </button>
+        </Button>
       </footer>
     </div>
   );

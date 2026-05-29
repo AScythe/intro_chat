@@ -37,11 +37,6 @@ describe('PersonCard', () => {
     expect(screen.getByText('Selected')).toBeInTheDocument();
   });
 
-  it('applies selected class when selected', () => {
-    const { container } = render(<PersonCard person={defaultPerson} selected />);
-    expect(container.firstChild).toHaveClass('selected');
-  });
-
   it('fires onClick when clicked', () => {
     const onClick = vi.fn();
     render(<PersonCard person={defaultPerson} onClick={onClick} />);

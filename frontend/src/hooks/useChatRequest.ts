@@ -2,7 +2,7 @@
 // Description: Hook managing chat request lifecycle — send request, wait for response, ready signaling
 
 import { useState, useCallback } from 'react';
-import { useDemoMode } from './useDemoMode';
+import { useDemoMode } from '@/hooks/useDemoMode';
 import { CONFIG } from '@/config/constants';
 import type { SamplePerson } from '@/utils/demoData';
 

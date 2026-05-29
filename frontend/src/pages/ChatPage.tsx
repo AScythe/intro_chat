@@ -10,10 +10,200 @@ import { useChatTimer } from '@/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import { PromptCard } from '@/components/PromptCard';
 import { ConnectionCard } from '@/components/ConnectionCard';
-import { CONFIG, FALLBACK_PROMPTS } from '@/config/constants';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CONFIG } from '@/config/constants';
 import { formatTime, formatDuration } from '@/utils/format';
 
+const FALLBACK_PROMPTS = [
+  "What's one thing you're excited about this weekend?",
+  "What's your favorite snack at hackathons?",
+  "If you could steal one skill from another hacker, what would it be?",
+  "What's your favorite debugging story?",
+  "What's the most interesting project you've worked on recently?",
+];
+
 type ChatState = 'loading' | 'chatting' | 'timeUp' | 'extended' | 'connecting' | 'result';
+
+interface ErrorViewProps {
+  error: string;
+  onBack: () => void;
+}
+
+function ErrorView({ error, onBack }: ErrorViewProps) {
+  return (
+    <Card>
+      <CardContent className="pt-6 space-y-4">
+        <p className="text-destructive">{error}</p>
+        <Button variant="outline" onClick={onBack}>
+          Back to Home
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface ChatLoadingViewProps {
+  durationLabel: string;
+}
+
+function ChatLoadingView({ durationLabel }: ChatLoadingViewProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Setting up your chat...</CardTitle>
+      </CardHeader>
+      <CardContent className="text-center">
+        <div className="mx-auto mb-5 h-16 w-16 animate-pulse rounded-full bg-gradient-to-br from-primary to-primary/70" />
+        <p>Getting everything ready for your {durationLabel} conversation</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface ChattingViewProps {
+  partnerName: string;
+  prompts: string[];
+  currentPromptIndex: number;
+  onNextPrompt: () => void;
+}
+
+function ChattingView({ partnerName, prompts, currentPromptIndex, onNextPrompt }: ChattingViewProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-center">
+          Chatting with <span>{partnerName}</span>
+        </CardTitle>
+        <p className="text-center text-sm text-muted-foreground">
+          Use the prompts below to guide your conversation
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <h3 className="mb-4 text-center text-lg font-medium text-foreground">Conversation Prompts</h3>
+          <div className="max-h-[200px] overflow-y-auto rounded-[12px] border-2 bg-muted p-5">
+            {prompts.length > 0 && (
+              <PromptCard prompt={prompts[currentPromptIndex]!} />
+            )}
+          </div>
+          <Button variant="outline" className="mt-4" onClick={onNextPrompt}>
+            Next Prompt
+          </Button>
+        </div>
+
+        <div className="rounded-[12px] bg-muted p-5 text-center space-y-1">
+          <p>
+            <strong>{formatDuration(CONFIG.CHAT_DURATION)}</strong> to connect and chat
+          </p>
+          <p className="text-sm text-muted-foreground">No pressure — just be yourself!</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface TimeUpViewProps {
+  onExtend: (seconds: number) => void;
+  onEndChat: () => void;
+}
+
+function TimeUpView({ onExtend, onEndChat }: TimeUpViewProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-center">Time's Up!</CardTitle>
+      </CardHeader>
+      <CardContent className="text-center space-y-4">
+        <p>Great chat! How would you like to continue?</p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button onClick={() => onExtend(CONFIG.CHAT_DURATION)}>
+            Extend for {formatDuration(CONFIG.CHAT_DURATION)}
+          </Button>
+          <Button variant="outline" onClick={() => onExtend(-1)}>
+            Continue indefinitely
+          </Button>
+          <Button variant="secondary" onClick={onEndChat}>
+            End chat and connect
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface ExtendedViewProps {
+  partnerName: string;
+  timeLeft: number;
+  isRunning: boolean;
+  onEndChat: () => void;
+}
+
+function ExtendedView({ partnerName, timeLeft, isRunning, onEndChat }: ExtendedViewProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Extended Chat</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p>
+          Chat extended! Enjoy your continued conversation with{' '}
+          <span>{partnerName}</span>
+        </p>
+        <div className="rounded-[12px] bg-muted p-5 text-center">
+          <p id="extendedTimerText">
+            {isRunning ? (
+              <>
+                <strong>{formatTime(timeLeft)}</strong> remaining
+              </>
+            ) : (
+              <>
+                <strong>No time limit</strong> - chat as long as you want!
+              </>
+            )}
+          </p>
+        </div>
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={onEndChat}>
+            End chat and connect
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface ResultViewProps {
+  connectionResult: 'exchanged' | 'declined' | null;
+  onStartNewChat: () => void;
+}
+
+function ResultView({ connectionResult, onStartNewChat }: ResultViewProps) {
+  return (
+    <Card>
+      <CardContent className="pt-6 text-center space-y-4">
+        {connectionResult === 'exchanged' && (
+          <>
+            <h2 className="text-2xl font-semibold">Connection Exchanged!</h2>
+            <p>You both want to connect!</p>
+          </>
+        )}
+        {connectionResult === 'declined' && (
+          <>
+            <h2 className="text-2xl font-semibold">Chat Complete</h2>
+            <p className="text-muted-foreground">
+              Thanks for the great chat! Your partner chose not to exchange
+              contact info, and that's perfectly okay.
+            </p>
+          </>
+        )}
+        <Button onClick={onStartNewChat}>
+          Start New Chat
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function ChatPage() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -129,175 +319,80 @@ export function ChatPage() {
     }).catch(() => setError('Failed to process connection preference.'));
   }
 
+  function handleStartNewChat() {
+    if (eventId) {
+      navigate(`/room/${eventId}`);
+    } else {
+      navigate('/');
+    }
+  }
+
   return (
-    <div className="container">
-      <header className="chat-header">
-        <h1>Micro-Chat</h1>
-        <div className="timer-container">
+    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 py-5">
+      <header className="mb-8 flex items-center justify-between text-foreground">
+        <h1 className="text-3xl font-semibold drop-shadow-sm">Micro-Chat</h1>
+        <div className="flex items-center">
           <Timer timeLeft={timer.timeLeft} />
         </div>
       </header>
 
-      <main className="main-content">
+      <main className="flex-1 space-y-6">
         {error && (
-          <div className="card">
-            <p style={{ color: 'red' }}>{error}</p>
-            <button className="btn btn-secondary" onClick={() => navigate('/')}>
-              Back to Home
-            </button>
-          </div>
+          <ErrorView error={error} onBack={() => navigate('/')} />
         )}
 
-        {state === 'loading' && (
-          <div className="card">
-            <h2>Setting up your chat...</h2>
-            <div className="waiting-animation">
-              <div className="pulse-dot"></div>
-              <p>Getting everything ready for your {formatDuration(CONFIG.CHAT_DURATION)} conversation</p>
-            </div>
-          </div>
+        {state === 'loading' && !error && (
+          <ChatLoadingView durationLabel={formatDuration(CONFIG.CHAT_DURATION)} />
         )}
 
-        {state === 'chatting' && partnerName && (
-          <div className="card">
-            <div className="chat-partner">
-              <h2>
-                Chatting with <span>{partnerName}</span>
-              </h2>
-              <p className="chat-instruction">
-                Use the prompts below to guide your conversation
-              </p>
-            </div>
-
-            <div className="prompts-container">
-              <h3>Conversation Prompts</h3>
-              <div className="prompts-scroll">
-                {prompts.length > 0 && (
-                  <PromptCard prompt={prompts[currentPromptIndex]!} />
-                )}
-              </div>
-              <button className="btn btn-secondary" onClick={handleNextPrompt}>
-                Next Prompt
-              </button>
-            </div>
-
-            <div className="chat-timer-info">
-              <p>
-                <strong>{formatDuration(CONFIG.CHAT_DURATION)}</strong> to connect and chat
-              </p>
-              <p>No pressure — just be yourself!</p>
-            </div>
-          </div>
+        {state === 'chatting' && partnerName && !error && (
+          <ChattingView
+            partnerName={partnerName}
+            prompts={prompts}
+            currentPromptIndex={currentPromptIndex}
+            onNextPrompt={handleNextPrompt}
+          />
         )}
 
-        {state === 'timeUp' && (
-          <div className="card">
-            <h2>Time's Up!</h2>
-            <div className="time-up-content">
-              <p>Great chat! How would you like to continue?</p>
-              <div className="conversation-options">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => handleExtend(CONFIG.CHAT_DURATION)}
-                >
-                  Extend for 2 more minutes
-                </button>
-                <button
-                  className="btn btn-affirmative"
-                  onClick={() => handleExtend(-1)}
-                >
-                  Continue indefinitely
-                </button>
-                <button className="btn btn-secondary" onClick={handleEndChat}>
-                  End chat and connect
-                </button>
-              </div>
-            </div>
-          </div>
+        {state === 'timeUp' && !error && (
+          <TimeUpView
+            onExtend={handleExtend}
+            onEndChat={handleEndChat}
+          />
         )}
 
-        {state === 'extended' && (
-          <div className="card">
-            <h2>Extended Chat</h2>
-            <div className="extended-chat-content">
-              <p>
-                Chat extended! Enjoy your continued conversation with{' '}
-                <span>{partnerName}</span>
-              </p>
-              <div className="extended-timer-info">
-                <p id="extendedTimerText">
-                  {timer.isRunning ? (
-                    <>
-                      <strong>{formatTime(timer.timeLeft)}</strong> remaining
-                    </>
-                  ) : (
-                    <>
-                      <strong>No time limit</strong> - chat as long as you want!
-                    </>
-                  )}
-                </p>
-              </div>
-              <div className="extended-actions">
-                <button className="btn btn-secondary" onClick={handleEndChat}>
-                  End chat and connect
-                </button>
-              </div>
-            </div>
-          </div>
+        {state === 'extended' && !error && (
+          <ExtendedView
+            partnerName={partnerName}
+            timeLeft={timer.timeLeft}
+            isRunning={timer.isRunning}
+            onEndChat={handleEndChat}
+          />
         )}
 
-        {state === 'connecting' && (
+        {state === 'connecting' && !error && (
           <ConnectionCard
             onYes={() => handleConnectionPref(true)}
             onNo={() => handleConnectionPref(false)}
           />
         )}
 
-        {state === 'result' && (
-          <div className="card">
-            {connectionResult === 'exchanged' && (
-              <>
-                <h2>Connection Exchanged!</h2>
-                <div className="connection-success">
-                  <p>You both want to connect!</p>
-                </div>
-              </>
-            )}
-            {connectionResult === 'declined' && (
-              <>
-                <h2>Chat Complete</h2>
-                <div className="connection-declined">
-                  <p>
-                    Thanks for the great chat! Your partner chose not to exchange
-                    contact info, and that's perfectly okay.
-                  </p>
-                </div>
-              </>
-            )}
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                if (eventId) {
-                  navigate(`/room/${eventId}`);
-                } else {
-                  navigate('/');
-                }
-              }}
-            >
-              Start New Chat
-            </button>
-          </div>
+        {state === 'result' && !error && (
+          <ResultView
+            connectionResult={connectionResult}
+            onStartNewChat={handleStartNewChat}
+          />
         )}
       </main>
 
-      <footer className="page-footer">
+      <footer className="mt-auto pt-5 text-center text-sm text-foreground/80">
         <p>
           <strong>Remember:</strong> This is a safe space. Be kind, be curious,
           and enjoy the conversation!
         </p>
-        <button className="btn btn-secondary" style={{ marginTop: 10 }} onClick={() => navigate('/')}>
+        <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate('/')}>
           Back to Home
-        </button>
+        </Button>
       </footer>
     </div>
   );

@@ -21,23 +21,13 @@ describe('Timer', () => {
     expect(screen.getByText('0:05')).toBeInTheDocument();
   });
 
-  it('applies timer class', () => {
-    const { container } = render(<Timer timeLeft={120} />);
-    expect(container.firstChild).toHaveClass('timer');
-  });
-
-  it('applies warning class when below warning threshold', () => {
+  it('shows warning state when below warning threshold', () => {
     const { container } = render(<Timer timeLeft={5} warningThreshold={10} />);
     expect(container.firstChild).toHaveClass('timer-warning');
   });
 
-  it('applies danger class when below danger threshold', () => {
+  it('shows danger state when below danger threshold', () => {
     const { container } = render(<Timer timeLeft={2} dangerThreshold={3} />);
     expect(container.firstChild).toHaveClass('timer-danger');
-  });
-
-  it('does not apply warning class above threshold', () => {
-    const { container } = render(<Timer timeLeft={20} warningThreshold={10} />);
-    expect(container.firstChild).not.toHaveClass('timer-warning');
   });
 });

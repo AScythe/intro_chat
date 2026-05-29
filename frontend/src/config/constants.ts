@@ -13,10 +13,4 @@ export const CONFIG = {
   SIMULATE_READY_DELAY_MS: 5000,
 } as const;
 
-export const FALLBACK_PROMPTS = [
-  "What's one thing you're excited about this weekend?",
-  "What's your favorite snack at hackathons?",
-  "If you could steal one skill from another hacker, what would it be?",
-  "What's your favorite debugging story?",
-  "What's the most interesting project you've worked on recently?",
-] as const;
+
