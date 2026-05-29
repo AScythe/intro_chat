@@ -12,3 +12,6 @@ PORT = 5000
 MATCH_EXPIRY_SECONDS = 30          # How long a match is valid in DB (informational)
 CLEANUP_INTERVAL_SECONDS = 60      # How often to check for expired matches
 CLEANUP_THRESHOLD_SECONDS = 300    # Remove matches older than this (5 minutes)
+
+# Default room names for new events
+DEFAULT_ROOMS = ['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Quiet Corner', 'Coffee Area']

@@ -9,19 +9,18 @@ from urllib.parse import urljoin
 from .state import active_users, active_matches, waiting_queue, CONVERSATION_PROMPTS, USER_TEMPLATE
 from .schemas import CreateEventRequest, JoinEventRequest, SetUserRoomRequest, SetAvailabilityRequest, ExchangeConnectionRequest
 from .connection_manager import manager
-from .config import DB_PATH
+from . import FRONTEND_DIST_DIR
+from .config import DB_PATH, DEFAULT_ROOMS
 import aiosqlite
 import uuid
 import time
-
-DEFAULT_ROOMS = ['Main Hall', 'Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Quiet Corner', 'Coffee Area']
 
 router = APIRouter()
 
 @router.get('/')
 async def index():
     from fastapi.responses import HTMLResponse
-    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'dist', 'index.html')) as f:
+    with open(os.path.join(FRONTEND_DIST_DIR, 'index.html')) as f:
         return HTMLResponse(content=f.read())
 
 @router.post('/api/events')
@@ -166,20 +165,10 @@ async def exchange_connection(match_id: str, data: ExchangeConnectionRequest):
 
 @router.get('/api/qr/{event_id}')
 async def generate_qr(event_id: str, request: Request):
-    import qrcode
-    import io
-    import base64
+    from .qr_utils import generate_qr_data_uri
     origin = f"{request.url.scheme}://{request.url.netloc}/"
     qr_data = urljoin(origin, f"room/{event_id}")
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(qr_data)
-    qr.make(True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    buffer = io.BytesIO()
-    img.save(buffer, format='PNG')
-    buffer.seek(0)
-    img_str = base64.b64encode(buffer.getvalue()).decode()
-    return {'qr_code': f"data:image/png;base64,{img_str}"}
+    return {'qr_code': generate_qr_data_uri(qr_data)}
 
 @router.get('/api/prompts')
 async def get_prompts():
