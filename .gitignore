@@ -68,4 +68,4 @@ frontend/tsconfig.tsbuildinfo
 /.cocoindex_code/
 
 # Graphify — knowledge graph
-graphify-out/
+graphify-out/*
