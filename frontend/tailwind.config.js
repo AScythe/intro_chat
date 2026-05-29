@@ -3,6 +3,7 @@
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -44,12 +45,13 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         sage: {
-          DEFAULT: "hsl(var(--sage))",
-          foreground: "hsl(var(--sage-foreground))",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
       },
       fontFamily: {
         sans: ["Sora", "system-ui", "sans-serif"],
+        heading: ["DM Serif Display", "serif"],
       },
       maxWidth: {
         app: "660px",
@@ -61,11 +63,16 @@ export default {
       },
       boxShadow: {
         soft: "0 4px 20px rgba(0, 0, 0, 0.06)",
+        card: "0 2px 12px rgba(0, 0, 0, 0.08)",
       },
       keyframes: {
         "fade-in": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
+        },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
         pulse: {
           "0%": { transform: "scale(1)", opacity: "1" },
@@ -75,6 +82,7 @@ export default {
       },
       animation: {
         "fade-in": "fade-in 0.4s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
         pulse: "pulse 2s ease-in-out infinite",
       },
     },

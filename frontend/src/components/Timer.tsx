@@ -22,18 +22,18 @@ export function Timer({
   return (
     <div
       className={cn(
-        'inline-flex items-center justify-center rounded-[12px] border px-6 py-3 backdrop-blur-sm transition-all duration-300',
+        'inline-flex items-center justify-center rounded-xl border-2 px-5 py-2.5 transition-all duration-300',
         isDanger
-          ? 'bg-destructive/20 border-destructive/50 animate-pulse'
+          ? 'border-destructive/50 bg-destructive/20 animate-pulse'
           : isWarning
-            ? 'bg-[rgba(212,184,106,0.2)] border-[rgba(212,184,106,0.5)]'
-            : 'bg-white/20 border-white/30',
+            ? 'border-[rgba(212,184,106,0.5)] bg-[rgba(212,184,106,0.2)]'
+            : 'border-border bg-card/80',
         'timer',
         isWarning && 'timer-warning',
         isDanger && 'timer-danger',
       )}
     >
-      <span className="text-3xl font-bold tracking-tight">
+      <span className="text-2xl font-bold tracking-tight text-foreground">
         {formatTime(timeLeft)}
       </span>
     </div>

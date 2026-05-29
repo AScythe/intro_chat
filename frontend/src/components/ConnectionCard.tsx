@@ -11,12 +11,15 @@ interface ConnectionCardProps {
 
 export function ConnectionCard({ onYes, onNo }: ConnectionCardProps) {
   return (
-    <Card>
+    <Card className="text-center">
       <CardHeader>
-        <CardTitle className="text-center">💬 Connect</CardTitle>
+        <CardTitle className="font-heading text-2xl">Connect</CardTitle>
       </CardHeader>
-      <CardContent className="text-center space-y-4">
-        <p>Would you like to exchange usernames to connect?</p>
+      <CardContent className="space-y-5">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-2xl">
+          💬
+        </div>
+        <p className="text-foreground">Would you like to exchange usernames to connect?</p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button onClick={onYes}>Yes, let's connect!</Button>
           <Button variant="outline" onClick={onNo}>

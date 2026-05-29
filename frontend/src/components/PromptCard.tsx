@@ -11,7 +11,7 @@ export function PromptCard({ prompt }: PromptCardProps) {
   return (
     <div
       className={cn(
-        'rounded-[12px] border-l-4 border-primary bg-card p-5 shadow-soft text-foreground text-lg leading-relaxed',
+        'rounded-xl border-l-4 border-primary bg-card p-5 shadow-soft text-lg leading-relaxed text-foreground',
         'prompt-item',
       )}
     >

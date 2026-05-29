@@ -7,28 +7,50 @@
 
 @layer base {
   :root {
-    --background: 35 30% 94%;
-    --foreground: 25 17% 15%;
+    --background: 40 6% 98%;
+    --foreground: 40 5% 16%;
     --card: 0 0% 100%;
-    --card-foreground: 25 17% 15%;
+    --card-foreground: 40 5% 16%;
     --popover: 0 0% 100%;
-    --popover-foreground: 25 17% 15%;
-    --primary: 28 22% 63%;
+    --popover-foreground: 40 5% 16%;
+    --primary: 105 12% 67%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 34 34% 88%;
-    --secondary-foreground: 25 17% 15%;
-    --muted: 35 30% 94%;
-    --muted-foreground: 28 9% 50%;
-    --accent: 35 25% 86%;
-    --accent-foreground: 25 17% 15%;
-    --destructive: 9 46% 69%;
+    --secondary: 30 20% 88%;
+    --secondary-foreground: 40 5% 16%;
+    --muted: 35 20% 92%;
+    --muted-foreground: 30 5% 50%;
+    --accent: 30 40% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 33% 73%;
     --destructive-foreground: 0 0% 100%;
-    --sage: 105 15% 60%;
-    --sage-foreground: 0 0% 100%;
-    --border: 32 22% 84%;
-    --input: 32 22% 84%;
-    --ring: 28 22% 63%;
+    --border: 30 20% 86%;
+    --input: 30 20% 86%;
+    --ring: 105 12% 67%;
     --radius: 1rem;
+    --transition-duration: 0.4s;
+  }
+
+  .dark {
+    --background: 40 10% 10%;
+    --foreground: 30 20% 88%;
+    --card: 40 10% 16%;
+    --card-foreground: 30 20% 88%;
+    --popover: 40 10% 16%;
+    --popover-foreground: 30 20% 88%;
+    --primary: 105 10% 56%;
+    --primary-foreground: 40 10% 10%;
+    --secondary: 30 10% 22%;
+    --secondary-foreground: 30 20% 88%;
+    --muted: 40 10% 16%;
+    --muted-foreground: 30 8% 57%;
+    --accent: 30 35% 54%;
+    --accent-foreground: 40 10% 10%;
+    --destructive: 0 30% 63%;
+    --destructive-foreground: 40 10% 10%;
+    --border: 30 10% 22%;
+    --input: 30 10% 22%;
+    --ring: 105 10% 56%;
+    --transition-duration: 0.4s;
   }
 }
 
@@ -37,6 +59,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-gradient-to-br from-background to-secondary min-h-screen text-foreground;
+    @apply bg-background min-h-screen text-foreground;
+    transition: background-color var(--transition-duration) ease,
+                color var(--transition-duration) ease;
   }
 }

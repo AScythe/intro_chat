@@ -33,7 +33,7 @@ interface ErrorViewProps {
 function ErrorView({ error, onBack }: ErrorViewProps) {
   return (
     <Card>
-      <CardContent className="pt-6 space-y-4">
+      <CardContent className="space-y-4 pt-6">
         <p className="text-destructive">{error}</p>
         <Button variant="outline" onClick={onBack}>
           Back to Home
@@ -51,11 +51,11 @@ function ChatLoadingView({ durationLabel }: ChatLoadingViewProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Setting up your chat...</CardTitle>
+        <CardTitle className="font-heading text-2xl">Setting up your chat...</CardTitle>
       </CardHeader>
       <CardContent className="text-center">
-        <div className="mx-auto mb-5 h-16 w-16 animate-pulse rounded-full bg-gradient-to-br from-primary to-primary/70" />
-        <p>Getting everything ready for your {durationLabel} conversation</p>
+        <div className="mx-auto mb-6 h-16 w-16 animate-pulse rounded-full bg-primary/20" />
+        <p className="text-muted-foreground">Getting everything ready for your {durationLabel} conversation</p>
       </CardContent>
     </Card>
   );
@@ -72,31 +72,33 @@ function ChattingView({ partnerName, prompts, currentPromptIndex, onNextPrompt }
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-center">
-          Chatting with <span>{partnerName}</span>
+        <CardTitle className="text-center font-heading text-2xl">
+          Chatting with <span className="text-primary">{partnerName}</span>
         </CardTitle>
         <p className="text-center text-sm text-muted-foreground">
           Use the prompts below to guide your conversation
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-5">
         <div>
-          <h3 className="mb-4 text-center text-lg font-medium text-foreground">Conversation Prompts</h3>
-          <div className="max-h-[200px] overflow-y-auto rounded-[12px] border-2 bg-muted p-5">
+          <h3 className="mb-4 text-center text-lg font-semibold text-foreground">Conversation Prompts</h3>
+          <div className="max-h-[200px] overflow-y-auto rounded-xl border-2 bg-muted p-5">
             {prompts.length > 0 && (
               <PromptCard prompt={prompts[currentPromptIndex]!} />
             )}
           </div>
-          <Button variant="outline" className="mt-4" onClick={onNextPrompt}>
-            Next Prompt
-          </Button>
+          <div className="mt-4 flex justify-center">
+            <Button variant="outline" onClick={onNextPrompt}>
+              Next Prompt
+            </Button>
+          </div>
         </div>
 
-        <div className="rounded-[12px] bg-muted p-5 text-center space-y-1">
-          <p>
-            <strong>{formatDuration(CONFIG.CHAT_DURATION)}</strong> to connect and chat
+        <div className="rounded-xl bg-muted p-5 text-center">
+          <p className="text-foreground">
+            <span className="font-semibold">{formatDuration(CONFIG.CHAT_DURATION)}</span> to connect and chat
           </p>
-          <p className="text-sm text-muted-foreground">No pressure — just be yourself!</p>
+          <p className="mt-1 text-sm text-muted-foreground">No pressure — just be yourself!</p>
         </div>
       </CardContent>
     </Card>
@@ -110,13 +112,13 @@ interface TimeUpViewProps {
 
 function TimeUpView({ onExtend, onEndChat }: TimeUpViewProps) {
   return (
-    <Card>
+    <Card className="text-center">
       <CardHeader>
-        <CardTitle className="text-center">Time's Up!</CardTitle>
+        <CardTitle className="font-heading text-3xl">Time's Up!</CardTitle>
       </CardHeader>
-      <CardContent className="text-center space-y-4">
-        <p>Great chat! How would you like to continue?</p>
-        <div className="flex flex-wrap justify-center gap-4">
+      <CardContent className="space-y-5">
+        <p className="text-foreground">Great chat! How would you like to continue?</p>
+        <div className="flex flex-wrap justify-center gap-3">
           <Button onClick={() => onExtend(CONFIG.CHAT_DURATION)}>
             Extend for {formatDuration(CONFIG.CHAT_DURATION)}
           </Button>
@@ -141,33 +143,30 @@ interface ExtendedViewProps {
 
 function ExtendedView({ partnerName, timeLeft, isRunning, onEndChat }: ExtendedViewProps) {
   return (
-    <Card>
+    <Card className="text-center">
       <CardHeader>
-        <CardTitle>Extended Chat</CardTitle>
+        <CardTitle className="font-heading text-2xl">Extended Chat</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p>
-          Chat extended! Enjoy your continued conversation with{' '}
-          <span>{partnerName}</span>
+      <CardContent className="space-y-5">
+        <p className="text-foreground">
+          Enjoy your continued conversation with <span className="font-semibold text-primary">{partnerName}</span>
         </p>
-        <div className="rounded-[12px] bg-muted p-5 text-center">
-          <p id="extendedTimerText">
+        <div className="rounded-xl bg-muted p-5">
+          <p id="extendedTimerText" className="text-foreground">
             {isRunning ? (
               <>
-                <strong>{formatTime(timeLeft)}</strong> remaining
+                <span className="font-semibold">{formatTime(timeLeft)}</span> remaining
               </>
             ) : (
               <>
-                <strong>No time limit</strong> - chat as long as you want!
+                <span className="font-semibold">No time limit</span> — chat as long as you want!
               </>
             )}
           </p>
         </div>
-        <div className="flex justify-center">
-          <Button variant="outline" onClick={onEndChat}>
-            End chat and connect
-          </Button>
-        </div>
+        <Button variant="outline" onClick={onEndChat}>
+          End chat and connect
+        </Button>
       </CardContent>
     </Card>
   );
@@ -180,17 +179,20 @@ interface ResultViewProps {
 
 function ResultView({ connectionResult, onStartNewChat }: ResultViewProps) {
   return (
-    <Card>
-      <CardContent className="pt-6 text-center space-y-4">
+    <Card className="text-center">
+      <CardContent className="space-y-5 pt-8">
         {connectionResult === 'exchanged' && (
           <>
-            <h2 className="text-2xl font-semibold">Connection Exchanged!</h2>
-            <p>You both want to connect!</p>
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-3xl">
+              🎉
+            </div>
+            <h2 className="font-heading text-2xl text-foreground">Connection Exchanged!</h2>
+            <p className="text-muted-foreground">You both want to connect!</p>
           </>
         )}
         {connectionResult === 'declined' && (
           <>
-            <h2 className="text-2xl font-semibold">Chat Complete</h2>
+            <h2 className="font-heading text-2xl text-foreground">Chat Complete</h2>
             <p className="text-muted-foreground">
               Thanks for the great chat! Your partner chose not to exchange
               contact info, and that's perfectly okay.
@@ -328,15 +330,13 @@ export function ChatPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 py-5">
-      <header className="mb-8 flex items-center justify-between text-foreground">
-        <h1 className="text-3xl font-semibold drop-shadow-sm">Micro-Chat</h1>
-        <div className="flex items-center">
-          <Timer timeLeft={timer.timeLeft} />
-        </div>
+    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 pb-8">
+      <header className="mb-6 mt-6 flex items-center justify-between">
+        <h1 className="font-heading text-3xl text-foreground">Micro-Chat</h1>
+        <Timer timeLeft={timer.timeLeft} />
       </header>
 
-      <main className="flex-1 space-y-6">
+      <main className="flex-1 space-y-5">
         {error && (
           <ErrorView error={error} onBack={() => navigate('/')} />
         )}
@@ -385,12 +385,11 @@ export function ChatPage() {
         )}
       </main>
 
-      <footer className="mt-auto pt-5 text-center text-sm text-foreground/80">
-        <p>
-          <strong>Remember:</strong> This is a safe space. Be kind, be curious,
-          and enjoy the conversation!
+      <footer className="mt-6 text-center">
+        <p className="text-xs text-muted-foreground">
+          This is a safe space. Be kind, be curious, and enjoy the conversation!
         </p>
-        <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate('/')}>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('/')}>
           Back to Home
         </Button>
       </footer>

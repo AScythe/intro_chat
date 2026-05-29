@@ -1,18 +1,23 @@
 // App.test.tsx
-// Description: Tests for App root — route rendering and provider integration
+// Description: Tests for App root — route rendering, provider integration, and dark mode toggle
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import App from '@/App';
 
 describe('App', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     localStorage.clear();
+    document.documentElement.classList.remove('dark');
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
     });
+  });
+
+  afterEach(() => {
+    document.documentElement.classList.remove('dark');
   });
 
   it('renders home page at /', () => {
@@ -37,5 +42,18 @@ describe('App', () => {
     window.history.pushState({}, '', '/chat/abc123');
     render(<App />);
     expect(screen.getByText(/Micro-Chat/i)).toBeInTheDocument();
+  });
+
+  it('toggles dark mode class on html element', () => {
+    window.history.pushState({}, '', '/');
+    render(<App />);
+    const toggle = screen.getByRole('button', { name: /switch to dark mode/i });
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    fireEvent.click(toggle);
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(localStorage.getItem('introchat_theme')).toBe('dark');
+    fireEvent.click(toggle);
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(localStorage.getItem('introchat_theme')).toBe('light');
   });
 });

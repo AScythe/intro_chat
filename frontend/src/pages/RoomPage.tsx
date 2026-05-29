@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { fetchJSON } from '@/api/client';
 import { useUser } from '@/hooks/useUser';
 import { useSocket } from '@/hooks/useSocket';
@@ -12,6 +13,7 @@ import { PersonCard } from '@/components/PersonCard';
 import { MatchCountdown } from '@/components/MatchCountdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -41,7 +43,7 @@ function RoomSelector({ rooms, selectedRoomId, onSelectRoom, onConfirm }: RoomSe
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Where are you?</CardTitle>
+        <CardTitle className="font-heading text-2xl">Where are you?</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Select value={selectedRoomId} onValueChange={onSelectRoom}>
@@ -77,18 +79,14 @@ function NearbyUsersView({ currentRoom, nearbyUsers, selectedPerson, onPersonCli
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          Room Selected: <span>{currentRoom.name}</span>
+        <CardTitle className="font-heading text-2xl">
+          {currentRoom.name}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <p>
-          You're now in <strong>{currentRoom.name}</strong>
-        </p>
-
-        <div className="rounded-[12px] bg-muted p-5">
-          <h3 className="mb-4 text-xl font-medium">Nearby Users</h3>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+      <CardContent className="space-y-5">
+        <div className="rounded-xl bg-muted p-5">
+          <h3 className="mb-4 text-lg font-semibold text-foreground">Nearby Users</h3>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
             {nearbyUsers.map((person) => (
               <PersonCard
                 key={person.name}
@@ -98,13 +96,13 @@ function NearbyUsersView({ currentRoom, nearbyUsers, selectedPerson, onPersonCli
               />
             ))}
           </div>
-          <p className="mt-4 text-center text-sm italic text-muted-foreground">
-            <strong>{nearbyUsers.filter((u) => u.available).length} available</strong> out of{' '}
-            {nearbyUsers.length} people in {currentRoom.name}
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            <span className="font-medium">{nearbyUsers.filter((u) => u.available).length} available</span> out of{' '}
+            {nearbyUsers.length} people
           </p>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <Button
             disabled={!selectedPerson}
             onClick={onRequestChat}
@@ -129,20 +127,20 @@ function WaitingResponseView({ requestedPerson, onCancel }: WaitingResponseViewP
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Request Sent</CardTitle>
+        <CardTitle className="font-heading text-2xl">Request Sent</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         <div className="max-w-sm">
           <PersonCard person={requestedPerson} />
         </div>
-        <div className="rounded-[12px] border bg-muted p-5 space-y-3">
-          <div className="flex items-center gap-3 rounded-[8px] border bg-card p-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
-            <span>You: Request sent</span>
+        <div className="space-y-3 rounded-xl border bg-muted p-5">
+          <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
+            <span className="text-sm text-foreground">You: Request sent</span>
           </div>
-          <div className="flex items-center gap-3 rounded-[8px] border bg-card p-3 animate-pulse">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
-            <span>{requestedPerson.name}: Waiting for response...</span>
+          <div className="flex animate-pulse items-center gap-3 rounded-lg border bg-card p-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
+            <span className="text-sm text-foreground">{requestedPerson.name}: Waiting for response...</span>
           </div>
         </div>
         <Button variant="outline" onClick={onCancel}>
@@ -166,30 +164,30 @@ function AcceptedView({ requestedPerson, personResponse, yourReady, theirReady, 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="font-heading text-2xl">
           {requestedPerson.name} accepted!
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="rounded-[12px] border-l-4 border-primary bg-muted p-5">
-          <p>
-            <strong>{requestedPerson.name} says:</strong> "{personResponse.message}"
+      <CardContent className="space-y-5">
+        <div className="rounded-xl border-l-4 border-primary bg-muted p-5">
+          <p className="text-sm text-foreground">
+            <span className="font-semibold">{requestedPerson.name} says:</span> "{personResponse.message}"
           </p>
-          <p className="mt-2 font-medium text-foreground">You've been matched! Take your time to get ready.</p>
+          <p className="mt-3 font-medium text-foreground">You've been matched! Take your time to get ready.</p>
         </div>
 
-        <div className="rounded-[12px] border bg-muted p-5 space-y-3">
-          <div className="flex items-center gap-3 rounded-[8px] border bg-card p-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-lg">
+        <div className="space-y-3 rounded-xl border bg-muted p-5">
+          <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">
               {yourReady ? '✅' : '⏳'}
             </span>
-            <span>You: {yourReady ? 'Ready!' : 'Getting ready...'}</span>
+            <span className="text-sm text-foreground">You: {yourReady ? 'Ready!' : 'Getting ready...'}</span>
           </div>
-          <div className="flex items-center gap-3 rounded-[8px] border bg-card p-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-lg">
+          <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">
               {theirReady ? '✅' : '⏳'}
             </span>
-            <span>{requestedPerson.name}: {theirReady ? 'Ready!' : 'Getting ready...'}</span>
+            <span className="text-sm text-foreground">{requestedPerson.name}: {theirReady ? 'Ready!' : 'Getting ready...'}</span>
           </div>
         </div>
 
@@ -221,6 +219,7 @@ export function RoomPage() {
   const { requestedPerson, personResponse, yourReady, theirReady, requestChat, imReady, cancelRequest } = useChatRequest();
 
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomsLoading, setRoomsLoading] = useState(true);
   const [selectedRoomId, setSelectedRoomId] = useState('');
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
   const [nearbyUsers, setNearbyUsers] = useState<SamplePerson[]>([]);
@@ -233,8 +232,8 @@ export function RoomPage() {
   useEffect(() => {
     if (!eventId) return;
     fetchJSON<Room[]>(`/api/events/${eventId}/rooms`)
-      .then(setRooms)
-      .catch(() => {});
+      .then((data) => { setRooms(data); setRoomsLoading(false); })
+      .catch(() => { toast.error('Failed to load rooms. Please refresh.'); setRoomsLoading(false); });
   }, [eventId]);
 
   async function handleSelectRoom() {
@@ -329,22 +328,34 @@ export function RoomPage() {
   }, [socket]);
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 py-5">
-      <header className="mb-8 text-center text-foreground">
-        <h1 className="mb-2 text-4xl font-semibold drop-shadow-sm">Select Your Location</h1>
-        <p className="text-base text-foreground/90">
+    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 pb-8">
+      <header className="mb-8 mt-6 text-center">
+        <h1 className="font-heading text-4xl text-foreground">Select Your Location</h1>
+        <p className="mt-2 text-muted-foreground">
           Choose where you're sitting to find nearby chat partners
         </p>
       </header>
 
-      <main className="flex-1 space-y-6">
+      <main className="flex-1 space-y-5">
         {viewState === 'selecting' && (
-          <RoomSelector
-            rooms={rooms}
-            selectedRoomId={selectedRoomId}
-            onSelectRoom={setSelectedRoomId}
-            onConfirm={handleSelectRoom}
-          />
+          roomsLoading ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-heading text-2xl">Where are you?</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-32" />
+              </CardContent>
+            </Card>
+          ) : (
+            <RoomSelector
+              rooms={rooms}
+              selectedRoomId={selectedRoomId}
+              onSelectRoom={setSelectedRoomId}
+              onConfirm={handleSelectRoom}
+            />
+          )
         )}
 
         {viewState === 'roomSelected' && currentRoom && (
@@ -386,11 +397,11 @@ export function RoomPage() {
         )}
       </main>
 
-      <footer className="mt-auto pt-5 text-center text-sm text-foreground/80">
-        <p>
-          <strong>Tip:</strong> Make sure you're physically in the room you select for the best matches!
+      <footer className="mt-6 text-center">
+        <p className="text-xs text-muted-foreground">
+          Make sure you're physically in the room you select for the best matches!
         </p>
-        <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate('/')}>
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('/')}>
           Back to Home
         </Button>
       </footer>

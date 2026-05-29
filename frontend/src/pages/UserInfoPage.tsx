@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { fetchJSON } from '@/api/client';
 import { useUser } from '@/hooks/useUser';
 import { generateUsername } from '@/utils/random';
@@ -45,15 +46,16 @@ export function UserInfoPage() {
       });
       setSaved(true);
     } catch {
+      toast.error('Failed to save profile. Please try again.');
       setSaving(false);
     }
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 py-5">
-      <header className="mb-8 text-center text-foreground">
-        <h1 className="mb-2 text-4xl font-semibold drop-shadow-sm">Your Profile</h1>
-        <p className="text-base text-foreground/90">
+    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 pb-8">
+      <header className="mb-8 mt-6 text-center">
+        <h1 className="font-heading text-4xl text-foreground">Your Profile</h1>
+        <p className="mt-2 text-muted-foreground">
           Add your information so others can connect with you after chatting
         </p>
       </header>
@@ -61,12 +63,12 @@ export function UserInfoPage() {
       <main className="flex-1">
         <Card>
           <CardHeader>
-            <CardTitle>Connect Details</CardTitle>
+            <CardTitle className="font-heading text-2xl">Connect Details</CardTitle>
             <CardDescription>
               These will be shared only when both you and your chat partner agree to connect.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="nameInput">Your Name</Label>
               <Input
@@ -102,7 +104,7 @@ export function UserInfoPage() {
             </div>
 
             <p className="text-sm text-muted-foreground">
-              Name is optional — leave blank for an anonymous username. LinkedIn and Slack are optional too.
+              Name is optional — leave blank for an anonymous username.
             </p>
 
             <div className="flex flex-col gap-3 pt-2">
@@ -119,22 +121,13 @@ export function UserInfoPage() {
             </div>
 
             {saved && (
-              <div className="rounded-[8px] border border-sage/30 bg-sage/10 p-3 text-center text-sm text-sage">
+              <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-center text-sm text-primary">
                 Profile saved! You can now select a room.
               </div>
             )}
           </CardContent>
         </Card>
       </main>
-
-      <footer className="mt-auto pt-5 text-center text-sm text-foreground/80">
-        <p>
-          <strong>Privacy:</strong> Your info is only shared when you opt in after a chat.
-        </p>
-        <Button variant="outline" size="sm" className="mt-2" onClick={() => navigate('/')}>
-          Back to Home
-        </Button>
-      </footer>
     </div>
   );
 }

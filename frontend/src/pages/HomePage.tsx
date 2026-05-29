@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { fetchJSON } from '@/api/client';
 import { QRDisplay } from '@/components/QRDisplay';
 import { Button } from '@/components/ui/button';
@@ -39,30 +40,27 @@ export function HomePage() {
       const qr = await fetchJSON<QRResponse>(`/api/qr/${event.event_id}`);
       setCreatedEvent({ id: event.event_id, name: eventName.trim(), qrCode: qr.qr_code });
     } catch {
+      toast.error('Failed to create event. Please try again.');
       setCreating(false);
     }
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 py-5">
-      <header className="mb-8 rounded-[20px] border border-white/30 bg-white/20 p-10 text-center backdrop-blur-sm">
-        <h1 className="mb-2 text-5xl font-bold text-foreground drop-shadow-sm">
+    <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 pb-8">
+      <header className="mb-8 mt-6 text-center">
+        <h1 className="font-heading text-5xl text-foreground">
           IntroChat
         </h1>
-        <p className="mb-3 text-lg font-medium text-foreground/90">
+        <p className="mt-3 text-lg text-muted-foreground">
           The Secret Icebreaker for Introverts at Events
-        </p>
-        <p className="mx-auto max-w-md text-base italic text-foreground/80">
-          "IntroChat doesn't make introverts talk more — it makes them feel safe enough to talk once.
-          And sometimes, that one conversation changes everything."
         </p>
       </header>
 
-      <main className="flex-1 space-y-6">
+      <main className="flex-1 space-y-5">
         <Card>
           <CardHeader>
-            <CardTitle>Join an Event</CardTitle>
-            <CardDescription>Enter an event code or scan the QR code to get started</CardDescription>
+            <CardTitle className="font-heading text-2xl">Join an Event</CardTitle>
+            <CardDescription>Enter an event code to get started</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-3">
@@ -78,23 +76,13 @@ export function HomePage() {
                 Join Event
               </Button>
             </div>
-
-            <div className="relative text-center before:absolute before:left-0 before:right-0 before:top-1/2 before:h-px before:bg-border">
-              <span className="relative z-10 bg-card px-5 text-sm text-muted-foreground">
-                or
-              </span>
-            </div>
-
-            <div className="text-center">
-              <Button variant="outline">🔳 Scan QR Code</Button>
-            </div>
           </CardContent>
         </Card>
 
         {!createdEvent && (
           <Card>
             <CardHeader>
-              <CardTitle>Create New Event</CardTitle>
+              <CardTitle className="font-heading text-2xl">Create New Event</CardTitle>
               <CardDescription>Set up a new IntroChat event for your venue</CardDescription>
             </CardHeader>
             <CardContent>
@@ -120,63 +108,76 @@ export function HomePage() {
         )}
 
         {createdEvent && (
-          <QRDisplay qrCode={createdEvent.qrCode} eventCode={createdEvent.id} eventName={createdEvent.name} />
+          <>
+            <QRDisplay qrCode={createdEvent.qrCode} eventCode={createdEvent.id} eventName={createdEvent.name} />
+            <Card>
+              <CardContent className="pt-6">
+                <Button className="w-full" onClick={() => navigate(`/join/${createdEvent.id}`)}>
+                  Join This Event
+                </Button>
+              </CardContent>
+            </Card>
+          </>
         )}
 
-        {createdEvent && (
-          <Card>
-            <CardContent className="pt-6">
-              <Button className="w-full" onClick={() => navigate(`/join/${createdEvent.id}`)}>
-                Join This Event
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="py-8">
-          <h3 className="mb-8 text-center text-3xl font-semibold text-foreground drop-shadow-sm">
+        <section className="py-6">
+          <h3 className="mb-8 text-center font-heading text-3xl text-foreground">
             How It Works
           </h3>
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            <div className="text-center text-foreground">
-              <div className="mb-2 text-4xl">🎯</div>
-              <h4 className="mb-1 text-base font-semibold">Join Event</h4>
-              <p className="text-sm text-foreground/80">Enter event code or scan QR</p>
+            <div className="text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-2xl">
+                🎯
+              </div>
+              <h4 className="mb-1 font-semibold text-foreground">Join Event</h4>
+              <p className="text-sm text-muted-foreground">Enter event code</p>
             </div>
-            <div className="text-center text-foreground">
-              <div className="mb-2 text-4xl">📍</div>
-              <h4 className="mb-1 text-base font-semibold">Select Room</h4>
-              <p className="text-sm text-foreground/80">Choose your location</p>
+            <div className="text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-2xl">
+                📍
+              </div>
+              <h4 className="mb-1 font-semibold text-foreground">Select Room</h4>
+              <p className="text-sm text-muted-foreground">Choose your location</p>
             </div>
-            <div className="text-center text-foreground">
-              <div className="mb-2 text-4xl">🤝</div>
-              <h4 className="mb-1 text-base font-semibold">Get Matched</h4>
-              <p className="text-sm text-foreground/80">Find someone ready to chat</p>
+            <div className="text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-2xl">
+                🤝
+              </div>
+              <h4 className="mb-1 font-semibold text-foreground">Get Matched</h4>
+              <p className="text-sm text-muted-foreground">Find someone ready to chat</p>
             </div>
-            <div className="text-center text-foreground">
-              <div className="mb-2 text-4xl">💬</div>
-              <h4 className="mb-1 text-base font-semibold">2-Min Chat</h4>
-              <p className="text-sm text-foreground/80">Guided conversation prompts</p>
+            <div className="text-center">
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-2xl">
+                💬
+              </div>
+              <h4 className="mb-1 font-semibold text-foreground">2-Min Chat</h4>
+              <p className="text-sm text-muted-foreground">Guided conversation prompts</p>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div className="rounded-[16px] border border-white/30 bg-white/20 p-6 text-foreground backdrop-blur-sm">
-          <h4 className="mb-4 text-xl font-semibold">Privacy First</h4>
-          <ul className="space-y-2">
-            {[
-              'Fully anonymous — no real names or photos',
-              'Room-level location only',
-              'Chats are never stored',
-              'Cancel anytime, no pressure',
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-2">
-                <span className="mt-0.5 font-bold text-primary">✓</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-2xl">Privacy First</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-3">
+              {[
+                'Fully anonymous — no real names or photos',
+                'Room-level location only',
+                'Chats are never stored',
+                'Cancel anytime, no pressure',
+              ].map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-xs text-primary">
+                    ✓
+                  </span>
+                  <span className="text-sm text-muted-foreground">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

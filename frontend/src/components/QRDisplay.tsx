@@ -13,23 +13,23 @@ export function QRDisplay({ qrCode, eventCode, eventName }: QRDisplayProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>✅ Event Created!</CardTitle>
+        <CardTitle className="font-heading text-2xl">Event Created!</CardTitle>
         <CardDescription>Share this QR code with attendees</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         <div className="flex justify-center">
           <img
             src={qrCode}
             alt="QR Code"
-            className="max-w-[200px] rounded-[12px] shadow-soft"
+            className="max-w-[180px] rounded-xl shadow-soft"
           />
         </div>
-        <div className="rounded-[12px] bg-muted p-5 space-y-2">
-          <p className="text-sm">
-            <strong>Event Code:</strong> <span>{eventCode}</span>
+        <div className="space-y-2 rounded-xl bg-muted p-5">
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Event Code:</span> {eventCode}
           </p>
-          <p className="text-sm">
-            <strong>Event Name:</strong> <span>{eventName}</span>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">Event Name:</span> {eventName}
           </p>
         </div>
       </CardContent>
