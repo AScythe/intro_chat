@@ -1,5 +1,5 @@
 // RoomPage.test.tsx
-// Description: Tests for RoomPage — room selection, person matching, countdown
+// Description: Tests for RoomPage — room selection, navigation to people matching
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';

@@ -19,11 +19,6 @@ export function useDemoMode(enabled?: boolean) {
         return SAMPLE_USERS[roomName] ?? [];
       },
 
-      addAllSampleUsers(): Record<string, SamplePerson[]> {
-        if (!isEnabled) return {};
-        return SAMPLE_USERS;
-      },
-
       simulatePersonResponse(personName: string): { accepted: boolean; message: string } | null {
         if (!isEnabled) return null;
         return RESPONSES[personName] ?? { accepted: true, message: "Sure! Let's chat!" };
@@ -36,10 +31,6 @@ export function useDemoMode(enabled?: boolean) {
 
       createDemoMatchId(): string {
         return 'demo_' + generateRandomString(8);
-      },
-
-      isDemoMatch(matchId: string): boolean {
-        return isEnabled && matchId.startsWith('demo_');
       },
     };
   }, []);

@@ -34,12 +34,6 @@ describe('useDemoMode', () => {
     expect(response?.message).toBe("Sure! Let's chat!");
   });
 
-  it('detects demo match IDs', () => {
-    const { result } = renderHook(() => useDemoMode(true));
-    expect(result.current.isDemoMatch('demo_abc123')).toBe(true);
-    expect(result.current.isDemoMatch('real_match_123')).toBe(false);
-  });
-
   it('generates demo match IDs', () => {
     const { result } = renderHook(() => useDemoMode(true));
     const id = result.current.createDemoMatchId();
@@ -51,6 +45,5 @@ describe('useDemoMode', () => {
     const { result } = renderHook(() => useDemoMode(false));
     expect(result.current.isDemo).toBe(false);
     expect(result.current.addSampleUsers('Main Hall')).toEqual([]);
-    expect(result.current.isDemoMatch('demo_abc')).toBe(false);
   });
 });

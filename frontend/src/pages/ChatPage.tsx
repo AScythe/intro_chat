@@ -1,5 +1,5 @@
 // ChatPage.tsx
-// Description: Chat interface — timed conversation with prompts, timer, extend, and connection exchange
+// Description: Chat interface — timed conversation with prompts, timer, and extend options
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
@@ -9,7 +9,6 @@ import { useUser } from '@/hooks/useUser';
 import { useChatTimer } from '@/hooks/useTimer';
 import { Timer } from '@/components/Timer';
 import { PromptCard } from '@/components/PromptCard';
-import { ConnectionCard } from '@/components/ConnectionCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CONFIG } from '@/config/constants';
@@ -23,7 +22,7 @@ const FALLBACK_PROMPTS = [
   "What's the most interesting project you've worked on recently?",
 ];
 
-type ChatState = 'loading' | 'chatting' | 'timeUp' | 'extended' | 'connecting' | 'result';
+type ChatState = 'loading' | 'chatting' | 'timeUp' | 'extended';
 
 interface ErrorViewProps {
   error: string;
@@ -172,41 +171,6 @@ function ExtendedView({ partnerName, timeLeft, isRunning, onEndChat }: ExtendedV
   );
 }
 
-interface ResultViewProps {
-  connectionResult: 'exchanged' | 'declined' | null;
-  onStartNewChat: () => void;
-}
-
-function ResultView({ connectionResult, onStartNewChat }: ResultViewProps) {
-  return (
-    <Card className="text-center">
-      <CardContent className="space-y-5 pt-8">
-        {connectionResult === 'exchanged' && (
-          <>
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-3xl">
-              🎉
-            </div>
-            <h2 className="font-heading text-2xl text-foreground">Connection Exchanged!</h2>
-            <p className="text-muted-foreground">You both want to connect!</p>
-          </>
-        )}
-        {connectionResult === 'declined' && (
-          <>
-            <h2 className="font-heading text-2xl text-foreground">Chat Complete</h2>
-            <p className="text-muted-foreground">
-              Thanks for the great chat! Your partner chose not to exchange
-              contact info, and that's perfectly okay.
-            </p>
-          </>
-        )}
-        <Button onClick={onStartNewChat}>
-          Start New Chat
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
 export function ChatPage() {
   const { matchId } = useParams<{ matchId: string }>();
   const [searchParams] = useSearchParams();
@@ -220,7 +184,6 @@ export function ChatPage() {
   const [partnerName, setPartnerName] = useState('');
   const [prompts, setPrompts] = useState<string[]>([]);
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
-  const [connectionResult, setConnectionResult] = useState<'exchanged' | 'declined' | null>(null);
   const [error, setError] = useState('');
 
   const timer = useChatTimer(CONFIG.CHAT_DURATION, {
@@ -233,28 +196,6 @@ export function ChatPage() {
     loadPrompts();
     connectSocket();
   }, [matchId]);
-
-  useEffect(() => {
-    const unsub = socket.subscribe<{ type: string; user1_username: string; user2_username: string }>(
-      'connection_exchanged',
-      () => {
-        setConnectionResult('exchanged');
-        setState('result');
-      },
-    );
-    return unsub;
-  }, [socket]);
-
-  useEffect(() => {
-    const unsub = socket.subscribe<{ type: string }>(
-      'connection_declined',
-      () => {
-        setConnectionResult('declined');
-        setState('result');
-      },
-    );
-    return unsub;
-  }, [socket]);
 
   function loadMatchInfo() {
     if (isDemo) {
@@ -298,35 +239,7 @@ export function ChatPage() {
   }
 
   function handleEndChat() {
-    setState('connecting');
-  }
-
-  function handleConnectionPref(pref: boolean) {
-    if (isDemo) {
-      setTimeout(() => {
-        if (pref) {
-          setConnectionResult('exchanged');
-        } else {
-          setConnectionResult('declined');
-        }
-        setState('result');
-      }, CONFIG.DEMO_CONNECTION_DELAY_MS);
-      return;
-    }
-    if (!user || !matchId) return;
-    fetchJSON<{ success: boolean }>(`/api/matches/${matchId}/connect`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.userId, wants_to_connect: pref }),
-    }).catch(() => setError('Failed to process connection preference.'));
-  }
-
-  function handleStartNewChat() {
-    if (eventId) {
-      navigate(`/room/${eventId}`);
-    } else {
-      navigate('/');
-    }
+    navigate(`/connect/${matchId}?event_id=${eventId}`);
   }
 
   return (
@@ -367,20 +280,6 @@ export function ChatPage() {
             timeLeft={timer.timeLeft}
             isRunning={timer.isRunning}
             onEndChat={handleEndChat}
-          />
-        )}
-
-        {state === 'connecting' && !error && (
-          <ConnectionCard
-            onYes={() => handleConnectionPref(true)}
-            onNo={() => handleConnectionPref(false)}
-          />
-        )}
-
-        {state === 'result' && !error && (
-          <ResultView
-            connectionResult={connectionResult}
-            onStartNewChat={handleStartNewChat}
           />
         )}
       </main>

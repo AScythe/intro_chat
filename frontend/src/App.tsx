@@ -13,19 +13,25 @@ import { HomePage } from './pages/HomePage';
 import { UserInfoPage } from './pages/UserInfoPage';
 import { RoomPage } from './pages/RoomPage';
 import { ChatPage } from './pages/ChatPage';
+import { PeoplePage } from './pages/PeoplePage';
+import { ConnectPage } from './pages/ConnectPage';
 
 const STEPS = [
   { label: 'Join', path: '/' },
   { label: 'Profile', path: '/join' },
   { label: 'Room', path: '/room' },
+  { label: 'People', path: '/people' },
   { label: 'Chat', path: '/chat' },
+  { label: 'Connect', path: '/connect' },
 ];
 
 function getCurrentStep(pathname: string): number {
   if (pathname === '/') return 0;
   if (pathname.startsWith('/join')) return 1;
   if (pathname.startsWith('/room')) return 2;
-  if (pathname.startsWith('/chat')) return 3;
+  if (pathname.startsWith('/people')) return 3;
+  if (pathname.startsWith('/chat')) return 4;
+  if (pathname.startsWith('/connect')) return 5;
   return 0;
 }
 
@@ -104,7 +110,9 @@ function AnimatedRoutes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/join/:eventId" element={<UserInfoPage />} />
           <Route path="/room/:eventId" element={<RoomPage />} />
+          <Route path="/people/:eventId" element={<PeoplePage />} />
           <Route path="/chat/:matchId" element={<ChatPage />} />
+          <Route path="/connect/:matchId" element={<ConnectPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

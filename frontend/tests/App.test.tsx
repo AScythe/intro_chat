@@ -2,7 +2,7 @@
 // Description: Tests for App root — route rendering, provider integration, and dark mode toggle
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import App from '@/App';
 
 describe('App', () => {
@@ -32,16 +32,32 @@ describe('App', () => {
     expect(screen.getByText(/Save Profile/i)).toBeInTheDocument();
   });
 
-  it('renders room page at /room/abc123', () => {
+  it('renders room page at /room/abc123', async () => {
     window.history.pushState({}, '', '/room/abc123');
     render(<App />);
+    await act(async () => {});
     expect(screen.getByText(/Select Your Location/i)).toBeInTheDocument();
   });
 
-  it('renders chat page at /chat/abc123', () => {
+  it('renders chat page at /chat/abc123', async () => {
     window.history.pushState({}, '', '/chat/abc123');
     render(<App />);
+    await act(async () => {});
     expect(screen.getByText(/Micro-Chat/i)).toBeInTheDocument();
+  });
+
+  it('renders people page route and redirects to room when no state', async () => {
+    window.history.pushState({}, '', '/people/abc123');
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText(/Select Your Location/i)).toBeInTheDocument();
+    });
+  });
+
+  it('renders connect page at /connect/abc123', () => {
+    window.history.pushState({}, '', '/connect/abc123');
+    render(<App />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Connect' })).toBeInTheDocument();
   });
 
   it('toggles dark mode class on html element', () => {
