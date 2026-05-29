@@ -1,6 +1,6 @@
 # 🎬 IntroChat Demo Guide
 
-> **Last verified:** 2026-05-14
+> **Last verified:** 2026-05-28
 
 ## 🚀 Quick Start Demo
 
@@ -34,16 +34,16 @@ uv run python -m app
 ### Step 6: Select Room
 1. Choose a room from the dropdown (e.g., "Table 1")
 2. Click "Select Room"
-3. You'll see the room interface with a "Need a 2-min chat?" button
+3. You'll see available person cards with a "Request 2-min chat with {name}" button
 
 ### Step 7: Test Matching (Two Devices)
-1. **Device 1**: Tap "Need a 2-min chat?" and wait
-2. **Device 2**: Join the same event, select the same room, tap "Need a 2-min chat?"
-3. Both devices should instantly show "Match Found!" with a countdown
-4. Click "Go to Chat" on both devices
+1. **Device 1**: Select a person card, tap "Request 2-min chat with {name}", then tap "I'm Ready to Chat!"
+2. **Device 2**: Join the same event, select the same room, select a person card, tap "Request 2-min chat with {name}", then tap "I'm Ready to Chat!"
+3. Both devices should show "Start Chat - Both Ready!"
+4. Click "Start Chat" on both devices
 
 ### Step 8: Experience the Chat
-1. You'll see a 2-minute timer
+1. You'll see a 30-second timer (configurable in `frontend/src/config/constants.ts`)
 2. Conversation prompts will appear automatically
 3. Use "Next Prompt" to cycle through questions
 4. When time is up, choose whether to exchange contact info
@@ -62,7 +62,7 @@ uv run python -m app
 - No page refresh needed
 
 ### 💬 Guided Conversations
-- 2-minute timer with visual countdown
+- 30-second timer with visual countdown
 - Rotating conversation prompts
 - No awkward silences
 
@@ -80,9 +80,8 @@ uv run python -m app
 
 ### Scenario 1: Single Device Demo
 1. Create event → Join event → Save profile → Select room
-2. Click "Need a 2-min chat?" — shows waiting state
-3. Click a demo person (e.g., "Alex from Table 1") to simulate a match
-4. Chat interface loads with timer and prompts — no second device needed
+2. Click a demo person card (e.g., "Alex from Table 1") → tap "Request 2-min chat" → tap "I'm Ready to Chat!"
+3. Chat interface loads with timer and prompts — no second device needed
 
 ### Scenario 2: Two-User Matching
 1. Two devices, same event, same room
@@ -115,7 +114,7 @@ Session state resets on page refresh — no manual cleanup needed.
 ## 🛠️ Fallback Options
 
 ### Only One Device Available
-- Use demo mode: after selecting a room, tap "Need a 2-min chat?" then click any person card to simulate a match
+- Use demo mode: after selecting a room, click any person card, then tap "Request 2-min chat" and "I'm Ready to Chat!"
 - Full chat flow works without a second device or browser
 
 ### QR Code Won't Scan
@@ -161,7 +160,7 @@ Session state resets on page refresh — no manual cleanup needed.
 - QR code generation
 
 ### Frontend
-- Vanilla JavaScript (no frameworks)
+- React 19 + TypeScript (SPA with Vite)
 - Responsive CSS with gradients
 - WebSocket integration
 - Mobile-optimized
@@ -178,11 +177,11 @@ Session state resets on page refresh — no manual cleanup needed.
 1. **Start with the problem**: "At every tech event, introverts struggle to connect..."
 2. **Show the solution**: "IntroChat makes it safe and easy with just one button"
 3. **Demonstrate the flow**: Create event → Join → Match → Chat
-4. **Highlight the tech**: "Built with Python FastAPI (modular `app/` package), native WebSockets, and zero frontend frameworks"
+4. **Highlight the tech**: "Built with Python FastAPI (modular `app/` package), native WebSockets, and React SPA frontend"
 5. **Emphasize impact**: "This could help thousands of introverts at every event"
 
 ### For Users
-1. **Emphasize simplicity**: "Just one button, two minutes, zero pressure"
+1. **Emphasize simplicity**: "Just one button, 30 seconds, zero pressure"
 2. **Show the beauty**: "Look how clean and modern this interface is"
 3. **Demonstrate privacy**: "No accounts, no data stored, anonymous by default"
 4. **Highlight the prompts**: "Never run out of things to talk about"
