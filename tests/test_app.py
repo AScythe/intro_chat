@@ -130,6 +130,8 @@ def test_file_structure():
         'frontend/src/pages/UserInfoPage.tsx',
         'frontend/src/pages/RoomPage.tsx',
         'frontend/src/pages/ChatPage.tsx',
+        'frontend/src/pages/PeoplePage.tsx',
+        'frontend/src/pages/ConnectPage.tsx',
         'frontend/src/components/Timer.tsx',
         'frontend/src/components/PersonCard.tsx',
         'frontend/src/styles/global.css',

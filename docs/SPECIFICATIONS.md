@@ -22,12 +22,12 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 1. **User creates or joins an event** → receives an 8-character event code
 2. **Sets up their profile** — optionally enters a display name, LinkedIn URL, and/or Slack handle (stored but never shared without double opt-in). If name is left blank, an anonymous `User_XXXXX` username is auto-generated.
 3. **Selects a room** (Main Hall, Table 1-5, Quiet Corner, Coffee Area) via dropdown
-4. **Toggles "I'm Ready"** to signal availability for matching
-5. **Server matches** with another available user in the same room
+4. **Browses nearby people and requests a chat** — sees who's in the same room, selects a person, and sends a chat request
+5. **Waits for acceptance** — the other person receives the request and accepts (or declines). Once accepted, both tap "Ready" to proceed
 6. **Match found!** → 60-second countdown → auto-redirect to chat page
 7. **30-second timed chat** with guided conversation prompts
 8. **Time's up** → option to extend the timer or chat indefinitely
-9. **Connection exchange** → both users decide → if both opt in, usernames are exchanged
+9. **Connection exchange** → both users independently decide → if both opt in, usernames are exchanged
 
 ---
 
@@ -125,17 +125,22 @@ The following are explicitly NOT implemented and should not be built unless the 
 >
 > They land on their profile page, optionally add their LinkedIn URL and Slack handle (safe — never shared without permission), then click *"Select Room"*.
 >
-> Select: *"Hall 3"* → Tap *"I'm Ready"*
+> Select: *"Hall 3"* → They're taken to a list of nearby people.
 >
-> 10 seconds later:
+> They spot *CodeCalm_42* — sounds interesting! They tap the card and click *"Request 2-min chat"*. The request is sent.
+>
+> CodeCalm_42 accepts. Both tap *"Ready"* → 60-second match countdown begins.
+>
 > ✅ *"Matched with CodeCalm_42 at Hall 3. Head over now!"*
 >
 > Alex walks over. 30-second timer starts.
 > Prompt: *"What's your favorite debugging story?"*
 >
 > They laugh. Share a story about a bug that took 6 hours to fix.
-> Timer ends.
-> Both tap: *"Yes"* → exchange usernames: `Alex_99` and `CodeCalm_42`
+> Timer ends. Alex taps *"End chat and connect"*, which takes them to the connection page.
+>
+> Both independently choose *"Yes, exchange usernames!"* → connection exchanged!
+> `Alex_99` ↔ `CodeCalm_42`
 >
 > Alex leaves feeling connected — not drained.
 

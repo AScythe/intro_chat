@@ -128,6 +128,48 @@ SKILL_ROUTING_CASES = [
         "add a new button component with shadcn styles",
         "create a form component using shadcn patterns",
     ]),
+
+    # ── Utility / Tool Skills (8) ─────────────────────────────────
+
+    ("rebuild-indexes", [
+        "rebuild indexes after the matchmaking changes",
+        "update indexes for the new modules",
+        "reindex the codebase before review",
+    ]),
+    ("run-e2e-tests", [
+        "run e2e tests for the chat flow",
+        "end to end test the app after connections change",
+        "playwright tests for the new page",
+    ]),
+    ("update-agent-setup-md", [
+        "update agent setup for the new tools",
+        "sync agent setup after environment changes",
+        "agent setup is outdated after the tooling update",
+    ]),
+    ("update-agents-md", [
+        "update agents after the session",
+        "sync agents doc with current rules",
+        "agents.md is outdated after rule changes",
+    ]),
+    ("update-architecture-md", [
+        "update architecture after the refactor",
+        "sync architecture doc with new modules",
+        "architecture is outdated after the restructure",
+    ]),
+    ("update-best-practices-md", [
+        "update best practices from this session",
+        "document lessons learned for the team",
+    ]),
+    ("update-readme-md", [
+        "update readme for the new features",
+        "sync readme with current setup",
+        "readme is outdated after recent changes",
+    ]),
+    ("update-specifications-md", [
+        "update specs for the changed flow",
+        "update specifications for the new pages",
+        "specs are outdated after features changed",
+    ]),
 ]
 
 # ── 2. Tool Selection Logic ──────────────────────────────────────

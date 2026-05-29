@@ -41,6 +41,8 @@ def test_frontend_files_exist():
         'pages/UserInfoPage.tsx',
         'pages/RoomPage.tsx',
         'pages/ChatPage.tsx',
+        'pages/PeoplePage.tsx',
+        'pages/ConnectPage.tsx',
         'hooks/useChatRequest.ts',
         'lib/utils.ts',
         'App.tsx',
@@ -179,6 +181,8 @@ def test_page_exports():
         'UserInfoPage.tsx': 'UserInfoPage',
         'RoomPage.tsx': 'RoomPage',
         'ChatPage.tsx': 'ChatPage',
+        'PeoplePage.tsx': 'PeoplePage',
+        'ConnectPage.tsx': 'ConnectPage',
     }
     for filename, page in pages.items():
         content = _read(os.path.join('pages', filename))
@@ -194,6 +198,7 @@ def test_import_references():
     app = _read('App.tsx')
 
     expected_imports = ['HomePage', 'UserInfoPage', 'RoomPage', 'ChatPage',
+                        'PeoplePage', 'ConnectPage',
                         'SocketProvider', 'UserProvider']
     for imp in expected_imports:
         if imp in app:

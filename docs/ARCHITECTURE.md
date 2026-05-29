@@ -72,8 +72,10 @@ intro_chat/
 │   │   └── pages/
 │   │       ├── HomePage.tsx       # Landing page — event code input, create/join event, QR display
 │   │       ├── UserInfoPage.tsx   # Profile form — optional name, LinkedIn/Slack input, save via API, navigate to room
-│   │       ├── RoomPage.tsx       # Room selection and person matching — dropdown, person cards, match countdown
-│   │       └── ChatPage.tsx       # Chat interface — timed conversation with prompts, timer, extend, and connection exchange
+│   │       ├── RoomPage.tsx       # Room selection — dropdown to choose a room, navigates to people matching
+│   │       ├── PeoplePage.tsx     # Nearby people matching — person cards, request/accept flow, match countdown
+│   │       ├── ChatPage.tsx       # Chat interface — timed conversation with prompts, timer, and extend options
+│   │       └── ConnectPage.tsx    # Post-chat connection exchange — ConnectionCard with yes/no, result view, WS subs
 │   ├── tests/
 │   │   ├── e2e/
 │   │   │   └── userFlow.spec.ts  # Playwright E2E tests — home, join, save, match, chat, full chat lifecycle
@@ -98,8 +100,10 @@ intro_chat/
 │   │   └── pages/
 │   │       ├── HomePage.test.tsx     # Tests for HomePage — event creation, join, navigation
 │   │       ├── UserInfoPage.test.tsx # Tests for UserInfoPage — form input, save, navigation
-│   │       ├── RoomPage.test.tsx     # Tests for RoomPage — room selection, person matching, countdown
-│   │       └── ChatPage.test.tsx     # Tests for ChatPage — chat flow, timer, prompts, connection exchange
+│   │       ├── RoomPage.test.tsx     # Tests for RoomPage — room selection, navigation to people matching
+│   │       ├── ChatPage.test.tsx     # Tests for ChatPage — chat flow, timer, prompts
+│   │       ├── PeoplePage.test.tsx   # Tests for PeoplePage — nearby users, request/accept flow, redirect guard
+│   │       └── ConnectPage.test.tsx  # Tests for ConnectPage — connection card, yes/no flow, result display
 │   └── dist/
 │       ├── index.html          # Built SPA entry HTML served by FastAPI catch-all
 │       └── assets/             # Built and optimized JS/CSS bundles
@@ -378,10 +382,16 @@ Landing page — event code input, create/join event, QR display. Features event
 Profile form — optional name, LinkedIn/Slack input, save via API, navigate to room. Features input fields, auto-generated username fallback, save via API, success card, navigates to `/room/:eventId`.
 
 ##### `frontend/src/pages/RoomPage.tsx`
-Room selection and person matching — dropdown, person cards, match countdown. Features nearby users grid, `PersonCard` selection, chat request flow, match-found display with `MatchCountdown`, 60s countdown → navigate to `/chat/:matchId`. Uses `useChatRequest` for request-accept-ready lifecycle and `useDemoMode` for demo flows.
+Room selection — dropdown to choose a room, then navigates to people matching. Features room dropdown with select/confirm flow, loading skeleton. Navigates to `/people/:eventId` with room name in navigation state.
+
+##### `frontend/src/pages/PeoplePage.tsx`
+Nearby people matching — person cards, request/accept flow, match countdown. Features `NearbyUsersView` with `PersonCard` grid, `WaitingResponseView`, `AcceptedView` with ready signaling, `MatchCountdown` with 60s auto-redirect. WebSocket listener for `match_found`. Guard: redirects to `/room/:eventId` on direct access without navigation state.
 
 ##### `frontend/src/pages/ChatPage.tsx`
-Chat interface — timed conversation with prompts, timer, extend, and connection exchange. Features loading card, chat card with `Timer` + `PromptCard`, time-up card with extend options, extended timer, `ConnectionCard`, connection result. WebSocket listener for `connection_exchanged`/`connection_declined`.
+Chat interface — timed conversation with prompts, timer, and extend options. Features loading card, chat card with `Timer` + `PromptCard`, time-up card with extend options, extended timer. Navigates to `/connect/:matchId` on "End chat and connect".
+
+##### `frontend/src/pages/ConnectPage.tsx`
+Post-chat connection exchange — `ConnectionCard` with yes/no, result view, and WebSocket subscriptions. Features `ConnectionCard` for Slack connection preference, `ResultView` for exchanged/declined outcome. WebSocket listeners for `connection_exchanged`/`connection_declined`. Demo mode simulates connection delay.
 
 ---
 
@@ -401,7 +411,7 @@ End-to-end integration test suite that tests page rendering, API endpoints, matc
 
 #### Functions
 - `test_imports()` — verifies all modular components import correctly (FastAPI, Uvicorn, aiosqlite, QRCode, SQLite3, all app modules)
-- `test_file_structure()` — checks 25 required files exist
+- `test_file_structure()` — checks 27 required files exist
 - `test_database()` — tests DB init, 4 tables exist, insert/delete operations
 - `test_conversation_prompts()` — checks prompts list is non-empty
 - `test_state_constants()` — verifies `MATCH_EXPIRY_SECONDS=30`, `CLEANUP_INTERVAL_SECONDS=60`, `CLEANUP_THRESHOLD_SECONDS=300`
@@ -416,13 +426,13 @@ End-to-end integration test suite that tests page rendering, API endpoints, matc
 Frontend source module validation suite using static regex analysis — checks file existence, TypeScript exports (interfaces, types, functions, components), config constants, and cross-file import references.
 
 #### Functions
-- `test_frontend_files_exist()` — checks 25 required frontend source files exist
+- `test_frontend_files_exist()` — checks 27 required frontend source files exist
 - `test_api_exports()` — checks 5 API interfaces defined in types/api.ts
 - `test_config()` — checks 8 CONFIG properties and FALLBACK_PROMPTS in config/constants.ts
 - `test_utils_exports()` — checks formatTime, 5 storage functions, generateRandomString, generateUsername, SamplePerson, SAMPLE_USERS, RESPONSES
 - `test_hook_exports()` — checks exports from useSocket, useTimer, useDemoMode, useUser
 - `test_component_exports()` — checks 6 component exports
-- `test_page_exports()` — checks 4 page exports
+- `test_page_exports()` — checks 6 page exports
 - `test_import_references()` — checks App.tsx imports all pages and providers
 - `test_code_quality()` — counts console.log across all source files
 - `main()` — runs all test functions in sequence

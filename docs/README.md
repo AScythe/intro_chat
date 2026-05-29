@@ -106,14 +106,24 @@ uv run python -m app
    - Click "Save" to create your profile
    - Click "Select Room/Area" to proceed
 
-3. **Pick a Room & Chat**
-   - Select your room/table location
-   - Select a person card, then tap "Request 2-min chat"
-   - Get matched with someone nearby!
-   - Use the conversation prompts to guide your chat
-   - Timer runs for the configured duration (default: 30 seconds, configurable)
-   - After time's up, each person independently chooses "End chat and connect" or "End chat"
-   - Both must opt in for usernames to be exchanged — one "no" closes for both
+3. **Pick a Room**
+   - Select your room/table location from the dropdown
+   - Confirm your selection to proceed to people matching
+
+4. **Find a Chat Partner**
+   - Browse nearby users in your room
+   - Tap a person to select them, then tap "Request 2-min chat"
+   - Wait for them to accept — once both tap "Ready", a match countdown begins
+   - After the countdown, you're automatically redirected to chat
+
+5. **Chat**
+   - Use the conversation prompts to guide your timed chat
+   - Timer runs for the configured duration (default: 30 seconds)
+   - When time's up, extend the chat or end it
+
+6. **Connect (Optional)**
+   - After the chat, each person independently decides whether to exchange usernames
+   - Both must opt in for contact info to be exchanged — one "no" closes for both
 
 ---
 

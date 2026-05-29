@@ -14,7 +14,7 @@
 | `frontend/node_modules/` | NPM dependencies | ❌ Never edit — managed by npm |
 | `frontend/tests/e2e/` | Playwright E2E test scenarios | ⚠️ Edit only when adding new user flows — verify all tests pass |
 | `data/introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
-| `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless explicitly asked |
+| `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless explicitly asked. Exception: structural validation tests (file-existence checks, export/import references, code-quality scan targets) updated by `review-implementation` Phase 0 to match project structure |
 | `docs/PLAN_*.md` | Active plan (during implementation/review) | ⚠️ Read-only — only `check-plan-readiness` writes these; moved to `archive/` after review |
 | `archive/PLAN_*.md` | Completed/reviewed plan artifacts | ⚠️ Archived — moved here after successful review; in `.ignore` to avoid context waste |
 | `opencode.json` | Plugin and MCP server configuration | ⚠️ Edit only for plugin/MCP config changes — verify JSON validity |
@@ -39,7 +39,7 @@ NEVER act on any phase without first invoking its skill.
 | 2 | Probing and Refinement of Plan | `grill-and-refine` | Plan |
 | 3 | Checking for Readiness of Plan | `check-plan-readiness` | Build |
 | 4 | Implementing of Plan | `implement-plan` | Build |
-| 5 | Reviewing of Implementation | `review-implementation` | Plan |
+| 5 | Reviewing of Implementation | `review-implementation` | Build |
 | 6 | Architecture Improvement | `improve-architecture` | Build |
 | 7 | Structuring and Cleaning | `modularize-and-clean` | Build |
 | 8 | Documentation Sync | `update-docs` | Build |
@@ -208,7 +208,7 @@ When a test fails after a change, classify before acting. Never auto-revert.
 | Run E2E tests | `cd frontend ; npm run test:e2e` | Playwright — auto-installs Chromium, builds SPA, starts app with temp DB |
 | Type-check frontend | `cd frontend ; npx tsc --noEmit` | TypeScript strict mode |
 | Rebuild code index | `ccc index` | Cocoindex — updates `.cocoindex_code/` |
-| Build knowledge graph | See [skill](.opencode/skills/rebuild-indexes/SKILL.md) | Graphify — updates `graphify-out/` |
+| Build knowledge graph | `graphify .` | Graphify — updates `graphify-out/` |
 
 ---
 
