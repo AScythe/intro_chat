@@ -112,7 +112,7 @@ def test_file_structure():
         'app/schemas.py',
         'app/config.py',
         'app/tasks.py',
-        'requirements.txt',
+        'pyproject.toml',
         'docs/README.md',
         'frontend/package.json',
         'frontend/index.html',
@@ -132,7 +132,7 @@ def test_file_structure():
         'frontend/src/pages/ChatPage.tsx',
         'frontend/src/components/Timer.tsx',
         'frontend/src/components/PersonCard.tsx',
-        'app/static/css/style.css',
+        'frontend/src/styles/global.css',
         'app/__main__.py',
         'tests/test_db.py',
         '.gitattributes'
@@ -343,7 +343,7 @@ def test_error_paths():
 
     # Missing event rooms
     resp = client.get('/api/events/nonexistent/rooms')
-    assert resp.status_code == 200  # Returns empty list, not error
+    assert resp.status_code == 200  # Creates 8 default rooms
 
     # Join with no body
     resp = client.post('/api/events/nonexistent/join', json={})

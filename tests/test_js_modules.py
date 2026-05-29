@@ -41,6 +41,8 @@ def test_frontend_files_exist():
         'pages/UserInfoPage.tsx',
         'pages/RoomPage.tsx',
         'pages/ChatPage.tsx',
+        'hooks/useChatRequest.ts',
+        'lib/utils.ts',
         'App.tsx',
         'main.tsx',
     ]
@@ -208,6 +210,7 @@ def test_code_quality():
         'api/client.ts', 'config/constants.ts',
         'utils/format.ts', 'utils/storage.ts', 'utils/random.ts',
         'hooks/useSocket.ts', 'hooks/useTimer.ts', 'hooks/useDemoMode.ts', 'hooks/useUser.ts',
+        'hooks/useChatRequest.ts', 'lib/utils.ts',
     ]
 
     for rel in ts_files:
@@ -222,6 +225,7 @@ def test_code_quality():
         'components/Timer.tsx', 'components/PersonCard.tsx', 'components/PromptCard.tsx',
         'components/MatchCountdown.tsx', 'components/ConnectionCard.tsx', 'components/QRDisplay.tsx',
         'pages/HomePage.tsx', 'pages/UserInfoPage.tsx', 'pages/RoomPage.tsx', 'pages/ChatPage.tsx',
+        'context/SocketContext.tsx', 'context/UserContext.tsx',
         'App.tsx',
     ]
     for rel in tsx_files:
