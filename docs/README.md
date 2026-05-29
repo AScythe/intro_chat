@@ -165,6 +165,9 @@ uv run python tests/test_app.py
 # Frontend source validation
 uv run python tests/test_js_modules.py
 
+# Agent guideline compliance validation
+uv run python tests/test_agent_guidelines.py
+
 # Vitest component and hook tests
 cd frontend && npm test && cd ..
 

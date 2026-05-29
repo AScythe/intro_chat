@@ -14,6 +14,7 @@
 | `frontend/node_modules/` | NPM dependencies | ❌ Never edit — managed by npm |
 | `frontend/tests/e2e/` | Playwright E2E test scenarios | ⚠️ Edit only when adding new user flows — verify all tests pass |
 | `data/introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
+| `data/e2e_test.db` | E2E test temporary data store | ⚠️ Never delete without explicit user confirmation |
 | `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless explicitly asked. Exception: structural validation tests (file-existence checks, export/import references, code-quality scan targets) updated by `review-implementation` Phase 0 to match project structure |
 | `docs/PLAN_*.md` | Active plan (during implementation/review) | ⚠️ Read-only — only `check-plan-readiness` writes these; moved to `archive/` after review |
 | `archive/PLAN_*.md` | Completed/reviewed plan artifacts | ⚠️ Archived — moved here after successful review; in `.ignore` to avoid context waste |
@@ -204,6 +205,8 @@ When a test fails after a change, classify before acting. Never auto-revert.
 | Run all backend tests | `uv run python tests/test_app.py` | |
 | Run JS module validation | `uv run python tests/test_js_modules.py` | |
 | Run DB utilities | `uv run python tests/test_db.py` | |
+| Run agent guideline validation | `uv run python tests/test_agent_guidelines.py` | |
+| Clean up database duplicates | `uv run python utility/cleanup_db.py` | Deduplicates events, rooms, users, matches; removes User_* test users |
 | Run frontend unit tests | `cd frontend ; npm test` | Vitest runner |
 | Run E2E tests | `cd frontend ; npm run test:e2e` | Playwright — auto-installs Chromium, builds SPA, starts app with temp DB |
 | Type-check frontend | `cd frontend ; npx tsc --noEmit` | TypeScript strict mode |
