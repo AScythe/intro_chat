@@ -226,7 +226,7 @@ SDD Workflow Rules and operational guidelines. Answers "How should I think, plan
 - **File ownership table** — every location an agent might touch, with explicit policy: ✅ safe to edit, ⚠️ caution required, ❌ forbidden
 - **SDD Workflow Rules** — organized by 9 workflow phases (Thinking & Analysis → Probing & Refinement → Planning & Readiness → Implementing → Reviewing → Architecture Improvement → Structuring & Cleaning → Documentation Sync → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
 - **Cross-Phase Universal Rules** — an H2 section with H3 subsections covering the following:
-  - **Context Window Discipline** — Grep→Read patterns for minimizing context waste
+  - **Smart Tool Selection** — Tool-by-task-type selection with Phase 0 hard gate
   - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
   - **Process Discipline** — read-before-write, exit declarations, full test suite after every change, source+tests as one unit
   - **Failure Triage** — classification table for test failures (import path, brittle test, behavioral regression, pre-existing, flaky)
@@ -389,10 +389,10 @@ review-implementation (1st pass)
 
 | Step | Documents to READ | Specific Sections | Documents to WRITE |
 |------|-------------------|-------------------|--------------------|
-| **brainstorm-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline" | nothing (verbal) |
+| **brainstorm-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Smart Tool Selection" | nothing (verbal) |
 | **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal only — this step produces no artifact; if issues require a revised plan, loop back to check-plan-readiness) |
 | **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/PLAN_*.md` |
-| **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Context Window Discipline", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
+| **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Smart Tool Selection", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
 | **review-implementation** (1st pass) | `docs/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
 | **improve-architecture** | `AGENTS.md`, `ARCHITECTURE.md`, `implement-plan/SKILL.md` | AGENTS: "File Ownership". ARCHITECTURE: "Project Structure", relevant module descriptions. implement-plan: §3, §5, §6, test-adaptation rule | Source code (`[ARCH]`), regression tests |
 | **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |

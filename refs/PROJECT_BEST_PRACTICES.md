@@ -236,6 +236,40 @@ tests/test_endpoint.py  ← stays forever, runs on every pytest
 
 **Why it matters**: Every batch must be independently testable. Stale test references mean the batch fails verification and breaks the pipeline.
 
+### 5.4 Test Health Audit
+**Context**: Test files had stale file paths, misleading comments, and coverage gaps — but all tests still passed, so the issues went unnoticed
+
+**Principle**: Periodically audit test files for structural health beyond pass/fail. Check three things: (1) stale file paths — do file-existence checks reference files that no longer exist? (2) misleading comments — do inline comments accurately describe what the test actually verifies? (3) coverage gaps — are files tested for exports but missing from file-existence and code-quality checks? A passing test suite can still have stale references that erode confidence over time.
+
+**Example**:
+```
+Test health audit findings:
+- test_app.py: line 115 lists 'requirements.txt' (replaced by pyproject.toml)
+- test_app.py: line 346 comment says "Returns empty list" but endpoint creates 8 rooms
+- test_js_modules.py: useChatRequest.ts tested for exports but absent from existence check
+```
+
+**Why it matters**: Passing tests lull confidence. Stale references and coverage gaps grow silently — by the time they cause failures, the drift is significant. Catch them early.
+
+### 5.5 File Existence Checks in Tests
+**Context**: `test_file_structure()` in test_app.py had hardcoded file paths that drifted from the actual project structure — `requirements.txt` was deleted, `app/static/css/style.css` was relocated
+
+**Principle**: When tests check file existence with hardcoded path lists, update those lists in the same batch as the corresponding file rename, deletion, or relocation. Alternatively, use glob-based discovery instead of hardcoded lists so the check stays current automatically.
+
+**Example**:
+```python
+# ❌ Hardcoded list — drifts from reality
+required_files = ['app/static/css/style.css', 'requirements.txt']
+
+# ✅ Glob-based — always current
+import glob
+all_py_files = glob.glob('app/**/*.py', recursive=True)
+
+# ✅ Or: update the list in the same batch as the file change
+```
+
+**Why it matters**: Hardcoded file lists in tests are documentation — they become misleading the moment the file structure changes. A single missed update creates noise in test output that trains developers to ignore it.
+
 ---
 
 ## 6. Documentation
@@ -251,7 +285,6 @@ tests/test_endpoint.py  ← stays forever, runs on every pytest
 | README.md | "What is it?", "How do I use it?" | User-facing: what, how, quick start |
 | ARCHITECTURE.md | "How is it built?", "How do I modify it?" | Technical: *how* it's structured |
 | SPECIFICATIONS.md | "Why does it exist?", "What problem does it solve?" | Product vision, user journey, why it exists |
-| DEMO_GUIDE.md | "How do I demonstrate this?" | Presenter walkthrough: demo steps |
 | AGENTS.md | "What can agents touch?", "What commands do they use?" | Agent context: *what* agents work on |
 | PROJECT_BEST_PRACTICES.md | "What lessons were learned?", "What patterns should I reuse?" | Universal coding patterns & lessons |
 | DOCUMENT_GUIDELINES.md | "Where does this content go?" | Governance: doc scope & boundaries |
@@ -304,7 +337,6 @@ The "popular" claim is speculative (gate 2), and the sentence is fluff (gate 3).
 | README.md | User-facing setup, usage, features, benefits, installation |
 | ARCHITECTURE.md | Technical structure, modules, file tree, implementation, data flow |
 | SPECIFICATIONS.md | Product vision, user journey, problem statement, pitch |
-| DEMO_GUIDE.md | Demo presentation, walkthrough, step-by-step instructions |
 | AGENTS.md | AI agent permissions, rules, file ownership, operational constraints |
 
 **Why it matters**: Faster routing decisions. One table replaces multiple decision trees and is easier to update.
@@ -1133,6 +1165,22 @@ update-docs: single orchestrator, routes to push-to-git
 
 **Why it matters**: Each layer catches what others miss. Macro prevents blind spots, meso finds intent-matches that literal grep can't, micro enables syntax-safe rewrites. Using only grep is like navigating with only a street-level map — the knowledge graph gives you a satellite view.
 
+### 8.23 Design-Spec-to-Config Bridge
+**Context**: The frontend-design skill produces a design spec (colors, typography, spacing, motion) but neither frontend-design nor shadcn explicitly owned translating those tokens into `tailwind.config.js` and `global.css` — the bridge step existed only as implicit agent knowledge
+
+**Principle**: Every design spec element must explicitly map to its implementation target before coding begins. Define a Design Token Mapping table in the spec that shows the exact hex/value for each token and where it goes: `tailwind.config.js` `theme.extend.{colors,fontFamily,borderRadius,spacing,boxShadow,maxWidth}` for config tokens, CSS variables in `global.css` for semantic token aliases. The implementation skill reads this table directly — no ambiguity about which value goes where.
+
+**Example**:
+```
+Spec element           → Implementation target               → Example value
+Color palette         → tailwind.config.js colors            → background: '#FDFBF7'
+Font family           → tailwind.config.js fontFamily        → sora: ['Sora', 'sans-serif']
+Border radius (card)  → tailwind.config.js borderRadius      → card: '16px'
+Semantic alias        → CSS variable in global.css           → --primary: theme('colors.sage')
+```
+
+**Why it matters**: Without an explicit mapping, the implementation skill must reinterpret the spec — introducing ambiguity and potential drift between what was designed and what was built.
+
 ---
 
 ## 9. Version Control
@@ -1302,3 +1350,6 @@ uv run pytest tests/ -v              # Tests
 62. **Consistent Process Template** — every workflow document follows the same section template for predictable navigation
 63. **Cross-Phase Deduplication** — extract duplicated rules to a shared governance document; replace copies with cross-references
 64. **Three-Layer Code Exploration Stack** — knowledge graph (macro) → semantic search (meso) → AST rewriting (micro); use in layer order
+65. **Test Health Audit** — periodically audit tests for stale file paths, misleading comments, and coverage gaps; pass/fail alone isn't enough
+66. **Design-Spec-to-Config Bridge** — every design spec token maps explicitly to its implementation target (tailwind.config.js, CSS variables); no ambiguity
+67. **File Existence Checks in Tests** — update hardcoded file lists in the same batch as file changes, or use glob-based discovery instead

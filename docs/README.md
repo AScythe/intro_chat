@@ -106,11 +106,12 @@ uv run python -m app
 
 3. **Pick a Room & Chat**
    - Select your room/table location
-   - Tap "Request 2-min chat" when ready
+   - Select a person card, then tap "Request 2-min chat"
    - Get matched with someone nearby!
    - Use the conversation prompts to guide your chat
    - Timer runs for the configured duration (default: 30 seconds, configurable)
-   - Choose whether to exchange usernames
+   - After time's up, each person independently chooses "End chat and connect" or "End chat"
+   - Both must opt in for usernames to be exchanged — one "no" closes for both
 
 ---
 

@@ -59,7 +59,7 @@ These are non-negotiable — enforced at the implementation level:
 - **No identity exposure** — auto-generated usernames by default (e.g., `User_ABC12`); users may optionally enter a display name; emails and photos never collected
 - **No single opt-in** — connection details (LinkedIn/Slack) require both parties to consent; one "no" means no exchange
 - **No IP logging** — users identified by UUIDs only; no IP addresses stored
-- **Match expiry enforced** — 2-minute initial expiry with 5-minute background cleanup
+- **Match expiry enforced** — 30-second initial expiry with 5-minute background cleanup
 - **Session reset on page refresh** — closing or refreshing the page clears the session state
 
 ---
