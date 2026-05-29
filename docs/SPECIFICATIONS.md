@@ -40,7 +40,8 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 5. **Timed conversation** — 30-second guided chat with rotating prompts
 6. **Chat extension** — extend by the configured duration or continue indefinitely
 7. **Double opt-in connection** — both users must consent before social info is exchanged
-8. **Background cleanup** — expired matches auto-purged every 60 seconds
+8. **Dark mode** — full light/dark theme toggle persisted in localStorage, respects system `prefers-color-scheme`
+9. **Background cleanup** — expired matches auto-purged every 60 seconds
 
 ---
 
@@ -93,7 +94,7 @@ The following are explicitly NOT implemented and should not be built unless the 
 
 ### Architecture Overview
 
-**Frontend (React SPA)** — All UI logic lives in the browser as a single-page application. The backend only provides data via REST and real-time events via WebSocket — no page reloads, keeping the server lightweight.
+**Frontend (React SPA)** — All UI logic lives in the browser as a single-page application. The backend only provides data via REST and real-time events via WebSocket — no page reloads, keeping the server lightweight. UI is built with Tailwind CSS + shadcn/ui (radix primitives) with a custom "Warm Sanctuary" design token system supporting both light and dark modes. Page transitions use `motion`, toasts use `sonner`, and icons use `lucide-react`.
 
 **Backend (FastAPI + WebSocket)** — Python API server that handles events, users, matches, and real-time communication. WebSocket connections enable instant match notifications without polling or constant network overhead.
 
@@ -102,11 +103,17 @@ The following are explicitly NOT implemented and should not be built unless the 
 | Layer | Technology | Why? |
 |-------|------------|------|
 | **Frontend** | React 19 + TypeScript + Vite | Component-based SPA with type safety, built via Vite pipeline. |
+| **Styling** | Tailwind CSS + PostCSS + shadcn/ui | Utility-first CSS with radix-based primitives; fast iteration and consistent design tokens. |
+| **Design System** | CSS custom properties + Tailwind config | "Warm Sanctuary" palette (sage greens, warm neutrals, cream paper) with `.dark` class toggle. Dark mode persisted in localStorage, falls back to `prefers-color-scheme`. |
+| **Animations** | `motion` (React) + Tailwind keyframes | Fade/slide page transitions via AnimatePresence; pulse loading animations; soft card shadows. |
+| **Icons** | `lucide-react` | Consistent icon set for theme toggle, UI actions. |
+| **Toasts** | `sonner` | Lightweight toast system for success/error notifications. |
 | **Backend** | Python + FastAPI | Modern ASGI framework, native WebSocket support, automatic OpenAPI docs. |
 | **Real-Time** | Native WebSocket via FastAPI | Live match notifications without polling. |
 | **Data Storage** | SQLite | Zero setup, portable. Active matches stored in memory for speed. |
 | **Location** | Manual room selection ("Main Hall", "Table 7", etc.) | MVP-friendly. Avoids complex geolocation. |
 | **QR Codes** | `qrcode` Python library | Generate event-specific QR codes for quick access. |
+| **Typography** | Sora (UI), DM Serif Display (headings) — Google Fonts | Warm, approachable text hierarchy. |
 
 ---
 
@@ -152,8 +159,6 @@ The following are explicitly NOT implemented and should not be built unless the 
 - **🧘 Quiet Zone Mode**: Shows empty tables/areas. Gentle nudge: *"You're not missing out. You're recharging."*
 - **📊 Post-Event Summary**:
   > *"You had 3 micro-chats today. 2 made you smile. That's progress."*
-- **🌙 Night Mode**: Softer colors, reduced animations for sensory sensitivity.
-
 ---
 
 ## 📣 Final Pitch Line (Say This Loud & Proud)

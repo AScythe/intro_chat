@@ -20,19 +20,24 @@ intro_chat/
 │
 ├── frontend/                  # React SPA (Vite + TypeScript)
 │   ├── index.html             # SPA entry HTML (mounts #root)
-│   ├── package.json           # Dependencies: react, react-dom, react-router-dom, vite, vitest
+│   ├── components.json        # shadcn/ui configuration — style, Tailwind integration, path aliases
+│   ├── package.json           # Dependencies: react, react-dom, react-router-dom, motion, sonner, lucide-react, tailwindcss, shadcn/ui (radix), vite, vitest, playwright
+│   ├── postcss.config.js      # PostCSS configuration — enables Tailwind CSS processing
+│   ├── tailwind.config.js     # Tailwind CSS configuration with design tokens — sage/warm palette, Sora/DM Serif fonts, custom animations
 │   ├── tsconfig.json          # TypeScript config (strict, jsx: react-jsx)
 │   ├── vite.config.ts         # Vite build configuration — React plugin, dev proxy to backend, Vitest integration
 │   ├── playwright.config.ts   # Playwright E2E config — chromium, webServer, temp database
 │   ├── src/
 │   │   ├── main.tsx           # React app entry point — mounts root component and imports global styles
-│   │   ├── App.tsx            # Root component — React Router setup with SocketContext and UserContext providers
+│   │   ├── App.tsx            # Root component — React Router with SocketContext, UserContext, ThemeProvider; progress stepper, animated routes, theme toggle, toast system
 │   │   ├── api/
 │   │   │   └── client.ts      # Typed fetch wrapper with timeout for backend API calls
 │   │   ├── config/
 │   │   │   └── constants.ts   # Application configuration constants — chat duration, timer defaults, demo delays
 │   │   ├── types/
 │   │   │   └── api.ts         # TypeScript interfaces for API request/response payloads
+│   │   ├── lib/
+│   │   │   └── utils.ts       # shadcn utility — merges Tailwind class names via tailwind-merge + clsx
 │   │   ├── utils/
 │   │   │   ├── format.ts      # Utility functions for formatting values (time, display strings)
 │   │   │   ├── storage.ts     # localStorage wrappers for persisting user session data
@@ -41,6 +46,7 @@ intro_chat/
 │   │   ├── hooks/
 │   │   │   ├── useSocket.ts   # Context and hook for managing a persistent WebSocket connection
 │   │   │   ├── useTimer.ts    # Hook providing extendable countdown timer with start/clear/extend callbacks
+│   │   │   ├── useTheme.tsx   # Theme context and hook — dark/light mode toggling, localStorage persistence, system preference detection
 │   │   │   ├── useDemoMode.ts # Hook providing demo/simulation logic gated by VITE_ENABLE_DEMO feature flag
 │   │   │   ├── useChatRequest.ts # Hook managing chat request lifecycle — send request, wait for response, ready signaling
 │   │   │   └── useUser.ts     # Context and hook for user session data (userId, eventId, username)
@@ -48,6 +54,13 @@ intro_chat/
 │   │   │   ├── SocketContext.tsx  # WebSocket context provider — connects at app root, persists across routes, auto-reconnects
 │   │   │   └── UserContext.tsx    # User session context provider — hydrates from localStorage, writes on change
 │   │   ├── components/
+│   │   │   ├── ui/                # shadcn/ui primitives
+│   │   │   │   ├── button.tsx     # shadcn Button — variants: default, destructive, outline, secondary, ghost, link
+│   │   │   │   ├── card.tsx       # shadcn Card — Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
+│   │   │   │   ├── input.tsx      # shadcn Input — styled text input with ring focus
+│   │   │   │   ├── label.tsx      # shadcn Label — radix-based form label
+│   │   │   │   ├── select.tsx     # shadcn Select — radix-based dropdown with trigger, content, item
+│   │   │   │   └── skeleton.tsx   # shadcn Skeleton — animated loading placeholder
 │   │   │   ├── Timer.tsx          # Timer display component showing MM:SS with warning/danger visual states
 │   │   │   ├── PersonCard.tsx     # Person selector card showing username, availability status, and click-to-select
 │   │   │   ├── PromptCard.tsx     # Conversation prompt display with fade transition
@@ -55,7 +68,7 @@ intro_chat/
 │   │   │   ├── ConnectionCard.tsx # Post-chat connection card with yes/no buttons for Slack connection exchange
 │   │   │   └── QRDisplay.tsx      # QR code image display with event code shown below
 │   │   ├── styles/
-│   │   │   └── global.css        # Global stylesheet — imported at `main.tsx` root via `import './styles/global.css'`
+│   │   │   └── global.css        # Global stylesheet — Tailwind directives, CSS variable design tokens (light + dark), custom utility layers
 │   │   └── pages/
 │   │       ├── HomePage.tsx       # Landing page — event code input, create/join event, QR display
 │   │       ├── UserInfoPage.tsx   # Profile form — optional name, LinkedIn/Slack input, save via API, navigate to room
@@ -96,23 +109,31 @@ intro_chat/
 │   ├── test_js_modules.py     # Frontend source validation tests
 │   └── test_db.py             # Database utility & verification
 │
+├── .cocoindex_code/               # CocoIndex code index (auto-generated — rebuild via `ccc index`)
+├── .opencode/                     # OpenCode configuration
+│   └── skills/                 # 19 SDD workflow and utility skills
+│
 ├── docs/                         # Documentation
 │   ├── README.md              # Main project README (features, setup, deployment)
 │   ├── ARCHITECTURE.md        # This file (project structure reference)
 │   ├── SPECIFICATIONS.md       # Product specification (problem, solution, user flow, out of scope, privacy)
-│   ├── AGENTS.md              # Agent behavioral rules, file ownership, commands, operational constraints
 │   └── PLAN_*.md              # Active plan documents (created by check-plan-readiness, moved to archive/ after review)
 │
 ├── archive/                       # Archived plans (completed/reviewed)
 │   └── PLAN_*.md              # Archived decision records (moved from docs/ after review)
 │
 ├── refs/                         # Reference documents
+│   ├── AGENT_SETUP.md         # Agent development environment setup (tooling, PATH, MCP)
 │   ├── DOCUMENT_GUIDELINES.md  # Document scope & governance
 │   └── PROJECT_BEST_PRACTICES.md # Universal coding best practices
+│
+├── graphify-out/                  # Graphify knowledge graph outputs (auto-generated — rebuild via `rebuild-indexes` skill)
+│   └── graph.json             # Knowledge graph data
 │
 ├── data/                         # Data files
 │   └── introchat.db           # SQLite database (auto-created)
 │
+├── AGENTS.md                      # Agent behavioral rules, file ownership, SDD workflow, commands
 ├── uv.lock                        # Lockfile (auto-generated by `uv sync`)
 ├── opencode.json                  # Plugin and MCP server configuration
 ├── .gitignore                     # Git ignore rules
@@ -264,7 +285,10 @@ QR code generation utility that produces base64-encoded PNG data URIs from input
 
 ### Frontend Modules (React SPA)
 
-The frontend is a React 19 SPA built with Vite + TypeScript. All routing is client-side via React Router. The backend serves the built `frontend/dist/index.html` as a catch-all.
+The frontend is a React 19 SPA built with Vite + TypeScript + Tailwind CSS + shadcn/ui. All routing is client-side via React Router. The backend serves the built `frontend/dist/index.html` as a catch-all. Dark mode is supported via CSS custom properties with a `.dark` class toggle, persisted in localStorage. Page transitions use `motion`'s `AnimatePresence`. Toast notifications use `sonner`. Icons use `lucide-react`.
+
+#### `frontend/src/lib/utils.ts` (shadcn Utility)
+shadcn utility that merges Tailwind class names using `tailwind-merge` + `clsx`. Exports `cn(...inputs: ClassValue[]): string`.
 
 #### `frontend/src/config/constants.ts` (Configuration)
 Application configuration constants — chat duration, timer defaults, demo delays.
@@ -314,6 +338,9 @@ Context and hook for user session data (userId, eventId, username). Provides `{ 
 #### `frontend/src/hooks/useChatRequest.ts` (Chat Request Lifecycle)
 Hook managing chat request lifecycle — send request, wait for response, ready signaling. Encapsulates `requestedPerson`, `personResponse`, `yourReady`, `theirReady` state. Provides `requestChat(person)`, `imReady()`, `cancelRequest()`. Uses `useDemoMode` for simulated response delays and acceptance logic.
 
+#### `frontend/src/hooks/useTheme.tsx` (Theme Provider + Hook)
+Theme context provider and hook for dark/light mode toggling. Stores preference in `localStorage` under `introchat_theme` key. Detects system preference via `prefers-color-scheme: dark` media query as fallback. Toggles `dark` class on `<html>` element. Provides `{ theme, toggleTheme }` via `useTheme()`.
+
 #### `frontend/src/context/SocketContext.tsx` (WebSocket Provider)
 WebSocket context provider — connects at app root, persists across routes, auto-reconnects. Connects on mount, disconnects on unmount. Stores `socket`, `connected` state, and `error` in context.
 
@@ -321,6 +348,8 @@ WebSocket context provider — connects at app root, persists across routes, aut
 User session context provider — hydrates from localStorage, writes on change. Provides `{ userId, eventId, username, linkedin_url, slack_handle, setUser, clearUser }`.
 
 #### Components
+
+Note: All components use `shadcn/ui` primitives (Button, Card, Input, Label, Select, Skeleton) imported from `@/components/ui/`. Styling uses Tailwind utility classes with design tokens from `global.css`. Page transitions use `motion`. Toasts use `sonner`.
 
 ##### `frontend/src/components/Timer.tsx`
 Timer display component showing MM:SS with warning/danger visual states. Displays with CSS class `timer-warning` (yellow) when below `TIMER_WARNING_THRESHOLD` and `timer-danger` (red) when below `TIMER_DANGER_THRESHOLD`.

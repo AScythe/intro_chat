@@ -45,6 +45,8 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 - **📱 QR Code**: Quick event joining for attendees
 - **🎮 Demo Mode**: Sample users with simulated responses
 - **🆔 User Profile**: Optional display name (auto-generates anonymous username if left blank) + LinkedIn/Slack handle collection, stored but never shared without permission
+- **🌙 Dark Mode**: Light/dark theme toggle persisted in localStorage, respects system preference
+- **🎨 Polished UI**: Tailwind CSS + shadcn/ui with a warm, cozy design system, smooth page transitions via `motion`, toast notifications via `sonner`
 - **🔒 Privacy First**: Fully anonymous, opt-in only, social info collected only for connection exchange
 
 ---
@@ -119,7 +121,13 @@ uv run python -m app
 
 ### Tech Stack
 - **Backend**: Python FastAPI + Uvicorn (`app/` package)
-- **Frontend**: React 19 + TypeScript + Vite (SPA with React Router)
+- **Frontend**: React 19 + TypeScript + Vite + React Router (SPA)
+- **Styling**: Tailwind CSS + PostCSS + shadcn/ui (radix primitives)
+- **Design System**: CSS custom properties — "Warm Sanctuary" palette (sage greens, warm neutrals), light + dark mode
+- **Animations**: `motion` (page transitions) + Tailwind keyframes
+- **Icons**: `lucide-react`
+- **Toasts**: `sonner`
+- **Typography**: Sora (UI), DM Serif Display (headings) — Google Fonts
 - **Database**: SQLite (`data/introchat.db`) via aiosqlite
 - **Real-time**: Native WebSocket via FastAPI
 - **QR Codes**: Python qrcode library

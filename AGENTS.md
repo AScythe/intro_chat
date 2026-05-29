@@ -208,7 +208,7 @@ When a test fails after a change, classify before acting. Never auto-revert.
 | Run E2E tests | `cd frontend ; npm run test:e2e` | Playwright — auto-installs Chromium, builds SPA, starts app with temp DB |
 | Type-check frontend | `cd frontend ; npx tsc --noEmit` | TypeScript strict mode |
 | Rebuild code index | `ccc index` | Cocoindex — updates `.cocoindex_code/` |
-| Build knowledge graph | See [skill](.opencode/skills/brainstorm-and-plan/SKILL.md) | Graphify — updates `graphify-out/` |
+| Build knowledge graph | See [skill](.opencode/skills/rebuild-indexes/SKILL.md) | Graphify — updates `graphify-out/` |
 
 ---
 
