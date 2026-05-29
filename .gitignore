@@ -67,9 +67,5 @@ frontend/tsconfig.tsbuildinfo
 # CocoIndex Code (ccc)
 /.cocoindex_code/
 
-# Graphify — knowledge graph outputs (only generated artifacts to ignore)
-graphify-out/manifest.json
-graphify-out/cost.json
-graphify-out/cache/
-graphify-out/.graphify_labels.json
-graphify-out/.graphify_root
+# Graphify — knowledge graph
+graphify-out/
