@@ -106,7 +106,7 @@ Optional sections (include only if applicable): Test Structure, API/WebSocket en
 
 ## Workflow
 
-> **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Session git diff is supplementary context only. Pre-existing discrepancies (stale paths, outdated descriptions, missing sections, incorrect claims) are gaps to flag regardless of when they were introduced.
+> **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Pre-existing discrepancies (stale paths, outdated descriptions, missing sections, incorrect claims) are gaps to flag regardless of when they were introduced.
 
 ### 1. Investigate the Codebase
 Read highest-value sources first in this priority order:

@@ -1,14 +1,23 @@
 ---
 name: shadcn
-description: 'Select, add, compose, and style shadcn/ui components following a design spec. Use after `frontend-design` has produced a design spec, or for trivial mechanical changes where no design decision is needed. Handles component imports, composition, accessibility, and shadcn CLI operations. For trivial mechanical changes (no aesthetic decision required), may run without a prior design spec.'
+description: 'Select, add, compose, and style shadcn/ui components following a design spec. Handles component imports, composition, accessibility, and CLI operations. Use after frontend-design has produced a spec, or for trivial mechanical changes where no design decision is needed. Triggered when the user says "add component", "build component", "implement UI", "create form", "shadcn", "shadcn/ui", "UI component", or similar.'
 ---
 
 ## What I Do
 
 Implement frontend components using shadcn/ui. Component structure and composition follow shadcn conventions; visual style defers to the `frontend-design` spec.
 
+## Principles
+
+1. **Use existing components first.** Run `npx shadcn@latest search` to check registries before writing custom UI. Check community registries too (`@magicui`, `@tailark`).
+2. **Compose, don't reinvent.** Settings page = Tabs + Card + form controls. Dashboard = Sidebar + Card + Chart + Table.
+3. **Use built-in variants before custom styles.** `variant="outline"`, `size="sm"`, etc.
+4. **Use semantic colors.** `bg-primary`, `text-muted-foreground` — never raw values like `bg-blue-500`.
+
 ## Boundaries
 
+- **Mode:** Build — writes component code, updates Tailwind config and CSS variables.
+- **Ordering:** Always invoke after frontend-design. Never use both simultaneously.
 - **Component structure** — use shadcn patterns for imports, composition, accessibility
 - **Visual deferral** — colors, typography, spacing, motion come from the design spec; never let shadcn defaults override intentional design decisions
 - **No design decisions** — if no design spec exists and the change is non-trivial, raise: "No design spec found, run frontend-design first"
@@ -36,12 +45,28 @@ When both `frontend-design` and `shadcn` are active:
 
 ## Project Context
 
-Always check the current project context first. Run:
+On every interaction, run the project context command first:
 ```bash
 npx shadcn@latest info --json
 ```
 
-This gives you: aliases, isRSC, tailwindVersion, tailwindCssFile, style, base (radix or base), iconLibrary, resolvedPaths, framework, packageManager, preset.
+The JSON output contains these key fields that guide all subsequent decisions:
+
+| Field | What it tells you |
+|-------|-------------------|
+| `aliases` | Import prefix (`@/`, `~/`) — never hardcode paths |
+| `isRSC` | If `true`, components using `useState`/`useEffect`/browser APIs need `"use client"` |
+| `tailwindVersion` | `"v4"` uses `@theme inline` blocks; `"v3"` uses `tailwind.config.js` |
+| `tailwindCssFile` | The one CSS file to edit — never create a new one |
+| `style` | Visual treatment (`nova`, `vega`, etc.) |
+| `base` | Primitive library (`radix` or `base`) — affects component APIs |
+| `iconLibrary` | Determines icon package (`lucide-react`, `@tabler/icons-react`, etc.) |
+| `resolvedPaths` | Exact file-system destinations for components, utils, hooks |
+| `framework` | Routing conventions (Next.js App Router vs Vite SPA) |
+| `packageManager` | Use for all non-shadcn dependency installs |
+| `preset` | Resolved preset code — use `preset resolve --json` for structured values |
+
+Use `npx shadcn@latest docs <component>` to get documentation and example URLs for any component.
 
 ## Essential Rules
 
@@ -153,17 +178,32 @@ If no spec exists and the change is non-trivial, raise: "No design spec found, r
    - `tailwind.config.js` `theme.extend.{colors,fontFamily,borderRadius,spacing,boxShadow,maxWidth}`
    - `global.css` CSS variable layer (semantic tokens referencing the config)
 4. Find/add components: `npx shadcn@latest search` / `npx shadcn@latest add`
-5. Get docs: `npx shadcn@latest docs <component>` → fetch URLs
-6. Import and compose following the rules above
-7. Override default variants/colors to match the design spec
+5. **Get docs** — `npx shadcn@latest docs <component>` → fetch the returned URLs. Always do this before writing code. It ensures you're working with the correct API and usage patterns rather than guessing.
+6. **Registry must be explicit** — When the user asks to add a block or component from a registry, do not guess which registry. If no registry is specified (e.g. "add a login block" without `@shadcn`, `@tailark`, etc.), ask which registry to use. Never default to one on behalf of the user.
+7. Import and compose following the rules above
+8. Override default variants/colors to match the design spec
 
 ### Post-Install Verification
 
-After all components are installed and styled, verify no default shadcn colors leaked through:
+After adding or updating components, verify correctness:
 
-```bash
-# Check for default shadcn raw colors in source files (these should be overridden by design spec tokens)
-grep -rn "bg-blue-\|bg-purple-\|bg-zinc-\|bg-slate-\|text-blue-\|text-purple-" --include="*.tsx" --include="*.ts" frontend/src/
-```
+1. **Read the added files** — check for missing sub-components (e.g. `SelectItem` without `SelectGroup`), missing imports, incorrect composition.
+2. **Check icon library alignment** — if the registry item imports from `lucide-react` but the project uses `hugeicons` (from `iconLibrary` in project context), swap imports accordingly.
+3. **Verify no default shadcn colors leaked through:**
+   ```bash
+   grep -rn "bg-blue-\|bg-purple-\|bg-zinc-\|bg-slate-\|text-blue-\|text-purple-" --include="*.tsx" --include="*.ts" frontend/src/
+   ```
+   Any matches mean shadcn defaults surfaced instead of design spec tokens. Fix with semantic tokens from the spec.
+4. **Run build or type check** — `npx tsc --noEmit` to catch any import errors or type mismatches.
 
-Any matches mean shadcn defaults surfaced where design spec tokens should be used. Fix by replacing raw color classes with semantic tokens from the spec.
+### Updating Components
+
+When updating an existing component from upstream while preserving local changes:
+
+1. Preview: `npx shadcn@latest add <component> --dry-run` — shows all affected files
+2. Diff per file: `npx shadcn@latest add <component> --diff <file>` — shows upstream vs local changes
+3. Decide per file:
+   - No local changes → safe to overwrite
+   - Has local changes → read the file, analyze the diff, apply upstream updates while preserving modifications
+   - User says "just update everything" → use `--overwrite`, but confirm first
+4. **Never use `--overwrite` without the user's explicit approval.**

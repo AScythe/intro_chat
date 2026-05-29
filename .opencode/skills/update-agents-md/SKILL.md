@@ -101,7 +101,7 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 
 ## Workflow
 
-> **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Session git diff is supplementary context only. Pre-existing discrepancies (outdated file ownership, missing sections, wrong commands, stale behavioral rules) are gaps to flag regardless of when they were introduced.
+> **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Pre-existing discrepancies (outdated file ownership, missing sections, wrong commands, stale behavioral rules) are gaps to flag regardless of when they were introduced.
 
 ### 1. Investigate the Codebase
 Read in priority order:

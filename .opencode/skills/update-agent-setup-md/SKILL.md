@@ -114,7 +114,7 @@ Optional sections (include only if applicable): Configuration reference (tables 
 
 ## Workflow
 
-> **Investigation Protocol:** Investigation scans the current system and project state, then compares against the current document — not against previous session changes. Session git diff is supplementary context only. Pre-existing discrepancies (stale tool versions, wrong PATH config, missing setup steps) are gaps to flag regardless of when they were introduced.
+> **Investigation Protocol:** Investigation scans the current system and project state, then compares against the current document — not against previous session changes. Pre-existing discrepancies (stale tool versions, wrong PATH config, missing setup steps) are gaps to flag regardless of when they were introduced.
 
 ### 1. Scan Global State
 Collect from the developer's system:

@@ -1,6 +1,6 @@
 ---
 name: update-docs
-description: 'Analyze session changes and sync all project documentation using the inline doc sync rules. Trigger when a documentation sync phase completes, or when the user says "sync docs", "update docs", "docs are outdated", or similar.'
+description: 'Analyze session changes and sync all project documentation by delegating to each doc-specific update skill. Trigger when a documentation sync phase completes, or when the user says "sync docs", "update docs", "docs are outdated", or similar.'
 ---
 
 ## What I do
@@ -28,7 +28,6 @@ description: 'Analyze session changes and sync all project documentation using t
 - Cross-reference verification — ensure all `[See ...](...)` links resolve
 - Hand-off instruction to `push-to-git`
 
-Doc sync rules are defined inline below — no external sub-skills needed.
 
 ## Phase 0: Prerequisites
 
@@ -56,33 +55,19 @@ Doc sync rules are defined inline below — no external sub-skills needed.
 
 3. **List which docs to update** — for each change type that occurred, note the corresponding doc. If none match, skip to Phase 3.
 
-### Doc Sync Rules Summary
-
-Key constraints per document. For full detail see the document itself.
-
-| Doc | Must include | Must NOT include |
-|-----|-------------|-----------------|
-| **ARCHITECTURE.md** | Project tree, module descriptions, data flow, import graph, key design decisions, per-function detail | User-facing features, product vision, setup instructions |
-| **SPECIFICATIONS.md** | Problem statement, user journey, feature descriptions with rationale, product decisions, Out of Scope | Internal module names, implementation details, command references |
-| **README.md** | Quick start, features list, how-to-use, tech stack (high-level only) | Internal module structure, per-function signatures, design decisions |
-| **AGENTS.md** | File ownership, SDD workflow phases, cross-phase rules, commands, test suite, failure triage | User-facing documentation, implementation walkthroughs |
-| **AGENT_SETUP.md** | Prerequisites, tool install commands, PATH config, global config, first-time flow | App dependencies, API keys, project-specific run commands (→ README) |
-| **PROJECT_BEST_PRACTICES.md** | Universal patterns: Context + Principle + Example + Why it matters | Project-specific names, code snippets with project identifiers |
-| **DOCUMENT_GUIDELINES.md** | Document scope boundaries, cross-reference rules | Implementation details, setup instructions |
-
-**Anti-duplication rule (all docs):** One purpose per doc. Cross-reference via `[See <DOC>.md](<DOC>.md)` instead of copying. If content belongs elsewhere, use `→ Redirect to <filename>`.
-
 ### Phase 2: Sync
 
-Update each changed doc by applying the rules above. Run in dependency order:
+For each doc in the update list from Phase 1, invoke the corresponding skill via the Task tool. Each skill investigates independently per its own Investigation Protocol — no session context or git diff needed.
 
-1. `docs/ARCHITECTURE.md` — architectural changes affect README, SPECS
-2. `docs/SPECIFICATIONS.md` — spec changes affect README
-3. `AGENTS.md` — self-contained
-4. `docs/README.md` — references ARCHITECTURE, SPECS
-5. `refs/PROJECT_BEST_PRACTICES.md` — self-contained
-6. `refs/AGENT_SETUP.md` — self-contained
-7. `refs/DOCUMENT_GUIDELINES.md` — inline update when doc structure/scope changes
+Run in dependency order:
+
+1. `docs/ARCHITECTURE.md` → `skill(name: "update-architecture-md")`
+2. `docs/SPECIFICATIONS.md` → `skill(name: "update-specifications-md")`
+3. `AGENTS.md` → `skill(name: "update-agents-md")`
+4. `docs/README.md` → `skill(name: "update-readme-md")`
+5. `refs/PROJECT_BEST_PRACTICES.md` → `skill(name: "update-best-practices-md")`
+6. `refs/AGENT_SETUP.md` → `skill(name: "update-agent-setup-md")`
+7. `refs/DOCUMENT_GUIDELINES.md` — inline update only (no dedicated skill)
 
 ### Phase 3: Verify
 

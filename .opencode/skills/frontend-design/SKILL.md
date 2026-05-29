@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: 'Define the visual identity and design direction for a frontend page, view, or component. Produces a design spec (not code). Use when starting a new page/component from scratch, making aesthetic decisions (colors, typography, spacing, motion, layout), or establishing/extending the project visual identity. Output is a design spec only — no code. For trivial mechanical changes where no design decision is needed, may skip to shadcn directly.'
+description: 'Define the visual identity and design direction for a frontend page, view, or component. Produces a design spec (not code) covering aesthetic direction, color system, typography scale, motion principles, and layout philosophy. Use when starting a new page or component, making aesthetic decisions, or establishing visual identity. Triggered when the user says "design the UI", "improve the design", "redesign the app", "overall design", "make it look good", "choose colors", "design spec", "UI design", "visual design", "theme this", "layout design", or similar. For trivial mechanical changes where no design decision is needed, skip to shadcn directly.'
 ---
 
 ## What I Do
@@ -9,6 +9,8 @@ Produce a **design spec** — not code — covering aesthetic direction, color s
 
 ## Boundaries
 
+- **Mode:** Plan — read-only. No files modified. Output is a design spec document only.
+- **Ordering:** Always invoke before shadcn. Never use both simultaneously.
 - **Design spec only** — no code, no HTML/CSS/JS output
 - **No component decisions** — component selection and composition are owned by `shadcn`
 - **No implementation** — stop at the spec; never write component code
@@ -30,6 +32,42 @@ Before writing the spec, commit to a bold aesthetic direction:
 - **Tone**: Pick an extreme — brutally minimal, maximalist, retro-futuristic, organic, luxury, playful, editorial, brutalist, etc.
 - **Constraints**: Technical requirements (framework, performance, accessibility).
 - **Differentiation**: What makes this unforgettable? The one thing someone will remember.
+
+## Aesthetics Guidelines
+
+### What to Avoid (Anti-Patterns)
+
+These generic AI-aesthetic choices signal low-effort design. Actively avoid them:
+
+- **Fonts:** Inter, Roboto, Arial, system-ui, Space Grotesk, Poppins — overused and characterless
+- **Color schemes:** Purple gradients on white backgrounds, overly muted gray-on-gray, high-contrast blue links
+- **Layouts:** Symmetrical card grids with no hierarchy, centered everything, predictable 12-column symmetry
+- **Effects:** Generic fade-in, same easing for everything, overused blur backdrops without purpose
+
+### What to Pursue
+
+**Typography**
+- Choose distinctive, characterful fonts. Pair a bold display font with a refined body font.
+- Size/weight scale should feel intentional — not the same as every other site.
+
+**Color & Theme**
+- Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
+- Commit to a cohesive palette where every color has a semantic role.
+
+**Motion**
+- Focus on high-impact moments: one well-orchestrated page load with staggered reveals creates more delight than scattered micro-interactions.
+- Use scroll-triggering and hover states that surprise.
+- CSS-first; use Motion library for React when available.
+
+**Spatial Composition**
+- Consider asymmetry, overlap, diagonal flow, grid-breaking elements.
+- Generous negative space OR controlled density — commit to one, never sit in between.
+
+**Backgrounds & Visual Details**
+- Create atmosphere beyond solid colors: gradient meshes, noise textures, geometric patterns, layered transparencies, grain overlays, dramatic shadows.
+- Match texture to the tone — brutalist gets sharp geometric noise, organic gets soft gradients.
+
+**Key principle:** Bold maximalism and refined minimalism both work — the key is intentionality, not intensity. Match the spec's complexity to the aesthetic vision.
 
 ## Design Spec Output
 
