@@ -61,7 +61,7 @@ Run `git status` to list all modified, added, and deleted files. Verify only exp
 
 #### Smart Tool Selection
 
-See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection) for the full decision framework. Use these tools for review verification:
+See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. Use these tools for review verification:
 
 **graphify** — verify the graph reflects intended structure. Query the knowledge graph to confirm changed modules have expected connections.
 

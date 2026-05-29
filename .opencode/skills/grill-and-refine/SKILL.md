@@ -36,7 +36,7 @@ description: 'Interview relentlessly about a plan or design until reaching share
 
 Start with the initial plan (from `brainstorm-and-plan` output). Explore identified files/code for each dimension:
 
-Use Smart Tool Selection to verify the plan's coverage completeness across all dimensions (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection)):
+Use Smart Tool Selection to verify the plan's coverage completeness across all dimensions (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md)):
 
 **graphify** — query the knowledge graph for concepts, communities, and connections across the entire codebase. Use `graphify query "..."` for broad context, `graphify path "X" "Y"` for blast radius between modules.
 

@@ -28,7 +28,7 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 Follow this layered analysis pipeline — all read-only:
 
-**Smart Tool Selection** — See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection) for the full decision framework. Use these skill-specific commands during analysis:
+**Smart Tool Selection** — See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. Use these skill-specific commands during analysis:
 
 - **graphify** — macro-level architecture map before diving into files:
   - `graphify_query_graph "..."` — broad concept search (e.g. "which modules handle SRT processing")

@@ -13,7 +13,7 @@ description: 'Analyze session changes and sync all project documentation by dele
 ## Boundaries
 - **Read-only analysis.** Review session changes and trigger syncs — do not create content for docs that had no changes.
 - **One pass at end.** Sync all docs in one batch at end of session, not after every commit or phase.
-- **Cross-reference integrity.** All `[See ...](...)` links must resolve after syncs complete.
+- **Cross-reference integrity.** All `See ...` links must resolve after syncs complete.
 
 ## Content Rules
 
@@ -25,7 +25,7 @@ description: 'Analyze session changes and sync all project documentation by dele
 ### Scope
 - Change inventory — which files were created, modified, or deleted
 - Doc Sync Triggers consultation — match changes to the correct doc
-- Cross-reference verification — ensure all `[See ...](...)` links resolve
+- Cross-reference verification — ensure all `See ...` links resolve
 - Hand-off instruction to `push-to-git`
 
 
@@ -71,7 +71,7 @@ Run in dependency order:
 
 ### Phase 3: Verify
 
-- [ ] All `[See <DOC>.md](...)` links between documents resolve to existing headings
+- [ ] All `See <DOC>.md` links between documents resolve to existing headings
 - [ ] No dead anchor references — every `#section-name` target exists in the target doc
 - [ ] No orphaned sections — every section in each doc is reachable from another doc or from the doc's own TOC
 - [ ] No stale redirects — `→ Redirect to <filename>` markers are removed if the target document no longer exists

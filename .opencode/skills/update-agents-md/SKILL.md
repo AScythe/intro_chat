@@ -52,7 +52,7 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` links instead of duplicating
+- Cross-reference, don't copy — use `See <DOC>.md` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
 ---
@@ -151,7 +151,7 @@ For each **What to Include** item and each **Universal Template** marker: does i
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
-- [ ] No content duplicated from another document — use `[See <DOC>.md](<DOC>.md)` cross-references instead
+- [ ] No content duplicated from another document — use `See <DOC>.md` cross-references instead
 - [ ] All claims verified against executable sources (code, config, workflows), not just docs
 - [ ] Every line passes the litmus test — "Would an agent miss this?"
 - [ ] Document omits everything an agent doesn't need — no speculative, aspirational, or unverifiable content

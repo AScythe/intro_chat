@@ -60,7 +60,7 @@ Mine session conversations, changed files, skills, and plan files for reusable, 
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` links instead of duplicating
+- Cross-reference, don't copy — use `See <DOC>.md` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
 ---
@@ -142,7 +142,7 @@ For each **What to Include** category and each existing entry: is it still accur
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
-- [ ] No content duplicated from another document — use `[See <DOC>.md](<DOC>.md)` cross-references instead
+- [ ] No content duplicated from another document — use `See <DOC>.md` cross-references instead
 - [ ] All claims traceable to session or codebase evidence — not inferred
 - [ ] Every entry passes the litmus test defined in Quality Gates
 - [ ] Document omits everything a developer on a new project doesn't need — no speculative, aspirational, or unverifiable content

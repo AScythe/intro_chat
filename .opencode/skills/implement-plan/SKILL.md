@@ -40,7 +40,7 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 ### Smart Tool Selection
 
-See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection) for the full decision framework. This skill has additional tool guidance specific to implementation work:
+See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. This skill has additional tool guidance specific to implementation work:
 
 **Assessing impact:** Before starting a batch, use **graphify** to understand the blast radius: `graphify query "impact of changing $MODULE"` to discover all connected concepts, or `graphify path "X" "Y"` to find the relationship path between two modules. This prevents missing downstream effects.
 

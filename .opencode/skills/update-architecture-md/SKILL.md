@@ -57,7 +57,7 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` links instead of duplicating
+- Cross-reference, don't copy — use `See <DOC>.md` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
 ---
@@ -232,7 +232,7 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
-- [ ] No content duplicated from another document — use `[See <DOC>.md](<DOC>.md)` cross-references instead
+- [ ] No content duplicated from another document — use `See <DOC>.md` cross-references instead
 - [ ] All claims verified against executable sources (code, config, workflows), not just docs
 - [ ] Document omits everything a developer or agent doesn't need — no speculative, aspirational, or unverifiable content
 

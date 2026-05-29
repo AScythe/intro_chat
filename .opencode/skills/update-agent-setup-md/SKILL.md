@@ -61,7 +61,7 @@ Mine the global system state and the project codebase, then update or create `re
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
-- Cross-reference, don't copy — use `[See <DOC>.md](<DOC>.md)` links instead of duplicating
+- Cross-reference, don't copy — use `See <DOC>.md` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
 
 **Boundary rules** (document-specific guardrails):
@@ -159,7 +159,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
-- [ ] No content duplicated from another document — use `[See <DOC>.md](<DOC>.md)` cross-references instead
+- [ ] No content duplicated from another document — use `See <DOC>.md` cross-references instead
 - [ ] All tool versions and commands verified against actual system state (global scan) or committed files (project scan)
 - [ ] Every line passes the litmus test defined in Quality Gates
 - [ ] Document omits everything a developer setting up doesn't need — no speculation, no aspirational content

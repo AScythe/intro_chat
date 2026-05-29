@@ -37,7 +37,7 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 
 First, read the test suite — imports will be adapted during cleanup.
 
-Apply Smart Tool Selection (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md#smart-tool-selection)). Use **graphify** community detection to identify strongly-connected components — same communities stay together, different communities are extraction candidates. Query `graphify path "A" "B"` to assess coupling before splitting. Use **ast_grep_search** for DRY analysis and **ast_grep_replace** with `dryRun: true` for rename preview. Use **cocoindex-code** to find related functions with different naming conventions.
+Apply Smart Tool Selection (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md)). Use **graphify** community detection to identify strongly-connected components — same communities stay together, different communities are extraction candidates. Query `graphify path "A" "B"` to assess coupling before splitting. Use **ast_grep_search** for DRY analysis and **ast_grep_replace** with `dryRun: true` for rename preview. Use **cocoindex-code** to find related functions with different naming conventions.
 
 Then examine source files across 11 scopes:
 
