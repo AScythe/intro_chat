@@ -1,5 +1,7 @@
 # Agent Development Environment Setup
 
+> **Last verified:** 2026-05-30
+
 This document captures every global and project-level configuration needed to reproduce this project's AI coding assistant environment on any device.
 
 ---
@@ -26,7 +28,7 @@ This document captures every global and project-level configuration needed to re
 | AI Assistant | OpenCode CLI |
 | Code Search | cocoindex-code (semantic), ast-grep (structural) |
 | Knowledge Graph | graphify (project map) |
-| Workflow | 16 custom SDD pipeline skills |
+| Workflow | 19 custom SDD pipeline skills |
 | Scaffolding | `/scaffold` command for generating skills and commands |
 
 ---
@@ -35,10 +37,11 @@ This document captures every global and project-level configuration needed to re
 
 | Tool | Version | Install |
 |------|---------|---------|
-| Python | >= 3.10 | [python.org](https://python.org) |
-| Node.js | >= 18 | [nodejs.org](https://nodejs.org) |
-| uv | latest | `powershell -c "irm https://astral.sh/uv/install.ps1 \| iex"` |
-| OpenCode CLI | latest | See below |
+| Python | >= 3.10 (3.12.10 verified) | [python.org](https://python.org) |
+| Node.js | >= 18 (24.15.0 verified) | [nodejs.org](https://nodejs.org) |
+| npm | >= 10 (11.12.1 verified) | (ships with Node.js) |
+| uv | >= 0.5 (0.5.3 verified) | `powershell -c "irm https://astral.sh/uv/install.ps1 \| iex"` |
+| OpenCode CLI | >= 1.14 (1.14.48 verified) | See below |
 
 ---
 
@@ -66,9 +69,6 @@ Create `~/.config/opencode/opencode.json`:
 {
   "$schema": "https://opencode.ai/config.json",
   "lsp": true,
-  "compaction": {
-    "reserved": 20000
-  },
   "agent": {
     "build": {
       "permission": {
@@ -81,7 +81,7 @@ Create `~/.config/opencode/opencode.json`:
 }
 ```
 
-This sets build-mode to ask before editing, writing, or running shell commands, and reserves 20k tokens as compaction buffer (~90% threshold for 200k-context models).
+This sets build-mode to ask before editing, writing, or running shell commands.
 
 ### 3. Install MCP Servers
 
@@ -178,7 +178,7 @@ ccc index
 ### 4. Build the Knowledge Graph
 
 ```powershell
-graphify .
+graphify update .
 ```
 
 This creates `graphify-out/` with:
@@ -186,13 +186,11 @@ This creates `graphify-out/` with:
 - `graph.html` — interactive visualization
 - `GRAPH_REPORT.md` — architecture insights
 
-### 5. Register Graphify with OpenCode
+### 5. (No Action Needed) Graphify is Pre-Configured
 
-```powershell
-graphify opencode install
-```
+Graphify usage rules are already committed in `AGENTS.md` and the MCP server is registered in root `opencode.json`. No post-clone step required.
 
-This writes a config file that tells OpenCode to consult the knowledge graph for codebase questions.
+> The `graphify opencode install` command exists but is not needed — it creates an optional plugin reminder that is redundant with AGENTS.md rules.
 
 ---
 
@@ -202,7 +200,7 @@ This writes a config file that tells OpenCode to consult the knowledge graph for
 
 | File | Purpose |
 |------|---------|
-| `~/.config/opencode/opencode.json` | OpenCode global config: permissions (build mode: edit/write/bash = ask), compaction reserved=20000 (~90% threshold) |
+| `~/.config/opencode/opencode.json` | OpenCode global config: permissions (build mode: edit/write/bash = ask), lsp enabled |
 | `~/.config/opencode/commands/scaffold.md` | Custom `/scaffold` command for generating skills and commands |
 | `~/.cocoindex_code/global_settings.yml` | Default embedding model for semantic search |
 
@@ -212,7 +210,7 @@ This writes a config file that tells OpenCode to consult the knowledge graph for
 |------|---------|----------|
 | OpenCode CLI | `npm install -g opencode-ai` | `opencode` command |
 | cocoindex-code | `uv tool install 'cocoindex-code[full]'` | `ccc`, `cocoindex-code` commands |
-| graphifyy | `pip install 'graphifyy[mcp]'` | `graphify` command, `graphify` Python module |
+| graphifyy (v0.8.14) | `pip install 'graphifyy[mcp]'` | `graphify` command, `graphify` Python module |
 
 ### Project Configuration Files
 
@@ -227,6 +225,9 @@ This writes a config file that tells OpenCode to consult the knowledge graph for
 | `graphify-out/graph.html` | Interactive visualization | Yes |
 | `graphify-out/manifest.json` | Cache metadata (not shared) | No (gitignored) |
 | `graphify-out/cost.json` | API cost tracking (not shared) | No (gitignored) |
+| `graphify-out/cache/` | AST extraction cache | No (gitignored) |
+| `graphify-out/.graphify_labels.json` | Internal metadata (regenerated on rebuild) | No (gitignored) |
+| `graphify-out/.graphify_root` | Internal metadata (regenerated on rebuild) | No (gitignored) |
 | `.gitignore` | Ignores for tool-generated files | Yes |
 
 ### opencode.json (Project Root)
@@ -250,7 +251,7 @@ This writes a config file that tells OpenCode to consult the knowledge graph for
 
 ### SDD Workflow Skills
 
-The `.opencode/skills/` directory contains 19 skills implementing a Specification-Driven Development pipeline:
+The `.opencode/skills/` directory contains 19 skills implementing a Specification-Driven Development pipeline (20 with the auto-generated `graphify` skill in `AGENTS.md`):
 
 | Phase | Skill | Mode |
 |-------|-------|------|
@@ -258,12 +259,13 @@ The `.opencode/skills/` directory contains 19 skills implementing a Specificatio
 | 2 | `grill-and-refine` | Plan |
 | 3 | `check-plan-readiness` | Build |
 | 4 | `implement-plan` | Build |
-| 5 | `review-implementation` | Plan |
+| 5 | `review-implementation` | Build |
 | 6 | `improve-architecture` | Build |
 | 7 | `modularize-and-clean` | Build |
 | 8 | `update-docs` | Build |
 | 9 | `push-to-git` | Build |
 | — | `run-e2e-tests` | Build |
+| — | `update-agent-setup-md` | Build |
 | — | `update-agents-md` | Build |
 | — | `update-architecture-md` | Build |
 | — | `update-best-practices-md` | Build |
@@ -289,9 +291,11 @@ Skills are auto-loaded by OpenCode when the task description matches their `name
 | `/.cocoindex_code/` | cocoindex-code | Platform-specific index tied to local Python env; recreated by `ccc init && ccc index` |
 | `graphify-out/manifest.json` | graphify | mtime-based cache metadata — breaks after git clone |
 | `graphify-out/cost.json` | graphify | Local API cost tracking — not shareable across machines |
-| `graphify-out/cache/` | graphify | Extraction cache — regenerated by `graphify .` |
+| `graphify-out/cache/` | graphify | AST extraction cache — regenerated by `graphify update .` |
 | `graphify-out/.graphify_labels.json` | graphify | Internal metadata — regenerated on rebuild |
 | `graphify-out/.graphify_root` | graphify | Internal metadata — regenerated on rebuild |
+
+> **Note:** `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`, and `graphify-out/graph.html` are **tracked** (shared across machines). Only caches and metadata are ignored.
 
 #### Nested `.opencode/.gitignore`
 
@@ -305,7 +309,7 @@ Only `node_modules` and `bun.lock` are ignored here. The files `package.json` an
 #### Why Not Commit Generated Files
 
 - `.cocoindex_code/` is tied to your Python environment and absolute file paths — an index built on Windows won't work on Mac or Linux. Run `ccc init && ccc index` on each machine instead.
-- `graphify-out/cache/` and metadata files (`.graphify_labels.json`, `.graphify_root`) are extraction artifacts unique to the local environment. The committed graph (`graph.json`, `GRAPH_REPORT.md`, `graph.html`) is the shareable output.
+- `graphify-out/cache/` and metadata files (`.graphify_labels.json`, `.graphify_root`) are AST extraction artifacts unique to the local environment. The committed graph (`graph.json`, `GRAPH_REPORT.md`, `graph.html`) is the shareable output.
 - `graphify-out/manifest.json` stores mtime-based hashes that change after clone — committing it would cause false rebuilds.
 
 ---
@@ -389,8 +393,7 @@ cd ..
 ```powershell
 ccc init
 ccc index
-graphify .
-graphify opencode install
+graphify update .
 ```
 
 ### Step 6: Restart OpenCode
@@ -511,10 +514,36 @@ But note: absolute paths are **machine-specific** — they break when the same r
 Run:
 
 ```powershell
-graphify .
+graphify update .
 ```
 
 This re-extracts the project and rebuilds the knowledge graph.
+
+### Graphify on Windows
+
+**`UnicodeEncodeError` when running `graphify` commands**
+
+```powershell
+$env:PYTHONIOENCODING='utf-8'; graphify update .
+```
+
+This affects PowerShell 5.1 on Windows where stdout defaults to the system code page (e.g., cp1252).
+
+**Graphify runs fine locally but CI reports `graphify: command not found`**
+
+CI environments typically don't have graphifyy installed. This is expected — graphify is used for *human-guided* architecture review, not automated CI checks. The committed graph (`graph.json`) is the shareable artifact.
+
+### CocoIndex on Windows
+
+**`ccc doctor` fails with `UnicodeEncodeError`**
+
+Same fix:
+
+```powershell
+$env:PYTHONIOENCODING='utf-8'; ccc doctor
+```
+
+This is already configured in `AGENTS.md` but may be needed for ad-hoc CLI usage.
 
 ### `.cocoindex_code/settings.yml` doesn't exist
 
