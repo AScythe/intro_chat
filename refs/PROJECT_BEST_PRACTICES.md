@@ -1104,7 +1104,7 @@ Step 3 — Test count diff:
 **Why it matters**: A command that blocks waiting for stdin will hang indefinitely in a headless or agent-driven session, causing timeouts and false failures.
 
 ### 8.17 Orchestrator Pattern for Convergent Pipeline Paths
-**Context**: The SDD workflow had 3 exit paths from review-implementation (modularize-and-clean, improve-architecture, update-docs) — all needing documentation sync as their final step before git push
+**Context**: The agentic workflow had 3 exit paths from review-implementation (modularize-and-clean, improve-architecture, update-docs) — all needing documentation sync as their final step before git push
 
 **Principle**: When a workflow has multiple exit paths that all converge at the same downstream step, introduce an orchestrator as the single entry point rather than duplicating logic across each route. The orchestrator owns the routing decision and produces a single handoff. This prevents scattered routing logic, makes the pipeline self-documenting, and ensures consistent pre-flight checks.
 

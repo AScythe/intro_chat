@@ -12,7 +12,7 @@
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow, per-function detail | Developers, AI agents | Code structure change | Technical, implementation |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product scope change | Product, pitch, vision, spec, privacy |
 | **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, judges | Demo flow change | Practical, step-by-step |
-| **AGENTS.md** | SDD Workflow Rules by workflow phase, permissions, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
+| **AGENTS.md** | Agentic Workflow Rules by workflow phase, permissions, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | After each session | Educational, guidelines |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | New doc added | Meta, governance |
 
@@ -212,21 +212,21 @@ Practical demo execution guide. Answers "How do I demonstrate this?", "What shou
 ## 5. AGENTS.md
 
 ### Scope
-SDD Workflow Rules and operational guidelines. Answers "How should I think, plan, implement, and verify?" and "What can I touch?", "What commands do I use?".
+Agentic Workflow Rules and operational guidelines. Answers "How should I think, plan, implement, and verify?" and "What can I touch?", "What commands do I use?".
 
 ### Audience
 - AI agents (e.g., opencode)
 - Developers setting up agent permissions
 
 ### Key Differentiator
-**SDD Workflow Rules + operational constraints over technical structure.** Organized by workflow phase, each phase mapping to the skill that owns it. AGENTS.md = how to behave and what to touch; ARCHITECTURE.md = implementation and data flow. If an agent needs to know "what's the right way to approach this task?" or "can I edit this file?", it's here.
+**Agentic Workflow Rules + operational constraints over technical structure.** Organized by workflow phase, each phase mapping to the skill that owns it. AGENTS.md = how to behave and what to touch; ARCHITECTURE.md = implementation and data flow. If an agent needs to know "what's the right way to approach this task?" or "can I edit this file?", it's here.
 
 ### What to Include
 - **Scope definition** — what this document covers and how it relates to other guidance (e.g., skill files)
 - **File ownership table** — every location an agent might touch, with explicit policy: ✅ safe to edit, ⚠️ caution required, ❌ forbidden
-- **SDD Workflow Rules** — organized by 9 workflow phases (Thinking & Analysis → Probing & Refinement → Planning & Readiness → Implementing → Reviewing → Architecture Improvement → Structuring & Cleaning → Documentation Sync → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
+- **Agentic Workflow Rules** — organized by 9 workflow phases (Thinking & Analysis → Probing & Refinement → Planning & Readiness → Implementing → Reviewing → Architecture Improvement → Structuring & Cleaning → Documentation Sync → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
 - **Cross-Phase Universal Rules** — an H2 section with H3 subsections covering the following:
-  - **Smart Tool Selection** — Two-tier classification: Fast Path (single tool) vs Pipeline (graphify→cocoindex→ast-grep for complex queries)
+  - **Codebase Exploration** — Two-tier classification: Fast Path (single tool) vs Pipeline (graphify→cocoindex→ast-grep for complex queries)
   - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
   - **Process Discipline** — read-before-write, exit declarations, full test suite after every change, source+tests as one unit
   - **Failure Triage** — classification table for test failures (import path, brittle test, behavioral regression, pre-existing, flaky)
@@ -250,7 +250,7 @@ For agent-specific operational requirements (non-interactive execution, venv set
 
 ### Content Boundaries
 - **File ownership:** Every entry must include a policy column (✅ safe, ⚠️ caution, ❌ forbidden). File names alone are not enough.
-- **SDD Workflow Rules:** Organized by workflow phase. Each phase header names the skill(s) it maps to. Rules are imperative sentences, one per bullet. Cross-reference the skill file for full detail.
+- **Agentic Workflow Rules:** Organized by workflow phase. Each phase header names the skill(s) it maps to. Rules are imperative sentences, one per bullet. Cross-reference the skill file for full detail.
 - **Verification:** No standalone verification section — verification requirements are embedded in each phase's behavioral rules (e.g., Phase 4: "Verify locally per batch", "Run full test suite + lint before hand-off").
 - **Cross-references:** Point to SPECIFICATIONS.md for product boundaries and privacy, ARCHITECTURE.md for endpoints and data flow, README.md for commands and setup. Do not duplicate content from other documents.
 
@@ -361,7 +361,7 @@ Meta-governance for all project documentation. Answers "Where does this content 
 
 2. **Cross-reference, don't copy** — Use `[See ARCHITECTURE.md](ARCHITECTURE.md)` instead of pasting sections from one document into another. A reference is better than a duplicate.
 
-3. **Summary here, details there** — Documents at the top of the funnel (README.md) get summary tables and navigation-level overviews. Documents deeper in (ARCHITECTURE.md, AGENTS.md) get the full detail. AGENTS.md gets high-level SDD Workflow Rules with cross-references to detail docs. ARCHITECTURE.md gets the authoritative data flow with endpoint tables. Example: `routes.py` — file tree gets "HTTP route handlers" (5 words), Module Descriptions gets lead line + endpoint list, `#### Functions` gets every handler with method/path + one-line purpose. Each level adds detail without duplicating.
+3. **Summary here, details there** — Documents at the top of the funnel (README.md) get summary tables and navigation-level overviews. Documents deeper in (ARCHITECTURE.md, AGENTS.md) get the full detail. AGENTS.md gets high-level Agentic Workflow Rules with cross-references to detail docs. ARCHITECTURE.md gets the authoritative data flow with endpoint tables. Example: `routes.py` — file tree gets "HTTP route handlers" (5 words), Module Descriptions gets lead line + endpoint list, `#### Functions` gets every handler with method/path + one-line purpose. Each level adds detail without duplicating.
 
 4. **Audience-first** — If audience overlaps, choose the document with the MOST RELEVANT audience. A developer reading about architecture doesn't need the same content as a user reading the README.
 
@@ -389,10 +389,10 @@ review-implementation (1st pass)
 
 | Step | Documents to READ | Specific Sections | Documents to WRITE |
 |------|-------------------|-------------------|--------------------|
-| **brainstorm-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Smart Tool Selection" | nothing (verbal) |
+| **brainstorm-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Codebase Exploration" | nothing (verbal) |
 | **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal only — this step produces no artifact; if issues require a revised plan, loop back to check-plan-readiness) |
 | **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/PLAN_*.md` |
-| **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Smart Tool Selection", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
+| **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Codebase Exploration", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
 | **review-implementation** (1st pass) | `docs/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
 | **improve-architecture** | `AGENTS.md`, `ARCHITECTURE.md`, `implement-plan/SKILL.md` | AGENTS: "File Ownership". ARCHITECTURE: "Project Structure", relevant module descriptions. implement-plan: §3, §5, §6, test-adaptation rule | Source code (`[ARCH]`), regression tests |
 | **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |
