@@ -174,6 +174,7 @@ ccc index
 - `ccc init` creates `.cocoindex_code/settings.yml` with file patterns for indexing
 - `ccc index` builds the semantic search index (incremental after first build)
 - `.cocoindex_code/` is gitignored — rebuild on each clone
+- `graphify-out/*.json`, `GRAPH_REPORT.md`, and `graph.html` are excluded from cocoindex's `exclude_patterns` — graph data is queried via the graphify MCP server, not semantic search
 
 ### 4. Build the Knowledge Graph
 
@@ -295,7 +296,7 @@ Skills are auto-loaded by OpenCode when the task description matches their `name
 | `graphify-out/.graphify_labels.json` | graphify | Internal metadata — regenerated on rebuild |
 | `graphify-out/.graphify_root` | graphify | Internal metadata — regenerated on rebuild |
 
-> **Note:** `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`, and `graphify-out/graph.html` are **tracked** (shared across machines). Only caches and metadata are ignored.
+> **Note:** `graphify-out/graph.json`, `graphify-out/GRAPH_REPORT.md`, and `graphify-out/graph.html` are **tracked** (shared across machines). Only caches and metadata are ignored. These graph output files are also excluded from cocoindex-code's semantic index (via `settings.yml` `exclude_patterns`) — graph queries use the graphify MCP server, not vector search.
 
 #### Nested `.opencode/.gitignore`
 

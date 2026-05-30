@@ -226,7 +226,7 @@ SDD Workflow Rules and operational guidelines. Answers "How should I think, plan
 - **File ownership table** — every location an agent might touch, with explicit policy: ✅ safe to edit, ⚠️ caution required, ❌ forbidden
 - **SDD Workflow Rules** — organized by 9 workflow phases (Thinking & Analysis → Probing & Refinement → Planning & Readiness → Implementing → Reviewing → Architecture Improvement → Structuring & Cleaning → Documentation Sync → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
 - **Cross-Phase Universal Rules** — an H2 section with H3 subsections covering the following:
-  - **Smart Tool Selection** — Tool-by-task-type selection with Phase 0 hard gate
+  - **Smart Tool Selection** — Two-tier classification: Fast Path (single tool) vs Pipeline (graphify→cocoindex→ast-grep for complex queries)
   - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
   - **Process Discipline** — read-before-write, exit declarations, full test suite after every change, source+tests as one unit
   - **Failure Triage** — classification table for test failures (import path, brittle test, behavioral regression, pre-existing, flaky)

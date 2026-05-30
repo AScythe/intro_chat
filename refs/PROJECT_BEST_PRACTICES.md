@@ -1156,14 +1156,36 @@ update-docs: single orchestrator, routes to push-to-git
 
 **Why it matters**: One source of truth. No drift across copied rules. Update one location, all consumers benefit.
 
-### 8.22 Three-Layer Code Exploration Stack
-**Context**: From integrating Graphify (knowledge graph) alongside cocoindex-code (semantic search) and ast-grep (AST rewriting) into the SDD workflow
+### 8.22 Narrow-Then-Search Pipeline
+**Context**: From evolving the Three-Layer Code Exploration Stack (graphify → cocoindex → ast-grep) into a formal pipeline with I/O contracts, fast-path rules, and completeness safeguards
 
-**Principle**: Structure codebase analysis tools into three complementary layers that each answer a different question. Layer 1 (macro) maps concepts and communities via a knowledge graph — answers "WHERE is the relevant code?" Layer 2 (meso) searches by natural language intent — answers "WHAT does it do?" Layer 3 (micro) searches and rewrites by AST structure — answers "HOW is it structured?" Use tools in layer order: understand the landscape first, then find the code, then modify it.
+**Principle**: For complex queries, run a 3-stage sequential pipeline instead of picking one tool. Stage 1 (graphify) narrows scope via 3 query variations × 2 sub-graphs. Stage 2 (cocoindex-code) searches within that scope by intent. Stage 3 (ast-grep) verifies structural patterns. For simple or moderate queries, use Fast Path — a single tool or 1-2 stage shortcut.
 
-**Example**: Graphify (`graphify query "matchmaking"`) discovers all connected concepts across the project → cocoindex-code (`ccc search "how are user sessions created"`) finds the specific function → ast-grep (`ast_grep_search(pattern: "def $NAME($$$):")`) finds all structural variants.
+**I/O Contracts:**
 
-**Why it matters**: Each layer catches what others miss. Macro prevents blind spots, meso finds intent-matches that literal grep can't, micro enables syntax-safe rewrites. Using only grep is like navigating with only a street-level map — the knowledge graph gives you a satellite view.
+| Stage | Input | Action | Output |
+|-------|-------|--------|--------|
+| 1 — Scope | User query | 3 phrases × 2 sub-graphs (code + doc), community expansion if ≤4 files | `scope: [...], communities: [...], confidence: high/medium/low` |
+| 2 — Search | Scope from Stage 1 + refined query | Semantic search with `paths=scope` | `chunks: [(file, line, content, score)], uncovered_aspects: [...]` |
+| 3 — Verify | Specific pattern from Stage 2 | Structural match in identified files | `exact_matches: [(file, line, pattern)], verified_files: [...]` |
+
+**Fast-Path Table:**
+
+| Task type | Tools | Example |
+|-----------|-------|---------|
+| Simple | Single tool (ast-grep, cocoindex, or grep) | "Find console.log" → ast-grep |
+| Moderate | 1-2 stages | "How is email validated?" → cocoindex only |
+
+**Example — full pipeline trace:**
+```
+Query: "How does matchmaking work?"
+Stage 1: graphify query "match queue" (code) + "match flow" (doc) + "user pairing" (code) → scope: [matchmaking.py, connection_manager.py, state.py, routes.py], confidence: high
+Stage 2: cocoindex-code search with paths=[matchmaking.py, ...] → chunks: find_match(), waiting_queue, _try_match()
+Stage 3: ast-grep search for "def find_match($$$)" → exact definition at matchmaking.py:42
+→ Read targeted code: matchmaking.py:42-85
+```
+
+**Why it matters**: The pipeline catches what single-tool searches miss. Graphify narrows scope before cocoindex searches, preventing token waste on 126+ files. Ast-grep verifies structural correctness that semantic search can't guarantee. The cost reminder ("~10k tokens — default to Fast Path") prevents over-engineering simple queries.
 
 ### 8.23 Design-Spec-to-Config Bridge
 **Context**: The frontend-design skill produces a design spec (colors, typography, spacing, motion) but neither frontend-design nor shadcn explicitly owned translating those tokens into `tailwind.config.js` and `global.css` — the bridge step existed only as implicit agent knowledge
