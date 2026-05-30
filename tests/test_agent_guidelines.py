@@ -173,12 +173,11 @@ SKILL_ROUTING_CASES = [
 ]
 
 # ── 2. Tool Selection Logic ──────────────────────────────────────
-# Rule (from AGENTS.md Smart Tool Selection, Phase 0 Hard Gate):
-#   1. Structural/exact pattern       → ast-grep first
-#   2. Semantic/fuzzy intent          → cocoindex-code first
-#   3. Architectural/relational       → graphify first
-#   4. Mixed                           → combine applicable layers
-#   5. None of the above               → grep
+# Rule (from AGENTS.md Smart Tool Selection, Two-Tier Classification):
+#   Fast Path: Simple → single tool, Moderate → 1-2 stages
+#   Pipeline: Complex → graphify→cocoindex→ast-grep, Critical → full + safety net
+#   Tool mapping: ast-grep (structural), cocoindex-code (semantic),
+#                 graphify (architectural), grep (fallback)
 #
 # Each test case: hypothetical query + expected primary tool.
 
@@ -284,23 +283,23 @@ def test_tool_selection_hypothetical_queries():
     primary tool selection is correct.
     """
     content = read_file(AGENTS_MD)
-    has_gate = "Phase 0 Hard Gate" in content
-    check(has_gate, "AGENTS.md defines Phase 0 Hard Gate classification")
+    has_two_tier = "Two-Tier Classification" in content
+    check(has_two_tier, "AGENTS.md defines Two-Tier Classification replacing Phase 0 Hard Gate")
 
-    has_ast_grep_rule = "Structural/exact pattern" in content
-    check(has_ast_grep_rule, "Gate rule: Structural/exact → ast-grep")
+    has_fast_path = "Fast Path" in content
+    check(has_fast_path, "Fast Path defined for simple/moderate queries")
 
-    has_cocoindex_rule = "Semantic/fuzzy intent" in content
-    check(has_cocoindex_rule, "Gate rule: Semantic/fuzzy → cocoindex-code")
+    has_pipeline = "3-stage sequential" in content
+    check(has_pipeline, "Pipeline defined for complex/critical queries (3-stage sequential)")
 
-    has_graphify_rule = "Architectural/relational" in content
-    check(has_graphify_rule, "Gate rule: Architectural/relational → graphify")
+    has_stage_safeguards = "Stage 1 completeness safeguards" in content
+    check(has_stage_safeguards, "Stage 1: 3 queries × 2 sub-graphs completeness safeguards")
 
-    has_mixed_rule = "Mixed → combine" in content
-    check(has_mixed_rule, "Gate rule: Mixed → combine applicable layers")
+    has_edge_cases = "Graphify returns 0 nodes" in content
+    check(has_edge_cases, "Edge case: Graphify 0 → cocoindex unscoped fallback")
 
-    has_grep_rule = "None of the above" in content
-    check(has_grep_rule, "Gate rule: None → grep")
+    has_pipeline_stages = "Stage 1: Scope" in content
+    check(has_pipeline_stages, "Pipeline stages: Scope → Search → Verify")
 
     print("\n📋 Tool Selection — hypothetical queries route to correct tool")
     for query, expected_tool, rationale in TOOL_SELECTION_CASES:
