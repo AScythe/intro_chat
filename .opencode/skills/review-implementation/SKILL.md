@@ -61,7 +61,7 @@ Run `git status` to list all modified, added, and deleted files. Verify only exp
 
 #### Smart Tool Selection
 
-See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. Use these tools for review verification:
+See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. For verification, run the pipeline (graphify→cocoindex→ast-grep) to catch missed changes, then use individual tools as needed. Use these tools for review verification:
 
 **graphify** — verify the graph reflects intended structure. Query the knowledge graph to confirm changed modules have expected connections.
 
@@ -171,7 +171,7 @@ Skip if plan already in `archive/`.
 Ask: **"Move plan to archive? (y/n)"**
 
 If yes:
-- Scan `archive/` for the globally highest NNN number across all `PLAN_*.md` files → increment by 1 (MMM)
+- Use Get-ChildItem (bash) to scan `docs/` and `archive/` for the highest NNN across all PLAN_*.md files (CRITICAL: do NOT use glob — glob respects `.ignore` which excludes archive/PLAN_*.md, causing silent failure). Increment by 1 → MMM.
 - Move: `docs/PLAN_<date>_<NNN>.md` → `archive/PLAN_<date>_<MMM>.md` (preserves original creation date, assigns global sequential archive number)
 - Confirm: "Plan archived as `archive/PLAN_<date>_<MMM>.md`."
 

@@ -42,7 +42,7 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. This skill has additional tool guidance specific to implementation work:
 
-**Assessing impact:** Before starting a batch, use **graphify** to understand the blast radius: `graphify query "impact of changing $MODULE"` to discover all connected concepts, or `graphify path "X" "Y"` to find the relationship path between two modules. This prevents missing downstream effects.
+**Assessing impact:** Before starting a batch, use the pipeline (graphify→cocoindex→ast-grep) to understand blast radius. Start with `graphify query "impact of changing $MODULE"` to discover all connected concepts, or `graphify path "X" "Y"` to find the relationship path between two modules. This prevents missing downstream effects.
 
 **Finding code:** Prefer **cocoindex-code** semantic search over `grep` when searching by purpose or intent (e.g. "find where we validate emails"). Prefer **ast_grep_search** over `grep` when searching by code structure (e.g. all `try/except` blocks with `pass`, or all calls to a deprecated function).
 

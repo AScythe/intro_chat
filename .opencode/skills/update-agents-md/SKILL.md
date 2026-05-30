@@ -31,7 +31,7 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 - **File ownership table** — location, role, agent policy (⚠️ caution / ❌ forbidden). Include only files with non-default policies — omit ✅ safe files
 - **Universal Template** — start from the reusable template with `<!-- FILL: -->` markers for project-specific injection
 - **SDD Workflow Rules** — phase order table with explicit always/never directives
-- **Cross-Phase Universal Rules** — Smart Tool Selection, Process Discipline, Documentation Discipline, Failure Triage
+- **Cross-Phase Universal Rules** — Smart Tool Selection (two-tier: Fast Path vs Pipeline), Process Discipline, Documentation Discipline, Failure Triage
 - **Project-specific behavioral rules** — extract from the project's entry points, configuration files, and operational constraints. Cover: modification constraints, resource management, configuration conventions
 - **Commands reference** — exact CLI commands for common operations (build, run, test, deploy, clean up)
 - **Test Suite** — if the project has a `tests/` directory, document: naming convention, file-to-module table with approach column, conventions, and run command
