@@ -1,4 +1,4 @@
-{
+﻿{
   "directed": false,
   "multigraph": false,
   "graph": {},
@@ -33,12 +33,12 @@
       "id": "archive_demo_guide_backend"
     },
     {
-      "label": "✨ Beautiful UI",
+      "label": "âœ¨ Beautiful UI",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L53",
       "community": 1,
-      "norm_label": "✨ beautiful ui",
+      "norm_label": "âœ¨ beautiful ui",
       "id": "archive_demo_guide_beautiful_ui"
     },
     {
@@ -69,21 +69,21 @@
       "id": "archive_demo_guide_codeblock_1"
     },
     {
-      "label": "🎪 Demo Tips",
+      "label": "ðŸŽª Demo Tips",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L174",
       "community": 1,
-      "norm_label": "🎪 demo tips",
+      "norm_label": "ðŸŽª demo tips",
       "id": "archive_demo_guide_demo_tips"
     },
     {
-      "label": "🛠️ Fallback Options",
+      "label": "ðŸ› ï¸ Fallback Options",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L114",
       "community": 1,
-      "norm_label": "🛠️ fallback options",
+      "norm_label": "ðŸ› ï¸ fallback options",
       "id": "archive_demo_guide_fallback_options"
     },
     {
@@ -114,12 +114,12 @@
       "id": "archive_demo_guide_frontend"
     },
     {
-      "label": "💬 Guided Conversations",
+      "label": "ðŸ’¬ Guided Conversations",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L64",
       "community": 1,
-      "norm_label": "💬 guided conversations",
+      "norm_label": "ðŸ’¬ guided conversations",
       "id": "archive_demo_guide_guided_conversations"
     },
     {
@@ -132,21 +132,21 @@
       "id": "archive_demo_guide_homepage"
     },
     {
-      "label": "🎬 IntroChat Demo Guide",
+      "label": "ðŸŽ¬ IntroChat Demo Guide",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L1",
       "community": 1,
-      "norm_label": "🎬 introchat demo guide",
+      "norm_label": "ðŸŽ¬ introchat demo guide",
       "id": "archive_demo_guide_introchat_demo_guide"
     },
     {
-      "label": "🎯 Key Features to Demonstrate",
+      "label": "ðŸŽ¯ Key Features to Demonstrate",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L51",
       "community": 1,
-      "norm_label": "🎯 key features to demonstrate",
+      "norm_label": "ðŸŽ¯ key features to demonstrate",
       "id": "archive_demo_guide_key_features_to_demonstrate"
     },
     {
@@ -159,12 +159,12 @@
       "id": "archive_demo_guide_md"
     },
     {
-      "label": "📱 Mobile-Friendly",
+      "label": "ðŸ“± Mobile-Friendly",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L74",
       "community": 1,
-      "norm_label": "📱 mobile-friendly",
+      "norm_label": "ðŸ“± mobile-friendly",
       "id": "archive_demo_guide_mobile_friendly"
     },
     {
@@ -177,12 +177,12 @@
       "id": "archive_demo_guide_only_one_device_available"
     },
     {
-      "label": "🔒 Privacy-First Design",
+      "label": "ðŸ”’ Privacy-First Design",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L69",
       "community": 1,
-      "norm_label": "🔒 privacy-first design",
+      "norm_label": "ðŸ”’ privacy-first design",
       "id": "archive_demo_guide_privacy_first_design"
     },
     {
@@ -195,30 +195,30 @@
       "id": "archive_demo_guide_qr_code_won_t_scan"
     },
     {
-      "label": "🚀 Quick Start Demo",
+      "label": "ðŸš€ Quick Start Demo",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L5",
       "community": 1,
-      "norm_label": "🚀 quick start demo",
+      "norm_label": "ðŸš€ quick start demo",
       "id": "archive_demo_guide_quick_start_demo"
     },
     {
-      "label": "🔄 Real-time Matching",
+      "label": "ðŸ”„ Real-time Matching",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L59",
       "community": 1,
-      "norm_label": "🔄 real-time matching",
+      "norm_label": "ðŸ”„ real-time matching",
       "id": "archive_demo_guide_real_time_matching"
     },
     {
-      "label": "🔄 Reset Instructions",
+      "label": "ðŸ”„ Reset Instructions",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L101",
       "community": 1,
-      "norm_label": "🔄 reset instructions",
+      "norm_label": "ðŸ”„ reset instructions",
       "id": "archive_demo_guide_reset_instructions"
     },
     {
@@ -339,30 +339,30 @@
       "id": "archive_demo_guide_step_8_experience_the_chat"
     },
     {
-      "label": "🔧 Technical Features to Highlight",
+      "label": "ðŸ”§ Technical Features to Highlight",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L154",
       "community": 1,
-      "norm_label": "🔧 technical features to highlight",
+      "norm_label": "ðŸ”§ technical features to highlight",
       "id": "archive_demo_guide_technical_features_to_highlight"
     },
     {
-      "label": "🧪 Testing Scenarios",
+      "label": "ðŸ§ª Testing Scenarios",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L79",
       "community": 1,
-      "norm_label": "🧪 testing scenarios",
+      "norm_label": "ðŸ§ª testing scenarios",
       "id": "archive_demo_guide_testing_scenarios"
     },
     {
-      "label": "🎨 UI Highlights",
+      "label": "ðŸŽ¨ UI Highlights",
       "file_type": "document",
       "source_file": "archive/DEMO_GUIDE.md",
       "source_location": "L129",
       "community": 1,
-      "norm_label": "🎨 ui highlights",
+      "norm_label": "ðŸŽ¨ ui highlights",
       "id": "archive_demo_guide_ui_highlights"
     },
     {
@@ -465,12 +465,12 @@
       "id": "archive_plan_2026_05_12_001_batches_ordered_by_dependency"
     },
     {
-      "label": "Client → Server",
+      "label": "Client â†’ Server",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_12_001.md",
       "source_location": "L36",
       "community": 44,
-      "norm_label": "client → server",
+      "norm_label": "client â†’ server",
       "id": "archive_plan_2026_05_12_001_client_server"
     },
     {
@@ -492,12 +492,12 @@
       "id": "archive_plan_2026_05_12_001_codeblock_2"
     },
     {
-      "label": "Flask → FastAPI Migration Plan",
+      "label": "Flask â†’ FastAPI Migration Plan",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_12_001.md",
       "source_location": "L1",
       "community": 44,
-      "norm_label": "flask → fastapi migration plan",
+      "norm_label": "flask â†’ fastapi migration plan",
       "id": "archive_plan_2026_05_12_001_flask_fastapi_migration_plan"
     },
     {
@@ -519,12 +519,12 @@
       "id": "archive_plan_2026_05_12_001_md"
     },
     {
-      "label": "Message Protocol (Frontend ↔ Backend)",
+      "label": "Message Protocol (Frontend â†” Backend)",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_12_001.md",
       "source_location": "L27",
       "community": 44,
-      "norm_label": "message protocol (frontend ↔ backend)",
+      "norm_label": "message protocol (frontend â†” backend)",
       "id": "archive_plan_2026_05_12_001_message_protocol_frontend_backend"
     },
     {
@@ -537,12 +537,12 @@
       "id": "archive_plan_2026_05_12_001_overview"
     },
     {
-      "label": "Server → Client",
+      "label": "Server â†’ Client",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_12_001.md",
       "source_location": "L29",
       "community": 44,
-      "norm_label": "server → client",
+      "norm_label": "server â†’ client",
       "id": "archive_plan_2026_05_12_001_server_client"
     },
     {
@@ -942,12 +942,12 @@
       "id": "archive_plan_2026_05_13_005_architecture"
     },
     {
-      "label": "code:block1 (Browser ──GET /──→ FastAPI (catch-all) ──→ frontend/dist/ind)",
+      "label": "code:block1 (Browser â”€â”€GET /â”€â”€â†’ FastAPI (catch-all) â”€â”€â†’ frontend/dist/ind)",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_13_005.md",
       "source_location": "L27",
       "community": 19,
-      "norm_label": "code:block1 (browser ──get /──→ fastapi (catch-all) ──→ frontend/dist/ind)",
+      "norm_label": "code:block1 (browser â”€â”€get /â”€â”€â†’ fastapi (catch-all) â”€â”€â†’ frontend/dist/ind)",
       "id": "archive_plan_2026_05_13_005_codeblock_1"
     },
     {
@@ -1302,39 +1302,39 @@
       "id": "archive_plan_2026_05_13_007_approach_design_decisions"
     },
     {
-      "label": "Batch 1 — CSS Relocation",
+      "label": "Batch 1 â€” CSS Relocation",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_13_007.md",
       "source_location": "L25",
       "community": 66,
-      "norm_label": "batch 1 — css relocation",
+      "norm_label": "batch 1 â€” css relocation",
       "id": "archive_plan_2026_05_13_007_batch_1_css_relocation"
     },
     {
-      "label": "Batch 2 — pyproject.toml",
+      "label": "Batch 2 â€” pyproject.toml",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_13_007.md",
       "source_location": "L40",
       "community": 66,
-      "norm_label": "batch 2 — pyproject.toml",
+      "norm_label": "batch 2 â€” pyproject.toml",
       "id": "archive_plan_2026_05_13_007_batch_2_pyproject_toml"
     },
     {
-      "label": "Batch 3 — Constants Relocation",
+      "label": "Batch 3 â€” Constants Relocation",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_13_007.md",
       "source_location": "L50",
       "community": 66,
-      "norm_label": "batch 3 — constants relocation",
+      "norm_label": "batch 3 â€” constants relocation",
       "id": "archive_plan_2026_05_13_007_batch_3_constants_relocation"
     },
     {
-      "label": "Batch 4 — `@/` Alias Conversion",
+      "label": "Batch 4 â€” `@/` Alias Conversion",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_13_007.md",
       "source_location": "L64",
       "community": 66,
-      "norm_label": "batch 4 — `@/` alias conversion",
+      "norm_label": "batch 4 â€” `@/` alias conversion",
       "id": "archive_plan_2026_05_13_007_batch_4_alias_conversion"
     },
     {
@@ -3372,12 +3372,12 @@
       "id": "archive_plan_2026_05_26_018_dimension_edge_cases"
     },
     {
-      "label": "Dimension: Meta — Agent Interaction Pattern",
+      "label": "Dimension: Meta â€” Agent Interaction Pattern",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_26_018.md",
       "source_location": "L201",
       "community": 17,
-      "norm_label": "dimension: meta — agent interaction pattern",
+      "norm_label": "dimension: meta â€” agent interaction pattern",
       "id": "archive_plan_2026_05_26_018_dimension_meta_agent_interaction_pattern"
     },
     {
@@ -3687,21 +3687,21 @@
       "id": "archive_plan_2026_05_26_019_success_metrics"
     },
     {
-      "label": "Task 2: Test 6a — Full chat flow, connection exchanged",
+      "label": "Task 2: Test 6a â€” Full chat flow, connection exchanged",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_26_019.md",
       "source_location": "L79",
       "community": 46,
-      "norm_label": "task 2: test 6a — full chat flow, connection exchanged",
+      "norm_label": "task 2: test 6a â€” full chat flow, connection exchanged",
       "id": "archive_plan_2026_05_26_019_task_2_test_6a_full_chat_flow_connection_exchanged"
     },
     {
-      "label": "Task 3: Test 6b — Full chat flow, connection declined",
+      "label": "Task 3: Test 6b â€” Full chat flow, connection declined",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_26_019.md",
       "source_location": "L99",
       "community": 46,
-      "norm_label": "task 3: test 6b — full chat flow, connection declined",
+      "norm_label": "task 3: test 6b â€” full chat flow, connection declined",
       "id": "archive_plan_2026_05_26_019_task_3_test_6b_full_chat_flow_connection_declined"
     },
     {
@@ -4110,39 +4110,39 @@
       "id": "archive_plan_2026_05_28_022_approved_candidates_for_user_to_approve_65"
     },
     {
-      "label": "Batch 1 [CONCURRENT] — Independent changes",
+      "label": "Batch 1 [CONCURRENT] â€” Independent changes",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L93",
       "community": 36,
-      "norm_label": "batch 1 [concurrent] — independent changes",
+      "norm_label": "batch 1 [concurrent] â€” independent changes",
       "id": "archive_plan_2026_05_28_022_batch_1_concurrent_independent_changes"
     },
     {
-      "label": "Batch 2 [SEQUENTIAL on routes.py] — QR extraction",
+      "label": "Batch 2 [SEQUENTIAL on routes.py] â€” QR extraction",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L101",
       "community": 36,
-      "norm_label": "batch 2 [sequential on routes.py] — qr extraction",
+      "norm_label": "batch 2 [sequential on routes.py] â€” qr extraction",
       "id": "archive_plan_2026_05_28_022_batch_2_sequential_on_routes_py_qr_extraction"
     },
     {
-      "label": "Batch 3 [CONCURRENT] — Frontend extraction",
+      "label": "Batch 3 [CONCURRENT] â€” Frontend extraction",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L106",
       "community": 36,
-      "norm_label": "batch 3 [concurrent] — frontend extraction",
+      "norm_label": "batch 3 [concurrent] â€” frontend extraction",
       "id": "archive_plan_2026_05_28_022_batch_3_concurrent_frontend_extraction"
     },
     {
-      "label": "Batch 4 — Prompt deduplication",
+      "label": "Batch 4 â€” Prompt deduplication",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L112",
       "community": 36,
-      "norm_label": "batch 4 — prompt deduplication",
+      "norm_label": "batch 4 â€” prompt deduplication",
       "id": "archive_plan_2026_05_28_022_batch_4_prompt_deduplication"
     },
     {
@@ -4209,39 +4209,39 @@
       "id": "archive_plan_2026_05_28_022_non_goals"
     },
     {
-      "label": "Phase 1a — Architecture Evaluation (improve-architecture)",
+      "label": "Phase 1a â€” Architecture Evaluation (improve-architecture)",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L22",
       "community": 36,
-      "norm_label": "phase 1a — architecture evaluation (improve-architecture)",
+      "norm_label": "phase 1a â€” architecture evaluation (improve-architecture)",
       "id": "archive_plan_2026_05_28_022_phase_1a_architecture_evaluation_improve_architecture"
     },
     {
-      "label": "Phase 1b — Modularization & Cleanup Evaluation (modularize-and-clean)",
+      "label": "Phase 1b â€” Modularization & Cleanup Evaluation (modularize-and-clean)",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L53",
       "community": 36,
-      "norm_label": "phase 1b — modularization & cleanup evaluation (modularize-and-clean)",
+      "norm_label": "phase 1b â€” modularization & cleanup evaluation (modularize-and-clean)",
       "id": "archive_plan_2026_05_28_022_phase_1b_modularization_cleanup_evaluation_modularize_and_clean"
     },
     {
-      "label": "Phase 2 — Implementation Plan",
+      "label": "Phase 2 â€” Implementation Plan",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L87",
       "community": 36,
-      "norm_label": "phase 2 — implementation plan",
+      "norm_label": "phase 2 â€” implementation plan",
       "id": "archive_plan_2026_05_28_022_phase_2_implementation_plan"
     },
     {
-      "label": "PLAN_2026_05_28_022 — Modularize & Clean + Improve Architecture",
+      "label": "PLAN_2026_05_28_022 â€” Modularize & Clean + Improve Architecture",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_022.md",
       "source_location": "L1",
       "community": 36,
-      "norm_label": "plan_2026_05_28_022 — modularize & clean + improve architecture",
+      "norm_label": "plan_2026_05_28_022 â€” modularize & clean + improve architecture",
       "id": "archive_plan_2026_05_28_022_plan_2026_05_28_022_modularize_clean_improve_architecture"
     },
     {
@@ -4461,12 +4461,12 @@
       "id": "archive_plan_2026_05_28_023_success_metrics"
     },
     {
-      "label": "Task 1: Rewrite AGENTS.md §Smart Tool Selection",
+      "label": "Task 1: Rewrite AGENTS.md Â§Smart Tool Selection",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_023.md",
       "source_location": "L70",
       "community": 9,
-      "norm_label": "task 1: rewrite agents.md §smart tool selection",
+      "norm_label": "task 1: rewrite agents.md Â§smart tool selection",
       "id": "archive_plan_2026_05_28_023_task_1_rewrite_agents_md_smart_tool_selection"
     },
     {
@@ -4479,12 +4479,12 @@
       "id": "archive_plan_2026_05_28_023_task_2_update_all_6_skill_prerequisite_checklists"
     },
     {
-      "label": "Task 3: Rewrite skill body sections — consistent header + cross-reference",
+      "label": "Task 3: Rewrite skill body sections â€” consistent header + cross-reference",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_023.md",
       "source_location": "L82",
       "community": 9,
-      "norm_label": "task 3: rewrite skill body sections — consistent header + cross-reference",
+      "norm_label": "task 3: rewrite skill body sections â€” consistent header + cross-reference",
       "id": "archive_plan_2026_05_28_023_task_3_rewrite_skill_body_sections_consistent_header_cross_reference"
     },
     {
@@ -4902,12 +4902,12 @@
       "id": "archive_plan_2026_05_28_025_success_metrics"
     },
     {
-      "label": "Task 1: Content transfer — add ~3 lines to README.md",
+      "label": "Task 1: Content transfer â€” add ~3 lines to README.md",
       "file_type": "document",
       "source_file": "archive/PLAN_2026_05_28_025.md",
       "source_location": "L71",
       "community": 23,
-      "norm_label": "task 1: content transfer — add ~3 lines to readme.md",
+      "norm_label": "task 1: content transfer â€” add ~3 lines to readme.md",
       "id": "archive_plan_2026_05_28_025_task_1_content_transfer_add_3_lines_to_readme_md"
     },
     {
@@ -6675,12 +6675,12 @@
       "id": "docs_design_spec_dark_mode_132"
     },
     {
-      "label": "Design Spec — IntroChat Redesign",
+      "label": "Design Spec â€” IntroChat Redesign",
       "file_type": "document",
       "source_file": "docs/DESIGN_SPEC.md",
       "source_location": "L1",
       "community": 79,
-      "norm_label": "design spec — introchat redesign",
+      "norm_label": "design spec â€” introchat redesign",
       "id": "docs_design_spec_design_spec_introchat_redesign"
     },
     {
@@ -6756,12 +6756,12 @@
       "id": "docs_readme_codeblock_1"
     },
     {
-      "label": "code:block2 (React SPA (frontend/) ←→ FastAPI Backend (app/) ←→ SQLite Da)",
+      "label": "code:block2 (React SPA (frontend/) â†â†’ FastAPI Backend (app/) â†â†’ SQLite Da)",
       "file_type": "document",
       "source_file": "docs/README.md",
       "source_location": "L146",
       "community": 7,
-      "norm_label": "code:block2 (react spa (frontend/) ←→ fastapi backend (app/) ←→ sqlite da)",
+      "norm_label": "code:block2 (react spa (frontend/) â†â†’ fastapi backend (app/) â†â†’ sqlite da)",
       "id": "docs_readme_codeblock_2"
     },
     {
@@ -6855,12 +6855,12 @@
       "id": "docs_readme_installation_run"
     },
     {
-      "label": "🌟 IntroChat - The Secret Icebreaker for Introverts",
+      "label": "ðŸŒŸ IntroChat - The Secret Icebreaker for Introverts",
       "file_type": "document",
       "source_file": "docs/README.md",
       "source_location": "L1",
       "community": 7,
-      "norm_label": "🌟 introchat - the secret icebreaker for introverts",
+      "norm_label": "ðŸŒŸ introchat - the secret icebreaker for introverts",
       "id": "docs_readme_introchat_the_secret_icebreaker_for_introverts"
     },
     {
@@ -6927,12 +6927,12 @@
       "id": "docs_readme_render_com_recommended"
     },
     {
-      "label": "📊 Success Metrics",
+      "label": "ðŸ“Š Success Metrics",
       "file_type": "document",
       "source_file": "docs/README.md",
       "source_location": "L269",
       "community": 7,
-      "norm_label": "📊 success metrics",
+      "norm_label": "ðŸ“Š success metrics",
       "id": "docs_readme_success_metrics"
     },
     {
@@ -6972,12 +6972,12 @@
       "id": "docs_readme_testing"
     },
     {
-      "label": "🎯 The Pitch",
+      "label": "ðŸŽ¯ The Pitch",
       "file_type": "document",
       "source_file": "docs/README.md",
       "source_location": "L279",
       "community": 7,
-      "norm_label": "🎯 the pitch",
+      "norm_label": "ðŸŽ¯ the pitch",
       "id": "docs_readme_the_pitch"
     },
     {
@@ -7017,12 +7017,12 @@
       "id": "docs_specifications_architecture_overview"
     },
     {
-      "label": "🚀 Bonus Features (If Time Allows)",
+      "label": "ðŸš€ Bonus Features (If Time Allows)",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L161",
       "community": 52,
-      "norm_label": "🚀 bonus features (if time allows)",
+      "norm_label": "ðŸš€ bonus features (if time allows)",
       "id": "docs_specifications_bonus_features_if_time_allows"
     },
     {
@@ -7035,21 +7035,21 @@
       "id": "docs_specifications_core_features"
     },
     {
-      "label": "🖥️ Demo Setup Instructions (For Judges)",
+      "label": "ðŸ–¥ï¸ Demo Setup Instructions (For Judges)",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L179",
       "community": 52,
-      "norm_label": "🖥️ demo setup instructions (for judges)",
+      "norm_label": "ðŸ–¥ï¸ demo setup instructions (for judges)",
       "id": "docs_specifications_demo_setup_instructions_for_judges"
     },
     {
-      "label": "📣 Final Pitch Line (Say This Loud & Proud)",
+      "label": "ðŸ“£ Final Pitch Line (Say This Loud & Proud)",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L169",
       "community": 52,
-      "norm_label": "📣 final pitch line (say this loud & proud)",
+      "norm_label": "ðŸ“£ final pitch line (say this loud & proud)",
       "id": "docs_specifications_final_pitch_line_say_this_loud_proud"
     },
     {
@@ -7062,21 +7062,21 @@
       "id": "docs_specifications_hard_constraints"
     },
     {
-      "label": "✅ How It Works (Core Logic Flow)",
+      "label": "âœ… How It Works (Core Logic Flow)",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L20",
       "community": 52,
-      "norm_label": "✅ how it works (core logic flow)",
+      "norm_label": "âœ… how it works (core logic flow)",
       "id": "docs_specifications_how_it_works_core_logic_flow"
     },
     {
-      "label": "🌟 IntroChat: The Secret Icebreaker for Introverts at Events",
+      "label": "ðŸŒŸ IntroChat: The Secret Icebreaker for Introverts at Events",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L1",
       "community": 52,
-      "norm_label": "🌟 introchat: the secret icebreaker for introverts at events",
+      "norm_label": "ðŸŒŸ introchat: the secret icebreaker for introverts at events",
       "id": "docs_specifications_introchat_the_secret_icebreaker_for_introverts_at_events"
     },
     {
@@ -7089,75 +7089,75 @@
       "id": "docs_specifications_md"
     },
     {
-      "label": "🚫 Out of Scope",
+      "label": "ðŸš« Out of Scope",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L68",
       "community": 52,
-      "norm_label": "🚫 out of scope",
+      "norm_label": "ðŸš« out of scope",
       "id": "docs_specifications_out_of_scope"
     },
     {
-      "label": "🔒 Privacy First",
+      "label": "ðŸ”’ Privacy First",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L48",
       "community": 52,
-      "norm_label": "🔒 privacy first",
+      "norm_label": "ðŸ”’ privacy first",
       "id": "docs_specifications_privacy_first"
     },
     {
-      "label": "💡 Problem",
+      "label": "ðŸ’¡ Problem",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L7",
       "community": 52,
-      "norm_label": "💡 problem",
+      "norm_label": "ðŸ’¡ problem",
       "id": "docs_specifications_problem"
     },
     {
-      "label": "💬 Sample User Flow (Perfect for Demo)",
+      "label": "ðŸ’¬ Sample User Flow (Perfect for Demo)",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L120",
       "community": 52,
-      "norm_label": "💬 sample user flow (perfect for demo)",
+      "norm_label": "ðŸ’¬ sample user flow (perfect for demo)",
       "id": "docs_specifications_sample_user_flow_perfect_for_demo"
     },
     {
-      "label": "🎯 Solution",
+      "label": "ðŸŽ¯ Solution",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L13",
       "community": 52,
-      "norm_label": "🎯 solution",
+      "norm_label": "ðŸŽ¯ solution",
       "id": "docs_specifications_solution"
     },
     {
-      "label": "🛠️ Tech Stack",
+      "label": "ðŸ› ï¸ Tech Stack",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L93",
       "community": 52,
-      "norm_label": "🛠️ tech stack",
+      "norm_label": "ðŸ› ï¸ tech stack",
       "id": "docs_specifications_tech_stack"
     },
     {
-      "label": "🎯 Why Introverts Love It",
+      "label": "ðŸŽ¯ Why Introverts Love It",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L80",
       "community": 52,
-      "norm_label": "🎯 why introverts love it",
+      "norm_label": "ðŸŽ¯ why introverts love it",
       "id": "docs_specifications_why_introverts_love_it"
     },
     {
-      "label": "🏆 Why Users Will Love It",
+      "label": "ðŸ† Why Users Will Love It",
       "file_type": "document",
       "source_file": "docs/SPECIFICATIONS.md",
       "source_location": "L149",
       "community": 52,
-      "norm_label": "🏆 why users will love it",
+      "norm_label": "ðŸ† why users will love it",
       "id": "docs_specifications_why_users_will_love_it"
     },
     {
@@ -7935,21 +7935,21 @@
       "id": "intro_chat_agents_graphify"
     },
     {
-      "label": "Phase 1 — Design (invoke `frontend-design`)",
+      "label": "Phase 1 â€” Design (invoke `frontend-design`)",
       "file_type": "document",
       "source_file": "AGENTS.md",
       "source_location": "L74",
       "community": 32,
-      "norm_label": "phase 1 — design (invoke `frontend-design`)",
+      "norm_label": "phase 1 â€” design (invoke `frontend-design`)",
       "id": "intro_chat_agents_phase_1_design_invoke_frontend_design"
     },
     {
-      "label": "Phase 2 — Implementation (invoke `shadcn`)",
+      "label": "Phase 2 â€” Implementation (invoke `shadcn`)",
       "file_type": "document",
       "source_file": "AGENTS.md",
       "source_location": "L85",
       "community": 32,
-      "norm_label": "phase 2 — implementation (invoke `shadcn`)",
+      "norm_label": "phase 2 â€” implementation (invoke `shadcn`)",
       "id": "intro_chat_agents_phase_2_implementation_invoke_shadcn"
     },
     {
@@ -7971,13 +7971,13 @@
       "id": "intro_chat_agents_scope"
     },
     {
-      "label": "SDD Workflow Skills",
+      "label": "Agentic Workflow Skills",
       "file_type": "document",
       "source_file": "AGENTS.md",
       "source_location": "L30",
       "community": 32,
-      "norm_label": "sdd workflow skills",
-      "id": "intro_chat_agents_sdd_workflow_skills"
+      "norm_label": "Agentic Workflow Skills",
+      "id": "intro_chat_agents_agentic_workflow_skills"
     },
     {
       "label": "Skill Loading Priority",
@@ -8079,12 +8079,12 @@
       "id": "modularize_and_clean_skill_change_log_verbal"
     },
     {
-      "label": "code:block1 ([DEAD] <file:line> — <symbol> — <evidence> → Recommend: <Rem)",
+      "label": "code:block1 ([DEAD] <file:line> â€” <symbol> â€” <evidence> â†’ Recommend: <Rem)",
       "file_type": "document",
       "source_file": ".opencode/skills/modularize-and-clean/SKILL.md",
       "source_location": "L63",
       "community": 40,
-      "norm_label": "code:block1 ([dead] <file:line> — <symbol> — <evidence> → recommend: <rem)",
+      "norm_label": "code:block1 ([dead] <file:line> â€” <symbol> â€” <evidence> â†’ recommend: <rem)",
       "id": "modularize_and_clean_skill_codeblock_1"
     },
     {
@@ -9276,12 +9276,12 @@
       "id": "refs_agent_setup_replicating_to_another_project"
     },
     {
-      "label": "Root `.gitignore` — Tool-Related Rules",
+      "label": "Root `.gitignore` â€” Tool-Related Rules",
       "file_type": "document",
       "source_file": "refs/AGENT_SETUP.md",
       "source_location": "L284",
       "community": 75,
-      "norm_label": "root `.gitignore` — tool-related rules",
+      "norm_label": "root `.gitignore` â€” tool-related rules",
       "id": "refs_agent_setup_root_gitignore_tool_related_rules"
     },
     {
@@ -9294,13 +9294,13 @@
       "id": "refs_agent_setup_scaffold"
     },
     {
-      "label": "SDD Workflow Skills",
+      "label": "Agentic Workflow Skills",
       "file_type": "document",
       "source_file": "refs/AGENT_SETUP.md",
       "source_location": "L251",
       "community": 75,
-      "norm_label": "sdd workflow skills",
-      "id": "refs_agent_setup_sdd_workflow_skills"
+      "norm_label": "Agentic Workflow Skills",
+      "id": "refs_agent_setup_agentic_workflow_skills"
     },
     {
       "label": "Step 1: Install System Prerequisites",
@@ -10239,12 +10239,12 @@
       "id": "refs_project_best_practices_6_documentation"
     },
     {
-      "label": "7.10 Interactive Walkthrough — One Item at a Time, Names Only",
+      "label": "7.10 Interactive Walkthrough â€” One Item at a Time, Names Only",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L633",
       "community": 0,
-      "norm_label": "7.10 interactive walkthrough — one item at a time, names only",
+      "norm_label": "7.10 interactive walkthrough â€” one item at a time, names only",
       "id": "refs_project_best_practices_7_10_interactive_walkthrough_one_item_at_a_time_names_only"
     },
     {
@@ -10626,30 +10626,30 @@
       "id": "refs_project_best_practices_codeblock_11"
     },
     {
-      "label": "code:python (# ✅ Use TestClient — no server process needed)",
+      "label": "code:python (# âœ… Use TestClient â€” no server process needed)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L197",
       "community": 77,
-      "norm_label": "code:python (# ✅ use testclient — no server process needed)",
+      "norm_label": "code:python (# âœ… use testclient â€” no server process needed)",
       "id": "refs_project_best_practices_codeblock_12"
     },
     {
-      "label": "code:block13 (# ✅ Each TDD batch produces code AND a saved test)",
+      "label": "code:block13 (# âœ… Each TDD batch produces code AND a saved test)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L217",
       "community": 77,
-      "norm_label": "code:block13 (# ✅ each tdd batch produces code and a saved test)",
+      "norm_label": "code:block13 (# âœ… each tdd batch produces code and a saved test)",
       "id": "refs_project_best_practices_codeblock_13"
     },
     {
-      "label": "code:block14 (✅ Same batch: rename getUser → fetchUser in source + update )",
+      "label": "code:block14 (âœ… Same batch: rename getUser â†’ fetchUser in source + update )",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L232",
       "community": 77,
-      "norm_label": "code:block14 (✅ same batch: rename getuser → fetchuser in source + update )",
+      "norm_label": "code:block14 (âœ… same batch: rename getuser â†’ fetchuser in source + update )",
       "id": "refs_project_best_practices_codeblock_14"
     },
     {
@@ -10662,12 +10662,12 @@
       "id": "refs_project_best_practices_codeblock_15"
     },
     {
-      "label": "code:python (# ❌ Hardcoded list — drifts from reality)",
+      "label": "code:python (# âŒ Hardcoded list â€” drifts from reality)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L260",
       "community": 77,
-      "norm_label": "code:python (# ❌ hardcoded list — drifts from reality)",
+      "norm_label": "code:python (# âŒ hardcoded list â€” drifts from reality)",
       "id": "refs_project_best_practices_codeblock_16"
     },
     {
@@ -10698,12 +10698,12 @@
       "id": "refs_project_best_practices_codeblock_19"
     },
     {
-      "label": "code:block2 (Configuration  → config.py / state.py (constants))",
+      "label": "code:block2 (Configuration  â†’ config.py / state.py (constants))",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L40",
       "community": 76,
-      "norm_label": "code:block2 (configuration  → config.py / state.py (constants))",
+      "norm_label": "code:block2 (configuration  â†’ config.py / state.py (constants))",
       "id": "refs_project_best_practices_codeblock_2"
     },
     {
@@ -10716,39 +10716,39 @@
       "id": "refs_project_best_practices_codeblock_20"
     },
     {
-      "label": "code:block21 (Python Modules: __init__ → state → database → config → schem)",
+      "label": "code:block21 (Python Modules: __init__ â†’ state â†’ database â†’ config â†’ schem)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L399",
       "community": 26,
-      "norm_label": "code:block21 (python modules: __init__ → state → database → config → schem)",
+      "norm_label": "code:block21 (python modules: __init__ â†’ state â†’ database â†’ config â†’ schem)",
       "id": "refs_project_best_practices_codeblock_21"
     },
     {
-      "label": "code:block22 (❌ ## Module Descriptions (auto-generated))",
+      "label": "code:block22 (âŒ ## Module Descriptions (auto-generated))",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L413",
       "community": 26,
-      "norm_label": "code:block22 (❌ ## module descriptions (auto-generated))",
+      "norm_label": "code:block22 (âŒ ## module descriptions (auto-generated))",
       "id": "refs_project_best_practices_codeblock_22"
     },
     {
-      "label": "code:block23 (✅ Keep: \"Content's PRIMARY purpose identified and routed to )",
+      "label": "code:block23 (âœ… Keep: \"Content's PRIMARY purpose identified and routed to )",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L433",
       "community": 26,
-      "norm_label": "code:block23 (✅ keep: \"content's primary purpose identified and routed to )",
+      "norm_label": "code:block23 (âœ… keep: \"content's primary purpose identified and routed to )",
       "id": "refs_project_best_practices_codeblock_23"
     },
     {
-      "label": "code:block24 (# ✅ All archive plan files in archive/)",
+      "label": "code:block24 (# âœ… All archive plan files in archive/)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L448",
       "community": 26,
-      "norm_label": "code:block24 (# ✅ all archive plan files in archive/)",
+      "norm_label": "code:block24 (# âœ… all archive plan files in archive/)",
       "id": "refs_project_best_practices_codeblock_24"
     },
     {
@@ -10779,12 +10779,12 @@
       "id": "refs_project_best_practices_codeblock_27"
     },
     {
-      "label": "code:block28 (Before: │   ├── format.ts      # formatTime() — seconds to M)",
+      "label": "code:block28 (Before: â”‚   â”œâ”€â”€ format.ts      # formatTime() â€” seconds to M)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L490",
       "community": 26,
-      "norm_label": "code:block28 (before: │   ├── format.ts      # formattime() — seconds to m)",
+      "norm_label": "code:block28 (before: â”‚   â”œâ”€â”€ format.ts      # formattime() â€” seconds to m)",
       "id": "refs_project_best_practices_codeblock_28"
     },
     {
@@ -10806,12 +10806,12 @@
       "id": "refs_project_best_practices_codeblock_3"
     },
     {
-      "label": "code:python (# ✅ import sqlite3; from .state import active_users)",
+      "label": "code:python (# âœ… import sqlite3; from .state import active_users)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L546",
       "community": 0,
-      "norm_label": "code:python (# ✅ import sqlite3; from .state import active_users)",
+      "norm_label": "code:python (# âœ… import sqlite3; from .state import active_users)",
       "id": "refs_project_best_practices_codeblock_30"
     },
     {
@@ -10833,21 +10833,21 @@
       "id": "refs_project_best_practices_codeblock_32"
     },
     {
-      "label": "code:block33 (✅ One item at a time:)",
+      "label": "code:block33 (âœ… One item at a time:)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L639",
       "community": 0,
-      "norm_label": "code:block33 (✅ one item at a time:)",
+      "norm_label": "code:block33 (âœ… one item at a time:)",
       "id": "refs_project_best_practices_codeblock_33"
     },
     {
-      "label": "code:block34 (✅ Presence check: \"Does the plan state confirmed assumptions)",
+      "label": "code:block34 (âœ… Presence check: \"Does the plan state confirmed assumptions)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L658",
       "community": 0,
-      "norm_label": "code:block34 (✅ presence check: \"does the plan state confirmed assumptions)",
+      "norm_label": "code:block34 (âœ… presence check: \"does the plan state confirmed assumptions)",
       "id": "refs_project_best_practices_codeblock_34"
     },
     {
@@ -10860,30 +10860,30 @@
       "id": "refs_project_best_practices_codeblock_35"
     },
     {
-      "label": "code:python (# ✅ Preserve and update)",
+      "label": "code:python (# âœ… Preserve and update)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L688",
       "community": 0,
-      "norm_label": "code:python (# ✅ preserve and update)",
+      "norm_label": "code:python (# âœ… preserve and update)",
       "id": "refs_project_best_practices_codeblock_36"
     },
     {
-      "label": "code:powershell (# ❌ PowerShell mangles embedded double quotes in f-strings)",
+      "label": "code:powershell (# âŒ PowerShell mangles embedded double quotes in f-strings)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L700",
       "community": 0,
-      "norm_label": "code:powershell (# ❌ powershell mangles embedded double quotes in f-strings)",
+      "norm_label": "code:powershell (# âŒ powershell mangles embedded double quotes in f-strings)",
       "id": "refs_project_best_practices_codeblock_37"
     },
     {
-      "label": "code:python (# ✅ Find users who ARE waiting for a match)",
+      "label": "code:python (# âœ… Find users who ARE waiting for a match)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L716",
       "community": 0,
-      "norm_label": "code:python (# ✅ find users who are waiting for a match)",
+      "norm_label": "code:python (# âœ… find users who are waiting for a match)",
       "id": "refs_project_best_practices_codeblock_38"
     },
     {
@@ -10896,21 +10896,21 @@
       "id": "refs_project_best_practices_codeblock_39"
     },
     {
-      "label": "code:javascript (// api-utils.js ONLY: API calls — no UI, no timers, no confi)",
+      "label": "code:javascript (// api-utils.js ONLY: API calls â€” no UI, no timers, no confi)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L68",
       "community": 76,
-      "norm_label": "code:javascript (// api-utils.js only: api calls — no ui, no timers, no confi)",
+      "norm_label": "code:javascript (// api-utils.js only: api calls â€” no ui, no timers, no confi)",
       "id": "refs_project_best_practices_codeblock_4"
     },
     {
-      "label": "code:block40 (# ✅ docs/ has 001, 002 → next is 003)",
+      "label": "code:block40 (# âœ… docs/ has 001, 002 â†’ next is 003)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L752",
       "community": 0,
-      "norm_label": "code:block40 (# ✅ docs/ has 001, 002 → next is 003)",
+      "norm_label": "code:block40 (# âœ… docs/ has 001, 002 â†’ next is 003)",
       "id": "refs_project_best_practices_codeblock_40"
     },
     {
@@ -10932,12 +10932,12 @@
       "id": "refs_project_best_practices_codeblock_42"
     },
     {
-      "label": "code:python (# ✅ Route handler accepts, manager only registers)",
+      "label": "code:python (# âœ… Route handler accepts, manager only registers)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L795",
       "community": 0,
-      "norm_label": "code:python (# ✅ route handler accepts, manager only registers)",
+      "norm_label": "code:python (# âœ… route handler accepts, manager only registers)",
       "id": "refs_project_best_practices_codeblock_43"
     },
     {
@@ -10959,12 +10959,12 @@
       "id": "refs_project_best_practices_codeblock_45"
     },
     {
-      "label": "code:markdown (### `app/routes.py` (HTTP Routes)   ← match on `app/routes.p)",
+      "label": "code:markdown (### `app/routes.py` (HTTP Routes)   â† match on `app/routes.p)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L889",
       "community": 12,
-      "norm_label": "code:markdown (### `app/routes.py` (http routes)   ← match on `app/routes.p)",
+      "norm_label": "code:markdown (### `app/routes.py` (http routes)   â† match on `app/routes.p)",
       "id": "refs_project_best_practices_codeblock_46"
     },
     {
@@ -10977,39 +10977,39 @@
       "id": "refs_project_best_practices_codeblock_47"
     },
     {
-      "label": "code:block48 ([diff] app/routes.py: 'Old lead line' → 'New lead line')",
+      "label": "code:block48 ([diff] app/routes.py: 'Old lead line' â†’ 'New lead line')",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L917",
       "community": 12,
-      "norm_label": "code:block48 ([diff] app/routes.py: 'old lead line' → 'new lead line')",
+      "norm_label": "code:block48 ([diff] app/routes.py: 'old lead line' â†’ 'new lead line')",
       "id": "refs_project_best_practices_codeblock_48"
     },
     {
-      "label": "code:regex (/Description: (.+)/   ← matches all of:)",
+      "label": "code:regex (/Description: (.+)/   â† matches all of:)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L931",
       "community": 12,
-      "norm_label": "code:regex (/description: (.+)/   ← matches all of:)",
+      "norm_label": "code:regex (/description: (.+)/   â† matches all of:)",
       "id": "refs_project_best_practices_codeblock_49"
     },
     {
-      "label": "code:python (# ✅ Good — leaf modules export, internal modules import from)",
+      "label": "code:python (# âœ… Good â€” leaf modules export, internal modules import from)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L83",
       "community": 76,
-      "norm_label": "code:python (# ✅ good — leaf modules export, internal modules import from)",
+      "norm_label": "code:python (# âœ… good â€” leaf modules export, internal modules import from)",
       "id": "refs_project_best_practices_codeblock_5"
     },
     {
-      "label": "code:block50 (❌ implement-guide: \"Code, test, debug, verify, and document\")",
+      "label": "code:block50 (âŒ implement-guide: \"Code, test, debug, verify, and document\")",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L962",
       "community": 12,
-      "norm_label": "code:block50 (❌ implement-guide: \"code, test, debug, verify, and document\")",
+      "norm_label": "code:block50 (âŒ implement-guide: \"code, test, debug, verify, and document\")",
       "id": "refs_project_best_practices_codeblock_50"
     },
     {
@@ -11031,12 +11031,12 @@
       "id": "refs_project_best_practices_codeblock_52"
     },
     {
-      "label": "code:block53 (✅ Good batch: \"Add POST /api/users endpoint + its test\" (3 f)",
+      "label": "code:block53 (âœ… Good batch: \"Add POST /api/users endpoint + its test\" (3 f)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L1016",
       "community": 12,
-      "norm_label": "code:block53 (✅ good batch: \"add post /api/users endpoint + its test\" (3 f)",
+      "norm_label": "code:block53 (âœ… good batch: \"add post /api/users endpoint + its test\" (3 f)",
       "id": "refs_project_best_practices_codeblock_53"
     },
     {
@@ -11094,12 +11094,12 @@
       "id": "refs_project_best_practices_codeblock_59"
     },
     {
-      "label": "code:block6 (routes.py → imports from → state.py, schemas.py, connection_)",
+      "label": "code:block6 (routes.py â†’ imports from â†’ state.py, schemas.py, connection_)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L92",
       "community": 76,
-      "norm_label": "code:block6 (routes.py → imports from → state.py, schemas.py, connection_)",
+      "norm_label": "code:block6 (routes.py â†’ imports from â†’ state.py, schemas.py, connection_)",
       "id": "refs_project_best_practices_codeblock_6"
     },
     {
@@ -11157,21 +11157,21 @@
       "id": "refs_project_best_practices_codeblock_65"
     },
     {
-      "label": "code:python (# ❌ Bad)",
+      "label": "code:python (# âŒ Bad)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L119",
       "community": 101,
-      "norm_label": "code:python (# ❌ bad)",
+      "norm_label": "code:python (# âŒ bad)",
       "id": "refs_project_best_practices_codeblock_7"
     },
     {
-      "label": "code:python (# ✅ Local dev — browser-ready)",
+      "label": "code:python (# âœ… Local dev â€” browser-ready)",
       "file_type": "document",
       "source_file": "refs/PROJECT_BEST_PRACTICES.md",
       "source_location": "L132",
       "community": 101,
-      "norm_label": "code:python (# ✅ local dev — browser-ready)",
+      "norm_label": "code:python (# âœ… local dev â€” browser-ready)",
       "id": "refs_project_best_practices_codeblock_8"
     },
     {
@@ -12165,12 +12165,12 @@
       "id": "update_architecture_md_skill_codeblock_2"
     },
     {
-      "label": "code:block3 (- `function_name(params)` — one-line purpose (what it does f)",
+      "label": "code:block3 (- `function_name(params)` â€” one-line purpose (what it does f)",
       "file_type": "document",
       "source_file": ".opencode/skills/update-architecture-md/SKILL.md",
       "source_location": "L180",
       "community": 43,
-      "norm_label": "code:block3 (- `function_name(params)` — one-line purpose (what it does f)",
+      "norm_label": "code:block3 (- `function_name(params)` â€” one-line purpose (what it does f)",
       "id": "update_architecture_md_skill_codeblock_3"
     },
     {
@@ -12912,12 +12912,12 @@
       "id": "update_specifications_md_skill_audience"
     },
     {
-      "label": "code:markdown (# Specifications — [Project Name])",
+      "label": "code:markdown (# Specifications â€” [Project Name])",
       "file_type": "document",
       "source_file": ".opencode/skills/update-specifications-md/SKILL.md",
       "source_location": "L72",
       "community": 63,
-      "norm_label": "code:markdown (# specifications — [project name])",
+      "norm_label": "code:markdown (# specifications â€” [project name])",
       "id": "update_specifications_md_skill_codeblock_1"
     },
     {
@@ -13022,7 +13022,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "intro_chat_agents_agents_md",
-      "target": "intro_chat_agents_sdd_workflow_skills"
+      "target": "intro_chat_agents_agentic_workflow_skills"
     },
     {
       "relation": "contains",
@@ -24542,7 +24542,7 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "refs_agent_setup_configuration_reference",
-      "target": "refs_agent_setup_sdd_workflow_skills"
+      "target": "refs_agent_setup_agentic_workflow_skills"
     },
     {
       "relation": "contains",
