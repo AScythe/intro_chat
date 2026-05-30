@@ -1,11 +1,45 @@
 # AGENTS.md
+---
 
-## Scope
-`AGENTS.md` defines *what* agents work on — file ownership and operational constraints — and *how* the SDD workflow is ordered. Phase-specific behavioral rules live in each phase's skill file (loaded via the `skill` tool). Cross-phase rules that apply to every phase are here.
- 
-> If it's about code structure or data flow (API endpoints, WebSocket events) → [ARCHITECTURE.md](docs/ARCHITECTURE.md#data-flow-technical). If it's about product vision, privacy, or out-of-scope boundaries → [SPECIFICATIONS.md](docs/SPECIFICATIONS.md). If it's about a specific phase's behavior → load the matching skill via `skill(name: "<skill-name>")`.
+## Agentic Workflow Skills
 
-### File Ownership
+**Rule:** Identify the current phase of your activity (or detect a trigger phrase in user input), then load the corresponding skill via `skill(name: ...)` before acting. Never execute phase work without it.
+
+| Phase | Name | Skill | Trigger (user says...) |
+|-------|------|-------|------------------------|
+| 1 | Discovery, Analysis, and Planning | `brainstorm-and-plan` | "brainstorm and plan", "analyze and plan", "analyze the requirements" |
+| 2 | Probing and Refinement of Plan | `grill-and-refine` | "grill the plan", "stress-test the plan", "interrogate the plan" |
+| 3 | Checking for Readiness of Plan | `check-plan-readiness` | "finalize the plan", "check plan readiness", "is the plan ready?" |
+| 4 | Implementing of Plan | `implement-plan` | "implement", "implement plan", "proceed" |
+| 5 | Reviewing of Implementation | `review-implementation` | "review the implementation", "verify changes", "review and verify" |
+| 6 | Improving Architecture | `improve-architecture` | "evaluate the architecture", "improve architecture", "review project structure" |
+| 7 | Refactoring and Code Cleaning | `modularize-and-clean` | "modularize", "clean up", "refactor" |
+| 8 | Syncing Documentation | `update-docs` | "sync docs", "update docs", "docs are outdated" |
+| 9 | Committing and Pushing | `push-to-git` | "push", "commit and push", "push to github" |
+
+**Key ordering rules:**
+- Phases 1–3 must complete before Phase 4. Never implement without a plan that passed all 7 gates.
+- Phase 5 always follows Phase 4, 6, or 7 — every write phase routes back to review.
+- Phases 6 and 7 are optional branches after a passing Phase 5. Offer both; do not default to one.
+- Phases 8–9 run at end of session, not after every commit.
+
+---
+
+## Skill Loading Priority
+
+**Rule:** Before every response, scan all skill descriptions to determine if user input matches a skill's trigger keywords (`description` field in the skill's frontmatter). If a match is found, load that skill via the `skill` tool before proceeding.
+
+**Priority chain:** Skill loading > opencode.ai help lookup > Task tool delegation > default response
+**Pre-Task gate:** Before using the Task tool or delegating to a subagent, verify that no skill matches the user's intent. Skills have priority over subagent delegation.
+**Ambiguous matches:** When uncertain whether a skill matches, err on the side of loading it. Loading an irrelevant skill wastes context; missing a needed skill breaks workflow compliance.
+**Multiple matches:** If user input matches multiple skills, load the skill corresponding to the current [agentic phase](#agentic-workflow-skills). If none corresponds, ask the user which skill to use.
+**No match:** If no skill matches, proceed with the default response.
+
+---
+
+## File Ownership
+
+**Rule:** Consult this table before editing any file. Every file has a defined agent policy — respect ⚠️ (caution) and ❌ (forbidden). Files not listed are safe to edit by default.
 
 | Location | Role | Agent Policy |
 |----------|------|--------------|
@@ -25,158 +59,51 @@
 | `.cocoindex_code/` | CocoIndex code index (auto-generated) | ❌ Never edit manually — rebuild via `ccc index` |
 | `graphify-out/` | Graphify knowledge graph outputs (auto-generated) | ⚠️ Commit graph.json/GRAPH_REPORT.md for team sharing; gitignored: manifest.json, cost.json |
 | `.ignore` | Context ignore rules (avoids low-signal files) | ⚠️ Edit when adding/removing low-signal file patterns |
-| `.opencode/skills/*/SKILL.md` | SDD workflow skill definitions | ⚠️ Replicable — copy to new projects (see [AGENT_SETUP.md](refs/AGENT_SETUP.md#replicating-to-another-project)) |
+| `.opencode/skills/*/SKILL.md` | agentic workflow skill definitions | ⚠️ Replicable — copy to new projects (see [AGENT_SETUP.md](refs/AGENT_SETUP.md#replicating-to-another-project)) |
 | `refs/*.md` | Reference docs — agent guidelines, best practices | ⚠️ Replicable — copy to new projects (see [AGENT_SETUP.md](refs/AGENT_SETUP.md#replicating-to-another-project)) |
 | `tests/test_agent_guidelines.py` | Agent guideline compliance tests | ⚠️ Replicable — copy to new projects (see [AGENT_SETUP.md](refs/AGENT_SETUP.md#replicating-to-another-project)) |
----
-
-## SDD Workflow Skills
-
-Every time the user communicates requirements, asks to make a plan, or requests implementation, invoke the appropriate SDD workflow skill below.
-Each skill corresponds to a specific phase in the agentic development process.
-Load it via `skill(name: "<skill-name>")` for the full behavioral rules of that phase.
-NEVER act on any phase without first invoking its skill.
- 
-| Phase | Name | Skill | Mode |
-|-------|------|-------|------|
-| 1 | Discovery, Analysis, and Planning | `brainstorm-and-plan` | Plan |
-| 2 | Probing and Refinement of Plan | `grill-and-refine` | Plan |
-| 3 | Checking for Readiness of Plan | `check-plan-readiness` | Build |
-| 4 | Implementing of Plan | `implement-plan` | Build |
-| 5 | Reviewing of Implementation | `review-implementation` | Build |
-| 6 | Architecture Improvement | `improve-architecture` | Build |
-| 7 | Structuring and Cleaning | `modularize-and-clean` | Build |
-| 8 | Documentation Sync | `update-docs` | Build |
-| 9 | Committing and Pushing | `push-to-git` | Build |
- 
-**Key ordering rules:**
-- Phases 1–3 must complete before Phase 4. Never implement without a plan that passed all 7 gates.
-- Phase 5 always follows Phase 4, 6, or 7 — every write phase routes back to review.
-- Phases 6 and 7 are optional branches after a passing Phase 5. Offer both; do not default to one.
-- Phases 8–9 run at end of session, not after every commit.
 
 ---
 
-## Utility Skills
+## Codebase Exploration
 
-Non-phase skills invoked as sub-steps within SDD phases or on-demand.
+**Rule:** Before every edit, run `graphify query_graph "<task scope>"` first — mandatory blast-radius check. Knowing the exact file paths is not enough; graphify reveals relationship context you might miss. This is the first step, not a fallback.
 
-| Skill | Trigger | Mode |
-|-------|---------|------|
-| `rebuild-indexes` | Phase 0 of `review-implementation`, or standalone "rebuild indexes" | Build |
-| `frontend-design` | Starting a new frontend component/page, or standalone "design" | Plan |
-| `shadcn` | After frontend-design spec is ready, or standalone "shadcn" | Build |
-| `run-e2e-tests` | Standalone — runs Playwright E2E tests; auto-installs Chromium, builds SPA, starts app with temp DB | Build |
+**Two-Tier Classification** — after the mandatory graphify, choose your depth: **Fast Path** if graphify gave enough context (use one tool from the table below) or **Pipeline** for complex work (continue through Stages 2–3).
 
----
+**Tool reference:**
 
-## UI/UX Skill Usage
+| If you need to... | Use |
+|---|---|
+| Find text/regex patterns | `grep` |
+| Find files by name | `glob` |
+| Find code structures (classes, functions, call sites) | `ast_grep_search` |
+| Find code by meaning / intent | `cocoindex-code_search` |
+| Map relationships, dependencies, blast radius | `graphify` |
 
-Two skills are available for frontend work: `frontend-design` and `shadcn`.
-Use them sequentially, never simultaneously.
-
-### Phase 1 — Design (invoke `frontend-design`)
-
-Trigger this skill first when:
-- Starting a new page, view, or component from scratch
-- Making aesthetic decisions (colors, typography, spacing, motion, layout)
-- Establishing or extending the visual identity of the project
-
-Use it to define: aesthetic direction, color system, typography scale, motion principles, and layout philosophy. Output is a design spec, not code.
-
-**Trivial-change carveout:** For purely mechanical changes (e.g. moving an element a few pixels, changing a single text label) where no aesthetic decision is needed, the agent may skip `frontend-design` and go directly to `shadcn`.
-
-### Phase 2 — Implementation (invoke `shadcn`)
-
-Trigger this skill after the design spec is established when:
-- Selecting and adding components
-- Writing or refactoring component code
-
-Rules:
-- Use shadcn for component STRUCTURE and composition only
-- Override shadcn's default variants/colors with the spec from Phase 1
-- When shadcn says "use built-in variants" and it conflicts with the design spec — the design spec wins for visual style, shadcn wins for API/composition patterns
-
-### Conflict Resolution
-
-If both skills give contradicting instructions:
-
-| `frontend-design` owns | `shadcn` owns |
-|------------------------|---------------|
-| Color, typography, spacing, motion, aesthetics | Component selection, imports, composition, accessibility |
-
-Never let shadcn's defaults override an intentional design decision.
-
-**Edge case — no spec exists:** If `shadcn` is invoked without a prior `frontend-design` spec and the change is non-trivial, it raises: "No design spec found, run frontend-design first." For trivial mechanical changes, it proceeds with shadcn defaults.
-
----
-
-## Cross-Phase Universal Rules
-
-These apply to every phase and override phase-specific rules when they conflict.
-
-### Skill Loading Priority
-Before every response, scan all skill descriptions to determine if user input matches a skill's trigger keywords (`description` field in the skill's frontmatter). If a match is found, load that skill via the `skill` tool before proceeding.
-
-**Priority chain:** Skill loading > opencode.ai help lookup > Task tool delegation > default response
-**Pre-Task gate:** Before using the Task tool or delegating to a subagent, verify that no skill matches the user's intent. Skills have priority over subagent delegation.
-**Ambiguous matches:** When uncertain whether a skill matches, err on the side of loading it. Loading an irrelevant skill wastes context; missing a needed skill breaks workflow compliance.
-**Multiple matches:** If user input matches multiple skills, load the skill corresponding to the current [SDD phase](#sdd-workflow-skills). If none corresponds, ask the user which skill to use.
-**No match:** If no skill matches, proceed with the default response.
-
-### Smart Tool Selection
-
-Choose tools by task type, not by a fixed priority chain. Layers are not mutually exclusive — use multiple when a task crosses types.
-
-| Layer | Tool | Best for | Works on |
-|-------|------|----------|----------|
-| 1 — Structural | **ast-grep** | Exact code patterns, structural rewrites | 25 languages (.py, .ts, .js, .tsx, .css, .rs, .go, .java, etc.) |
-| 2 — Semantic | **cocoindex-code** | Natural language intent, fuzzy concept search | All text — code and docs |
-| 3 — Architectural | **graphify** | Relationship mapping, blast radius, community detection | All text — indexed docs + code |
-| Fallback | **grep / Read** | Simple keyword search, file content inspection | Everything |
-
-**Two-Tier Classification:** Replace Phase 0 Hard Gate with two tiers:
-
-**Fast Path** (single tool or 1-2 stages):
-| Classification | Pipeline | Example |
-|---------------|----------|---------|
-| Simple | Single tool | "Find console.log" → ast-grep |
-| Moderate | 1-2 stages | "How is email validated?" → cocoindex only |
-
-**Pipeline** (3-stage sequential — ~10k tokens; default to Fast Path for 1-2 file queries):
-| Classification | Pipeline | Example |
-|---------------|----------|---------|
-| Complex | Full 3-stage | "How does matchmaking work?" → graphify→cocoindex→ast-grep |
-| Critical | Full pipeline + safety net | Refactoring with blast radius → include unscoped cocoindex check |
-
-**Pipeline Stages:**
+**Pipeline** (3-stage sequential):
 ```
-Stage 1: Scope (graphify) → Stage 2: Search (cocoindex-code) → Stage 3: Verify (ast-grep) → Read targeted code
+Stage 1: Scope — graphify query_graph (mandatory — see Rule above)
+Stage 2: Search — cocoindex-code (semantic search within scope)
+Stage 3: Verify — ast-grep (structural pattern confirmation) → Read (exact lines)
 ```
 
-**Stage 1 completeness safeguards:**
-- Query 3 variations of the question (different phrasings) × 2 sub-graphs (code + doc) = 6 total queries
-- If result ≤4 files or confidence is low → expand to include all files in returned communities
+**Fallback:** If a tool returns nothing relevant, try the next in the pipeline. Edge case: if **Graphify returns 0 nodes**, run cocoindex-code unscoped, then ast-grep.
 
-**Edge case handling:**
-| Condition | Action |
-|-----------|--------|
-| Graphify returns 0 nodes | Drop to cocoindex unscoped |
-| Scoped cocoindex returns 0 chunks | Fall through to ast-grep + grep within scope |
-| Scope ≤4 files or low confidence | Community expansion — include all files in returned communities |
-| False Complex classification | Agent judgment + cost reminder: "~10k tokens — default to Fast Path" |
+**Discipline:**
+- Prefer `Read(path, offset=<line>, limit=~100)` over full-file reads
+- Avoid low-signal files: `frontend/dist/`, `archive/`, `.cocoindex_code/`, `graphify-out/cache/`, `uv.lock`
+- After each phase: state which tools you used and why you skipped the others
+- If you used `grep` when a smarter tool was applicable, flag it
 
-**Exit Declaration:** After each phase, state: "Tools used: [tool]. Why not the others: [reason for each skipped layer]."
+**graphify specifics:**
+- Query tools: `graphify query_graph` (broad), `graphify shortest_path` (relationships), `graphify get_community` (all files in a group)
+- Sub-graphs: MCP serves full graph; CLI with `--graph graphify-out/graph-code.json` (code) or `graphify-out/graph-document.json` (docs)
+- Pipeline Stage 1 completeness safeguards: query 3 variations × 2 sub-graphs = 6 queries; if ≤4 files or low confidence, expand to include all files in returned communities
 
-**Tool applicability note:** ast-grep supports only 25 programming languages. For .md, .json, .yaml, or any file outside those 25, skip to cocoindex-code or graphify.
+---
 
-**Token accountability:** Flag when grep was used but a smarter tool was applicable — wasted context is a process violation.
-
-Prefer `Read` with offset over full-file reads: `Read(path, offset=<line>, limit=~100)`.
-
-Avoid low-signal files: `frontend/dist/`, `archive/`, `cocoindex_code/`, `graphify-out/cache/`, `uv.lock`
-
-### Process Discipline
+## Process Discipline
 
 **Integrity:** Read-before-write, baseline tests, and failure triage.
 - **Read before write** — planning phases never modify files.
@@ -200,15 +127,11 @@ Avoid low-signal files: `frontend/dist/`, `archive/`, `cocoindex_code/`, `graphi
 - **Consistency pass** — after multi-file changes, read affected files end-to-end.
 - **Keep index/graph current** — always run `rebuild-indexes` before review verification (handled by Phase 0 of `review-implementation`). If querying graph/index mid-implementation, rebuild manually.
 
-### Documentation Discipline
-- **Cross-reference, don't duplicate:** Use `[See ...](...)` links instead of copying content from other docs into this one.
-- **New files must have description headers:** Every new file must include a file-level description comment: `# Description:` for Python, `// Description:` for TS/TSX, `/* Description: */` for CSS. This is required for auto-extraction into ARCHITECTURE.md.
-- **Preserve source description comments:** File-level `# Description:` headers are the canonical source for ARCHITECTURE.md auto-extraction. Update them when behavior changes. Never delete them.
-- **Executable sources of truth:** When documentation conflicts with code, configs, scripts, or CI files, trust the executable source. Prose is aspirational — code is truth.
+---
 
-### Failure Triage
+## Failure Triage
 
-When a test fails after a change, classify before acting. Never auto-revert.
+**Rule:** When a test fails after a change, classify before acting. Never auto-revert.
 
 | Symptom | Classification | Action |
 |---------|---------------|--------|
@@ -222,30 +145,24 @@ When a test fails after a change, classify before acting. Never auto-revert.
 
 ## Commands Reference
 
+**Rule:** Use these exact commands for common operations. Run from the project root unless specified otherwise. Do not deviate — they are the canonical, tested commands.
+
 | Operation | Command | Notes |
 |-----------|---------|-------|
-| Install Python deps | `uv sync` | Run from project root |
-| Install frontend deps | `cd frontend ; npm install` | |
 | Build frontend | `cd frontend ; npm run build` | Required after any frontend change |
 | Run app (dev) | `uv run python -m app` | Serves on `localhost:5000` |
-| Run backend tests with emoji output | `$env:PYTHONIOENCODING='utf-8'; uv run python tests/<file>.py` | Prevents UnicodeEncodeError on Windows cp1252 console |
 | Run frontend dev server | `cd frontend ; npm run dev` | Vite on port 3000, proxies to backend |
 | Run all backend tests | `uv run python tests/test_app.py` | |
-| Run JS module validation | `uv run python tests/test_js_modules.py` | |
-| Run DB utilities | `uv run python tests/test_db.py` | |
-| Run agent guideline validation | `uv run python tests/test_agent_guidelines.py` | |
-| Clean up database duplicates | `uv run python utility/cleanup_db.py` | Deduplicates events, rooms, users, matches; removes User_* test users |
 | Run frontend unit tests | `cd frontend ; npm test` | Vitest runner |
 | Run E2E tests | `cd frontend ; npm run test:e2e` | Playwright — auto-installs Chromium, builds SPA, starts app with temp DB |
 | Type-check frontend | `cd frontend ; npx tsc --noEmit` | TypeScript strict mode |
-| Rebuild code index | `ccc index` | Cocoindex — updates `.cocoindex_code/` |
-| Build knowledge graph (AST-only) | `graphify update .` | Graphify — no LLM cost, updates `graphify-out/` |
-| Build sub-graphs | `uv run python utility/filter_graph.py --all` | Run after every graph rebuild — generates `graph-code.json` (444 nodes, 741 edges) and `graph-document.json` (1443 nodes, 1387 edges) |
-| Full graph rebuild pipeline | `graphify update . ; if ($?) { uv run python utility/filter_graph.py --all ; if ($?) { uv run python utility/enhance_graph_viewer.py } }` | Complete rebuild: full graph → sub-graphs → enhanced viewer |
+| Clean up database duplicates | `uv run python utility/cleanup_db.py` | Removes User_* test users; run after E2E tests |
 
 ---
 
 ## Test Suite Structure
+
+**Rule:** Run the full test suite after every change. Backend tests run standalone; frontend tests require `cd frontend` first. E2E tests auto-build the SPA before running.
 
 See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file breakdown and function-level detail.
 
@@ -262,9 +179,19 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 
 ---
 
+## Utility Skills
+
+**Rule:** Non-phase skills are invoked as sub-steps within agentic phases or on-demand — never as standalone top-level phases. Load via `skill(name: "<skill-name>")` when their task is needed.
+
+- **Rebuild indexes:** Before review verification (Phase 0 of `review-implementation`), or standalone request — see `rebuild-indexes` skill.
+- **Frontend/UIUX work:** For UI/UX frontend tasks, use `frontend-design` (design spec) then `shadcn` (implementation) sequentially — see each skill for full behavioral rules.
+- **End-to-end tests:** Run Playwright E2E tests standalone — auto-installs Chromium, builds SPA, starts app with temp DB — see `run-e2e-tests` skill.
+
+---
+
 ## Documentation Structure
 
-See [Quick Reference Table in DOCUMENT_GUIDELINES.md](refs/DOCUMENT_GUIDELINES.md#quick-reference-table) for document scope boundaries.
+**Rule:** This table maps every documentation file to its purpose and location. Use it to find the right doc — never duplicate content across files. See [Quick Reference Table in DOCUMENT_GUIDELINES.md](refs/DOCUMENT_GUIDELINES.md#quick-reference-table) for document scope boundaries.
 
 | Document | Location | Purpose |
 |----------|----------|---------|
@@ -279,51 +206,16 @@ See [Quick Reference Table in DOCUMENT_GUIDELINES.md](refs/DOCUMENT_GUIDELINES.m
 
 ---
 
+## Documentation Discipline
+
+- **Cross-reference, don't duplicate:** Use `[See ...](...)` links instead of copying content from other docs into this one.
+- **New files must have description headers:** Every new file must include a file-level description comment: `# Description:` for Python, `// Description:` for TS/TSX, `/* Description: */` for CSS. This is required for auto-extraction into ARCHITECTURE.md.
+- **Preserve source description comments:** File-level `# Description:` headers are the canonical source for ARCHITECTURE.md auto-extraction. Update them when behavior changes. Never delete them.
+- **Executable sources of truth:** When documentation conflicts with code, configs, scripts, or CI files, trust the executable source. Prose is aspirational — code is truth.
+
+---
+
 ## Tooling Rules
 
-- **Code index (CocoIndex):** Auto-generated in `.cocoindex_code/`. Rebuild via `ccc index`. ❌ Never edit manually.
-- **Knowledge graph (Graphify):** Outputs to `graphify-out/`. Commit `graph.json` and `GRAPH_REPORT.md` for team sharing.`manifest.json` and `cost.json` are gitignored.
-- **ccc MCP:** Configured as bare `"ccc"` command in `opencode.json` — relies on `~/.local/bin` being on `PATH`. If `ccc doctor` fails with `UnicodeEncodeError` on Windows, prepend `$env:PYTHONIOENCODING='utf-8'`.
-- **Package manager:** `uv` pipelined to backend Python, `npm` for frontend Node.js. Never use pip or yarn directly.
-
-## graphify
-
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
-
-When the user types `/graphify`, invoke the `skill` tool with `skill: "graphify"` before doing anything else.
-
-Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- Dirty graphify-out/ files are expected after hooks or incremental updates; dirty graph files are not a reason to skip graphify. Only skip graphify if the task is about stale or incorrect graph output, or the user explicitly says not to use it.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
-
-### Sub-graph Usage
-
-Type-specific sub-graphs live at `graphify-out/graph-code.json` and `graphify-out/graph-document.json`.
-These are generated by `utility/filter_graph.py` and exclude irrelevant node types to reduce token waste.
-
-| Sub-graph | Nodes | Edges | Best for |
-|-----------|-------|-------|----------|
-| `graph-code.json` | 444 (408 code + 36 rationale) | 741 | Code-specific queries (Python routing, function calls, module structure) |
-| `graph-document.json` | 1443 | 1387 | Documentation queries, markdown structure |
-| Full `graph.json` | 1887 | 2128 | Broad architecture, cross-type relationships |
-
-**Staleness guard:** Before querying a sub-graph, timestamp-check that it is newer than `graphify-out/graph.json`. If stale, run `uv run python utility/filter_graph.py --all`.
-
-**Query syntax:**
-- Code-specific query: `graphify query "<question>" --graph graphify-out/graph-code.json`
-- Document-specific query: `graphify query "<question>" --graph graphify-out/graph-document.json`
-- Broad architecture query (full graph, via MCP): `graphify query "<question>"` (no `--graph` flag)
-
-MCP server always serves the full graph (`graphify-out/graph.json`). Use CLI with `--graph` for type-specific queries.
-
-### Pipeline Usage
-
-When used as Stage 1 of the [Smart Tool Selection pipeline](#smart-tool-selection):
-- Query 3 variations of the question (different phrasings) × 2 sub-graphs (code + doc) = 6 total queries
-- If result ≤4 files or confidence is low → expand to include all files in returned communities
-- Output: `scope: [...], communities: [...], confidence: "high"|"medium"|"low"`
-
-**Staleness guard:** Before querying a sub-graph, timestamp-check that it is newer than `graphify-out/graph.json`. If stale, run `uv run python utility/filter_graph.py --all`.
+- **Code index & knowledge graph:** Auto-generated — rebuild via `rebuild-indexes` skill. ❌ Never edit manually.
+- **Package manager:** `uv` for Python, `npm` for frontend. Never use pip or yarn directly.
