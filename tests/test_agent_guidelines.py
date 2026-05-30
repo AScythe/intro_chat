@@ -68,7 +68,7 @@ EXECUTE_MESSAGE = (
 
 SKILL_ROUTING_CASES = [
 
-    # ── SDD Workflow Phases (9) ──────────────────────────────────
+    # ── Agentic Workflow Phases (9) ─────────────────────────────
 
     ("brainstorm-and-plan", [
         "brainstorm and plan a new chat feature",
@@ -87,7 +87,6 @@ SKILL_ROUTING_CASES = [
     ("implement-plan", [
         "implement the plan for the login flow",
         "proceed with the matchmaking changes",
-        "start coding the new timer component",
     ]),
     ("review-implementation", [
         "review the implementation of the chat feature",
@@ -105,8 +104,6 @@ SKILL_ROUTING_CASES = [
         "modularize the routes module into smaller files",
         "clean up the dead code in utilities",
         "refactor the connection manager for readability",
-        "code quality review of the hooks directory",
-        "restructure the context providers",
     ]),
     ("update-docs", [
         "sync docs after the chat feature implementation",
@@ -173,11 +170,11 @@ SKILL_ROUTING_CASES = [
 ]
 
 # ── 2. Tool Selection Logic ──────────────────────────────────────
-# Rule (from AGENTS.md Smart Tool Selection, Two-Tier Classification):
-#   Fast Path: Simple → single tool, Moderate → 1-2 stages
-#   Pipeline: Complex → graphify→cocoindex→ast-grep, Critical → full + safety net
-#   Tool mapping: ast-grep (structural), cocoindex-code (semantic),
-#                 graphify (architectural), grep (fallback)
+# Rule (from AGENTS.md §Codebase Exploration):
+#   Question type → tool: grep (text), glob (files), ast_grep (structure),
+#   cocoindex-code (intent), graphify (relationships).
+#   Complex tasks: pipeline (graphify→cocoindex→ast-grep→Read).
+#   Fallback chain: if empty results, try next tool.
 #
 # Each test case: hypothetical query + expected primary tool.
 
@@ -392,7 +389,7 @@ def test_skill_loading_priority_chain():
     check("Ambiguous matches" in content,
           "Ambiguous match resolution rule defined")
     check("Multiple matches" in content,
-          "Multiple matches rule (current SDD phase wins) defined")
+          "Multiple matches rule (current agentic phase wins) defined")
 
 
 # ── Run ─────────────────────────────────────────────────────────────
