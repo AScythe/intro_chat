@@ -1,6 +1,6 @@
 ---
 name: grill-and-refine
-description: 'Interview relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree, then produce a fool-proof revised plan with no gaps. Use when user wants to stress-test a plan/design, after brainstorm-and-plan, or triggered when the user says "grill the plan", "stress-test the plan", or similar.'
+description: 'Interview relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree, then produce a fool-proof revised plan with no gaps. Use when user wants to stress-test a plan/design, after brainstorm-and-plan, or triggered when the user says "grill the plan", "stress-test the plan", "interrogate the plan", or similar.'
 ---
 
 ## What I do
@@ -20,7 +20,7 @@ description: 'Interview relentlessly about a plan or design until reaching share
 - [ ] Read the upstream plan (from brainstorm-and-plan) — all sections
 - [ ] Verify the plan has all required sections (approach, files, testing, success criteria)
 - [ ] Run baseline tests — all must pass
-- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
+- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
 - [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
 
 ## Documents to Read
@@ -36,7 +36,7 @@ description: 'Interview relentlessly about a plan or design until reaching share
 
 Start with the initial plan (from `brainstorm-and-plan` output). Explore identified files/code for each dimension:
 
-Use Smart Tool Selection to verify the plan's coverage completeness across all dimensions (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md)). For complex plans, run the pipeline (graphify→cocoindex→ast-grep) first to discover scope before grilling individual dimensions:
+Use Codebase Exploration to verify the plan's coverage completeness across all dimensions (see [AGENTS.md §Codebase Exploration](../../../AGENTS.md)). For complex plans, run the pipeline (graphify→cocoindex→ast-grep) first to discover scope before grilling individual dimensions:
 
 **graphify** — query the knowledge graph for concepts, communities, and connections across the entire codebase. Use `graphify query "..."` for broad context, `graphify path "X" "Y"` for blast radius between modules.
 

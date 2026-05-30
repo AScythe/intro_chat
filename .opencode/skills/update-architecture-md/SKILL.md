@@ -30,7 +30,10 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 **Universal sections** (present in every project's ARCHITECTURE.md):
 - **Project file tree** — concise (1-line) descriptions per directory and key file for quick navigation
 - **Module Descriptions** — organized into subsections matching the project's directory structure. Each entry: 1-sentence lead line from source file's description header, bullet points for key responsibilities, and a per-function detail subsection
-- **Data flow** — describe the main data path through the system (processing pipeline, request lifecycle, or event flow)
+- **Tests** — per-file function descriptions with signature + one-line purpose (navigation map per test module)
+- **Maintenance Scripts** — utility scripts with purpose and exact run command
+- **Critical Implementation Details** — non-obvious runtime behavior: resource management, match expiry, WebSocket config, frontend module rules, demo mode guards
+- **Data flow** — describe the main data path through the system (processing pipeline, request lifecycle, or event flow), including SPA Serving (route, assets mount, catch-all handler)
 - **Import structure and dependency graph** — how modules depend on each other
 - **Key design decisions** — include the *why*, not just the *what*. Technical rationale only
 - **Running instructions** — full technical startup sequence: environment setup, dependencies, configuration, commands
@@ -38,8 +41,6 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 - **Per-function detail** — every named function/class in every module with signature and one-line purpose (navigation map, not a manual)
 
 **Optional sections** (include only if the project has them):
-- **Test structure** — test file naming convention, framework, approach (cross-reference canonical source: AGENTS.md)
-- **Critical implementation details** — any non-obvious runtime behavior: resource management, thread safety, state management, configuration conventions, data schemas
 - **API/WebSocket endpoint tables** — for web servers or APIs with documented endpoints
 - **Pipeline stage diagrams** — for multi-stage data processing pipelines
 - **Sub-architecture references** — links to specialized architecture docs for subsystems
@@ -75,8 +76,20 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 ## Module Descriptions
 [Organized by directory/subsystem; each entry: lead line, bullets, per-function detail]
 
+## Tests
+[Per-file function descriptions with signature + one-line purpose — navigation map per test module]
+
+## Maintenance Scripts
+[Utility scripts with purpose and exact run command]
+
+## Critical Implementation Details
+[Non-obvious runtime behavior: resource management, match expiry, WebSocket config, frontend module rules]
+
 ## Data Flow
 [Main data path: processing pipeline, request lifecycle, or event flow]
+
+### SPA Serving
+[How the SPA is served: route, assets mount, catch-all handler]
 
 ## Import Structure
 [Dependency graph showing how modules depend on each other]
@@ -93,12 +106,13 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 <!-- FILL: optional-sections -->
 ```
 
-Optional sections (include only if applicable): Test Structure, API/WebSocket endpoint tables, Critical Implementation Details, sub-architecture reference links, pipeline stage diagrams.
+Optional sections (include only if applicable): API/WebSocket endpoint tables, sub-architecture reference links, pipeline stage diagrams.
 
 ---
 
 ## Phase 0: Prerequisites
 
+- [ ] Run `graphify query_graph "architecture / module structure"` — understand relationship context with all source modules, imports, and docs
 - [ ] Verify source code exists and matches current project state
 - [ ] Read existing ARCHITECTURE.md — understand current documented structure
 - [ ] Run codebase search for new modules added since last sync
@@ -241,7 +255,11 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 - [ ] All numeric claims verified against actual source (file counts, export counts, test counts)
 - [ ] File tree is current and complete — all source directories and key files described
 - [ ] Data flow reflects the current system — this is the authoritative reference
+- [ ] SPA Serving section documents how the SPA is served (route, assets mount, catch-all handler)
 - [ ] Module Descriptions section organized by directory/subsystem with accurate lead lines
+- [ ] Tests section has per-file function detail for every test module — function signatures with one-line purpose
+- [ ] Maintenance Scripts section lists each utility script with purpose and exact run command
+- [ ] Critical Implementation Details covers all non-obvious runtime behavior (match expiry, WS config, frontend module rules, demo mode)
 - [ ] Design decisions include the *why* (technical rationale only)
 - [ ] Running instructions cover full startup sequence (env, config, dependencies, commands)
 - [ ] Modifying instructions are accurate for the current codebase

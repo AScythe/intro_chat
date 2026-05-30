@@ -31,16 +31,18 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 - **Solution description and pitch** — what the product does at a high level, why it solves the problem
 - **User journey / core logic flow** — product-focused steps in plain language, readable by a non-technical evaluator
 - **Feature descriptions** — with purpose and rationale: what each feature does and **why** it exists
-- **Product decisions and rationale** — why certain approaches were chosen (vision rationale, not technical trade-offs)
+- **Privacy and trust model** — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section
 - **Product constraints / Out of Scope** — standalone section listing what the product explicitly does NOT do and why
+- **Tech stack with rationale** — Architecture Overview (2-line max + cross-reference) plus a "Why?" column for each technology
+- **Product decisions and rationale** — why certain approaches were chosen (vision rationale, not technical trade-offs)
 
 **Optional sections** (include only if the project has them):
 - **Target user personas** — who the product serves and why they benefit
 - **Feature priority and status** — what's implemented vs. planned, to guide what to build next
-- **Privacy and trust model** — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section
-- **Tech stack with rationale** — include a "Why?" column for each technology
 - **Future enhancements / bonus features** — clearly marked as not yet implemented
 - **Sample user flow** — narrative walkthrough showing the product in action
+- **Value proposition / why users will love it** — problem-solution table or benefit bullets
+- **Demo setup instructions** — runnable steps for judges or evaluators to demo the product
 
 ### What NOT to Include
 
@@ -56,7 +58,6 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 **Boundary rules** (additional document-specific guardrails):
 - Architecture Overview = 2-line summary + cross-reference — no implementation detail, no internal module names
 - Tech stack: this document documents the *rationale* (why chosen). The README has the *table* (what is used). Do not copy the README table into this document
-- Processing stages: name them at a high level (e.g., "ingestion, analysis, export") — do not list every file or script
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
@@ -84,18 +85,25 @@ The skeleton below is used for every project's `SPECIFICATIONS.md`. Markers like
 ## Features
 [Feature descriptions with purpose and rationale]
 
+## Privacy & Trust Model
+[User-facing table: identity, location, data, control — plus Hard Constraints sub-section]
+
 ## Out of Scope
 [What the product explicitly does NOT do and why]
+
+## Tech Stack
+[Architecture Overview (2-line max) — plus Why? column table]
 
 <!-- FILL: optional-sections -->
 ```
 
-Optional sections (include only if applicable): Privacy/Trust model, Target user personas, Tech stack rationale, Sample user flow, Future enhancements, Demo setup.
+Optional sections (include only if applicable): Target user personas, Feature priority and status, Future enhancements / bonus features, Sample user flow (narrative), Value proposition / why users will love it, Demo setup instructions.
 
 ---
 
 ## Phase 0: Prerequisites
 
+- [ ] Run `graphify query_graph "specifications/project scope"` — understand relationship context with other docs, skills, and code
 - [ ] Verify source code and product state are current
 - [ ] Read existing SPECIFICATIONS.md — understand current scope boundaries
 - [ ] Consult docs/ARCHITECTURE.md and AGENTS.md for cross-reference integrity
@@ -135,7 +143,7 @@ For each existing section: does it belong here per **What NOT to Include**? If n
 3. Fill in each section with discovered project-specific content
 
 **If SPECIFICATIONS.md already exists (surgical update):**
-- For each universal section: compare against discovered data and update only what changed (problem, solution, flow, features, scope, decisions)
+- For each universal section: compare against discovered data and update only what changed (problem, solution, flow, features, privacy, scope, tech stack, decisions)
 - For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
 - Never rewrite the whole file — use targeted edits on changed sections only
 - Keep language product-focused — benefits and outcomes, not implementation
@@ -159,6 +167,8 @@ For each existing section: does it belong here per **What NOT to Include**? If n
 - [ ] Feature descriptions include purpose/rationale suitable for guiding development decisions
 - [ ] Product decisions capture vision rationale (not technical trade-offs)
 - [ ] Privacy section includes both user-facing table and Hard Constraints sub-section
+- [ ] Tech Stack has Architecture Overview (2-line max + cross-reference) and a "Why?" column table
+- [ ] Demo setup instructions (if present) list runnable steps, not architecture detail
 - [ ] Out of Scope lists hard boundaries only — no aspirational items
 - [ ] No endpoint names, route definitions, or implementation-level detail anywhere
 - [ ] If features were added/removed/renamed, verify SPECS (rationale) and README (benefits) are both synced

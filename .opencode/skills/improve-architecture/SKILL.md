@@ -1,6 +1,6 @@
 ---
 name: improve-architecture
-description: 'Scan project-level structure — directory layout, package organization, cross-module boundaries, and naming/file conventions — then apply structural improvements in TDD-backed batches with [ARCH] flags. Use after review-implementation (first pass), or triggered when the user says "evaluate the architecture", "improve architecture", "review project structure", "architecture review", "check architecture", or similar.'
+description: 'Scan project-level structure — directory layout, package organization, cross-module boundaries, and naming/file conventions — then apply structural improvements in TDD-backed batches with [ARCH] flags. Use after review-implementation (first pass), or triggered when the user says "evaluate the architecture", "improve architecture", "review project structure", or similar.'
 ---
 
 ## What I do
@@ -18,7 +18,7 @@ description: 'Scan project-level structure — directory layout, package organiz
 
 - [ ] Read the review pass findings (from review-implementation)
 - [ ] Run baseline tests — all must pass
-- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
+- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
 - [ ] Read ARCHITECTURE.md for current documented structure
 
 ## Documents to Read
@@ -35,7 +35,7 @@ Scan all 8 areas in order. Priority definitions:
 - **P1** — Should fix: increases cognitive load or refactoring risk
 - **P2** — Nice to fix: style or convention inconsistency
 
-**Smart Tool Selection:** See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md). Use **graphify** community detection to identify natural architecture boundaries — tightly-coupled groups stay together, loosely-connected candidates separate. Use **ast_grep_search** to find import violations, naming convention breaks, and dead exports across the codebase in one pass. Use **cocoindex-code** to discover similar code that should be consolidated.
+**Codebase Exploration:** See [AGENTS.md §Codebase Exploration](../../../AGENTS.md). Use **graphify** community detection to identify natural architecture boundaries — tightly-coupled groups stay together, loosely-connected candidates separate. Use **ast_grep_search** to find import violations, naming convention breaks, and dead exports across the codebase in one pass. Use **cocoindex-code** to discover similar code that should be consolidated.
 
 Layer separation (config → state → logic → persistence) and leaf module pattern (leafs export only, never import internal) inform areas 1 (directory org), 2 (import hygiene), and 7 (module boundaries).
 

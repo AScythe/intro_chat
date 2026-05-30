@@ -26,7 +26,7 @@ description: 'Verify the completed implementation meets all success criteria —
 - [ ] Run baseline tests — all must pass before proceeding
 - [ ] Sync structural validation tests — scan test files for hardcoded file-extension + path-separator lists or function names matching `file_structure|file_exist|exports|imports|code_quality`. Diff current vs project state, fix only mismatched entries, print delta. Immediately re-run affected tests after syncing; repeat until clean. Skip business-logic tests (those without the above patterns).
 - [ ] Load and execute `rebuild-indexes` skill — conditionally rebuilds CocoIndex and Graphify
-- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
+- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
 
 ## Documents to Read
 
@@ -59,9 +59,9 @@ Run `git status` to list all modified, added, and deleted files. Verify only exp
 
 ### Phase 2: Verify Execution
 
-#### Smart Tool Selection
+#### Codebase Exploration
 
-See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. For verification, run the pipeline (graphify→cocoindex→ast-grep) to catch missed changes, then use individual tools as needed. Use these tools for review verification:
+See [AGENTS.md §Codebase Exploration](../../../AGENTS.md) for the full decision framework. For verification, run the pipeline (graphify→cocoindex→ast-grep) to catch missed changes, then use individual tools as needed. Use these tools for review verification:
 
 **graphify** — verify the graph reflects intended structure. Query the knowledge graph to confirm changed modules have expected connections.
 

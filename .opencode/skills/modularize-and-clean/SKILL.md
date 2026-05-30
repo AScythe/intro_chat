@@ -1,6 +1,6 @@
 ---
 name: modularize-and-clean
-description: 'Scan code-level quality — DRY violations, mixed concerns, naming, large files, dead code, type safety, idempotency, immutability, deep modules, and referential transparency — then apply cleanup in batches with [CLEANUP] flags. Use after review-implementation passes, or triggered when user says "modularize", "clean up", "refactor", "code quality", "restructure", or similar.'
+description: 'Scan code-level quality — DRY violations, mixed concerns, naming, large files, dead code, type safety, idempotency, immutability, deep modules, and referential transparency — then apply cleanup in batches with [CLEANUP] flags. Use after review-implementation passes, or triggered when user says "modularize", "clean up", "refactor", or similar.'
 ---
 
 ## What I do
@@ -23,7 +23,7 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 
 - [ ] Read the review pass findings (from review-implementation)
 - [ ] Run baseline tests — all must pass
-- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
+- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
 - [ ] Read ARCHITECTURE.md for current documented structure
 
 ## Documents to Read
@@ -37,7 +37,7 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 
 First, read the test suite — imports will be adapted during cleanup.
 
-Apply Smart Tool Selection (see [AGENTS.md §Smart Tool Selection](../../../AGENTS.md)). Use **graphify** community detection to identify strongly-connected components — same communities stay together, different communities are extraction candidates. Query `graphify path "A" "B"` to assess coupling before splitting. Use **ast_grep_search** for DRY analysis and **ast_grep_replace** with `dryRun: true` for rename preview. Use **cocoindex-code** to find related functions with different naming conventions.
+Apply Codebase Exploration (see [AGENTS.md §Codebase Exploration](../../../AGENTS.md)). Use **graphify** community detection to identify strongly-connected components — same communities stay together, different communities are extraction candidates. Query `graphify path "A" "B"` to assess coupling before splitting. Use **ast_grep_search** for DRY analysis and **ast_grep_replace** with `dryRun: true` for rename preview. Use **cocoindex-code** to find related functions with different naming conventions.
 
 Then examine source files across 11 scopes:
 

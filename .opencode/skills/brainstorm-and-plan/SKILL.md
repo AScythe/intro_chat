@@ -19,7 +19,7 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 - [ ] Read the upstream problem description or prior plan document
 - [ ] Run baseline tests — all must pass
-- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
+- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
 - [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
 
 ## Guidelines
@@ -28,7 +28,7 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 Follow this layered analysis pipeline — all read-only:
 
-**Smart Tool Selection** — See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. For complex questions, use the pipeline (graphify→cocoindex→ast-grep) rather than picking one tool. Use these skill-specific commands during analysis:
+**Codebase Exploration** — See [AGENTS.md §Codebase Exploration](../../../AGENTS.md) for the full decision framework. For complex questions, use the pipeline (graphify→cocoindex→ast-grep) rather than picking one tool. Use these skill-specific commands during analysis:
 
 - **graphify** — macro-level architecture map before diving into files:
   - `graphify_query_graph "..."` — broad concept search (e.g. "which modules handle SRT processing")

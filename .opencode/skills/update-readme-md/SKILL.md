@@ -34,15 +34,15 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 - **How to use** — step-by-step for each user type. Show the workflow from their perspective
 - **Tech stack** — high-level only: one-liner per technology, max 2-3 paragraphs
 - **Testing instructions** — inline runnable commands for common test suites
+- **Deployment options** — platform(s) with build and start commands
+- **Privacy and security information** — user-facing summary: what data is collected, what is not, what users control
+- **Troubleshooting common issues** — concrete error messages with actionable fixes
+- **Why / Value proposition** — problem-solution format or benefit bullets showing what users gain
 
 **Optional sections** (include only if the project has them):
-- **Deployment options** — how to deploy for production use
-- **Privacy and security information** — user-facing summary: what data is collected, what is not, what users control
-- **Troubleshooting common issues** — problems users have encountered and how to resolve them
 - **Requirements** — system dependencies, API keys, environment setup
 - **Pipeline or stage breakdown** — table of processing steps (for pipeline-style projects)
 - **Documentation links** — references to ARCHITECTURE.md, SPECIFICATIONS.md, etc.
-- **Value proposition and success metrics** — user-facing description of what users gain
 
 ### What NOT to Include
 
@@ -86,15 +86,28 @@ The skeleton below is used for every project's `README.md`. Markers like `<!-- F
 ## Testing
 [Inline runnable commands]
 
+## Deployment
+[Platform options with build + start commands]
+
+## Privacy & Security
+[User-facing summary: what's collected, what's not, user control]
+
+## Troubleshooting
+[Common issues with actionable fixes]
+
+## Why / Value Proposition
+[Problem-solution table or benefit bullets]
+
 <!-- FILL: optional-sections -->
 ```
 
-Optional sections (include only if applicable): Deployment, Privacy/Security, Troubleshooting, Requirements (system dependencies, API keys), Pipeline stages, Documentation links, Value proposition.
+Optional sections (include only if applicable): Requirements (system dependencies, API keys), Pipeline stages, Documentation links.
 
 ---
 
 ## Phase 0: Prerequisites
 
+- [ ] Run `graphify query_graph "readme / project overview"` — understand relationship context with app code, docs, and skills
 - [ ] Verify source code and project state are current
 - [ ] Read existing README.md — understand current documented state
 - [ ] Verify all setup instructions against actual environment
@@ -130,7 +143,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 3. Fill in each section with discovered project-specific content
 
 **If README.md already exists (surgical update):**
-- For each universal section: compare against discovered data and update only what changed (description, features, quick start, how to use, tech stack, testing)
+- For each universal section: compare against discovered data and update only what changed (description, features, quick start, how to use, tech stack, testing, deployment, privacy, troubleshooting, value proposition)
 - For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
 - Never rewrite the whole file — use targeted edits on changed sections only
 - Keep language user-facing
@@ -154,5 +167,9 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] Install and run steps work based on actual project files
 - [ ] "How to Use" steps match actual app pages and navigation order — each step maps to a real route
 - [ ] All feature list items verified against actual app — no removed or renamed features
+- [ ] Deployment lists at least one platform with exact build + start commands
+- [ ] Privacy & Security section is user-facing — no implementation detail
+- [ ] Troubleshooting has concrete error messages with actionable fixes
+- [ ] Why / Value Proposition uses problem-solution format or benefit bullets
 - [ ] If features were added/removed/renamed, verify README (benefits) and SPECS (rationale) are both synced
 - [ ] Language is appropriate for a non-technical first-time visitor

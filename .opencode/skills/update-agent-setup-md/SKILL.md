@@ -41,6 +41,7 @@ Mine the global system state and the project codebase, then update or create `re
 - **First-time flow** — complete end-to-end sequence from blank machine to working setup
 - **Verification steps** — commands to confirm each component works after setup (version checks, status commands, connectivity tests)
 - **Troubleshooting** — common failures (tool not found, path issues, MCP errors, stale indexes) with actionable fixes
+- **Replicating to Another Project** — copy instructions + post-copy setup steps for migrating tooling to a new repo
 
 **Optional (include only if applicable):**
 - **Configuration reference** — tables of global and project config files with purpose and check-in status
@@ -99,6 +100,9 @@ The skeleton below is used for every project's `AGENT_SETUP.md`. Markers like `<
 ## Troubleshooting
 [Common failures — tool not found, path issues, MCP errors — with actionable fixes]
 
+## Replicating to Another Project
+[Copy instructions + post-copy setup steps for migrating tooling to a new repo]
+
 <!-- FILL: optional-sections -->
 ```
 
@@ -108,6 +112,7 @@ Optional sections (include only if applicable): Configuration reference (tables 
 
 ## Phase 0: Prerequisites
 
+- [ ] Run `graphify query_graph "agent setup / tooling"` — understand relationship context with skills, configs, and MCP servers
 - [ ] Verify agent environment is accessible (global config, project config)
 - [ ] Read existing AGENT_SETUP.md — understand current documented state
 - [ ] Check for new tools/dependencies added since last sync
@@ -171,6 +176,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] MCP server config shows both the config entry and the verification command
 - [ ] Skill inventory is complete and matches `.opencode/skills/` directory
 - [ ] Custom commands documented with usage syntax and examples
+- [ ] Replicating to Another Project lists file-by-file copy instructions and post-copy setup steps
 - [ ] First-time flow is a complete end-to-end sequence from blank machine
 - [ ] Verification section has runnable commands for each component
 - [ ] All configuration file paths are correct (global paths use `\~`, project paths are repo-relative)

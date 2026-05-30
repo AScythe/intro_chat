@@ -1,6 +1,6 @@
 ---
 name: implement-plan
-description: 'Execute the approved plan following TDD in reviewable batches. Flag every change. Verify locally per batch. Use after check-plan-readiness passes, or when the user says "implement", "implement plan", "proceed", "start coding", or similar. Reads the plan file as read-only — never writes to it.'
+description: 'Execute the approved plan following TDD in reviewable batches. Flag every change. Verify locally per batch. Use after check-plan-readiness passes, or when the user says "implement", "implement plan", "proceed", or similar. Reads the plan file as read-only — never writes to it.'
 ---
 
 ## What I do
@@ -24,8 +24,9 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 - [ ] Read the approved plan (docs/PLAN_*) — verify all 8 gates pass
 - [ ] Run baseline tests — all must pass before any changes
+- [ ] Run `graphify query_graph "<task scope>"` — mandatory blast-radius check. Knowing the exact file paths is not enough; graphify reveals relationship context you might miss. This is the first step, not a fallback.
+- [ ] Based on graphify output, run `cocoindex-code_search` or `ast_grep_search` if deeper search is warranted
 - [ ] Identify all files to create/modify/remove
-- [ ] Apply Smart Tool Selection per task type (see AGENTS.md §Smart Tool Selection)
 
 ## Implementation Workflow
 
@@ -38,9 +39,9 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 - Identify files to create, modify, or remove. Map each test file to a plan task.
 - If anything is unclear, ask before proceeding.
 
-### Smart Tool Selection
+### Codebase Exploration
 
-See [AGENTS.md §Smart Tool Selection](../../../AGENTS.md) for the full decision framework. This skill has additional tool guidance specific to implementation work:
+See [AGENTS.md §Codebase Exploration](../../../AGENTS.md) for the full decision framework. This skill has additional tool guidance specific to implementation work:
 
 **Assessing impact:** Before starting a batch, use the pipeline (graphify→cocoindex→ast-grep) to understand blast radius. Start with `graphify query "impact of changing $MODULE"` to discover all connected concepts, or `graphify path "X" "Y"` to find the relationship path between two modules. This prevents missing downstream effects.
 

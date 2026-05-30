@@ -7,7 +7,7 @@ description: 'Analyze the current codebase and update `AGENTS.md` to be accurate
 
 Guide for updating `AGENTS.md` — the authoritative reference for agent behavioral rules, file ownership, commands, and operational constraints. This skill combines a **universal template** (sections identical across all projects) with **project-specific discovery** (extracted by analyzing the current project).
 
-The result is a project-specific `AGENTS.md` that accurately reflects that project's file ownership, commands, test suite, and operational constraints — while sharing the common SDD workflow and cross-phase rules with all other projects.
+The result is a project-specific `AGENTS.md` that accurately reflects that project's file ownership, commands, test suite, and operational constraints — while sharing the common agentic workflow and cross-phase rules with all other projects.
 
 ---
 
@@ -29,15 +29,17 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 ### What to Include
 - **Scope** — brief definition of what AGENTS.md covers
 - **File ownership table** — location, role, agent policy (⚠️ caution / ❌ forbidden). Include only files with non-default policies — omit ✅ safe files
-- **Universal Template** — start from the reusable template with `<!-- FILL: -->` markers for project-specific injection
-- **SDD Workflow Rules** — phase order table with explicit always/never directives
-- **Cross-Phase Universal Rules** — Smart Tool Selection (two-tier: Fast Path vs Pipeline), Process Discipline, Documentation Discipline, Failure Triage
-- **Project-specific behavioral rules** — extract from the project's entry points, configuration files, and operational constraints. Cover: modification constraints, resource management, configuration conventions
-- **Commands reference** — exact CLI commands for common operations (build, run, test, deploy, clean up)
-- **Test Suite** — if the project has a `tests/` directory, document: naming convention, file-to-module table with approach column, conventions, and run command
-- **Failure Triage table** — project-specific failure patterns, classified by symptom and actionable. Use generic descriptions
+- **Agentic Workflow Skills** — 9-phase table with skill name, trigger keywords (from skill frontmatter `description`), and ordering rules
+- **Skill Loading Priority** — priority chain, Pre-Task gate, ambiguous/multiple/no-match resolution rules
+- **Codebase Exploration** — question-type decision table + pipeline + tool discipline rules
+- **Process Discipline** — Integrity (read-before-write, baseline tests), Execution (exit declarations, user approval gate, batch discipline), Hygiene (full test suite, source+tests one unit)
+- **Failure Triage** — classification table with symptom, cause, action (import path, brittle test, behavioral regression, baseline failure, flaky)
+- **Commands Reference** — exact CLI commands for common operations (build, run, test, lint, cleanup)
+- **Test Suite Structure** — if the project has a `tests/` directory, document: naming convention, file-table with run commands, and policies
+- **Utility Skills** — non-phase skills (rebuild-indexes, frontend-design+shadcn, run-e2e-tests) as prose descriptions
 - **Documentation Structure table** — file-to-location map so agents know where each doc lives
-- **MCP/tooling rules** — document the project's specific tooling conventions as behavioral rules, not tool names
+- **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
+- **Tooling Rules** — behavioral rules for code index, knowledge graph, package manager
 
 ### What NOT to Include
 
@@ -67,23 +69,44 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 ## Scope
 ... → [ARCHITECTURE.md](ARCHITECTURE.md) | [SPECIFICATIONS.md](SPECIFICATIONS.md) | `.opencode/skills/<skill-name>/SKILL.md`
 
-### File Ownership
+## Agentic Workflow Skills
+[Standard 9-phase table with Trigger column + 4 ordering rules]
+
+## Skill Loading Priority
+[Priority chain, Pre-Task gate, ambiguous/multiple/no-match rules]
+
+## File Ownership
 | Location | Role | Agent Policy |
 |----------|------|--------------|
 <!-- FILL: file-ownership-rows -->
 <!-- BOILERPLATE: docs/PLAN_*.md, archive/, .opencode/skills/, opencode.json, .cocoindex_code/, graphify-out/ -->
 
-## SDD Workflow — Phase Order
-[Standard 9-phase table + 4 ordering rules]
+## Codebase Exploration
+[Question-type decision table + pipeline + tool discipline]
 
-## Cross-Phase Universal Rules
-[Smart Tool Selection | Process Discipline | Documentation Discipline | Failure Triage]
+## Process Discipline
+[Integrity | Execution | Hygiene]
+
+## Failure Triage
+[Classification table]
 <!-- FILL: project-failure-triage -->
 
+## Commands Reference
 <!-- FILL: commands-section -->
+
+## Test Suite Structure
 <!-- FILL: test-suite-section -->
+
+## Utility Skills
+[Non-phase skill references — rebuild-indexes, frontend-design+shadcn, run-e2e-tests]
+
+## Documentation Structure
 <!-- FILL: documentation-structure-section -->
-<!-- FILL: behavioral-rules-section -->
+
+## Documentation Discipline
+[Cross-referencing, description headers, executable truth]
+
+## Tooling Rules
 <!-- FILL: tooling-section -->
 ```
 
@@ -116,10 +139,12 @@ For each **What to Include** item, collect the data. This fills the `<!-- FILL: 
 - **File ownership** — files with ⚠️/❌ policies only; omit safe defaults
 - **Commands** — install, run, build, test, lint, cleanup
 - **Test Suite** — naming convention, file-to-module table with approach (Pure / `sys.modules` patch / mock), run command
+- **Utility Skills** — scan `.opencode/skills/` for non-phase skills with `description` frontmatter
 - **Documentation Structure** — scan `docs/`, `refs/`, root for `.md` files
-- **Behavioral rules** — domain-specific constraints (pipeline, memory, config, data safety)
-- **Failure Triage** — project-specific symptom→cause→action rows
+- **Documentation Discipline** — scan for description headers in source files; note any stale ones
 - **Tooling** — knowledge graph, search index invocation and update commands
+- **Failure Triage** — project-specific symptom→cause→action rows
+- **Skill Loading Priority** — verify `skill` loading rules are present and accurate
 
 ### 2. Read the Current Document
 - Check if `AGENTS.md` exists at the project root — create if not
@@ -158,16 +183,22 @@ For each **What to Include** item and each **Universal Template** marker: does i
 - [ ] No `<!-- FILL:` markers remain in the final output
 - [ ] Universal template sections are unmodified from the skill's template (only project-specific sections differ)
 
+**Section Structure:**
+- [ ] Section order follows priority: Scope → Agentic Workflow Skills → Skill Loading Priority → File Ownership → Codebase Exploration → Process Discipline → Failure Triage → Commands → Test Suite → Utility Skills → Documentation Structure → Documentation Discipline → Tooling
+- [ ] Agentic Workflow Skills table has Trigger column — keywords match skill frontmatter `description` exactly
+- [ ] Skill Loading Priority section exists — priority chain, Pre-Task gate, ambiguous/multiple/no-match rules
+- [ ] Utility Skills section uses prose descriptions, not a table — each non-phase skill has `**Header:** description — see skill` pattern
+
 **Document-Specific Checks:**
 - [ ] File ownership table covers all files with non-default policies (⚠️ / ❌) — accurate and complete
 - [ ] File ownership table cross-referenced against current filesystem — no missing entries for new files, no stale entries for removed files
 - [ ] Test suite structure matches actual test files on disk — every test file entry in the table verified against filesystem
 - [ ] All commands are accurate and runnable with exact syntax
 - [ ] Agent behavioral rules are imperative — "always/never", not "consider" or "try to"
-- [ ] Cross-phase universal rules are not duplicated in phase-specific skill files
-- [ ] Project-specific behavioral rules are captured — modification constraints, resource management, config conventions
+- [ ] Universal sections not duplicated in phase-specific skill files
 - [ ] Failure Triage table reflects actual project failure patterns (use generic symptom categories, not tool names)
 - [ ] Test Suite section includes: file naming convention, file-to-module table with approach per file, test conventions, and run command
 - [ ] Documentation Structure table lists all project docs with correct relative paths
+- [ ] Documentation Discipline rules present — cross-referencing, description headers, executable sources of truth
 - [ ] Tooling conventions documented as behavioral rules, not tool names
 - [ ] Cross-references between documents are accurate (use relative paths)
