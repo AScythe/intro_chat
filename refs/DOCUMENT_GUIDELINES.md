@@ -1,5 +1,7 @@
 # Document Guidelines - IntroChat
 
+> **Last verified:** 2026-05-31 20:15 EDT
+
 > **Purpose:** Authoritative reference for document boundaries. Defines which content goes where, how each document is differentiated, and what to do when boundaries touch. Use this guide as the single source of truth for routing new content.
 
 ---
@@ -11,6 +13,7 @@
 | **README.md** | User-facing setup, usage, features, benefits, installation | End users, new developers | Feature or setup change | User-facing, practical |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow, per-function detail | Developers, AI agents | Code structure change | Technical, implementation |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product scope change | Product, pitch, vision, spec, privacy |
+| **DESIGN_SPEC.md** | Visual design spec, color system, typography, motion | Developers, designers, AI agents | Design or theme change | Visual, aesthetic |
 | **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, judges | Demo flow change | Practical, step-by-step |
 | **AGENTS.md** | Agentic Workflow Rules by workflow phase, permissions, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | After each session | Educational, guidelines |
@@ -90,7 +93,7 @@ Technical structure reference for the project. Answers "How is it built?", "What
 ### What NOT to Include
 - ❌ User-facing benefits or marketing language — these go in README.md
 - ❌ Product pitch, problem statement, or user journey — these go in SPECIFICATIONS.md
-- ❌ Demo step-by-step instructions — these go in DEMO_GUIDE.md
+
 - ❌ AI agent file ownership tables or operational rules — these go in AGENTS.md
 - ❌ Best practices philosophy or universal coding patterns — these go in PROJECT_BEST_PRACTICES.md
 
@@ -134,13 +137,13 @@ Product specification and vision. Answers "Why does this exist?", "What problem 
 - **Value proposition for evaluators** — what judges, investors, or stakeholders should understand about the product's value *(phase-specific: remove or archive post-launch)*
 - **Future enhancements / bonus features** — clearly marked as not yet implemented
 - **Final pitch line** — the one-sentence summary of what this product is *(phase-specific: remove or archive post-launch)*
-- **Brief demo setup** — 2-3 lines so an evaluator can run it independently. Full walkthrough goes in DEMO_GUIDE.md.
+- **Brief demo setup** — 2-3 lines so an evaluator can run it independently.
 
 ### What NOT to Include
 - ❌ Endpoint names, route definitions, or any implementation-level detail — these go in ARCHITECTURE.md
 - ❌ Module descriptions, file trees, or import structure — these go in ARCHITECTURE.md
 - ❌ Installation or setup instructions — these go in README.md
-- ❌ Detailed demo walkthrough with step-by-step actions — this goes in DEMO_GUIDE.md
+
 - ❌ AI agent rules, file permissions, or operational constraints — these go in AGENTS.md
 - ❌ Best practices or universal coding patterns — these go in PROJECT_BEST_PRACTICES.md
 - ❌ Data flow with endpoint names — this goes in ARCHITECTURE.md
@@ -152,7 +155,7 @@ Product specification and vision. Answers "Why does this exist?", "What problem 
 - **Target personas:** Who the user is and why they benefit. Not user stories, not acceptance criteria.
 - **Feature priority / status:** What state each feature is in. Not implementation timeline.
 - **Tech stack:** Include a "Why?" rationale column. Not detailed module descriptions.
-- **Brief demo setup:** Enough for a judge to run it independently. Full walkthrough goes in DEMO_GUIDE.md.
+- **Brief demo setup:** Enough for a judge to run it independently.
 - **Privacy:** User-facing table covering identity, location, data, and control — followed by a "Hard Constraints" sub-section with non-negotiable implementation-level rules.
 - **Out of Scope:** Standalone section listing explicitly forbidden implementations. Not aspirational — each item is a hard boundary.
 
@@ -225,11 +228,10 @@ Agentic Workflow Rules and operational guidelines. Answers "How should I think, 
 - **Scope definition** — what this document covers and how it relates to other guidance (e.g., skill files)
 - **File ownership table** — every location an agent might touch, with explicit policy: ✅ safe to edit, ⚠️ caution required, ❌ forbidden
 - **Agentic Workflow Rules** — organized by 9 workflow phases (Thinking & Analysis → Probing & Refinement → Planning & Readiness → Implementing → Reviewing → Architecture Improvement → Structuring & Cleaning → Documentation Sync → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
-- **Cross-Phase Universal Rules** — an H2 section with H3 subsections covering the following:
-  - **Codebase Exploration** — Two-tier classification: Fast Path (single tool) vs Pipeline (graphify→cocoindex→ast-grep for complex queries)
-  - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
-  - **Process Discipline** — read-before-write, exit declarations, full test suite after every change, source+tests as one unit
-  - **Failure Triage** — classification table for test failures (import path, brittle test, behavioral regression, pre-existing, flaky)
+- **Codebase Exploration** — Three-Tier classification: Tier 1 (Tiny, known exact files) / Tier 2 (Moderate, known area) / Tier 3 (Complex, unknown scope). Each tier has required steps, completeness safeguards, and a tool guidance table with token costs.
+- **Documentation Discipline** — cross-referencing (not duplicating), file-level description comments, executable sources of truth (code > prose)
+- **Process Discipline** — read-before-write, baseline tests before changes, exit declarations, user approval gate (line-level diffs), batch discipline with granular edits, source+tests as one unit, non-interactive execution, periodic test health audit
+- **Failure Triage** — classification table for test failures (import path issue, brittle test, behavioral regression, pre-existing, flaky) with prescribed action for each type
 - **Architecture overview** — 3-5 lines so agents can navigate the project structure. Full detail (module descriptions, file tree, data flow) stays in ARCHITECTURE.md.
 - **Cross-references** — to ARCHITECTURE.md, SPECIFICATIONS.md, DOCUMENT_GUIDELINES.md, and skill files
 
@@ -245,7 +247,6 @@ For agent-specific operational requirements (non-interactive execution, venv set
 - ❌ Detailed module descriptions or file trees — these go in ARCHITECTURE.md
 - ❌ User-facing setup instructions or benefit descriptions — these go in README.md
 - ❌ Product pitch, vision, or user journey — these go in SPECIFICATIONS.md
-- ❌ Demo walkthrough or presentation steps — these go in DEMO_GUIDE.md
 - ❌ Best practices philosophy or universal coding patterns — these go in PROJECT_BEST_PRACTICES.md
 
 ### Content Boundaries
@@ -374,7 +375,7 @@ Meta-governance for all project documentation. Answers "Where does this content 
 This section defines which documents each workflow step should read, and which specific sections (via Grep→Read) to minimize context waste.
 
 ### Reading Pattern
-Use Grep→Read to read specific sections: grep for the section heading line number, then `Read(offset=line, limit=~100)`. Do not read entire documents unless specified as "(full)".
+Use Grep→Read to read specific sections: grep for the section heading line number, then `Read(offset=line, limit=~20)`. Do not read entire documents unless specified as "(full)".
 
 ### Core Pipeline
 
@@ -392,7 +393,7 @@ review-implementation (1st pass)
 | **brainstorm-and-plan** | `SPECIFICATIONS.md`, `ARCHITECTURE.md`, `AGENTS.md` | SPECS: task-dependent (product vision, user flow, Out of Scope). ARCHITECTURE: "Project Structure", "Module Descriptions" (relevant entries), "Import Structure", "Modifying Instructions". AGENTS: "File Ownership", "Failure Triage", "Codebase Exploration" | nothing (verbal) |
 | **grill-and-refine** | `ARCHITECTURE.md` | "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details" | nothing (verbal only — this step produces no artifact; if issues require a revised plan, loop back to check-plan-readiness) |
 | **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/PLAN_*.md` |
-| **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Codebase Exploration", "Cross-Phase Universal Rules". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
+| **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Codebase Exploration". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
 | **review-implementation** (1st pass) | `docs/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
 | **improve-architecture** | `AGENTS.md`, `ARCHITECTURE.md`, `implement-plan/SKILL.md` | AGENTS: "File Ownership". ARCHITECTURE: "Project Structure", relevant module descriptions. implement-plan: §3, §5, §6, test-adaptation rule | Source code (`[ARCH]`), regression tests |
 | **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |

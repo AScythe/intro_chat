@@ -1,6 +1,8 @@
 # Architecture - IntroChat
 ===================================================
 
+> **Last verified:** 2026-05-31 20:15 EDT
+
 ## Project Structure
 
 ```
@@ -13,9 +15,11 @@ intro_chat/
 │   ├── prompts.py             # Static conversation prompt data shared across all modules
 │   ├── qr_utils.py            # QR code generation — produces base64-encoded PNG data URIs
 │   ├── schemas.py             # Pydantic request models for API validation
-│   ├── routes.py              # All HTTP route handlers and WebSocket endpoint
+│   ├── routes.py              # All HTTP route handlers (WS gateway delegates to websocket_handler)
+│   ├── websocket_handler.py   # WebSocket endpoint handler — processes JSON messages, room changes, disconnect cleanup
+│   ├── helpers.py             # Shared helper utilities (short_id for UUID generation)
 │   ├── matchmaking.py         # Match finding and creation logic
-│   ├── connection_manager.py  # WebSocket connection tracking and broadcasting
+│   ├── connection_manager.py  # WebSocket connection tracking and per-user broadcasting
 │   └── tasks.py               # Background cleanup thread
 │
 ├── frontend/                  # React SPA (Vite + TypeScript)
@@ -44,13 +48,13 @@ intro_chat/
 │   │   │   ├── random.ts      # Utility functions for random string and username generation
 │   │   │   └── demoData.ts    # Demo/simulation data — sample users, fallback prompts, and mock responses
 │   │   ├── hooks/
-│   │   │   ├── useSocket.ts   # Context and hook for managing a persistent WebSocket connection
-│   │   │   ├── useTimer.ts    # Hook providing extendable countdown timer with start/clear/extend callbacks
-│   │   │   ├── useTheme.tsx   # Theme context and hook — dark/light mode toggling, localStorage persistence, system preference detection
-│   │   │   ├── useDemoMode.ts # Hook providing demo/simulation logic gated by VITE_ENABLE_DEMO feature flag
-│   │   │   ├── useChatRequest.ts # Hook managing chat request lifecycle — send request, wait for response, ready signaling
-│   │   │   └── useUser.ts     # Context and hook for user session data (userId, eventId, username)
+│   │   │   ├── useSocket.ts       # Context and hook for managing a persistent WebSocket connection
+│   │   │   ├── useTimer.ts        # Hook providing extendable countdown timer with start/clear/extend callbacks
+│   │   │   ├── useDemoMode.ts     # Hook providing demo/simulation logic gated by VITE_ENABLE_DEMO feature flag
+│   │   │   ├── useChatRequest.ts  # Hook managing chat request lifecycle — send request, wait for response, ready signaling
+│   │   │   └── useUser.ts         # Context and hook for user session data (userId, eventId, username)
 │   │   ├── context/
+│   │   │   ├── useTheme.tsx       # Theme context and hook — dark/light mode toggling, localStorage persistence, system preference detection
 │   │   │   ├── SocketContext.tsx  # WebSocket context provider — connects at app root, persists across routes, auto-reconnects
 │   │   │   └── UserContext.tsx    # User session context provider — hydrates from localStorage, writes on change
 │   │   ├── components/
@@ -116,7 +120,7 @@ intro_chat/
 │
 ├── .cocoindex_code/               # CocoIndex code index (auto-generated — rebuild via `ccc index`)
 ├── .opencode/                     # OpenCode configuration
-│   └── skills/                 # 19 agentic workflow and utility skills
+    │   └── skills/                 # 20 agentic workflow and utility skills
 │
 ├── docs/                         # Documentation
 │   ├── README.md              # Main project README (features, setup, deployment)
@@ -173,11 +177,18 @@ Server-global in-memory state — active users, active matches, waiting queue, a
 - `USER_TEMPLATE = {}` — default skeleton for new user entries
 - Re-exports `CONVERSATION_PROMPTS` from `app.prompts`
 
+#### TypedDicts
+- `UserData` — `{event_id: str, username: str, room_id: str | None, linkedin_url: str, slack_handle: str, is_available: bool, last_seen: str | None}`
+- `MatchData` — `{user1_id: str, user2_id: str, room_id: str, created_at: float}`
+- `QueueEntry` — `{room_id: str, timestamp: float}`
+
 #### Data Structures
-- `active_users = {}` — `{user_id: {event_id, username, room_id, linkedin_url, slack_handle, is_available, last_seen}}`
-- `active_matches = {}` — `{match_id: {user1_id, user2_id, room_id, created_at}}`
-- `waiting_queue = {}` — `{user_id: {room_id, timestamp}}`
-- `USER_TEMPLATE = {}` — `{event_id: None, username: None, room_id: None, linkedin_url: '', slack_handle: '', is_available: False, last_seen: None}` — default skeleton for new user entries
+- `active_users: dict[str, UserData]` — `{user_id: UserData}`
+- `active_matches: dict[str, MatchData]` — `{match_id: MatchData}`
+- `active_matches_lock: Lock` — threading lock for thread-safe match operations
+- `waiting_queue: dict[str, QueueEntry]` — `{user_id: QueueEntry}`
+- `connection_statuses: dict[str, dict[str, bool]]` — `{match_id: {user_id: wants_to_connect}}`
+- `USER_TEMPLATE: UserData` — `{event_id: '', username: '', room_id: None, linkedin_url: '', slack_handle: '', is_available: False, last_seen: None}` — default skeleton for new user entries
 
 #### Data re-export
 - `CONVERSATION_PROMPTS` — re-exported from `app.prompts` for backward compatibility (see `app/prompts.py`)
@@ -186,7 +197,9 @@ Server-global in-memory state — active users, active matches, waiting queue, a
 Central configuration constants module defining the database path (supports `DB_PATH` env var override for testing), server host, port, timer intervals, and default room names — imported by database, routes, and the main entry point.
 
 #### Constants
-- `DB_PATH` — absolute path to `data/introchat.db`
+- `BASE_DIR` — absolute path to project root directory
+- `FRONTEND_DIST_DIR` — absolute path to `frontend/dist/`
+- `DB_PATH` — absolute path to `data/introchat.db` (supports `DB_PATH` env var override)
 - `HOST` — server bind address (`127.0.0.1`)
 - `PORT` — server port (`5000`)
 - `MATCH_EXPIRY_SECONDS = 30` — how long a match is valid in DB
@@ -211,8 +224,8 @@ Async SQLite database initialization using aiosqlite, creating events, users, ro
 | `users` | `id` (TEXT PK), `event_id` (TEXT FK), `room_id` (TEXT FK), `username` (TEXT), `linkedin_url` (TEXT DEFAULT ''), `slack_handle` (TEXT DEFAULT ''), `is_available` (BOOLEAN DEFAULT 0), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `last_seen` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP) |
 | `matches` | `id` (TEXT PK), `user1_id` (TEXT FK), `user2_id` (TEXT FK), `room_id` (TEXT FK), `status` (TEXT DEFAULT 'active'), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `expires_at` (TIMESTAMP) |
 
-### `app/routes.py` (HTTP Routes + WebSocket)
-All HTTP route handlers for REST API endpoints (events, users, rooms, matches, QR codes, conversation prompts) and the WebSocket endpoint for real-time communication. SPA page serving is handled by the catch-all in `app/__init__.py`.
+### `app/routes.py` (HTTP Routes)
+All HTTP route handlers for REST API endpoints (events, users, rooms, matches, QR codes, conversation prompts). The WebSocket gateway at `/ws` delegates to `websocket_handler.py`. SPA page serving is handled by the catch-all in `app/__init__.py`.
 
 - `router = APIRouter()` — defines all route handlers with FastAPI decorators
 - Endpoints: `/`, `/api/events`, `/api/events/<id>/join`, `/api/events/<id>/rooms`, etc.
@@ -230,24 +243,37 @@ All HTTP route handlers for REST API endpoints (events, users, rooms, matches, Q
 - `exchange_connection(match_id, data)` — `POST /api/matches/<match_id>/connect` → double opt-in connection, broadcasts via WebSocket
 - `generate_qr(event_id, request)` — `GET /api/qr/<event_id>` → generates QR code image as base64
 - `get_prompts()` — `GET /api/prompts` → returns `CONVERSATION_PROMPTS` array
-- `websocket_endpoint(websocket)` — `WS /ws` → accepts connection, registers via `ConnectionManager`, handles `join_room`, listens for messages
+- `websocket_endpoint(websocket)` — `WS /ws` → thin gateway, delegates to `handle_websocket()` in `websocket_handler.py`
 
-### `app/matchmaking.py` (Match Logic)
-Async match-finding algorithm that pairs available users in the same room, creates match records in the database, and sends match_found events via WebSocket.
-
-- `find_match(user_id)` — async, finds available users in the same room
-- `create_match(user1_id, user2_id, room_id)` — async, creates match, notifies users via WebSocket
+### `app/websocket_handler.py` (WebSocket Handler)
+Real-time WebSocket message processing — accepts connections, manages room membership changes, and handles disconnection cleanup.
 
 #### Functions
-- `find_match(user_id)` — async, scans `active_users` for available users in same room; calls `await create_match()` if found, otherwise adds to `waiting_queue`
-- `create_match(user1_id, user2_id, room_id)` — async, inserts match into DB + `active_matches`, removes from `waiting_queue`, sets both to unavailable, sends `match_found` via `manager.broadcast_to_users()`
+- `handle_websocket(websocket)` — async, accepts WS connection, reads user_id/room_id from initial JSON, registers via `ConnectionManager`, processes `join_room` messages, cleans up on disconnect
+
+### `app/helpers.py` (Shared Helpers)
+Shared utility functions used across the application.
+
+#### Functions
+- `short_id()` — returns an 8-character hex string from `uuid.uuid4()[:8]`
+- `insert_default_rooms(db, event_id)` — inserts 8 default rooms for a given event into the database
+
+### `app/matchmaking.py` (Match Logic)
+Async match-finding algorithm that pairs available users in the same room, creates match records in the database (with expiry), and sends match_found events via WebSocket. Uses `active_matches_lock` for thread-safe match operations.
+
+- `find_match(user_id)` — async, finds available users in the same room, acquires `active_matches_lock`
+- `create_match(user1_id, user2_id, room_id)` — async, creates match with `MATCH_EXPIRY_SECONDS` expiry, notifies users via WebSocket
+
+#### Functions
+- `find_match(user_id)` — async, scans `active_users` under `active_matches_lock` for available users in same room who are also in `waiting_queue`; calls `await create_match()` if found, otherwise adds `QueueEntry` to `waiting_queue`
+- `create_match(user1_id, user2_id, room_id)` — async, idempotent check under lock (skips if pair already matched), inserts into DB via `aiosqlite` with `expires_at` = now + `MATCH_EXPIRY_SECONDS`, adds `MatchData` to `active_matches` (under lock), removes both from `waiting_queue`, sets both unavailable, sends `match_found` via `manager.broadcast_to_users()`
 
 ### `app/schemas.py` (Request Models)
 Pydantic request models for API endpoint validation — event creation, user join, room assignment, availability toggle, and connection exchange.
 
 #### Models
 - `CreateEventRequest` — `name: str`
-- `JoinEventRequest` — `username: Optional[str]`, `linkedin_url: Optional[str]`, `slack_handle: Optional[str]`
+- `JoinEventRequest` — `username: str | None`, `linkedin_url: str | None`, `slack_handle: str | None`
 - `SetUserRoomRequest` — `room_id: str`
 - `SetAvailabilityRequest` — `available: bool`
 - `ExchangeConnectionRequest` — `user_id: str`, `wants_to_connect: bool`
@@ -263,8 +289,6 @@ Pydantic request models for API endpoint validation — event creation, user joi
 - `disconnect(user_id)` — removes user from all mappings
 - `send_to_user(user_id, message)` — sends JSON message to a single user's WebSocket
 - `broadcast_to_users(user_ids, message)` — sends JSON message to multiple users
-- `broadcast_to_room(room_id, message)` — sends JSON message to all users in a room
-
 ### `app/tasks.py` (Background Tasks)
 Daemon background thread that periodically checks for and removes expired matches from in-memory state to prevent stale data accumulation.
 
@@ -347,7 +371,7 @@ Context and hook for user session data (userId, eventId, username). Provides `{ 
 #### `frontend/src/hooks/useChatRequest.ts` (Chat Request Lifecycle)
 Hook managing chat request lifecycle — send request, wait for response, ready signaling. Encapsulates `requestedPerson`, `personResponse`, `yourReady`, `theirReady` state. Provides `requestChat(person)`, `imReady()`, `cancelRequest()`. Uses `useDemoMode` for simulated response delays and acceptance logic.
 
-#### `frontend/src/hooks/useTheme.tsx` (Theme Provider + Hook)
+#### `frontend/src/context/useTheme.tsx` (Theme Provider + Hook)
 Theme context provider and hook for dark/light mode toggling. Stores preference in `localStorage` under `introchat_theme` key. Detects system preference via `prefers-color-scheme: dark` media query as fallback. Toggles `dark` class on `<html>` element. Provides `{ theme, toggleTheme }` via `useTheme()`.
 
 #### `frontend/src/context/SocketContext.tsx` (WebSocket Provider)
@@ -377,6 +401,12 @@ Post-chat connection card with yes/no buttons for Slack connection exchange. Fir
 
 ##### `frontend/src/components/QRDisplay.tsx`
 QR code image display with event code shown below. Receives `qrCode`, `eventCode`, and optional `eventName` as props.
+
+##### `frontend/src/components/PeoplePageViews.tsx`
+Composite view components for the PeoplePage — `NearbyUsersView` (person card grid with request button), `WaitingResponseView` (cancel-able request state), `AcceptedView` (ready signaling with mutual acceptance). Exports `PersonResponse` interface.
+
+##### `frontend/src/components/ChatPageViews.tsx`
+Composite view components for the ChatPage — `ErrorView` (error with back button), `ChatLoadingView` (loading skeleton with duration label), `ChattingView` (prompt card + next button), `TimeUpView` (extend/end options), `ExtendedView` (extended timer with end chat).
 
 #### Pages
 
@@ -425,20 +455,28 @@ End-to-end integration test suite that tests page rendering, API endpoints, matc
 - `test_social_info()` — verifies `linkedin_url` and `slack_handle` saved to `active_users`
 - `test_error_paths()` — tests 404 for missing user/match, empty list for missing event rooms
 - `test_matchmaking_lifecycle()` — full lifecycle: create users, match via `create_match()`, retrieve via API, double opt-in connection, cleanup
+- `test_find_match_end_to_end()` — tests `find_match()` via availability toggle (two users, same room, waiting queue, match creation)
+- `test_cleanup_expired_matches()` — tests cleanup threshold logic: old matches removed, fresh ones kept
+- `test_websocket_connection()` — tests `ConnectionManager` internal mappings, `send_to_user` graceful handling, WebSocket endpoint via `TestClient` with `join_room` and missing user_id rejection
+- `test_template_pages()` — tests SPA catch-all renders `index.html` for client-side routes (`/`, `/join/*`, `/room/*`, `/chat/*`)
+- `test_helpers_short_id()` — verifies `short_id()` generates valid 8-char hex IDs
+- `test_qr_utils()` — verifies `generate_qr_data_uri()` returns valid `data:image/png;base64,` data URI
 - `main()` — runs all test functions in sequence
 
 #### `tests/test_js_modules.py`
 Frontend source module validation suite using static regex analysis — checks file existence, TypeScript exports (interfaces, types, functions, components), config constants, and cross-file import references.
 
 #### Functions
-- `test_frontend_files_exist()` — checks 27 required frontend source files exist
-- `test_api_exports()` — checks 5 API interfaces defined in types/api.ts
-- `test_config()` — checks 8 CONFIG properties and FALLBACK_PROMPTS in config/constants.ts
-- `test_utils_exports()` — checks formatTime, 5 storage functions, generateRandomString, generateUsername, SamplePerson, SAMPLE_USERS, RESPONSES
-- `test_hook_exports()` — checks exports from useSocket, useTimer, useDemoMode, useUser
-- `test_component_exports()` — checks 6 component exports
-- `test_page_exports()` — checks 6 page exports
+- `test_frontend_files_exist()` — checks 32 required frontend source files exist (including PeoplePageViews.tsx, ChatPageViews.tsx, useChatRequest.ts)
+- `test_api_exports()` — checks 4 API interfaces defined in types/api.ts: `CreateEventResponse`, `Room`, `JoinEventResponse`, `QRResponse`
+- `test_demo_data_exports()` — checks `SamplePerson`, `SAMPLE_USERS`, `RESPONSES` exports from utils/demoData.ts
+- `test_config()` — checks 8 CONFIG properties in config/constants.ts
+- `test_utils_exports()` — checks formatTime, 5 storage functions, generateRandomString, generateUsername
+- `test_hook_exports()` — checks exports from useSocket, useTimer, useDemoMode, useUser, useChatRequest
+- `test_component_exports()` — checks 8 component exports (Timer, PeoplePageViews, ChatPageViews, PersonCard, PromptCard, MatchCountdown, ConnectionCard, QRDisplay)
+- `test_page_exports()` — checks 6 page exports (HomePage, UserInfoPage, RoomPage, ChatPage, PeoplePage, ConnectPage)
 - `test_import_references()` — checks App.tsx imports all pages and providers
+- `test_client_exports()` — checks client.ts exports fetchJSON and defines fetchWithTimeout, parseJSON
 - `test_code_quality()` — counts console.log across all source files
 - `main()` — runs all test functions in sequence
 
@@ -450,15 +488,22 @@ Standalone database debugging utility that tests SQLite connection, lists table 
 - `reset_database()` — deletes existing database file and recreates via `init_db()`
 
 #### `tests/test_agent_guidelines.py`
-Static validation suite that verifies agent skill-routing and tool-selection logic matches the documented rules in `AGENTS.md` and skill `SKILL.md` files. No messages are executed — pure static routing verification.
+Dual-section validation suite. Section 1 (routing): verifies AGENTS.md skill-routing and tool-selection rules match documented trigger keywords via hypothetical messages — no messages executed. Section 2 (integrity): verifies all verifiable claims in AGENTS.md against the actual filesystem — file paths, command targets, doc paths, naming conventions, description headers, tool availability, and skill count.
 
 #### Functions
-- `test_skill_routing_hypothetical_messages()` — verifies hypothetical user messages match the correct skill descriptions
-- `test_tool_selection_hypothetical_queries()` — verifies query types match the correct tool layer
-- `test_skill_no_match_fallback()` — verifies non-matching input falls through correctly
-- `test_tool_mixed_combines_layers()` — verifies mixed-type queries select multiple tool layers
-- `test_skill_loading_priority_chain()` — verifies skill loading takes priority over other handlers
-- `main()` — runs all test functions in sequence
+- `test_skill_routing_hypothetical_messages()` — verifies 20 loadable skills each have description triggers matching hypothetical messages
+- `test_tool_selection_hypothetical_queries()` — verifies Three-Tier Classification, Pipeline stages, and hypothetical query-to-tool routing
+- `test_skill_no_match_fallback()` — verifies non-matching input (casual/general questions) triggers no skill
+- `test_tool_mixed_combines_layers()` — verifies mixed-type queries select combined layers
+- `test_skill_loading_priority_chain()` — verifies priority chain defined in AGENTS.md
+- `test_file_ownership_paths()` — verifies all source paths, auto-generated paths, dir patterns, and the full `.opencode/skills/*/SKILL.md` set (20 skills) exist on disk
+- `test_commands_reference()` — verifies command target files exist and package.json has build/dev/test/test:e2e scripts
+- `test_documentation_structure()` — verifies all 8 documented doc paths exist
+- `test_test_suite_structure()` — verifies backend `test_*.py`, frontend `*.test.{ts,tsx}`, E2E `*.spec.ts` naming conventions
+- `test_utility_skills()` — verifies 4 utility skill files exist (rebuild-indexes, frontend-design, shadcn, run-e2e-tests)
+- `test_documentation_discipline()` — verifies all Python files in app/ have `# Description:` header and all TS/TSX files in frontend/src/ have description header
+- `test_tooling_rules()` — verifies `uv` and `npm` tools available on PATH
+- `main()` — runs all test functions, reports PASS/FAIL count
 
 #### `frontend/tests/e2e/userFlow.spec.ts` (E2E Test Scenarios)
 7 Playwright E2E tests that verify the app in a real Chromium browser. Covers: home page load, join page with optional name field, save with auto-generated username, save with custom name, two-user matchmaking with chat page rendering, and full chat lifecycle with connection exchange (both users connect and one declines). Tests 6a/6b use localStorage hydration for user context, real 30s timer wait, random room selection from all 8 default rooms, and the footer "Back to Home" navigation. Run via `npm run test:e2e`. Per-test timeout: 90s (configurable in `playwright.config.ts`).
@@ -469,6 +514,12 @@ Static validation suite that verifies agent skill-routing and tool-selection log
 
 #### `utility/cleanup_db.py`
 Database maintenance utility that deduplicates rows across all tables and removes auto-generated test users (`User_*` prefix). Operates on both `data/introchat.db` and `data/e2e_test.db`. Run via `uv run python utility/cleanup_db.py`. Idempotent — safe to run multiple times.
+
+#### `utility/enhance_graph_viewer.py`
+Post-processes graphify-out/graph.html to add an interactive filtering UI — collapsible panels, search highlighting, and community color-coding for large knowledge graphs.
+
+#### `utility/filter_graph.py`
+Filters graphify-out/graph.json into type-specific sub-graphs — splits the combined JSON into separate code (`graph-code.json`) and document (`graph-document.json`) graphs.
 
 ---
 ## Critical Implementation Details
@@ -489,6 +540,7 @@ Constant `CONVERSATION_PROMPTS` exists in `app/state.py` — safe to edit.
 - **Production:** Add origin restrictions via FastAPI middlewares or WebSocket validator
 
 ### Frontend Module Rules
+- Theme context (`useTheme.tsx`) lives in `context/` — not `hooks/` — because it provides React context, not just a hook
 - All routing via React Router — no page reloads
 - Shared state in React Context (`SocketContext`, `UserContext`) — no `window` globals
 - Shared utilities in `frontend/src/utils/` — no direct DOM manipulation
@@ -561,12 +613,14 @@ app/
 ├── state.py          ← imports from .prompts (re-exports CONVERSATION_PROMPTS)
 ├── config.py         ← no internal imports (leaf module)
 ├── database.py       ← imports aiosqlite, sqlite3, os (leaf module — no internal imports)
-├── schemas.py        ← imports pydantic.BaseModel, typing.Optional (leaf module)
+├── schemas.py        ← imports pydantic.BaseModel (leaf module)
 ├── prompts.py        ← no internal imports (leaf module)
 ├── qr_utils.py       ← imports qrcode, io, base64 (leaf module)
-├── routes.py         ← imports from .state, .schemas, .connection_manager, .config, .matchmaking
-├── connection_manager.py  ← imports fastapi.WebSocket, typing (leaf module)
-├── matchmaking.py    ← imports from .state, .connection_manager, .config
+├── helpers.py        ← imports uuid (leaf module)
+├── routes.py         ← imports from .state, .schemas, .connection_manager, .config, .matchmaking, .websocket_handler, .helpers
+├── websocket_handler.py  ← imports from .connection_manager; leaf module
+├── connection_manager.py  ← imports fastapi.WebSocket (leaf module)
+├── matchmaking.py    ← imports from .state, .connection_manager, .config, .helpers
 └── tasks.py          ← imports from .state
 ```
 
@@ -615,7 +669,7 @@ npm run dev        # Starts Vite on port 3000, proxies /api and /ws to backend
 
 ### Changing Timer Durations
 1. Edit `frontend/src/config/constants.ts` (for frontend timers)
-2. Edit `app/state.py` (for backend constants)
+2. Edit `app/config.py` (for backend constants)
 3. Run `uv run python tests/test_app.py && uv run python tests/test_js_modules.py` and `cd frontend && npm test` to verify
 
 ### Adding a New Documentation File

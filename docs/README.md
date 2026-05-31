@@ -15,6 +15,7 @@
 - [Quick Start](#quick-start)
 - [How to Use](#how-to-use)
 - [Technical Details](#technical-details)
+- [Documentation](#documentation)
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Privacy & Security](#privacy--security)
@@ -33,6 +34,8 @@ IntroChat is a lightweight, browser-based web app that lets introverts initiate 
 Think of it as *Tinder for 30-second conversations* — but only when you're physically near someone else who's also ready to chat.
 
 ---
+
+> **Last verified:** 2026-05-31 20:30 EDT
 
 ## Features
 
@@ -153,26 +156,40 @@ For full architecture details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
+## Documentation
+
+For detailed documentation, see:
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — Technical module reference, data flow, and modification instructions
+- [SPECIFICATIONS.md](SPECIFICATIONS.md) — Product vision, user journey, privacy model, and hard constraints
+- [DESIGN_SPEC.md](DESIGN_SPEC.md) — Visual design spec, color system, typography, and motion principles
+- [AGENTS.md](../AGENTS.md) — AI agent rules, file ownership, and commands reference
+
+---
+
 ## Testing
 
 ```bash
-# Type-check frontend (run after TypeScript changes before testing)
-cd frontend && npm run type-check && cd ..
-
-# Backend and database checks
+# Backend tests
 uv run python tests/test_app.py
 
 # Frontend source validation
 uv run python tests/test_js_modules.py
 
-# Agent guideline compliance validation
+# Database debugging utility
+uv run python tests/test_db.py
+
+# Agent guideline compliance
 uv run python tests/test_agent_guidelines.py
 
-# Vitest component and hook tests
+# Frontend unit tests (Vitest)
 cd frontend && npm test && cd ..
 
 # E2E browser tests (Playwright — auto-installs Chromium)
 cd frontend && npm run test:e2e && cd ..
+
+# Type-check frontend (run after TypeScript changes)
+cd frontend && npm run type-check && cd ..
 ```
 
 ---
@@ -191,9 +208,6 @@ cd frontend && npm run test:e2e && cd ..
 - DigitalOcean App Platform
 - AWS Elastic Beanstalk
 - Any platform that supports Python ASGI
-
-> **Note:** Set `ENV=production` in production environments. CORS origins should be configured via FastAPI middlewares in `app/main.py`.
-
 ---
 
 ## Privacy & Security
@@ -243,7 +257,7 @@ This project is open source and available under the [MIT License](LICENSE).
 - Check firewall settings
 
 **Database errors**
-- Delete `introchat.db` and restart the application
+- Delete `data/introchat.db` and restart the application
 - The database will be recreated automatically
 
 ### Getting Help

@@ -1,5 +1,7 @@
 # Universal Project Best Practices
 
+> **Last verified:** 2026-05-31 20:15 EDT
+
 > Derived from real-world debugging - applies to ALL projects
 
 **Conciseness Rule**: Keep all descriptions 50% shorter than verbose explanations.
@@ -23,6 +25,10 @@ app/
 ├── database.py           # DB schema ONLY (leaf module)
 ├── config.py             # Config constants ONLY (leaf module)
 ├── schemas.py            # Pydantic models ONLY (leaf module)
+├── helpers.py            # Shared utility functions ONLY (leaf module)
+├── prompts.py            # Static conversation prompt data ONLY (leaf module)
+├── qr_utils.py           # QR code generation utility ONLY (leaf module)
+├── websocket_handler.py  # WebSocket message handling ONLY
 ├── routes.py             # HTTP + WebSocket endpoints ONLY
 ├── connection_manager.py # WebSocket connection tracking ONLY (leaf module)
 ├── matchmaking.py        # Business logic ONLY
@@ -48,31 +54,29 @@ Persistence   → database.py / repository layer
 **Why it matters**: Changes in one layer don't break others.
 
 ### 1.3 Frontend Modularization
-**Context**: From `app/static/js/` structure and 500-line JS monoliths
+**Context**: From `frontend/src/` React/TypeScript structure and large page monoliths
 
-**Principle**: 1 JS file = 1 purpose. Centralize shared code in `utils.js`, page-specific in `page.js`.
+**Principle**: 1 module = 1 purpose. Shared utilities in `utils/`, stateful logic in `hooks/`, context providers in `context/`, reusable UI in `components/`, page entries in `pages/`.
 
 **Example**:
 ```
-app/static/js/
-├── config.js        # Central config ONLY (CHAT_DURATION)
-├── utils.js         # Shared utilities ONLY (showError)
-├── dom-utils.js     # DOM helper functions ONLY
-├── api-utils.js     # API calls ONLY (fetchJSON)
-├── timer-utils.js   # Timer functions ONLY (createChatTimer)
-├── home.js          # Homepage logic ONLY
-├── user-info.js     # User profile page logic ONLY
-├── room.js          # Room page logic ONLY
-└── chat.js          # Chat page logic ONLY
-```
-```javascript
-// api-utils.js ONLY: API calls — no UI, no timers, no config
-async function fetchJSON(url, options={}) {
-    return parseJSON(await fetchWithTimeout(url, options));
-}
+frontend/src/
+├── config/constants.ts  # App configuration ONLY (CHAT_DURATION)
+├── utils/               # Pure utility functions ONLY (format, storage)
+├── api/client.ts        # API calls ONLY
+├── context/             # React context providers ONLY
+├── hooks/               # Custom React hooks ONLY
+├── components/          # Reusable UI components ONLY
+│   ├── Timer.tsx        # Timer display ONLY
+│   ├── PromptCard.tsx   # Prompt card display ONLY
+│   ├── PersonCard.tsx   # Person profile card ONLY
+│   ├── PeoplePageViews.tsx # PeoplePage sub-views ONLY
+│   └── ChatPageViews.tsx   # ChatPage sub-views ONLY
+├── pages/               # Page-level components ONLY
+└── types/api.ts         # TypeScript type definitions ONLY
 ```
 
-**Why it matters**: No 500-line monoliths, easy to find and test functionality.
+**Why it matters**: No monolith files, predictable location for any concern, easy to find and test.
 
 ### 1.4 Module Communication
 **Context**: From fixing import errors and tracing import chains in `app/` package
@@ -90,11 +94,15 @@ from .matchmaking import find_match  # Import from sibling
 ```
 Dependency graph:
 ```
-routes.py → imports from → state.py, schemas.py, connection_manager.py, config.py, matchmaking.py
-matchmaking.py → imports from → state.py, connection_manager.py, config.py
+routes.py → imports from → state.py, schemas.py, connection_manager.py, config.py, matchmaking.py, helpers.py, qr_utils.py, websocket_handler.py
+matchmaking.py → imports from → state.py, connection_manager.py, config.py, helpers.py
+tasks.py → imports from → state.py, config.py
 connection_manager.py → no internal imports (leaf module)
 config.py → no internal imports (leaf module)
 schemas.py → no internal imports (leaf module)
+helpers.py → no internal imports (leaf module)
+prompts.py → no internal imports (leaf module)
+qr_utils.py → no internal imports (leaf module)
 ```
 
 **Why it matters**: Predictable dependency graph with zero circular import errors.
@@ -104,9 +112,46 @@ schemas.py → no internal imports (leaf module)
 
 **Principle**: Split triggers: >200 lines, mixed concerns, circular imports, parallel dev conflicts.
 
-**Example**: Your `routes.py` (181 lines) stays single-purpose: HTTP endpoints ONLY. Business logic → `matchmaking.py`.
+**Example**: Your `routes.py` (171 lines) stays single-purpose: HTTP endpoints ONLY. Business logic → `matchmaking.py`, WebSocket handling → `websocket_handler.py`, QR generation → `qr_utils.py`, shared helpers → `helpers.py`.
 
-**Why it matters**: File stays maintainable, merge conflicts reduced. Business logic → `matchmaking.py`.
+**Why it matters**: File stays maintainable, merge conflicts reduced.
+
+### 1.6 Documentation-Driven Module Design
+**Context**: From ARCHITECTURE.md auto-extraction requiring Description: headers in source code
+
+**Principle**: After creating a new module, write its `# Description:` header before writing any logic. The description must state the module's single responsibility in one concise line. This ensures the auto-extraction pipeline (ARCHITECTURE.md) always has a source of truth.
+
+**Example**:
+```python
+# matchmaking.py
+# Description: Async match-finding algorithm that pairs available users in the same room
+
+# ... rest of file
+```
+
+**Why it matters**: Description headers are the canonical source for ARCHITECTURE.md — they must be written while the purpose is still clear, not retrofitted later.
+
+### 1.7 Surgical Edit Pattern
+**Context**: From updating skill files and instruction documents — rewrites risk silently dropping context
+
+**Principle**: When updating instruction files (skills, workflows, rulesets), prefer `oldString→newString` replacements over full file rewrites. Each edit is independently verifiable by `oldString` uniqueness. Instruction files contain branching workflows and nuanced edge case handling — rewriting risks dropping context not explicitly identified as problematic.
+
+**Example**: Instead of rewriting a 386-line skill file, apply 12 targeted replacements — each verifiable by selecting for the old text.
+
+**Why it matters**: A rewrite that drops a single behavioral rule changes agent behavior permanently. Surgical edits preserve everything not explicitly changed.
+
+### 1.8 One Logical Change Per Edit
+**Context**: From multi-edit batches where interleaved changes made verification difficult
+
+**Principle**: When making multiple changes to a file, apply one logical change per edit call. Each edit is independently verifiable — if an edit fails (oldString not found), only that single change is affected. This also makes the audit trail easier to review.
+
+**Example**:
+```
+Bad: One edit changes 3 different sections simultaneously
+Good: 3 separate edits, each changing one section with a unique oldString
+```
+
+**Why it matters**: Independent edits can be verified, reverted, or reviewed in isolation.
 
 ---
 
@@ -397,9 +442,9 @@ Then ARCHITECTURE.md extracts the lead line from the comment — no manual dupli
 
 **Example**:
 ```
-Python Modules: __init__ → state → database → config → schemas → routes → connection_manager → matchmaking → tasks → __main__
-Frontend Modules: config → utils → dom-utils → api-utils → timer-utils → home → user-info → room → chat
-Templates: index → user_info → room → chat
+Python Modules: __init__ → state → database → config → schemas → helpers → prompts → qr_utils → websocket_handler → routes → connection_manager → matchmaking → tasks → __main__
+Frontend Pages: HomePage → UserInfoPage → RoomPage → PeoplePage → ChatPage → ConnectPage
+Frontend Core: config → utils → api → types → context → hooks → components → pages
 ```
 
 **Why it matters**: Entries stay logical and navigable regardless of how many times the section is regenerated.
@@ -446,9 +491,9 @@ Templates: index → user_info → room → chat
 
 **Example**:
 ```
-# ✅ All archive plan files in archive/
-archive/PLAN_2026_05_12_001.md
-archive/PLAN_2026_05_12_002.md
+# ✅ All archive plan files in archive/plan/
+archive/plan/PLAN_2026_05_12_001.md
+archive/plan/PLAN_2026_05_12_002.md
 
 # ❌ Orphan artifact in .opencode/plans/ creates conflicts
 ```
@@ -724,7 +769,52 @@ if uid not in waiting_queue:
 ```
 **Why it matters**: Inverted boolean logic in queues is a classic bug that looks plausible in review but silently breaks the entire matching flow.
 
-### 7.16 Root Pattern Extraction
+### 7.16 TypedDict for Structured In-Memory State
+**Context**: In-memory state used plain dicts with string keys (`active_users[uid] = {...}`) — key typos and undocumented shapes caused bugs during matchmaking and connection exchange refactoring
+
+**Principle**: Use `TypedDict` (or equivalent typed structures) for in-memory state dicts that are accessed across multiple modules. This documents the expected shape in one place, catches key-name typos statically, and makes the data contract visible without tracing runtime usage.
+
+**Example**:
+```python
+from typing import TypedDict
+
+class UserData(TypedDict):
+    event_id: str
+    username: str
+    room_id: str | None
+    linkedin_url: str
+    slack_handle: str
+    is_available: bool
+    last_seen: str | None
+```
+
+**Why it matters**: TypedDict serves as executable documentation — the shape is checked statically and visible without reading initialization code. Plain dicts hide their structure; every consumer must infer keys from usage patterns.
+
+### 7.17 Thread Safety for Shared Mutable State
+**Context**: Background thread (`tasks.py`) and async HTTP handlers both mutated `active_matches` dict — race conditions caused phantom matches and lost cleanup events
+
+**Principle**: When shared mutable state is accessed by background threads and async event handlers concurrently, protect ALL mutation points with a `threading.Lock`. Every `read → modify → write` cycle must happen inside the same lock scope. Never add state mutations outside the lock — one missed site creates a race condition.
+
+**Example**:
+```python
+# state.py
+active_matches: dict[str, MatchData] = {}
+active_matches_lock = threading.Lock()
+
+# tasks.py — background cleanup
+with active_matches_lock:
+    for match_id, match in active_matches.items():
+        ...
+
+# routes.py — HTTP handler
+with active_matches_lock:
+    if match_id not in active_matches:
+        raise HTTPException(status_code=404)
+```
+
+**Why it matters**: Race conditions in shared state are intermittent and hard to reproduce. A single missing lock site can corrupt data silently. Wrapping every mutation in the same lock is the only reliable defense.
+
+### 7.18 Root Pattern Extraction
 **Context**: From revising the update-best-practices-md skill to push for root cause over symptom
 
 **Principle**: When extracting lessons from a session, distinguish the symptom (what happened) from the root cause (why it happened). The root pattern is the universally applicable form — it transfers to other projects. If the root becomes too abstract to be useful, step back one level. Guard: a pattern passes if a developer on an unrelated project would still find it valuable.
@@ -744,7 +834,7 @@ Root:     "Always derive cryptographic nonces from a deterministic counter or a
 **Why it matters**: Symptom-level lessons only fix this one case. Root-level lessons prevent entire categories of bugs.
 
 ### 7.17 Sequential Numbering for Plan Files
-**Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `archive/PLAN_001` both existed
+**Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `archive/plan/PLAN_001` both existed
 
 **Principle**: When artifacts use sequential numbering, the number must be globally unique across ALL locations. Before assigning a new number, scan the canonical directory for existing files and pick the next available. Never reuse a number from an alternative directory that was later merged.
 
@@ -1157,9 +1247,9 @@ update-docs: single orchestrator, routes to push-to-git
 **Why it matters**: One source of truth. No drift across copied rules. Update one location, all consumers benefit.
 
 ### 8.22 Narrow-Then-Search Pipeline
-**Context**: From evolving the Three-Layer Code Exploration Stack (graphify → cocoindex → ast-grep) into a formal pipeline with I/O contracts, fast-path rules, and completeness safeguards
+**Context**: From evolving the Three-Tier Code Exploration Classification (graphify → cocoindex → ast-grep) into a formal pipeline with I/O contracts, tiered classification rules, and completeness safeguards
 
-**Principle**: For complex queries, run a 3-stage sequential pipeline instead of picking one tool. Stage 1 (graphify) narrows scope via 3 query variations × 2 sub-graphs. Stage 2 (cocoindex-code) searches within that scope by intent. Stage 3 (ast-grep) verifies structural patterns. For simple or moderate queries, use Fast Path — a single tool or 1-2 stage shortcut.
+**Principle**: For complex queries, run a 3-stage sequential pipeline instead of picking one tool. Stage 1 (graphify) narrows scope via 3 query variations × 2 sub-graphs. Stage 2 (cocoindex-code) searches within that scope by intent. Stage 3 (ast-grep) verifies structural patterns. For Tier 1 (Tiny) tasks with known exact files, skip the pipeline and use grep or a single read. For Tier 2 (Moderate), use 1-2 stages (cocoindex → read). For Tier 3 (Complex), run full 3-stage pipeline.
 
 **I/O Contracts:**
 
@@ -1169,12 +1259,13 @@ update-docs: single orchestrator, routes to push-to-git
 | 2 — Search | Scope from Stage 1 + refined query | Semantic search with `paths=scope` | `chunks: [(file, line, content, score)], uncovered_aspects: [...]` |
 | 3 — Verify | Specific pattern from Stage 2 | Structural match in identified files | `exact_matches: [(file, line, pattern)], verified_files: [...]` |
 
-**Fast-Path Table:**
+**Three-Tier Table:**
 
-| Task type | Tools | Example |
-|-----------|-------|---------|
-| Simple | Single tool (ast-grep, cocoindex, or grep) | "Find console.log" → ast-grep |
-| Moderate | 1-2 stages | "How is email validated?" → cocoindex only |
+| Tier | Scope | Tools | Example |
+|------|-------|-------|---------|
+| Tier 1 — Tiny | 1-2 exact files known | grep/Read | "Fix typo in line 42 of matchmaking.py" → read + edit |
+| Tier 2 — Moderate | Known area, exact files unclear | graphify + cocoindex | "How is email validated?" → cocoindex + ast-grep |
+| Tier 3 — Complex | Unknown scope, multiple communities | Full 3-stage pipeline | "How does matchmaking work?" → graphify × 6 queries → cocoindex → ast-grep |
 
 **Example — full pipeline trace:**
 ```
@@ -1185,7 +1276,7 @@ Stage 3: ast-grep search for "def find_match($$$)" → exact definition at match
 → Read targeted code: matchmaking.py:42-85
 ```
 
-**Why it matters**: The pipeline catches what single-tool searches miss. Graphify narrows scope before cocoindex searches, preventing token waste on 126+ files. Ast-grep verifies structural correctness that semantic search can't guarantee. The cost reminder ("~10k tokens — default to Fast Path") prevents over-engineering simple queries.
+**Why it matters**: The pipeline catches what single-tool searches miss. Graphify narrows scope before cocoindex searches, preventing token waste on 126+ files. Ast-grep verifies structural correctness that semantic search can't guarantee. The tier classification prevents over-engineering: Tier 1 costs ~1k tokens, Tier 2 ~5k, Tier 3 ~10k+.
 
 ### 8.23 Design-Spec-to-Config Bridge
 **Context**: The frontend-design skill produces a design spec (colors, typography, spacing, motion) but neither frontend-design nor shadcn explicitly owned translating those tokens into `tailwind.config.js` and `global.css` — the bridge step existed only as implicit agent knowledge
@@ -1202,6 +1293,27 @@ Semantic alias        → CSS variable in global.css           → --primary: th
 ```
 
 **Why it matters**: Without an explicit mapping, the implementation skill must reinterpret the spec — introducing ambiguity and potential drift between what was designed and what was built.
+
+### 8.24 question Tool Mandate for All User Interaction
+**Context**: From enforcing consistent user interaction across all phase skills — previously some skills used raw "ask before proceeding" text prompts while others used the `question` tool
+
+**Principle**: The built-in `question` tool with clickable selectable options (`label` + `description`, free-form fallback) is the sole mechanism for all agent-to-user questions and decision points. Raw text prompts ("ask before proceeding"), unformatted "y/n" questions, and bullet-option lists in prose are prohibited. Each decision point is walked through one at a time — never present multiple items in a single message.
+
+**Example**:
+```
+question(
+  questions=[{
+    header: "Interaction style",
+    question: "How should the agent ask questions?",
+    options: [
+      {label: "question tool", description: "Clickable selectable options"},
+      {label: "free-form text", description: "Raw text prompts"}
+    ]
+  }]
+)
+```
+
+**Why it matters**: The `question` tool provides structured, clickable options that eliminate ambiguity. By mandating `label` + `description` fields and a free-form "Type your own answer" fallback, every user choice is clearly framed while remaining open to unexpected input. Walking through decisions one at a time prevents cognitive overload.
 
 ---
 
@@ -1307,6 +1419,21 @@ uv run pytest tests/ -v              # Tests
 
 **Why it matters**: Systematic approach, no guesswork.
 
+## 12. Documentation Sync
+
+### 12.1 Per-Batch Approval for Documentation Changes
+**Context**: From update-docs phase applying all changes at once without per-edit approval — user reverted everything
+
+**Principle**: When making documentation changes, present proposed edits one batch at a time with exact old→new diff. Get user sign-off before applying. Never batch all doc changes into a single unapproved update. This applies even when the changes are well-scoped and the user has already agreed in principle.
+
+**Example**:
+```
+Batch 1: README.md (5 surgical edits) → show diff → user approves → apply → verify
+Batch 2: SPECIFICATIONS.md (2 edits) → show diff → user approves → apply → verify
+```
+
+**Why it matters**: Documentation changes affect the developer/agent interface — even small wording changes can alter how tools are used. Per-batch approval prevents the "everything changed at once" surprise that breaks trust.
+
 ## Key Takeaways
 1. **Modular > Monolithic**
 2. **Config > Hardcode**
@@ -1371,7 +1498,8 @@ uv run pytest tests/ -v              # Tests
 61. **Step 0 Convention** — universal pre-conditions go at step 0, not mixed into the main step sequence
 62. **Consistent Process Template** — every workflow document follows the same section template for predictable navigation
 63. **Cross-Phase Deduplication** — extract duplicated rules to a shared governance document; replace copies with cross-references
-64. **Three-Layer Code Exploration Stack** — knowledge graph (macro) → semantic search (meso) → AST rewriting (micro); use in layer order
+64. **Three-Tier Classification** — Classify tasks before exploring: Tier 1 (Tiny, known files) / Tier 2 (Moderate, known area) / Tier 3 (Complex, unknown scope). Each tier has a defined tool set and completeness safeguard.
 65. **Test Health Audit** — periodically audit tests for stale file paths, misleading comments, and coverage gaps; pass/fail alone isn't enough
 66. **Design-Spec-to-Config Bridge** — every design spec token maps explicitly to its implementation target (tailwind.config.js, CSS variables); no ambiguity
 67. **File Existence Checks in Tests** — update hardcoded file lists in the same batch as file changes, or use glob-based discovery instead
+68. **question Tool Mandate** — the built-in `question` tool is the sole mechanism for agent-to-user questions; no raw text prompts, unformatted "y/n", or prose option lists

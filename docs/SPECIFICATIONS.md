@@ -4,6 +4,8 @@
 
 ---
 
+> **Last verified:** 2026-05-31 20:15 EDT
+
 ## 💡 Problem  
 At hackathons, conferences, and meetups, introverts often feel overwhelmed by the pressure to "just go talk to people."  
 Traditional networking feels exhausting, performative, and unpredictable — leading many to stay isolated, even when they want to connect.
@@ -23,11 +25,11 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 2. **Sets up their profile** — optionally enters a display name, LinkedIn URL, and/or Slack handle (stored but never shared without double opt-in). If name is left blank, an anonymous `User_XXXXX` username is auto-generated.
 3. **Selects a room** (Main Hall, Table 1-5, Quiet Corner, Coffee Area) via dropdown
 4. **Browses nearby people and requests a chat** — sees who's in the same room, selects a person, and sends a chat request
-5. **Waits for acceptance** — the other person receives the request and accepts (or declines). Once accepted, both tap "Ready" to proceed
+5. **Waits for acceptance** — the other person receives the request and accepts (or declines). Once accepted, both tap "I'm Ready to Chat!" and then "Start Chat - Both Ready!" to proceed
 6. **Match found!** → 60-second countdown → auto-redirect to chat page
 7. **30-second timed chat** with guided conversation prompts
 8. **Time's up** → option to extend the timer or chat indefinitely
-9. **Connection exchange** → both users independently decide → if both opt in, usernames are exchanged
+9. **Connection exchange** → navigated to a dedicated Connect page where both users independently choose Yes/No on a connection card. If both opt in, usernames are exchanged in real time via WebSocket; if either declines, the chat ends respectfully with a decline message
 
 ---
 
@@ -94,11 +96,7 @@ The following are explicitly NOT implemented and should not be built unless the 
 
 ### Architecture Overview
 
-**Frontend (React SPA)** — All UI logic lives in the browser as a single-page application. The backend only provides data via REST and real-time events via WebSocket — no page reloads, keeping the server lightweight. UI is built with Tailwind CSS + shadcn/ui (radix primitives) with a custom "Warm Sanctuary" design token system supporting both light and dark modes. Page transitions use `motion`, toasts use `sonner`, and icons use `lucide-react`.
-
-**Backend (FastAPI + WebSocket)** — Python API server that handles events, users, matches, and real-time communication. WebSocket connections enable instant match notifications without polling or constant network overhead.
-
-**Data Model** — Four entities: Events group users by occasion, Rooms provide coarse location-based matching, Users carry optional profile info, and Matches pair two users temporarily. Chats are never stored — matches expire after 30 seconds with background cleanup at 5 minutes.
+**Frontend (React SPA)** — Browser-based UI with Tailwind CSS + shadcn/ui. **Backend (FastAPI + WebSocket)** — Python API server for events, users, and real-time matching. **Data Model** — Four entities (Events, Rooms, Users, Matches) with temporary match lifecycle. See the technology table below for details.
 
 | Layer | Technology | Why? |
 |-------|------------|------|
@@ -115,6 +113,19 @@ The following are explicitly NOT implemented and should not be built unless the 
 | **QR Codes** | `qrcode` Python library | Generate event-specific QR codes for quick access. |
 | **Typography** | Sora (UI), DM Serif Display (headings) — Google Fonts | Warm, approachable text hierarchy. |
 
+### Product Decisions
+
+| Decision | Why? |
+|----------|------|
+| Anonymous by default | Zero friction sign-up; no email or password needed |
+| SQLite over PostgreSQL | Zero setup, portable, sufficient for event-scale traffic |
+| Native WebSocket over SocketIO | No extra dependency; FastAPI has built-in WS support |
+| Room-level location over GPS | Privacy-preserving; no location permissions needed |
+| In-memory matches + DB persistence | Speed for active matches; durability for user profiles |
+| 30-second chat timer | Low commitment reduces anxiety; easy to extend if desired |
+| Double opt-in connection | Both parties must consent before contact info is shared |
+| Dark mode via CSS variables + localStorage | Respects system preference; persists across sessions |
+
 ---
 
 ## 💬 Sample User Flow (Perfect for Demo)
@@ -129,7 +140,7 @@ The following are explicitly NOT implemented and should not be built unless the 
 >
 > They spot *CodeCalm_42* — sounds interesting! They tap the card and click *"Request 2-min chat"*. The request is sent.
 >
-> CodeCalm_42 accepts. Both tap *"Ready"* → 60-second match countdown begins.
+> CodeCalm_42 accepts. Both tap *"I'm Ready to Chat!"* and then *"Start Chat - Both Ready!"* → 60-second match countdown begins.
 >
 > ✅ *"Matched with CodeCalm_42 at Hall 3. Head over now!"*
 >

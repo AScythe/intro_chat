@@ -1,4 +1,6 @@
-# Design Spec — IntroChat Redesign
+# Design Spec — IntroChat
+
+> **Last updated:** 2026-05-31 20:15 EDT
 
 ## Aesthetic Direction
 
