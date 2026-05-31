@@ -57,7 +57,9 @@ describe('UserInfoPage', () => {
       );
     });
     await waitFor(() => {
-      expect(screen.getByText(/Profile saved/i)).toBeInTheDocument();
+      const btn = screen.getByText('Profile saved! Select a room.');
+      expect(btn).toBeInTheDocument();
+      expect(btn).toBeDisabled();
     });
     expect(screen.getByText('Select Room / Area')).not.toBeDisabled();
   });
@@ -90,8 +92,38 @@ describe('UserInfoPage', () => {
       );
     });
     await waitFor(() => {
-      expect(screen.getByText(/Profile saved/i)).toBeInTheDocument();
+      const btn = screen.getByText('Profile saved! Select a room.');
+      expect(btn).toBeInTheDocument();
+      expect(btn).toBeDisabled();
     });
     expect(screen.getByText('Select Room / Area')).not.toBeDisabled();
+  });
+
+  it('re-enables save button when form is edited after save', async () => {
+    const mockResponse = { user_id: 'user_abc123', username: 'Alex' };
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    });
+
+    renderWithRouter();
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\. Alex/i), {
+      target: { value: 'Alex' },
+    });
+    fireEvent.click(screen.getByText('Save Profile'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Profile saved! Select a room.')).toBeInTheDocument();
+    });
+
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\. Alex/i), {
+      target: { value: 'Alexandra' },
+    });
+
+    await waitFor(() => {
+      const btn = screen.getByText('Save Profile');
+      expect(btn).not.toBeDisabled();
+    });
+    expect(screen.getByText('Select Room / Area')).toBeDisabled();
   });
 });

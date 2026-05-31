@@ -8,11 +8,12 @@ import { UserProvider } from '@/context/UserContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { ChatPage } from '@/pages/ChatPage';
 
-function renderWithProviders(matchId = 'demo_test1234', eventId = 'TEST1234') {
+function renderWithProviders(matchId = 'demo_test1234', eventId = 'TEST1234', partnerName?: string) {
+  const partnerParam = partnerName ? `&partner=${partnerName}` : '';
   return render(
     <UserProvider>
       <SocketProvider>
-        <MemoryRouter initialEntries={[`/chat/${matchId}?event_id=${eventId}`]}>
+        <MemoryRouter initialEntries={[`/chat/${matchId}?event_id=${eventId}${partnerParam}`]}>
           <Routes>
             <Route path="/chat/:matchId" element={<ChatPage />} />
           </Routes>
@@ -42,10 +43,18 @@ describe('ChatPage', () => {
     expect(screen.getByText(/setting up your chat/i)).toBeInTheDocument();
   });
 
-  it('shows partner name after loading', async () => {
+  it('shows fallback partner name when no partner param', async () => {
     renderWithProviders('demo_test1234');
     await waitFor(() => {
       expect(screen.getByText(/Dan_DevOps/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+  });
+
+  it('shows partner name from URL param when provided', async () => {
+    const partnerName = 'Sarah_Dev';
+    renderWithProviders('demo_test1234', 'TEST1234', partnerName);
+    await waitFor(() => {
+      expect(screen.getByText(new RegExp(partnerName, 'i'))).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 

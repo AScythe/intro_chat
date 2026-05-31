@@ -73,6 +73,13 @@ describe('PeoplePage', () => {
     });
   });
 
+  it('renders back to room link', async () => {
+    renderWithProviders();
+    await waitFor(() => {
+      expect(screen.getByText(/Back to Room/i)).toBeInTheDocument();
+    });
+  });
+
   it('redirects to room page on direct access without state', async () => {
     renderDirectAccess('TEST1234');
     await waitFor(() => {

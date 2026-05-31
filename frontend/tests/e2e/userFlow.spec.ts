@@ -48,7 +48,7 @@ test.describe('IntroChat E2E', () => {
     const body = JSON.parse(postReq.postData() || '{}');
     expect(body.username).toMatch(/^User_[a-z0-9]{5}$/);
 
-    await expect(page.getByText('Profile saved')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Profile saved/i })).toBeDisabled();
     await expect(page.getByText('Select Room / Area')).not.toBeDisabled();
   });
 
@@ -68,7 +68,7 @@ test.describe('IntroChat E2E', () => {
     const body = JSON.parse(postReq.postData() || '{}');
     expect(body.username).toBe('Alice');
 
-    await expect(page.getByText('Profile saved')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Profile saved/i })).toBeDisabled();
     await expect(page.getByText('Select Room / Area')).not.toBeDisabled();
   });
 

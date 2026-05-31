@@ -53,4 +53,9 @@ describe('RoomPage', () => {
     renderWithProviders();
     expect(screen.getByText(/Back to Home/i)).toBeInTheDocument();
   });
+
+  it('renders back to profile link', () => {
+    renderWithProviders();
+    expect(screen.getByText(/Back to Profile/i)).toBeInTheDocument();
+  });
 });
