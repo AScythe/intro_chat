@@ -16,6 +16,7 @@ description: 'Scan project-level structure — directory layout, package organiz
 
 ## Phase 0: Prerequisites
 
+- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the review pass findings (from review-implementation)
 - [ ] Run baseline tests — all must pass
 - [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
@@ -54,7 +55,7 @@ Present findings as: `[P0/P1/P2] file:line — finding → Recommend: action`
 
 ### Gate: User Approval
 
-Present findings and ask: **"Shall I apply these changes?"**
+Present findings and use the `question` tool to ask: **"Shall I apply these changes?"** Provide clickable `options` with `label` ("Apply all", "Select items", "Skip") and `description` fields. Rely on the auto-added "Type your own answer" for custom input.
 
 Wait for explicit approval before Phase 2. If zero findings, report **"Architecture evaluation complete — no issues found."**
 
@@ -111,10 +112,31 @@ When multiple approved items touch the same file or directory, sort by dependenc
 - **Partial:** Track done items in-conversation. On resume, pick up at first undone item.
 - **Stale evaluation:** If codebase changed significantly since Phase 1, re-run Phase 1 before continuing.
 
+### Combined execution with modularize-and-clean
+
+When the user triggers both `improve-architecture` and `modularize-and-clean` together:
+
+1. **Phase 1 runs in parallel** with `modularize-and-clean` Phase 1 — each skill independently scans its defined scope (structure vs code-level quality)
+2. **Merge phase**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan document (see [check-plan-readiness template format](../../../AGENTS.md#agentic-workflow-skills))
+3. **Unified plan** covers all findings from both skills, deduplicated and re-prioritized with P0–P2 labels per skill
+4. **User approval**: Present the unified plan for approval
+5. **Apply batches**: Structural changes carry `[ARCH]` flags, code-quality changes carry `[CLEANUP]` flags — never mix flags in the same batch
+6. **Review**: Route to `review-implementation`
+
+## Save Session (before hand-off)
+
+After all architecture improvements are applied and verified, load and execute the `save-session` skill before proceeding to hand-off.
+
+**Steps:**
+1. Load the skill: `skill(name: "save-session")`
+2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
+3. After save completes, proceed to Hand-off below
+
 ## Hand-off
 - Phase 1: All 8 areas evaluated, findings presented with priorities
 - Gate: User approved (or selected specific items)
 - Phase 2: All approved items applied or explicitly skipped (with reason)
+- Phase 3: Architecture session saved
 - Full test suite passes with same or documented test count change
 - Every changed line carries `[ARCH]` flag — zero non-ARCH flags
 

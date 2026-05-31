@@ -17,6 +17,7 @@ description: 'Create the finalized plan document from conversation context, veri
 
 ## Phase 0: Prerequisites
 
+- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the upstream plan (from brainstorm-and-plan or grill-and-refine) — all sections
 - [ ] Verify all 8 gates from the prior plan are closed
 - [ ] Confirm the plan document does not already exist in docs/
@@ -131,16 +132,26 @@ After checking all gates, append the results table:
    - **Minor** (missing doc, unclear wording) → fix in place, re-check.
    - **Significant** (unresolved assumption, edge case, soundness) → follow the User Interaction Pattern:
      1. State which gates failed and why — one gate at a time, do not dump all at once
-     2. For each failed gate, present the unresolved issue with concrete options (e.g., "Option A: extend the plan to cover this, Option B: mark as out of scope, Option C: route back to grill-and-refine")
-     3. Accept free-form input beyond offered options
+     2. For each failed gate, use the `question` tool with concrete options (e.g., "Option A: extend the plan to cover this, Option B: mark as out of scope, Option C: route back to grill-and-refine"). Provide `label` and `description` in every option.
+     3. Rely on the auto-added "Type your own answer" for free-form input beyond offered options
      4. Resolve before moving to the next gate — do not revisit
      5. After all resolved, summarize confirmed decisions
 3. Re-check all gates after resolution
+
+## Save Session (on pass)
+
+If all gates pass, load and execute the `save-session` skill before proceeding to hand-off. This captures the planning conversation before implementation begins.
+
+**Steps:**
+1. Load the skill: `skill(name: "save-session")`
+2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
+3. After save completes, proceed to Hand-off below
 
 ## Hand-off
 - Phase 1: Inputs gathered from brainstorm + grill
 - Phase 2: Plan file created with all sections populated
 - Phase 3: All 8 gates checked, results appended
+- Phase 4: Session conversation saved (on pass)
 - Pass → route to implement-plan. Fail → triaged (minor: fixed; significant: route to grill-and-refine)
 
 ---
@@ -151,7 +162,7 @@ After checking all gates, append the results table:
 Persistent plan file at `docs/PLAN_*.md` with all sections populated and gate results appended.
 
 ### Exit Declaration (pass)
-State clearly: "**All planning gates pass. Plan saved at `docs/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implementation of the plan.**"
+State clearly: "**All planning gates pass. Plan saved at `docs/PLAN_...`. Ready to implement. Say 'proceed' or 'implement' to trigger implementation of the plan. Remember to compact before proceeding.**"
 
 ### Exit Declaration (fail)
 State clearly: "**Gate failure: [list failed gates]. Triage: [minor → fixed in place | significant → let's resolve these: list affected dimensions].**"

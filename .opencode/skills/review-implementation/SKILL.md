@@ -21,6 +21,7 @@ description: 'Verify the completed implementation meets all success criteria —
 
 ## Phase 0: Prerequisites
 
+- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Confirm which prior skill produced the diff (implement-plan, improve-architecture, or modularize-and-clean)
 - [ ] Read the prior plan or evaluation list
 - [ ] Run baseline tests — all must pass before proceeding
@@ -31,7 +32,7 @@ description: 'Verify the completed implementation meets all success criteria —
 ## Documents to Read
 
 - **First pass** (after `implement-plan`): `docs/PLAN_*.md` + `docs/ARCHITECTURE.md` ("Import Structure", relevant module descriptions)
-- **Clean-up pass** (after `modularize-and-clean`): `docs/PLAN_*.md` (success criteria) — fall back to `archive/` if already moved. Change-log is the primary target.
+- **Clean-up pass** (after `modularize-and-clean`): `docs/PLAN_*.md` (success criteria) — fall back to `archive/plan/` if already moved. Change-log is the primary target.
 - **Architecture pass** (after `improve-architecture`): `improve-architecture` session output — the evaluation list is the target.
 
 ## Review Workflow
@@ -168,17 +169,27 @@ All pass or any fail → see Exit Declaration below.
 
 Skip if plan already in `archive/`.
 
-Ask: **"Move plan to archive? (y/n)"**
+Use the `question` tool to ask: **"Move plan to archive?"** Provide clickable `options` with `label` ("Yes, archive", "No, keep") and `description` fields.
 
 If yes:
-- Use Get-ChildItem (bash) to scan `docs/` and `archive/` for the highest NNN across all PLAN_*.md files (CRITICAL: do NOT use glob — glob respects `.ignore` which excludes archive/PLAN_*.md, causing silent failure). Increment by 1 → MMM.
-- Move: `docs/PLAN_<date>_<NNN>.md` → `archive/PLAN_<date>_<MMM>.md` (preserves original creation date, assigns global sequential archive number)
-- Confirm: "Plan archived as `archive/PLAN_<date>_<MMM>.md`."
+- Use Get-ChildItem (bash) to scan `docs/` and `archive/plan/` for the highest NNN across all PLAN_*.md files (CRITICAL: do NOT use glob — glob respects `.ignore` which excludes `archive/plan/`, causing silent failure). Increment by 1 → MMM.
+- Move: `docs/PLAN_<date>_<NNN>.md` → `archive/plan/PLAN_<date>_<MMM>.md` (preserves original creation date, assigns global sequential archive number)
+- Confirm: "Plan archived as `archive/plan/PLAN_<date>_<MMM>.md`."
+
+#### Save Session (on success)
+
+After archiving the plan (or skipping if already archived), load and execute the `save-session` skill to capture the implementation/review conversation.
+
+**Steps:**
+1. Load the skill: `skill(name: "save-session")`
+2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
+3. After save completes, proceed to Hand-off below
 
 ## Hand-off
 - Phase 1: Diff reviewed, git status clean — only expected files touched
 - Phase 2: All tests pass (count compared), build succeeds, lint clean
 - Phase 3: Test quality verified, plan/evaluation criteria met, archive moved
+- Phase 4: Review session saved
 - Pass → route to modularize-and-clean (first pass), improve-architecture (first pass), or update-docs (clean-up/arch pass). Fail → route back to the prior skill that produced the diff.
 
 ### Abort Paths
@@ -194,7 +205,7 @@ Verbal verification report: pass (all items implemented, all criteria met) or fa
 ### Exit Declaration
 
 **Pass** — state clearly:
-- First pass: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (structural cleanup), improve-architecture (architectural review), or update-docs (skip to documentation sync). Proceed?**"
+- First pass: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (structural cleanup) with improve-architecture (architectural improvement), or update-docs (skip to documentation sync). Proceed?**"
 - Clean-up pass: "**All checks pass. Cleanup verified. Proceed to update-docs?**"
 - Architecture pass: "**All checks pass. Architecture improvements verified. Proceed to update-docs?**"
 
@@ -202,6 +213,6 @@ Verbal verification report: pass (all items implemented, all criteria met) or fa
 
 ### Next Step
 
-- **First pass — pass:** User invokes `modularize-and-clean` (Build mode), `improve-architecture` (Plan mode), or `update-docs` (Build mode).
+- **First pass — pass:** User invokes `modularize-and-clean` (Build mode) and `improve-architecture` (Plan mode), or `update-docs` (Build mode).
 - **Clean-up/Architecture pass — pass:** User invokes `update-docs`.
 - **Any fail:** User invokes the prior skill that produced the diff.

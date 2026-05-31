@@ -85,13 +85,13 @@ During **Risks**, probe for test fragility:
 
 ### Phase 2: Interactive Walkthrough (with user)
 
-Follow the User Interaction Pattern in AGENTS.md: present one decision-point at a time, resolve, then present the next. Never present multiple items in a single message.
+Follow the User Interaction Pattern in AGENTS.md — use the `question` tool with clickable selectable options for every user decision point. Provide `options` with `label` and `description` fields. Never use raw text prompts or unformatted "y/n" questions. Present one decision-point at a time, resolve, then present the next.
 
-1. **Before starting:** flag each dimension by NAME only as "needs discussion" or "skippable" — do not describe contents or list individual items within dimensions. Confirm skip list with the user.
+1. **Before starting:** use the `question` tool to let user flag each dimension as "needs discussion" or "skippable" — present only NAME, do not describe contents. Resolve skip list before proceeding.
 2. Walk through each non-skipped dimension in order. For each:
    - State ONE finding and recommendation at a time
-   - Offer concrete options (e.g., "server-side, client-side, or something else")
-   - Accept free-form input beyond offered options
+   - Use the `question` tool with concrete options (e.g., "server-side, client-side, or something else")
+   - Rely on the auto-added "Type your own answer" for free-form input beyond offered options
    - Resolve before moving to the next item within this dimension — do not revisit
 3. After all dimensions, summarize confirmed decisions
 
@@ -128,7 +128,7 @@ After all dimensions, produce the full revised plan summary. Must be:
 Revised plan (verbal) formatted as a ready-to-copy code block.
 
 ### Exit Declaration
-State clearly: "**Grill complete. Check for plan readiness? Say 'check' to trigger checking the readiness of the plan.**"
+State clearly: "**Grill complete. Check for plan readiness? Say 'check' to trigger checking the readiness of the plan. Remember to switch to Build mode**"
 
 ### Next Step
 User invokes `check-plan-readiness` — **switch to Build mode before proceeding**.

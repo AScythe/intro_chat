@@ -55,21 +55,42 @@ description: 'Analyze session changes and sync all project documentation by dele
 
 3. **List which docs to update** — for each change type that occurred, note the corresponding doc. If none match, skip to Phase 3.
 
-### Phase 2: Sync
+### Phase 2: Propose (Parallel Analysis)
 
-For each doc in the update list from Phase 1, invoke the corresponding skill via the Task tool. Each skill investigates independently per its own Investigation Protocol — no session context or git diff needed.
+For each doc in the update list from Phase 1, launch a Task sub-agent to analyze and propose diffs. Each sub-agent is **read-only** — it investigates the codebase and returns a list of `oldString→newString` proposals, but does NOT apply any edits.
 
-Run in dependency order:
+**Important:** Sub-agents must be instructed explicitly to return proposed diffs only, never to call `edit`, `write`, or `bash`. The `question` and `read` tools are permitted for analysis.
 
-1. `docs/ARCHITECTURE.md` → `skill(name: "update-architecture-md")`
-2. `docs/SPECIFICATIONS.md` → `skill(name: "update-specifications-md")`
-3. `AGENTS.md` → `skill(name: "update-agents-md")`
-4. `docs/README.md` → `skill(name: "update-readme-md")`
-5. `refs/PROJECT_BEST_PRACTICES.md` → `skill(name: "update-best-practices-md")`
-6. `refs/AGENT_SETUP.md` → `skill(name: "update-agent-setup-md")`
-7. `refs/DOCUMENT_GUIDELINES.md` — inline update only (no dedicated skill)
+Launch all in parallel (no dependency ordering needed — analysis is independent):
 
-### Phase 3: Verify
+1. `docs/ARCHITECTURE.md` → instruct sub-agent to load `skill(name: "update-architecture-md")` and return proposals
+2. `docs/SPECIFICATIONS.md` → instruct sub-agent to load `skill(name: "update-specifications-md")` and return proposals
+3. `AGENTS.md` → instruct sub-agent to load `skill(name: "update-agents-md")` and return proposals
+4. `docs/README.md` → instruct sub-agent to load `skill(name: "update-readme-md")` and return proposals
+5. `refs/PROJECT_BEST_PRACTICES.md` → instruct sub-agent to load `skill(name: "update-best-practices-md")` and return proposals
+6. `refs/AGENT_SETUP.md` → instruct sub-agent to load `skill(name: "update-agent-setup-md")` and return proposals
+7. `refs/DOCUMENT_GUIDELINES.md` — inline analysis only (no dedicated skill)
+
+Each sub-agent returns: a list of `{filePath, oldString, newString, reason}` objects. No edits are applied.
+
+### Phase 3: Review (Serial Approval)
+
+Collect all proposals from Phase 2. Present each document's proposed diffs to the user **one doc at a time** using the `question` tool.
+
+For each doc that has proposals:
+1. Show the proposed oldString→newString diffs (use `read` to display context)
+2. Ask user: approve all, reject all, or review individual edits
+3. Collect the user's decision before moving to the next doc
+
+Only proceed to Phase 4 after all documents have been reviewed.
+
+### Phase 4: Apply
+
+Apply approved proposals from Phase 3 using the `edit` tool. Apply one doc at a time — run full test suite before moving to the next doc.
+
+If a user rejected or modified a proposal, skip or adjust accordingly.
+
+### Phase 5: Verify
 
 - [ ] All `See <DOC>.md` links between documents resolve to existing headings
 - [ ] No dead anchor references — every `#section-name` target exists in the target doc
@@ -78,8 +99,10 @@ Run in dependency order:
 
 ## Hand-off
 - Phase 1: Session changes inventoried and matched against Doc Sync Triggers
-- Phase 2: All applicable docs updated in dependency order
-- Phase 3: Cross-references verified — no dead links, orphaned sections, or stale redirects
+- Phase 2: All applicable docs have proposals generated (parallel analysis, no writes)
+- Phase 3: User reviewed and approved/rejected each proposal (serial, one doc at a time)
+- Phase 4: Approved edits applied (one doc at a time, tests pass between each)
+- Phase 5: Cross-references verified — no dead links, orphaned sections, or stale redirects
 
 ### Abort Paths
 If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
@@ -89,7 +112,7 @@ If interrupted mid-phase: record current state in a TODO or pending list, offer 
 ## Outputs & Triggers
 
 ### Output
-All applicable docs updated in dependency order. Cross-references verified across all project docs. No dead links, orphaned sections, or stale redirects.
+All applicable docs updated via propose-review-apply pipeline. Cross-references verified across all project docs. No dead links, orphaned sections, or stale redirects.
 
 ### Exit Declaration
 State clearly: "**Documentation sync complete. All applicable syncs run, cross-references verified. Proceed to push-to-git? Say 'push' to trigger pushing the changes to git.**"

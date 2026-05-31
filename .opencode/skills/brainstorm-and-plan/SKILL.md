@@ -17,6 +17,7 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 ## Phase 0: Prerequisites
 
+- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the upstream problem description or prior plan document
 - [ ] Run baseline tests — all must pass
 - [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
@@ -77,7 +78,7 @@ Evaluate the proposed approach against these principles. Surface concerns here.
 
 ### Phase 2: Interactive Walkthrough (with user)
 
-Follow the User Interaction Pattern in AGENTS.md: present one decision-point at a time, resolve, then present the next. Never present multiple items in a single message and ask the user to respond to all at once.
+Follow the User Interaction Pattern in AGENTS.md — use the `question` tool with clickable selectable options for every user decision point. Provide `options` with `label` and `description` fields. Never use raw text prompts or unformatted "y/n" questions. Present one decision-point at a time, resolve, then present the next. Never present multiple items in a single message.
 
 1. **Clarify understanding** — restate requirements back to the user. Do not proceed until confirmed.
 2. **Surface ambiguities** — state ONE unclear point at a time. Present multiple interpretations if they exist for that point; do not pick silently. Resolve before moving to the next ambiguity.

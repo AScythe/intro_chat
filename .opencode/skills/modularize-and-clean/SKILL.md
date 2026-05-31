@@ -21,6 +21,7 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 
 ## Phase 0: Prerequisites
 
+- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the review pass findings (from review-implementation)
 - [ ] Run baseline tests — all must pass
 - [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
@@ -76,7 +77,7 @@ Recommendation guide:
 
 ### Gate: User Approval
 
-Present the candidate list and ask: **"Shall I proceed with these changes?"**
+Present the candidate list and use the `question` tool to ask for approval: **"Shall I proceed with these changes?"** Provide clickable `options` with `label` ("Proceed", "Skip item", "Cancel") and `description` fields. Rely on the auto-added "Type your own answer" for custom input.
 
 Wait for explicit approval before Phase 2.
 
@@ -128,10 +129,31 @@ For each approved candidate, in order:
 
 After all batches, produce a verbal markdown change-log grouped by scope with `[CLEANUP]` `[file:line]` entries — coverage tests added and unsafe candidates skipped.
 
+### Combined execution with improve-architecture
+
+When the user triggers both `modularize-and-clean` and `improve-architecture` together:
+
+1. **Phase 1 runs in parallel** with `improve-architecture` Phase 1 — each skill independently scans its defined scope (code-level quality vs structure)
+2. **Merge phase**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan document (see [check-plan-readiness template format](../../../AGENTS.md#agentic-workflow-skills))
+3. **Unified plan** covers all findings from both skills, deduplicated and re-prioritized
+4. **User approval**: Present the unified plan for approval
+5. **Apply batches**: Code-quality changes carry `[CLEANUP]` flags, structural changes carry `[ARCH]` flags — never mix flags in the same batch
+6. **Review**: Route to `review-implementation`
+
+## Save Session (before hand-off)
+
+After all batches are applied and verified, load and execute the `save-session` skill before proceeding to hand-off. This captures the cleanup conversation before review.
+
+**Steps:**
+1. Load the skill: `skill(name: "save-session")`
+2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
+3. After save completes, proceed to Hand-off below
+
 ## Hand-off
 - Phase 1: All 11 scopes scanned, candidate list compiled
 - Gate: User approved
 - Phase 2: Approved batches applied or explicitly skipped
+- Phase 3: Cleanup session saved
 - All changed lines carry [CLEANUP]
 - Full test suite and lint pass
 - Verbal change-log produced

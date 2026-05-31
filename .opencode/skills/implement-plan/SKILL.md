@@ -22,6 +22,7 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 ## Phase 0: Prerequisites
 
+- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the approved plan (docs/PLAN_*) — verify all 8 gates pass
 - [ ] Run baseline tests — all must pass before any changes
 - [ ] Run `graphify query_graph "<task scope>"` — mandatory blast-radius check. Knowing the exact file paths is not enough; graphify reveals relationship context you might miss. This is the first step, not a fallback.
@@ -37,7 +38,7 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 - Verify all 8 gates pass. Do not proceed if any failed.
 - Read the plan fully — batches map 1:1 to the plan's Task Breakdown items.
 - Identify files to create, modify, or remove. Map each test file to a plan task.
-- If anything is unclear, ask before proceeding.
+- If anything is unclear, use the `question` tool to ask — provide selectable `options` with `label` and `description` fields. Rely on the auto-added "Type your own answer" for free-form input.
 
 ### Codebase Exploration
 
@@ -210,10 +211,20 @@ Every batch that adds or modifies logic must include its test file(s) in `tests/
 11. **Plan file unchanged** — read-only constraint verified
 12. **Idempotency check** — re-running the same operation produces the same result? No state changes on repeated calls?
 
+## Save Session (before hand-off)
+
+After Phase 3 Verify completes, load and execute the `save-session` skill before proceeding to hand-off. This captures the implementation conversation before review begins.
+
+**Steps:**
+1. Load the skill: `skill(name: "save-session")`
+2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
+3. After save completes, proceed to Hand-off below
+
 ## Hand-off
 - Phase 1: Plan verified (8 gates ✅), batches mapped to Task Breakdown
 - Phase 2: All batches implemented with TDD + flags, verified per batch
 - Phase 3: Full test suite passes, lint clean, all audits passed
+- Phase 4: Implementation session saved
 - Pass → route to review-implementation. Plan file unchanged. Tests saved in `tests/`.
 
 ### Abort Paths
