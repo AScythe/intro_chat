@@ -1,6 +1,15 @@
 # qr_utils.py
 # Description: QR code generation utility — produces base64-encoded PNG data URIs from input text
 # ====
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
 import qrcode
 import io
 import base64

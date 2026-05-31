@@ -1,11 +1,20 @@
 # database.py
 # Description: Async SQLite database initialization creating events, users, rooms, and matches tables with migration handling for social profile columns
 # ====
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
 import aiosqlite
 import sqlite3
 import os
 
-async def init_db(db_path):
+async def init_db(db_path: str) -> None:
     async with aiosqlite.connect(db_path) as db:
         await db.execute('''
             CREATE TABLE IF NOT EXISTS events (

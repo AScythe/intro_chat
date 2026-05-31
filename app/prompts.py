@@ -1,6 +1,14 @@
 # prompts.py
 # Description: Static conversation prompt data shared across all modules — used by the API endpoint and re-exported via state.py for backward compatibility
 # ====
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
 
 CONVERSATION_PROMPTS = [
     "What's one thing you're excited about this weekend?",
