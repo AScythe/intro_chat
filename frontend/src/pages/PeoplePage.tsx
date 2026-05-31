@@ -6,161 +6,11 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSocket } from '@/hooks/useSocket';
 import { useDemoMode } from '@/hooks/useDemoMode';
 import { useChatRequest } from '@/hooks/useChatRequest';
-import { PersonCard } from '@/components/PersonCard';
 import { MatchCountdown } from '@/components/MatchCountdown';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CONFIG } from '@/config/constants';
+import { NearbyUsersView, WaitingResponseView, AcceptedView } from '@/components/PeoplePageViews';
 import type { SamplePerson } from '@/utils/demoData';
-
-interface PersonResponse {
-  accepted: boolean;
-  message: string;
-}
-
-interface NearbyUsersViewProps {
-  roomName: string;
-  nearbyUsers: SamplePerson[];
-  selectedPerson: SamplePerson | null;
-  onPersonClick: (person: SamplePerson) => void;
-  onRequestChat: () => void;
-  onChangeRoom: () => void;
-}
-
-function NearbyUsersView({ roomName, nearbyUsers, selectedPerson, onPersonClick, onRequestChat, onChangeRoom }: NearbyUsersViewProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-heading text-2xl">
-          {roomName}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="rounded-xl bg-muted p-5">
-          <h3 className="mb-4 text-lg font-semibold text-foreground">Nearby Users</h3>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
-            {nearbyUsers.map((person) => (
-              <PersonCard
-                key={person.name}
-                person={person}
-                selected={selectedPerson?.name === person.name}
-                onClick={() => onPersonClick(person)}
-              />
-            ))}
-          </div>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            <span className="font-medium">{nearbyUsers.filter((u) => u.available).length} available</span> out of{' '}
-            {nearbyUsers.length} people
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <Button
-            disabled={!selectedPerson}
-            onClick={onRequestChat}
-          >
-            Request 2-min chat with {selectedPerson?.name || 'selected person'}
-          </Button>
-          <Button variant="outline" onClick={onChangeRoom}>
-            Change Room
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface WaitingResponseViewProps {
-  requestedPerson: SamplePerson;
-  onCancel: () => void;
-}
-
-function WaitingResponseView({ requestedPerson, onCancel }: WaitingResponseViewProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-heading text-2xl">Request Sent</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="max-w-sm">
-          <PersonCard person={requestedPerson} />
-        </div>
-        <div className="space-y-3 rounded-xl border bg-muted p-5">
-          <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
-            <span className="text-sm text-foreground">You: Request sent</span>
-          </div>
-          <div className="flex animate-pulse items-center gap-3 rounded-lg border bg-card p-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
-            <span className="text-sm text-foreground">{requestedPerson.name}: Waiting for response...</span>
-          </div>
-        </div>
-        <Button variant="outline" onClick={onCancel}>
-          Cancel Request
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface AcceptedViewProps {
-  requestedPerson: SamplePerson;
-  personResponse: PersonResponse;
-  yourReady: boolean;
-  theirReady: boolean;
-  onImReady: () => void;
-  onGoToChat: () => void;
-}
-
-function AcceptedView({ requestedPerson, personResponse, yourReady, theirReady, onImReady, onGoToChat }: AcceptedViewProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-heading text-2xl">
-          {requestedPerson.name} accepted!
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="rounded-xl border-l-4 border-primary bg-muted p-5">
-          <p className="text-sm text-foreground">
-            <span className="font-semibold">{requestedPerson.name} says:</span> "{personResponse.message}"
-          </p>
-          <p className="mt-3 font-medium text-foreground">You've been matched! Take your time to get ready.</p>
-        </div>
-
-        <div className="space-y-3 rounded-xl border bg-muted p-5">
-          <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">
-              {yourReady ? '✅' : '⏳'}
-            </span>
-            <span className="text-sm text-foreground">You: {yourReady ? 'Ready!' : 'Getting ready...'}</span>
-          </div>
-          <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">
-              {theirReady ? '✅' : '⏳'}
-            </span>
-            <span className="text-sm text-foreground">{requestedPerson.name}: {theirReady ? 'Ready!' : 'Getting ready...'}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-4">
-          {!yourReady && (
-            <Button onClick={onImReady}>
-              I'm Ready to Chat!
-            </Button>
-          )}
-          <Button
-            variant={yourReady && theirReady ? 'default' : 'outline'}
-            disabled={!yourReady || !theirReady}
-            onClick={onGoToChat}
-          >
-            {yourReady && theirReady ? 'Start Chat - Both Ready!' : 'Start Chat'}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 export function PeoplePage() {
   const { eventId } = useParams<{ eventId: string }>();
@@ -209,7 +59,7 @@ export function PeoplePage() {
 
   function handleGoToChat() {
     const mid = demo.createDemoMatchId();
-    navigate(`/chat/${mid}?event_id=${eventId}`);
+    navigate(`/chat/${mid}?event_id=${eventId}&partner=${encodeURIComponent(requestedPerson?.name ?? '')}`);
   }
 
   function handleCancelRequest() {
@@ -264,6 +114,11 @@ export function PeoplePage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 pb-8">
       <header className="mb-8 mt-6 text-center">
+        <div className="mb-2 text-left">
+          <Button variant="link" className="p-0" onClick={() => navigate(`/room/${eventId}`)}>
+            ← Back to Room
+          </Button>
+        </div>
         <h1 className="font-heading text-4xl text-foreground">Find Chat Partners</h1>
         <p className="mt-2 text-muted-foreground">
           See who's nearby and request a chat

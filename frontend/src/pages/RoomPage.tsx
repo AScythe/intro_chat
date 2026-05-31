@@ -76,6 +76,11 @@ export function RoomPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-app flex-col px-5 pb-8">
       <header className="mb-8 mt-6 text-center">
+        <div className="mb-2 text-left">
+          <Button variant="link" className="p-0" onClick={() => navigate(`/join/${eventId}`)}>
+            ← Back to Profile
+          </Button>
+        </div>
         <h1 className="font-heading text-4xl text-foreground">Select Your Location</h1>
         <p className="mt-2 text-muted-foreground">
           Choose where you're sitting to find nearby chat partners

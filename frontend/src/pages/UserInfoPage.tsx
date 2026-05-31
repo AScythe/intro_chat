@@ -45,6 +45,7 @@ export function UserInfoPage() {
         slackHandle: slackHandle || undefined,
       });
       setSaved(true);
+      setSaving(false);
     } catch {
       toast.error('Failed to save profile. Please try again.');
       setSaving(false);
@@ -77,7 +78,7 @@ export function UserInfoPage() {
                 placeholder="e.g. Alex"
                 maxLength={50}
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value); setSaved(false); }}
               />
             </div>
 
@@ -88,7 +89,7 @@ export function UserInfoPage() {
                 id="linkedinInput"
                 placeholder="https://linkedin.com/in/yourname"
                 value={linkedinUrl}
-                onChange={(e) => setLinkedinUrl(e.target.value)}
+                onChange={(e) => { setLinkedinUrl(e.target.value); setSaved(false); }}
               />
             </div>
 
@@ -99,7 +100,7 @@ export function UserInfoPage() {
                 id="slackInput"
                 placeholder="@username or email@company.slack.com"
                 value={slackHandle}
-                onChange={(e) => setSlackHandle(e.target.value)}
+                onChange={(e) => { setSlackHandle(e.target.value); setSaved(false); }}
               />
             </div>
 
@@ -108,8 +109,8 @@ export function UserInfoPage() {
             </p>
 
             <div className="flex flex-col gap-3 pt-2">
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? 'Saving...' : 'Save Profile'}
+              <Button onClick={handleSave} disabled={saving || saved}>
+                {saving ? 'Saving...' : saved ? 'Profile saved! Select a room.' : 'Save Profile'}
               </Button>
               <Button
                 variant="outline"
@@ -120,14 +121,15 @@ export function UserInfoPage() {
               </Button>
             </div>
 
-            {saved && (
-              <div className="rounded-lg border border-primary/30 bg-primary/10 p-3 text-center text-sm text-primary">
-                Profile saved! You can now select a room.
-              </div>
-            )}
           </CardContent>
         </Card>
       </main>
+
+      <footer className="mt-6 text-center">
+        <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate('/')}>
+          Back to Home
+        </Button>
+      </footer>
     </div>
   );
 }

@@ -20,6 +20,3 @@ export interface QRResponse {
   qr_code: string;
 }
 
-export interface ApiSuccess {
-  success: boolean;
-}

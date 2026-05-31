@@ -5,16 +5,16 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Toaster } from 'sonner';
 import { Sun, Moon } from 'lucide-react';
-import { SocketProvider } from './context/SocketContext';
-import { UserProvider } from './context/UserContext';
-import { ThemeProvider, useTheme } from './hooks/useTheme';
+import { SocketProvider } from '@/context/SocketContext';
+import { UserProvider } from '@/context/UserContext';
+import { ThemeProvider, useTheme } from '@/context/useTheme';
 import { Button } from '@/components/ui/button';
-import { HomePage } from './pages/HomePage';
-import { UserInfoPage } from './pages/UserInfoPage';
-import { RoomPage } from './pages/RoomPage';
-import { ChatPage } from './pages/ChatPage';
-import { PeoplePage } from './pages/PeoplePage';
-import { ConnectPage } from './pages/ConnectPage';
+import { HomePage } from '@/pages/HomePage';
+import { UserInfoPage } from '@/pages/UserInfoPage';
+import { RoomPage } from '@/pages/RoomPage';
+import { ChatPage } from '@/pages/ChatPage';
+import { PeoplePage } from '@/pages/PeoplePage';
+import { ConnectPage } from '@/pages/ConnectPage';
 
 const STEPS = [
   { label: 'Join', path: '/' },
