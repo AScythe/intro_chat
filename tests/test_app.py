@@ -136,6 +136,8 @@ def test_file_structure():
         'frontend/src/components/PersonCard.tsx',
         'frontend/src/styles/global.css',
         'app/__main__.py',
+        'app/websocket_handler.py',
+        'app/helpers.py',
         'tests/test_db.py',
         '.gitattributes'
     ]
@@ -423,16 +425,18 @@ def test_matchmaking_lifecycle():
     assert resp.status_code == 200
     print("✅ Connection exchange completed")
 
-    # Connection declined path — user1 opts in, user2 opts out
-    asyncio.run(create_match(user1_id, user2_id, room_id))
+    # Connection declined path — user2 opts in, user3 opts out
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User3'})
+    user3_id = resp.json()['user_id']
+    client.post(f'/api/users/{user3_id}/room', json={'room_id': room_id})
+    asyncio.run(create_match(user2_id, user3_id, room_id))
     match_id2 = [mid for mid, m in active_matches.items()
-                 if m['user1_id'] == user1_id and m['user2_id'] == user2_id
-                 and mid != match_id][0]
+                 if m['user1_id'] == user2_id and m['user2_id'] == user3_id][0]
     resp = client.post(f'/api/matches/{match_id2}/connect',
-                       json={'user_id': user1_id, 'wants_to_connect': True})
+                       json={'user_id': user2_id, 'wants_to_connect': True})
     assert resp.status_code == 200
     resp = client.post(f'/api/matches/{match_id2}/connect',
-                       json={'user_id': user2_id, 'wants_to_connect': False})
+                       json={'user_id': user3_id, 'wants_to_connect': False})
     assert resp.status_code == 200
     print("✅ Connection declined path works")
     if match_id2 in active_matches:
@@ -590,10 +594,6 @@ def test_websocket_connection():
     asyncio.run(manager.send_to_user('nonexistent', {'type': 'test'}))
     print("✅ ConnectionManager.send_to_user handles missing user gracefully")
 
-    # broadcast_to_room handles empty room gracefully
-    asyncio.run(manager.broadcast_to_room('empty_room', {'type': 'test'}))
-    print("✅ ConnectionManager.broadcast_to_room handles empty room gracefully")
-
     # Test WebSocket endpoint via TestClient
     ws_user = 'ws_e2e_user'
 
@@ -645,6 +645,30 @@ def test_template_pages():
     print("✅ SPA pages test completed\n")
 
 
+def test_helpers_short_id():
+    """Test that short_id generates valid 8-char hex IDs"""
+    print("🧪 Testing helpers.short_id...")
+    from app.helpers import short_id
+    id1 = short_id()
+    id2 = short_id()
+    assert len(id1) == 8
+    assert id1 != id2
+    assert all(c in '0123456789abcdef' for c in id1)
+    print("✅ helpers.short_id generates valid 8-char hex IDs")
+    print()
+
+
+def test_qr_utils():
+    """Test that generate_qr_data_uri returns a valid data URI"""
+    print("🧪 Testing qr_utils.generate_qr_data_uri...")
+    from app.qr_utils import generate_qr_data_uri
+    uri = generate_qr_data_uri('https://example.com/test')
+    assert uri.startswith('data:image/png;base64,')
+    assert len(uri) > 50
+    print("✅ qr_utils.generate_qr_data_uri returns valid data URI")
+    print()
+
+
 def main():
     """Run all tests"""
     print("🌟 IntroChat Application Test Suite")
@@ -664,6 +688,8 @@ def main():
     test_cleanup_expired_matches()
     test_websocket_connection()
     test_template_pages()
+    test_helpers_short_id()
+    test_qr_utils()
 
     print("🎉 All tests completed!")
 

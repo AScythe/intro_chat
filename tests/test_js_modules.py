@@ -29,9 +29,12 @@ def test_frontend_files_exist():
         'hooks/useTimer.ts',
         'hooks/useDemoMode.ts',
         'hooks/useUser.ts',
+        'context/useTheme.tsx',
         'context/SocketContext.tsx',
         'context/UserContext.tsx',
         'components/Timer.tsx',
+        'components/PeoplePageViews.tsx',
+        'components/ChatPageViews.tsx',
         'components/PersonCard.tsx',
         'components/PromptCard.tsx',
         'components/MatchCountdown.tsx',
@@ -64,7 +67,7 @@ def test_api_exports():
     expected = [
         'CreateEventResponse', 'Room',
         'JoinEventResponse',
-        'QRResponse', 'ApiSuccess',
+        'QRResponse',
     ]
     for name in expected:
         if f'export interface {name}' in content or f'export type {name}' in content:
@@ -159,18 +162,28 @@ def test_component_exports():
     print("🧪 Testing component exports...")
     components = {
         'Timer.tsx': 'Timer',
+        'PeoplePageViews.tsx': ['NearbyUsersView', 'WaitingResponseView', 'AcceptedView', 'PersonResponse'],
+        'ChatPageViews.tsx': ['ErrorView', 'ChatLoadingView', 'ChattingView', 'TimeUpView', 'ExtendedView'],
         'PersonCard.tsx': 'PersonCard',
         'PromptCard.tsx': 'PromptCard',
         'MatchCountdown.tsx': 'MatchCountdown',
         'ConnectionCard.tsx': 'ConnectionCard',
         'QRDisplay.tsx': 'QRDisplay',
     }
-    for filename, comp in components.items():
+    for filename, exports in components.items():
         content = _read(os.path.join('components', filename))
-        if f'export function {comp}' in content:
-            print(f"✅ {filename} exports {comp}")
+        if isinstance(exports, list):
+            for name in exports:
+                pattern = f'export function {name}' in content or f'export interface {name}' in content or f'export const {name}' in content
+                if pattern:
+                    print(f"✅ {filename} exports {name}")
+                else:
+                    print(f"❌ {filename} missing {name}")
         else:
-            print(f"❌ {filename} missing {comp}")
+            if f'export function {exports}' in content:
+                print(f"✅ {filename} exports {exports}")
+            else:
+                print(f"❌ {filename} missing {exports}")
     print()
 
 def test_page_exports():
@@ -207,6 +220,25 @@ def test_import_references():
             print(f"❌ App.tsx missing '{imp}' import")
     print()
 
+def test_client_exports():
+    """Test that client.ts exports its public API function"""
+    print("🧪 Testing client exports (api/client.ts)...")
+    content = _read('api/client.ts')
+    if 'export async function fetchJSON' in content:
+        print("✅ client.ts exports fetchJSON")
+    else:
+        print("❌ client.ts missing fetchJSON")
+    if 'async function fetchWithTimeout' in content:
+        print("✅ client.ts defines fetchWithTimeout (internal)")
+    else:
+        print("❌ client.ts missing fetchWithTimeout")
+    if 'async function parseJSON' in content:
+        print("✅ client.ts defines parseJSON (internal)")
+    else:
+        print("❌ client.ts missing parseJSON")
+    print()
+
+
 def test_code_quality():
     """Test code quality — no console.log stmts in production code, strict mode"""
     print("🧪 Testing code quality...")
@@ -229,6 +261,7 @@ def test_code_quality():
     tsx_files = [
         'components/Timer.tsx', 'components/PersonCard.tsx', 'components/PromptCard.tsx',
         'components/MatchCountdown.tsx', 'components/ConnectionCard.tsx', 'components/QRDisplay.tsx',
+        'components/PeoplePageViews.tsx', 'components/ChatPageViews.tsx',
         'pages/HomePage.tsx', 'pages/UserInfoPage.tsx', 'pages/RoomPage.tsx', 'pages/ChatPage.tsx',
         'context/SocketContext.tsx', 'context/UserContext.tsx',
         'App.tsx',
@@ -256,6 +289,7 @@ def main():
     test_component_exports()
     test_page_exports()
     test_import_references()
+    test_client_exports()
     test_code_quality()
 
     print("🎉 All frontend source validation tests completed!")
@@ -264,7 +298,7 @@ def main():
     print("   - Demo data exports validated (demoData.ts)")
     print("   - Utility functions present in format.ts, storage.ts, random.ts")
     print("   - Hooks exported: useSocket, useTimer, useDemoMode, useUser")
-    print("   - 6 components + 4 pages exported with expected names")
+    print("   - 8 components + 4 pages exported with expected names")
     print("   - App.tsx references all pages and context providers")
 
 if __name__ == "__main__":
