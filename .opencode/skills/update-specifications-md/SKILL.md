@@ -29,11 +29,11 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 **Universal sections** (present in every project's SPECIFICATIONS.md):
 - **Problem statement and context** — what pain point exists, who experiences it, why it matters
 - **Solution description and pitch** — what the product does at a high level, why it solves the problem
-- **User journey / core logic flow** — product-focused steps in plain language, readable by a non-technical evaluator
+- **User journey / core logic flow** — numbered product-focused steps in plain language, each describing a distinct user-facing action, readable by a non-technical evaluator
 - **Feature descriptions** — with purpose and rationale: what each feature does and **why** it exists
 - **Privacy and trust model** — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section
 - **Product constraints / Out of Scope** — standalone section listing what the product explicitly does NOT do and why
-- **Tech stack with rationale** — Architecture Overview (2-line max + cross-reference) plus a "Why?" column for each technology
+- **Tech stack with rationale** — Architecture Overview (2-6 lines describing frontend/backend/data model for stakeholders) plus a "Why?" column table for each technology, plus a Product Decisions table (decision + rationale)
 - **Product decisions and rationale** — why certain approaches were chosen (vision rationale, not technical trade-offs)
 
 **Optional sections** (include only if the project has them):
@@ -41,7 +41,8 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 - **Feature priority and status** — what's implemented vs. planned, to guide what to build next
 - **Future enhancements / bonus features** — clearly marked as not yet implemented
 - **Sample user flow** — narrative walkthrough showing the product in action
-- **Value proposition / why users will love it** — problem-solution table or benefit bullets
+- **Value proposition / why users will love it** — problem-solution table (❌ problem → ✅ how it's solved) or benefit bullets
+- **Final Pitch Line** — one-sentence user-facing summary of what the product is, placed as closing callout
 - **Demo setup instructions** — runnable steps for judges or evaluators to demo the product
 
 ### What NOT to Include
@@ -56,8 +57,9 @@ Mine the codebase and session history, then update or create `docs/SPECIFICATION
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
 
 **Boundary rules** (additional document-specific guardrails):
-- Architecture Overview = 2-line summary + cross-reference — no implementation detail, no internal module names
-- Tech stack: this document documents the *rationale* (why chosen). The README has the *table* (what is used). Do not copy the README table into this document
+- Architecture Overview = 2-6 line high-level summary describing frontend/backend/data model — no implementation detail, no internal module names
+- Tech stack Technology Table uses 3 columns (Layer, Technology, Why?) — rationale for each choice. The README has the simpler "what is used" table. Do not duplicate README content here
+- Product Decisions table uses 2 columns (Decision, Why?) — vision rationale, not technical trade-offs
 
 **Anti-duplication:**
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
@@ -73,6 +75,8 @@ The skeleton below is used for every project's `SPECIFICATIONS.md`. Markers like
 ```markdown
 # Specifications — [Project Name]
 
+> **Last verified:** [date]
+
 ## Problem
 [What pain point exists, who experiences it, why it matters]
 
@@ -80,7 +84,7 @@ The skeleton below is used for every project's `SPECIFICATIONS.md`. Markers like
 [What the product does at a high level, why it solves the problem]
 
 ## How It Works
-[Core flow in plain language — readable by a non-technical evaluator]
+[Numbered steps in plain language — each step describes a distinct user-facing action, readable by a non-technical evaluator]
 
 ## Features
 [Feature descriptions with purpose and rationale]
@@ -92,12 +96,22 @@ The skeleton below is used for every project's `SPECIFICATIONS.md`. Markers like
 [What the product explicitly does NOT do and why]
 
 ## Tech Stack
-[Architecture Overview (2-line max) — plus Why? column table]
+### Architecture Overview
+[Brief description of frontend/backend/data model structure — 2-6 lines, no implementation detail]
+
+### Technology Table
+[Layer, Technology, Why? — rationale column for each technology choice]
+
+### Product Decisions
+[Decision + rationale — vision rationale, not technical trade-offs]
 
 <!-- FILL: optional-sections -->
+
+## Final Pitch Line
+[One-sentence closing callout]
 ```
 
-Optional sections (include only if applicable): Target user personas, Feature priority and status, Future enhancements / bonus features, Sample user flow (narrative), Value proposition / why users will love it, Demo setup instructions.
+Optional sections (include only if applicable): Target user personas, Feature priority and status, Future enhancements / bonus features, Sample user flow (narrative), Value proposition / why users will love it, Final Pitch Line, Demo setup instructions.
 
 ---
 
@@ -141,6 +155,7 @@ For each existing section: does it belong here per **What NOT to Include**? If n
 1. Start with the **Universal Template** from this skill
 2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
 3. Fill in each section with discovered project-specific content
+4. Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format)
 
 **If SPECIFICATIONS.md already exists (surgical update):**
 - For each universal section: compare against discovered data and update only what changed (problem, solution, flow, features, privacy, scope, tech stack, decisions)
@@ -148,7 +163,8 @@ For each existing section: does it belong here per **What NOT to Include**? If n
 - Never rewrite the whole file — use targeted edits on changed sections only
 - Keep language product-focused — benefits and outcomes, not implementation
 - Feature descriptions must state purpose and benefit
-- Architecture Overview must be 2 lines max + cross-reference
+- Architecture Overview must be 2-6 lines — high-level, no implementation detail or internal module names
+- Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
 ### 5. Verify
 
@@ -167,9 +183,11 @@ For each existing section: does it belong here per **What NOT to Include**? If n
 - [ ] Feature descriptions include purpose/rationale suitable for guiding development decisions
 - [ ] Product decisions capture vision rationale (not technical trade-offs)
 - [ ] Privacy section includes both user-facing table and Hard Constraints sub-section
-- [ ] Tech Stack has Architecture Overview (2-line max + cross-reference) and a "Why?" column table
+- [ ] Tech Stack has Architecture Overview (2-6 lines), Technology Table with "Why?" column, and Product Decisions table
 - [ ] Demo setup instructions (if present) list runnable steps, not architecture detail
+- [ ] Final Pitch Line (if present) is a one-sentence user-facing closing callout
 - [ ] Out of Scope lists hard boundaries only — no aspirational items
 - [ ] No endpoint names, route definitions, or implementation-level detail anywhere
 - [ ] If features were added/removed/renamed, verify SPECS (rationale) and README (benefits) are both synced
 - [ ] Language appropriate for product owners, developers, and evaluators — not end users
+- [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)

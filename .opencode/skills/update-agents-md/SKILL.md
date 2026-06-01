@@ -37,6 +37,7 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 - **Commands Reference** — exact CLI commands for common operations (build, run, test, lint, cleanup)
 - **Test Suite Structure** — if the project has a `tests/` directory, document: naming convention, file-table with run commands, and policies
 - **Utility Skills** — non-phase skills (rebuild-indexes, frontend-design+shadcn, run-e2e-tests) as prose descriptions
+- **Session Continuity Check** — trigger conditions (automatic heuristic, user "continue"), policy (header only, archived sessions, sub-agent context)
 - **Documentation Structure table** — file-to-location map so agents know where each doc lives
 - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
 - **Tooling Rules** — behavioral rules for code index, knowledge graph, package manager
@@ -65,6 +66,8 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 
 ```markdown
 # AGENTS.md
+
+> **Last updated:** [date]
 
 ## Scope
 ... → [ARCHITECTURE.md](ARCHITECTURE.md) | [SPECIFICATIONS.md](SPECIFICATIONS.md) | `.opencode/skills/<skill-name>/SKILL.md`
@@ -99,6 +102,9 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 
 ## Utility Skills
 [Non-phase skill references — rebuild-indexes, frontend-design+shadcn, run-e2e-tests]
+
+## Session Continuity Check
+[Trigger conditions: automatic heuristic (session files exist + <3 user messages), user "continue" after compaction. Policy: header only (~200 tokens), archived sessions never auto-read, sub-agent extracts 1-3 relevant lines]
 
 ## Documentation Structure
 <!-- FILL: documentation-structure-section -->
@@ -140,6 +146,7 @@ For each **What to Include** item, collect the data. This fills the `<!-- FILL: 
 - **Commands** — install, run, build, test, lint, cleanup
 - **Test Suite** — naming convention, file-to-module table with approach (Pure / `sys.modules` patch / mock), run command
 - **Utility Skills** — scan `.opencode/skills/` for non-phase skills with `description` frontmatter
+- **Session Continuity Check** — check if `docs/sessions/` directory exists and contains SESSION_*.md files; verify session archiving policy
 - **Documentation Structure** — scan `docs/`, `refs/`, root for `.md` files
 - **Documentation Discipline** — scan for description headers in source files; note any stale ones
 - **Tooling** — knowledge graph, search index invocation and update commands
@@ -164,13 +171,15 @@ For each **What to Include** item and each **Universal Template** marker: does i
 2. Replace each `<!-- FILL: name -->` marker with discovered project-specific content
 3. Omit markers for sections that don't apply (no tests → remove `<!-- FILL: test-suite-section -->`)
 4. Verify no `<!-- FILL:` markers remain
-5. Write the result to `AGENTS.md`
+5. Update the `> **Last updated:**` line to today's date (YYYY-MM-DD HH:MM TZ format)
+6. Write the result to `AGENTS.md`
 
 **If AGENTS.md already exists (surgical update):**
 - For each `<!-- FILL: -->` section in the Universal Template: replace the corresponding section in AGENTS.md with freshly discovered data (e.g., replace the Commands block, update the Test Suite table, refresh File Ownership rows)
 - Keep universal template sections as-is — they're identical across projects and should not drift
 - Remove sections that no longer apply, add any that are missing
 - Never rewrite the whole file — use targeted edits on changed sections only
+- Update the `> **Last updated:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
 ### 5. Verify
 
@@ -184,7 +193,7 @@ For each **What to Include** item and each **Universal Template** marker: does i
 - [ ] Universal template sections are unmodified from the skill's template (only project-specific sections differ)
 
 **Section Structure:**
-- [ ] Section order follows priority: Scope → Agentic Workflow Skills → Skill Loading Priority → File Ownership → Codebase Exploration → Process Discipline → Failure Triage → Commands → Test Suite → Utility Skills → Documentation Structure → Documentation Discipline → Tooling
+- [ ] Section order follows priority: Scope → Agentic Workflow Skills → Skill Loading Priority → File Ownership → Codebase Exploration → Process Discipline → Failure Triage → Commands → Test Suite → Utility Skills → Session Continuity Check → Documentation Structure → Documentation Discipline → Tooling
 - [ ] Agentic Workflow Skills table has Trigger column — keywords match skill frontmatter `description` exactly
 - [ ] Skill Loading Priority section exists — priority chain, Pre-Task gate, ambiguous/multiple/no-match rules
 - [ ] Utility Skills section uses prose descriptions, not a table — each non-phase skill has `**Header:** description — see skill` pattern
@@ -202,3 +211,4 @@ For each **What to Include** item and each **Universal Template** marker: does i
 - [ ] Documentation Discipline rules present — cross-referencing, description headers, executable sources of truth
 - [ ] Tooling conventions documented as behavioral rules, not tool names
 - [ ] Cross-references between documents are accurate (use relative paths)
+- [ ] `> **Last updated:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)

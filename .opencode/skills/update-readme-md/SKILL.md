@@ -32,17 +32,22 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 - **Feature list** — user-facing benefits, not technical internals
 - **Quick start instructions** — condensed: install dependencies, run the app, minimum steps to get going
 - **How to use** — step-by-step for each user type. Show the workflow from their perspective
-- **Tech stack** — high-level only: one-liner per technology, max 2-3 paragraphs
+- **Tech stack** — high-level only: technology table (one-liner per entry, plus a simplified architecture diagram if applicable), max 2-3 paragraphs or a table
 - **Testing instructions** — inline runnable commands for common test suites
 - **Deployment options** — platform(s) with build and start commands
 - **Privacy and security information** — user-facing summary: what data is collected, what is not, what users control
 - **Troubleshooting common issues** — concrete error messages with actionable fixes
 - **Why / Value proposition** — problem-solution format or benefit bullets showing what users gain
+- **Success Metrics / Pitch** — user-facing outcomes and closing tagline (optional, specific to projects with a pitch angle)
 
 **Optional sections** (include only if the project has them):
+- **Table of Contents** — for longer READMEs (10+ sections), helps navigation
+- **Shields/badges** — repo status badges below the title (license, Python version, framework)
+- **Documentation links** — references to ARCHITECTURE.md, SPECIFICATIONS.md, etc.
+- **Contributing** — fork/submit guidelines, dev setup reference
+- **License** — what license the project uses
 - **Requirements** — system dependencies, API keys, environment setup
 - **Pipeline or stage breakdown** — table of processing steps (for pipeline-style projects)
-- **Documentation links** — references to ARCHITECTURE.md, SPECIFICATIONS.md, etc.
 
 ### What NOT to Include
 
@@ -68,8 +73,13 @@ The skeleton below is used for every project's `README.md`. Markers like `<!-- F
 
 ```markdown
 # [Project Name]
+<!-- FILL: shields-badges -->
 
 [Project description and tagline]
+
+<!-- FILL: table-of-contents -->
+
+> **Last verified:** [date]
 
 ## Features
 [User-facing benefits, not technical internals]
@@ -81,16 +91,25 @@ The skeleton below is used for every project's `README.md`. Markers like `<!-- F
 [Step-by-step for each user type]
 
 ## Tech Stack
-[High-level: one-liner per technology]
+[High-level: technology table with one-liner per entry; optionally include a simplified architecture diagram]
 
 ## Testing
 [Inline runnable commands]
+
+## Documentation
+[Links to ARCHITECTURE.md, SPECIFICATIONS.md, etc.]
 
 ## Deployment
 [Platform options with build + start commands]
 
 ## Privacy & Security
 [User-facing summary: what's collected, what's not, user control]
+
+## Contributing
+[Fork/submit guidelines, dev setup reference → AGENT_SETUP.md]
+
+## License
+[What license the project uses]
 
 ## Troubleshooting
 [Common issues with actionable fixes]
@@ -101,7 +120,7 @@ The skeleton below is used for every project's `README.md`. Markers like `<!-- F
 <!-- FILL: optional-sections -->
 ```
 
-Optional sections (include only if applicable): Requirements (system dependencies, API keys), Pipeline stages, Documentation links.
+Optional sections (include only if applicable): Table of Contents, Shields/badges, Success Metrics / Pitch, Requirements (system dependencies, API keys), Pipeline stages.
 
 ---
 
@@ -141,6 +160,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 1. Start with the **Universal Template** from this skill
 2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
 3. Fill in each section with discovered project-specific content
+4. Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format)
 
 **If README.md already exists (surgical update):**
 - For each universal section: compare against discovered data and update only what changed (description, features, quick start, how to use, tech stack, testing, deployment, privacy, troubleshooting, value proposition)
@@ -148,6 +168,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 - Never rewrite the whole file — use targeted edits on changed sections only
 - Keep language user-facing
 - Quick start steps must work based on actual project files
+- Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
 ### 5. Verify
 
@@ -162,7 +183,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] Features section describes user benefits, not technical internals
 - [ ] Value proposition and success metrics written in user-facing language
 - [ ] Pitch line is a one-sentence user-facing summary
-- [ ] Technical details are high-level only (max 2-3 paragraphs, one-liner per technology)
+- [ ] Technical details are high-level only (max 2-3 paragraphs or a table, one-liner per technology)
 - [ ] Quick start is the canonical source for install/run commands — condensed and accurate
 - [ ] Install and run steps work based on actual project files
 - [ ] "How to Use" steps match actual app pages and navigation order — each step maps to a real route
@@ -171,5 +192,10 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] Privacy & Security section is user-facing — no implementation detail
 - [ ] Troubleshooting has concrete error messages with actionable fixes
 - [ ] Why / Value Proposition uses problem-solution format or benefit bullets
+- [ ] Documentation section lists cross-references to ARCHITECTURE.md, SPECIFICATIONS.md, etc.
+- [ ] Contributing section references AGENT_SETUP.md for dev environment setup
+- [ ] License section states the project's license
+- [ ] Success Metrics / Pitch (if present) written in user-facing language
 - [ ] If features were added/removed/renamed, verify README (benefits) and SPECS (rationale) are both synced
 - [ ] Language is appropriate for a non-technical first-time visitor
+- [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)

@@ -43,11 +43,11 @@ Mine the global system state and the project codebase, then update or create `re
 - **Troubleshooting** — common failures (tool not found, path issues, MCP errors, stale indexes) with actionable fixes
 - **Replicating to Another Project** — copy instructions + post-copy setup steps for migrating tooling to a new repo
 
-**Optional (include only if applicable):**
-- **Configuration reference** — tables of global and project config files with purpose and check-in status
+**Configuration reference (core — always present):**
+- **Configuration files** — tables of global and project config files with purpose and check-in status
 - **Gitignore configuration** — what's ignored and why per tool, tracked vs ignored files with rationale, nested gitignore files
 - **Custom commands** — project-specific or global CLI commands with usage syntax and examples
-- **Skill/workflow inventory** — list of all agent skills with phase mapping and descriptions
+- **Skill/workflow inventory** — list of all agent skills with phase mapping and descriptions, placed as a subsection within Configuration Reference
 
 ### What NOT to Include
 
@@ -91,6 +91,15 @@ The skeleton below is used for every project's `AGENT_SETUP.md`. Markers like `<
 ## Project Setup (Per Repository Clone)
 [Steps per clone — dependency install, index initialization, MCP registration]
 
+## Configuration Reference
+[Tables of global config files, global tool installations, and project config files with purpose and check-in status]
+
+### Gitignore Configuration
+[What's tracked vs ignored per tool with rationale, root + nested .gitignore files]
+
+### Custom Commands
+[Project-specific CLI commands (/scaffold) with usage syntax and examples]
+
 ## First-Time Flow From Scratch
 [Complete end-to-end sequence from blank machine to working setup]
 
@@ -106,7 +115,9 @@ The skeleton below is used for every project's `AGENT_SETUP.md`. Markers like `<
 <!-- FILL: optional-sections -->
 ```
 
-Optional sections (include only if applicable): Configuration reference (tables of global and project config files), Gitignore explanation (what's tracked vs ignored per tool with rationale), Custom commands (project-specific `/scaffold` or similar), Skill/workflow inventory (agent skills with phase mapping).
+> **Note:** Configuration Reference, Gitignore Configuration, and Custom Commands are CORE sections (not optional) — they appear between Project Setup and First-Time Flow. Skill/workflow inventory is a subsection within Configuration Reference.
+
+Optional sections (include only if applicable): (none — all applicable sections are in the core template above)
 
 ---
 
@@ -153,12 +164,14 @@ For each **What to Include** item: does it exist? Is it accurate?
 2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
 3. Fill each universal section with discovered tool-specific content
 4. Verify no `<!-- FILL:` markers remain
-5. Write the result to `refs/AGENT_SETUP.md`
+5. Update the `> **Last verified:**` line to today's date (YYYY-MM-DD format)
+6. Write the result to `refs/AGENT_SETUP.md`
 
 **If AGENT_SETUP.md already exists (surgical update):**
 - For each universal section: compare against discovered system state and update only what changed (tool versions, commands, config paths, setup steps)
 - For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
 - Never rewrite the whole file — use targeted edits on changed sections only
+- Update the `> **Last verified:**` line to today's date (YYYY-MM-DD format) — always update, even if no other changes were needed
 
 ### 6. Verify
 
@@ -184,3 +197,4 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] Cross-references to README.md and other docs are accurate
 - [ ] Gitignore rules are documented per tool — tracked vs ignored files explained with rationale
 - [ ] `.opencode/.gitignore` nested config is documented — only `node_modules` and `bun.lock` ignored; `package.json` and `package-lock.json` tracked
+- [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD)

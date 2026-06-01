@@ -36,16 +36,19 @@ Mine session conversations, changed files, skills, and plan files for reusable, 
 
 ### What to Include
 
-**Universal (always present):**
-- **Entry Format** — Every entry must follow: Context (1 line), Principle (2-3 lines), Example (short snippet), Why it matters (1 line)
-- **Code Structure** — Modularization patterns, responsibility separation, circular import prevention, leaf vs internal modules
-- **Quality** — Error handling types, fix strategies; Testing patterns (syntax checks, unit tests, integration tests, test-coordination patterns); State management (in-memory vs persistent, recovery, queue management)
-- **Operations** — Configuration patterns, environment setup, non-interactive execution, version control patterns
-- **Process** — Debugging process, documentation methodology, skills/workflow methodology, AI-assisted development patterns
-- **Meta** — Session Lessons Learned: cross-cutting process meta-lessons that don't fit named categories
-
-**Optional (include only if applicable):**
-- **UI/Frontend Practices** — UI patterns, JS/TS module rules, React/SPA conventions (only for projects with frontend code)
+**Required categories (numbered sections, always present):**
+- **§1 Modularization Techniques** — Module responsibility pattern, separation of concerns, leaf vs internal modules, frontend modularization (if applicable), module communication, when to split, documentation-driven design, surgical edit pattern, one logical change per edit
+- **§2 Configuration** — Centralized config, server binding for browser access, portable config paths
+- **§3 Error Handling** — Defense in depth, validation, graceful degradation
+- **§4 State Management** — In-memory + persistent dual layer, recovery patterns
+- **§5 Testing** — Test after every change, TestClient over live server, TDD tests are permanent, test references updated in same batch, test health audit, file existence checks
+- **§6 Documentation** — One purpose per document, key differentiator, quality gates, routing table, boundary tensions, comments-first, lead line + bullets, strict subsection ordering, standalone cross-cutting sections, verify presence not absence, single canonical location, file description convention, project structure tree synced from source, documentation conciseness
+- **§7 Session Lessons Learned** — Cross-cutting process meta-lessons: syntax verification, import discipline, API contract first, immediate verification, investigation priority order, inline constraints, merge pre/post verification, gap grilling, docs-first analysis, interactive walkthrough, presence check over re-probe, triage routing, preserve description comments, Windows shell quoting, matchmaking queue filter direction, TypedDict for structured state, thread safety, root pattern extraction, sequential numbering, skill rename protocol, workflow handoff, WebSocket accept once, skill audit after restructure, exhaustive section mapping, stale pattern audit, surgical edits over rewrites, three-layer verification, consistency pass
+- **§8 Automation & Process Design** — Permission control, executable sources of truth, filename as stable key, preserve manual/regenerate auto, diff logging, cross-language extraction pattern, description headers in source only, one verb per skill, independent re-verification, stage gate pattern, batch by logical concern, persistent decision artifacts, dead code detection, batch conflict resolution, review-implementation expanded checks, non-interactive execution, orchestrator pattern, granular edits, step 0 convention, consistent process template, cross-phase deduplication, narrow-then-search pipeline, design-spec-to-config bridge, question tool mandate
+- **§9 Version Control** — Commit discipline, commit by logical group, push per commit, auto-generate commit messages, detect renames via deleted + new pairs
+- **§10 Code Review Checklist** — Syntax, imports, tests, errors, hardcoded values, docs
+- **§11 Debugging Process** — Identify → Isolate → Read → Plan → Apply → Verify → Document
+- **§12 Documentation Sync** — Per-batch approval for documentation changes
 
 ### What NOT to Include
 
@@ -70,22 +73,24 @@ Mine session conversations, changed files, skills, and plan files for reusable, 
 The skeleton below is used for every project's `PROJECT_BEST_PRACTICES.md`. Markers like `<!-- FILL: name -->` indicate where project-specific content is injected. The Entry Format (Context + Principle + Example + Why it matters) is fixed.
 
 ```markdown
-# [Project Name] Best Practices
+# Universal Project Best Practices
+
+> **Last verified:** [date]
 
 > Derived from real-world development — applies to ALL projects
 
-## [Category Name — e.g., "Code Structure", "Quality", "Operations", "Process"]
+## 1. Modularization Techniques
 
-### X.Y Practice Name
+### 1.X Practice Name
 **Context**: When/where this applies
 **Principle**: The universal rule
 **Example**: Short code snippet or command
 **Why it matters**: Impact on future work
 
-<!-- FILL: categories -->
+<!-- FILL: sections-2-through-12 -->
+## Key Takeaways
+[Numbered list of all best practices at a glance — updated when a new entry is added]
 ```
-
-Optional categories (include only if applicable): UI/Frontend Practices (for projects with frontend code).
 
 ---
 
@@ -127,16 +132,18 @@ For each **What to Include** category and each existing entry: is it still accur
 
 **If PROJECT_BEST_PRACTICES.md doesn't exist (create from scratch):**
 1. Start with the **Universal Template** from this skill
-2. Replace `<!-- FILL: categories -->` with applicable categories from **What to Include**
+2. Replace `<!-- FILL: sections-2-through-12 -->` with applicable sections from **What to Include**
 3. For each category, add entries following the **Entry Format** (Context + Principle + Example + Why it matters)
 4. Verify no `<!-- FILL:` markers remain
-5. Write the result to `refs/PROJECT_BEST_PRACTICES.md`
+5. Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format)
+6. Write the result to `refs/PROJECT_BEST_PRACTICES.md`
 
 **If PROJECT_BEST_PRACTICES.md already exists (surgical update):**
 - For each changed category: update only the entries that changed — add new, remove stale, improve existing
-- For each optional category (UI/Frontend): add if applicable and missing, remove if no longer applicable
+- For each of the 12 sections: add if missing, remove or merge if no longer accurate
 - Never rewrite the whole file — use targeted edits on changed entries only
 - Follow the triage: existing entries get improved (merged or tightened) over creating duplicates
+- Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
 #### 6. Verify
 
@@ -152,8 +159,9 @@ For each **What to Include** category and each existing entry: is it still accur
 - [ ] Conciseness applied — no multi-sentence stories, each entry is a tight rule
 - [ ] **Universality check** — the principle works on any project, framed generically
 - [ ] No duplication with existing entries — improve existing instead of creating new
-- [ ] If content spans multiple categories, assigned to the PRIMARY category
-- [ ] "Session Lessons Learned" contains only genuinely cross-cutting lessons — not overflow from other categories
+- [ ] If content spans multiple sections, assigned to the PRIMARY section
+- [ ] **§7 Session Lessons Learned** contains only genuinely cross-cutting lessons — not overflow from other sections
+- [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)
 
 #### 7. Route Skill Improvements
 If this session identified improvements to `update-best-practices-md/SKILL.md` itself:

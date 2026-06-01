@@ -29,16 +29,16 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 
 **Universal sections** (present in every project's ARCHITECTURE.md):
 - **Project file tree** — concise (1-line) descriptions per directory and key file for quick navigation
-- **Module Descriptions** — organized into subsections matching the project's directory structure. Each entry: 1-sentence lead line from source file's description header, bullet points for key responsibilities, and a per-function detail subsection
+- **Module Descriptions** — organized into subsections matching the project's directory structure (e.g., Python backend modules, frontend modules by layer). Each entry: 1-sentence lead line from source file's description header, bullet points for key responsibilities, and a `#### Functions` per-function detail subsection
 - **Tests** — per-file function descriptions with signature + one-line purpose (navigation map per test module)
 - **Maintenance Scripts** — utility scripts with purpose and exact run command
 - **Critical Implementation Details** — non-obvious runtime behavior: resource management, match expiry, WebSocket config, frontend module rules, demo mode guards
-- **Data flow** — describe the main data path through the system (processing pipeline, request lifecycle, or event flow), including SPA Serving (route, assets mount, catch-all handler)
+- **Data flow** — describe the main data path through the system (processing pipeline, request lifecycle, or event flow) via a numbered flow, plus REST API Endpoints table (method, path, purpose) and WebSocket Events table (event name, direction, payload), plus SPA Serving (route, assets mount, catch-all handler)
 - **Import structure and dependency graph** — how modules depend on each other
 - **Key design decisions** — include the *why*, not just the *what*. Technical rationale only
 - **Running instructions** — full technical startup sequence: environment setup, dependencies, configuration, commands
 - **Modifying instructions** — how to add modules, extend functionality, change providers or configuration
-- **Per-function detail** — every named function/class in every module with signature and one-line purpose (navigation map, not a manual)
+- **Per-function detail** — every named function/class in every module (embedded inside its Module Description entry as `#### Functions` subsections) with signature and one-line purpose (navigation map, not a manual)
 
 **Optional sections** (include only if the project has them):
 - **API/WebSocket endpoint tables** — for web servers or APIs with documented endpoints
@@ -70,6 +70,8 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 ```markdown
 # Architecture - [Project Name]
 
+> **Last verified:** [date]
+
 ## Project Structure
 [Complete file tree with descriptions]
 
@@ -86,7 +88,13 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 [Non-obvious runtime behavior: resource management, match expiry, WebSocket config, frontend module rules]
 
 ## Data Flow
-[Main data path: processing pipeline, request lifecycle, or event flow]
+[Numbered main data path, REST API Endpoints table, WebSocket Events table]
+
+### REST API Endpoints
+[Method, path, purpose — authoritative endpoint reference]
+
+### WebSocket Events
+[Event name, direction, payload — authoritative event reference]
 
 ### SPA Serving
 [How the SPA is served: route, assets mount, catch-all handler]
@@ -106,7 +114,9 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 <!-- FILL: optional-sections -->
 ```
 
-Optional sections (include only if applicable): API/WebSocket endpoint tables, sub-architecture reference links, pipeline stage diagrams.
+Optional sections (include only if applicable): sub-architecture reference links, pipeline stage diagrams.
+
+> **Note:** REST API Endpoints and WebSocket Events tables are NOT optional for server projects — they live inside the Data Flow section, not as separate optional sections.
 
 ---
 
@@ -225,11 +235,13 @@ For every source file that contains functions/classes:
 1. Start with the **Universal Template** from this skill
 2. Replace `<!-- FILL: optional-sections -->` with any applicable optional sections
 3. Fill in each section with discovered project-specific content
+4. Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format)
 
 **If ARCHITECTURE.md already exists (surgical update):**
 - For each universal section: compare against discovered data and update only what changed (file tree, module descriptions, data flow, import structure, etc.)
 - For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
 - Never rewrite the whole file — use targeted edits on changed sections only
+- Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
 **Module Descriptions — lead line replacement:**
 For each entry in the Module Descriptions section, match by filename:
@@ -254,9 +266,9 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 - [ ] File tree cross-referenced against actual filesystem entries — no missing or phantom entries
 - [ ] All numeric claims verified against actual source (file counts, export counts, test counts)
 - [ ] File tree is current and complete — all source directories and key files described
-- [ ] Data flow reflects the current system — this is the authoritative reference
-- [ ] SPA Serving section documents how the SPA is served (route, assets mount, catch-all handler)
-- [ ] Module Descriptions section organized by directory/subsystem with accurate lead lines
+- [ ] Data flow reflects the current system — numbered flow + REST API Endpoints table + WebSocket Events table — this is the authoritative reference
+- [ ] SPA Serving section documents how the SPA is served (route, assets mount, catch-all handler) — standalone section, not nested inside Data Flow
+- [ ] Module Descriptions section organized by directory/subsystem with accurate lead lines — includes Frontend Modules subsection if the project has a frontend directory
 - [ ] Tests section has per-file function detail for every test module — function signatures with one-line purpose
 - [ ] Maintenance Scripts section lists each utility script with purpose and exact run command
 - [ ] Critical Implementation Details covers all non-obvious runtime behavior (match expiry, WS config, frontend module rules, demo mode)
@@ -266,3 +278,4 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 - [ ] Every source file with functions has a per-function detail subsection
 - [ ] Function entries are one-line purpose only — no implementation logic
 - [ ] Missing descriptions are flagged with `⚠️` marker — never invent descriptions
+- [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)
