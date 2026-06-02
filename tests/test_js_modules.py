@@ -27,7 +27,7 @@ def test_frontend_files_exist():
         'types/api.ts',
         'hooks/useSocket.ts',
         'hooks/useTimer.ts',
-        'hooks/useDemoMode.ts',
+        'hooks/useDemoSimulation.ts',
         'hooks/useUser.ts',
         'context/useTheme.tsx',
         'context/SocketContext.tsx',
@@ -46,7 +46,9 @@ def test_frontend_files_exist():
         'pages/ChatPage.tsx',
         'pages/PeoplePage.tsx',
         'pages/ConnectPage.tsx',
+        'pages/OrganizeEventPage.tsx',
         'hooks/useChatRequest.ts',
+        'hooks/useChipSelection.ts',
         'lib/utils.ts',
         'App.tsx',
         'main.tsx',
@@ -66,8 +68,12 @@ def test_api_exports():
     content = _read('types/api.ts')
     expected = [
         'CreateEventResponse', 'Room',
+        'Topic', 'EventConfigResponse',
         'JoinEventResponse',
         'QRResponse',
+        'SampleUserData',
+        'RoomUsersResponse',
+        'SaveEventConfigResponse',
     ]
     for name in expected:
         if f'export interface {name}' in content or f'export type {name}' in content:
@@ -81,7 +87,7 @@ def test_demo_data_exports():
     print("🧪 Testing demo data exports (utils/demoData.ts)...")
     content = _read('utils/demoData.ts')
     expected = [
-        'SamplePerson', 'SAMPLE_USERS', 'RESPONSES',
+        'SAMPLE_USERS', 'RESPONSES',
     ]
     for name in expected:
         if f'export interface {name}' in content or f'export const {name}' in content:
@@ -143,7 +149,8 @@ def test_hook_exports():
     hook_files = {
         'useSocket.ts': ['useSocket', 'SocketContext', 'SocketContextValue'],
         'useTimer.ts': ['useChatTimer'],
-        'useDemoMode.ts': ['useDemoMode'],
+        'useDemoSimulation.ts': ['useDemoSimulation'],
+        'useChipSelection.ts': ['useChipSelection', 'ChipItem'],
         'useUser.ts': ['useUser', 'UserContext', 'UserData'],
         'useChatRequest.ts': ['useChatRequest'],
     }
@@ -196,6 +203,7 @@ def test_page_exports():
         'ChatPage.tsx': 'ChatPage',
         'PeoplePage.tsx': 'PeoplePage',
         'ConnectPage.tsx': 'ConnectPage',
+        'OrganizeEventPage.tsx': 'OrganizeEventPage',
     }
     for filename, page in pages.items():
         content = _read(os.path.join('pages', filename))
@@ -211,7 +219,7 @@ def test_import_references():
     app = _read('App.tsx')
 
     expected_imports = ['HomePage', 'UserInfoPage', 'RoomPage', 'ChatPage',
-                        'PeoplePage', 'ConnectPage',
+                        'PeoplePage', 'ConnectPage', 'OrganizeEventPage',
                         'SocketProvider', 'UserProvider']
     for imp in expected_imports:
         if imp in app:
@@ -245,9 +253,11 @@ def test_code_quality():
 
     ts_files = [
         'api/client.ts', 'config/constants.ts',
-        'utils/format.ts', 'utils/storage.ts', 'utils/random.ts',
-        'hooks/useSocket.ts', 'hooks/useTimer.ts', 'hooks/useDemoMode.ts', 'hooks/useUser.ts',
-        'hooks/useChatRequest.ts', 'lib/utils.ts',
+        'utils/format.ts', 'utils/storage.ts', 'utils/random.ts', 'utils/demoData.ts',
+        'types/api.ts',
+        'hooks/useSocket.ts', 'hooks/useTimer.ts', 'hooks/useDemoSimulation.ts', 'hooks/useUser.ts',
+        'hooks/useChatRequest.ts', 'hooks/useChipSelection.ts', 'lib/utils.ts',
+        'context/useTheme.tsx',
     ]
 
     for rel in ts_files:
@@ -263,6 +273,7 @@ def test_code_quality():
         'components/MatchCountdown.tsx', 'components/ConnectionCard.tsx', 'components/QRDisplay.tsx',
         'components/PeoplePageViews.tsx', 'components/ChatPageViews.tsx',
         'pages/HomePage.tsx', 'pages/UserInfoPage.tsx', 'pages/RoomPage.tsx', 'pages/ChatPage.tsx',
+        'pages/PeoplePage.tsx', 'pages/ConnectPage.tsx', 'pages/OrganizeEventPage.tsx',
         'context/SocketContext.tsx', 'context/UserContext.tsx',
         'App.tsx',
     ]
@@ -297,8 +308,8 @@ def main():
     print("   - TypeScript types and interfaces validated")
     print("   - Demo data exports validated (demoData.ts)")
     print("   - Utility functions present in format.ts, storage.ts, random.ts")
-    print("   - Hooks exported: useSocket, useTimer, useDemoMode, useUser")
-    print("   - 8 components + 4 pages exported with expected names")
+    print("   - Hooks exported: useSocket, useTimer, useDemoSimulation, useUser, useChatRequest, useChipSelection")
+    print("   - 8 components + 7 pages exported with expected names")
     print("   - App.tsx references all pages and context providers")
 
 if __name__ == "__main__":

@@ -10,9 +10,20 @@ describe('App', () => {
     vi.restoreAllMocks();
     localStorage.clear();
     document.documentElement.classList.remove('dark');
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([]),
+    globalThis.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url.toString().includes('/api/events/') && url.toString().includes('/config')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            rooms: [{ id: 'r1', name: 'Main Hall', selected: true, is_default: true }, { id: 'r2', name: 'Table 1', selected: true, is_default: true }],
+            topics: [{ id: 't1', name: 'AI/ML', selected: true, is_default: true }, { id: 't2', name: 'Web Dev', selected: true, is_default: true }],
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve([]),
+      });
     });
   });
 
@@ -58,6 +69,14 @@ describe('App', () => {
     window.history.pushState({}, '', '/connect/abc123');
     render(<App />);
     expect(screen.getByRole('heading', { level: 1, name: 'Connect' })).toBeInTheDocument();
+  });
+
+  it('renders organize event page at /organize/abc123', async () => {
+    window.history.pushState({}, '', '/organize/abc123');
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Organize Event')).toBeInTheDocument();
+    });
   });
 
   it('toggles dark mode class on html element', () => {

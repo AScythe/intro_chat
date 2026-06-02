@@ -148,6 +148,22 @@ describe('useChatTimer', () => {
     expect(result.current.timeLeft).toBe(5);
   });
 
+  it('getTimeLeft returns current timeLeft', () => {
+    const { result } = renderHook(() => useChatTimer(10));
+
+    expect(result.current.getTimeLeft()).toBe(10);
+
+    act(() => {
+      result.current.start();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+
+    expect(result.current.getTimeLeft()).toBe(7);
+  });
+
   it('isRunning reflects timer state', () => {
     const { result } = renderHook(() => useChatTimer(5));
 

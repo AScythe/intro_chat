@@ -54,7 +54,8 @@ def test_imports():
 
     # Test new modular imports from app package
     try:
-        from app.state import CONVERSATION_PROMPTS
+        from app.state import store
+        from app.prompts import CONVERSATION_PROMPTS
         print("✅ app/state.py imported successfully")
     except ImportError as e:
         print(f"❌ app/state.py import failed: {e}")
@@ -66,13 +67,15 @@ def test_imports():
         print(f"❌ app/database.py import failed: {e}")
 
     try:
-        from app.routes import router
-        print("✅ app/routes.py imported successfully")
+        from app.routes_html import router_html
+        from app.routes_api import router_api
+        from app.routes_ws import router_ws
+        print("✅ app/routes_*.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/routes.py import failed: {e}")
+        print(f"❌ app/routes_*.py import failed: {e}")
 
     try:
-        from app.matchmaking import find_match, create_match
+        from app.matchmaking import find_or_enqueue_match, create_match
         print("✅ app/matchmaking.py imported successfully")
     except ImportError as e:
         print(f"❌ app/matchmaking.py import failed: {e}")
@@ -95,6 +98,12 @@ def test_imports():
     except ImportError as e:
         print(f"❌ app/tasks.py import failed: {e}")
 
+    try:
+        from app.connection_service import handle_connection_exchange
+        print("✅ app/connection_service.py imported successfully")
+    except ImportError as e:
+        print(f"❌ app/connection_service.py import failed: {e}")
+
     print("✅ Import test completed\n")
 
 
@@ -106,12 +115,19 @@ def test_file_structure():
         'app/__init__.py',
         'app/state.py',
         'app/database.py',
-        'app/routes.py',
+        'app/routes_html.py',
+        'app/routes_api.py',
+        'app/routes_ws.py',
         'app/matchmaking.py',
         'app/connection_manager.py',
         'app/schemas.py',
         'app/config.py',
         'app/tasks.py',
+        'app/connection_service.py',
+        'app/handlers.py',
+        'app/prompts.py',
+        'app/qr_utils.py',
+        'app/sample_users.py',
         'pyproject.toml',
         'docs/README.md',
         'frontend/package.json',
@@ -201,7 +217,7 @@ def test_conversation_prompts():
     """Test conversation prompts"""
     print("🧪 Testing conversation prompts...")
 
-    from app.state import CONVERSATION_PROMPTS
+    from app.prompts import CONVERSATION_PROMPTS
 
     if CONVERSATION_PROMPTS and len(CONVERSATION_PROMPTS) > 0:
         print(f"✅ Found {len(CONVERSATION_PROMPTS)} conversation prompts")
@@ -323,8 +339,8 @@ def test_social_info():
     assert resp.status_code == 200
     user_id = resp.json()['user_id']
 
-    from app.state import active_users
-    user = active_users.get(user_id, {})
+    from app.state import store
+    user = store.active_users.get(user_id, {})
     assert user.get('linkedin_url') == 'https://linkedin.com/in/testuser'
     assert user.get('slack_handle') == '@testuser'
 
@@ -347,7 +363,7 @@ def test_error_paths():
 
     # Missing event rooms
     resp = client.get('/api/events/nonexistent/rooms')
-    assert resp.status_code == 200  # Creates 8 default rooms
+    assert resp.status_code == 200  # Returns empty list for nonexistent event
 
     # Join with no body
     resp = client.post('/api/events/nonexistent/join', json={})
@@ -360,7 +376,7 @@ def test_matchmaking_lifecycle():
     """Test match lifecycle: create, retrieve, connect"""
     print("🧪 Testing matchmaking lifecycle...")
 
-    from app.state import active_users, active_matches, waiting_queue
+    from app.state import store
     from app.matchmaking import create_match
 
     client = TestClient(app)
@@ -384,11 +400,11 @@ def test_matchmaking_lifecycle():
     # Create match directly
     asyncio.run(create_match(user1_id, user2_id, room_id))
 
-    match_ids = [m for m in active_matches.values()
+    match_ids = [m for m in store.active_matches.values()
                  if m['user1_id'] == user1_id and m['user2_id'] == user2_id]
     assert len(match_ids) == 1
-    match_id = list(active_matches.keys())[
-        [m['user1_id'] for m in active_matches.values()].index(user1_id)
+    match_id = list(store.active_matches.keys())[
+        [m['user1_id'] for m in store.active_matches.values()].index(user1_id)
     ]
     print(f"✅ Match created: {match_id}")
 
@@ -430,7 +446,7 @@ def test_matchmaking_lifecycle():
     user3_id = resp.json()['user_id']
     client.post(f'/api/users/{user3_id}/room', json={'room_id': room_id})
     asyncio.run(create_match(user2_id, user3_id, room_id))
-    match_id2 = [mid for mid, m in active_matches.items()
+    match_id2 = [mid for mid, m in store.active_matches.items()
                  if m['user1_id'] == user2_id and m['user2_id'] == user3_id][0]
     resp = client.post(f'/api/matches/{match_id2}/connect',
                        json={'user_id': user2_id, 'wants_to_connect': True})
@@ -439,12 +455,12 @@ def test_matchmaking_lifecycle():
                        json={'user_id': user3_id, 'wants_to_connect': False})
     assert resp.status_code == 200
     print("✅ Connection declined path works")
-    if match_id2 in active_matches:
-        del active_matches[match_id2]
+    if match_id2 in store.active_matches:
+        del store.active_matches[match_id2]
 
     # Cleanup state
-    if match_id in active_matches:
-        del active_matches[match_id]
+    if match_id in store.active_matches:
+        del store.active_matches[match_id]
 
     print("✅ Matchmaking lifecycle test completed\n")
 
@@ -453,8 +469,8 @@ def test_find_match_end_to_end():
     """Test find_match via availability toggle (full flow, not direct call)"""
     print("🧪 Testing find_match end-to-end...")
 
-    from app.state import active_users, active_matches, waiting_queue
-    from app.matchmaking import find_match
+    from app.state import store
+    from app.matchmaking import find_or_enqueue_match
 
     client = TestClient(app)
 
@@ -476,7 +492,7 @@ def test_find_match_end_to_end():
 
     # Toggle user1 available — no match yet, goes to waiting_queue
     client.post(f'/api/users/{user1_id}/available', json={'available': True})
-    assert user1_id in waiting_queue
+    assert user1_id in store.waiting_queue
     print("✅ User1 in waiting queue")
 
     # Toggle user2 available — triggers find_match, both should match
@@ -484,7 +500,7 @@ def test_find_match_end_to_end():
 
     # Verify match was created
     match_id = None
-    for mid, m in active_matches.items():
+    for mid, m in store.active_matches.items():
         if (m['user1_id'] == user1_id and m['user2_id'] == user2_id) or \
            (m['user1_id'] == user2_id and m['user2_id'] == user1_id):
             match_id = mid
@@ -493,18 +509,18 @@ def test_find_match_end_to_end():
     print(f"✅ Match created via find_match: {match_id}")
 
     # Both should be removed from waiting queue
-    assert user1_id not in waiting_queue
-    assert user2_id not in waiting_queue
+    assert user1_id not in store.waiting_queue
+    assert user2_id not in store.waiting_queue
     print("✅ Both users removed from waiting queue")
 
     # Both should be set unavailable
-    assert active_users.get(user1_id, {}).get('is_available') == False
-    assert active_users.get(user2_id, {}).get('is_available') == False
+    assert store.active_users.get(user1_id, {}).get('is_available') == False
+    assert store.active_users.get(user2_id, {}).get('is_available') == False
     print("✅ Both users set to unavailable")
 
     # Cleanup
-    if match_id in active_matches:
-        del active_matches[match_id]
+    if match_id in store.active_matches:
+        del store.active_matches[match_id]
 
     print("✅ find_match end-to-end test completed\n")
 
@@ -513,13 +529,13 @@ def test_cleanup_expired_matches():
     """Test cleanup threshold logic — old matches get removed, new ones stay"""
     print("🧪 Testing cleanup expired matches...")
 
-    from app.state import active_matches
+    from app.state import store
     from app.config import CLEANUP_THRESHOLD_SECONDS
     import time
 
     # Add a new match (should NOT be cleaned up)
     fresh_match_id = 'fresh_match_test'
-    active_matches[fresh_match_id] = {
+    store.active_matches[fresh_match_id] = {
         'user1_id': 'u1',
         'user2_id': 'u2',
         'room_id': 'r1',
@@ -528,17 +544,17 @@ def test_cleanup_expired_matches():
 
     # Add an old match (should be cleaned up)
     old_match_id = 'old_match_test'
-    active_matches[old_match_id] = {
+    store.active_matches[old_match_id] = {
         'user1_id': 'u3',
         'user2_id': 'u4',
         'room_id': 'r2',
-        'created_at': time.time() - CLEANUP_THRESHOLD_SECONDS - 10  # older than threshold
+        'created_at': time.time() - CLEANUP_THRESHOLD_SECONDS - 10
     }
 
     # Run cleanup logic inline (same logic as cleanup_expired_matches)
     current_time = time.time()
     matches_to_remove = [
-        mid for mid, match in active_matches.items()
+        mid for mid, match in store.active_matches.items()
         if current_time - match['created_at'] > CLEANUP_THRESHOLD_SECONDS
     ]
 
@@ -550,15 +566,15 @@ def test_cleanup_expired_matches():
 
     # Actually remove them (simulating cleanup)
     for mid in matches_to_remove:
-        del active_matches[mid]
+        del store.active_matches[mid]
 
-    assert fresh_match_id in active_matches
-    assert old_match_id not in active_matches
+    assert fresh_match_id in store.active_matches
+    assert old_match_id not in store.active_matches
     print("✅ Cleanup removes old matches, keeps new ones")
 
     # Cleanup
-    if fresh_match_id in active_matches:
-        del active_matches[fresh_match_id]
+    if fresh_match_id in store.active_matches:
+        del store.active_matches[fresh_match_id]
 
     print("✅ Cleanup expired matches test completed\n")
 
@@ -645,6 +661,139 @@ def test_template_pages():
     print("✅ SPA pages test completed\n")
 
 
+def test_sample_users_fill():
+    """Test that saving event config fills rooms with sample users"""
+    print("🧪 Testing sample user fill on save config...")
+
+    client = TestClient(app)
+
+    # Create event
+    resp = client.post('/api/events', json={'name': 'Sample Fill Test'})
+    event_id = resp.json()['event_id']
+
+    # Get default rooms
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    rooms = resp.json()
+    selected_names = [r['name'] for r in rooms[:3]]
+
+    # Save config with first 3 rooms selected
+    resp = client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names,
+        'topics': ['Tech', 'Music']
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['success'] is True
+    assert len(data['rooms_filled']) == 3
+    for name in selected_names:
+        assert name in data['rooms_filled']
+    print(f"✅ PUT /api/events/<id>/config → {len(data['rooms_filled'])} rooms filled")
+
+    # Verify each room has sample users via GET endpoint
+    resp = client.get(f'/api/events/{event_id}/config')
+    config_rooms = resp.json()['rooms']
+    for room in config_rooms:
+        if room['name'] in selected_names:
+            rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
+            assert rresp.status_code == 200
+            users = rresp.json()['sample_users']
+            assert 3 <= len(users) <= 5
+            assert any(u['available'] for u in users)
+            print(f"✅ Room '{room['name']}' has {len(users)} sample users (≥1 available)")
+
+    print("✅ Sample user fill test completed\n")
+
+
+def test_sample_users_idempotent():
+    """Test that re-saving same config does not add duplicate sample users"""
+    print("🧪 Testing sample user fill idempotency...")
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'Idempotent Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    rooms = resp.json()
+    selected_names = [r['name'] for r in rooms[:2]]
+
+    # First save — should fill rooms
+    resp = client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names,
+        'topics': ['Tech']
+    })
+    assert len(resp.json()['rooms_filled']) == 2
+    print("✅ First save filled 2 rooms")
+
+    # Get count of sample users after first save
+    resp = client.get(f'/api/events/{event_id}/config')
+    room_id = resp.json()['rooms'][0]['id']
+    rresp = client.get(f'/api/events/{event_id}/rooms/{room_id}/users')
+    first_count = len(rresp.json()['sample_users'])
+
+    # Second save — should NOT fill any rooms (idempotent)
+    resp = client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names,
+        'topics': ['Tech']
+    })
+    assert len(resp.json()['rooms_filled']) == 0
+    print("✅ Second save filled 0 rooms (idempotent)")
+
+    # Verify count unchanged
+    rresp = client.get(f'/api/events/{event_id}/rooms/{room_id}/users')
+    second_count = len(rresp.json()['sample_users'])
+    assert first_count == second_count
+    print("✅ Sample user count unchanged after re-save")
+
+    print("✅ Sample user fill idempotency test completed\n")
+
+
+def test_room_users_api():
+    """Test GET /api/events/{id}/rooms/{rid}/users endpoint"""
+    print("🧪 Testing room users API...")
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'Room Users API Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    rooms = resp.json()
+    selected_names = [r['name'] for r in rooms[:1]]
+
+    # Save config to fill sample users
+    client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names,
+        'topics': ['Tech']
+    })
+
+    # Get room ID from config
+    resp = client.get(f'/api/events/{event_id}/config')
+    room = resp.json()['rooms'][0]
+
+    # GET users for this room
+    rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
+    assert rresp.status_code == 200
+    data = rresp.json()
+    assert 'sample_users' in data
+    assert len(data['sample_users']) >= 1
+    for user in data['sample_users']:
+        assert 'name' in user
+        assert 'available' in user
+        assert 'status' in user
+        assert 'linkedin_url' in user
+        assert 'slack_handle' in user
+    print(f"✅ GET /users returned {len(data['sample_users'])} users with correct shape")
+
+    # GET users for non-existent room — returns empty list
+    rresp = client.get(f'/api/events/{event_id}/rooms/nonexistent/users')
+    assert rresp.status_code == 200
+    assert rresp.json()['sample_users'] == []
+    print("✅ GET /users for non-existent room returns empty list")
+
+    print("✅ Room users API test completed\n")
+
+
 def test_helpers_short_id():
     """Test that short_id generates valid 8-char hex IDs"""
     print("🧪 Testing helpers.short_id...")
@@ -688,6 +837,9 @@ def main():
     test_cleanup_expired_matches()
     test_websocket_connection()
     test_template_pages()
+    test_sample_users_fill()
+    test_sample_users_idempotent()
+    test_room_users_api()
     test_helpers_short_id()
     test_qr_utils()
 

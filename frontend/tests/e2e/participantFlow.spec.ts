@@ -1,39 +1,37 @@
-// userFlow.spec.ts
-// Description: E2E tests covering all app pages — home, join (optional name), save, room, two-user match + chat
+// participantFlow.spec.ts
+// Description: E2E tests for participant flow — join existing event via home page, fill profile, select room, match, chat
 
 import { test, expect } from '@playwright/test';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-test.describe('IntroChat E2E', () => {
-  let eventId: string;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-  test.beforeAll(async ({ request }) => {
-    const resp = await request.post('/api/events', {
-      data: { name: 'E2E Test Event' },
-    });
-    expect(resp.ok()).toBeTruthy();
-    const data = await resp.json();
-    eventId = data.event_id;
-  });
+test.describe.configure({ mode: 'serial' });
 
-  test('1: Home page loads with event input and action buttons', async ({ page }) => {
+let eventId: string;
+
+test.beforeAll(() => {
+  const scriptPath = path.resolve(__dirname, 'helpers', 'get_event.py');
+  const rawId = execSync(`uv run python "${scriptPath}"`, { encoding: 'utf-8' }).trim();
+  eventId = rawId.toUpperCase();
+  expect(eventId).toHaveLength(8);
+});
+
+test.describe('Participant Flow', () => {
+  test('1: Home page — join via event code input', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('h1')).toContainText('IntroChat');
-    await expect(page.locator('input[placeholder*="code"]').first()).toBeVisible();
-    await expect(page.getByText('Create Event').first()).toBeVisible();
-    await expect(page.getByText('Join Event').first()).toBeVisible();
-  });
 
-  test('2: Join page renders with optional name field', async ({ page }) => {
-    await page.goto(`/join/${eventId}`);
+    await page.locator('#eventCode').fill(eventId);
+    await page.getByRole('button', { name: 'Join Event' }).click();
+
+    await expect(page).toHaveURL(`/join/${eventId}`);
     await expect(page.locator('#nameInput')).toBeVisible();
-    await expect(page.locator('label:has-text("Your Name")')).toBeVisible();
-    await expect(page.locator('label:has-text("Your Name")')).not.toContainText('*');
-    await expect(page.locator('#linkedinInput')).toBeVisible();
-    await expect(page.locator('#slackInput')).toBeVisible();
-    await expect(page.getByText('Save Profile')).not.toBeDisabled();
   });
 
-  test('3: Save profile with auto-generated username when name is empty', async ({ page }) => {
+  test('2: Save profile with auto-generated username', async ({ page }) => {
     await page.goto(`/join/${eventId}`);
 
     const postPromise = page.waitForRequest((req) =>
@@ -42,6 +40,11 @@ test.describe('IntroChat E2E', () => {
 
     await page.locator('#linkedinInput').fill('https://linkedin.com/in/test');
     await page.locator('#slackInput').fill('@testuser');
+
+    await page.getByRole('combobox').first().click();
+    await page.getByRole('option').first().click();
+    await page.keyboard.press('Escape');
+
     await page.getByText('Save Profile').click();
 
     const postReq = await postPromise;
@@ -52,7 +55,7 @@ test.describe('IntroChat E2E', () => {
     await expect(page.getByText('Select Room / Area')).not.toBeDisabled();
   });
 
-  test('4: Save profile with custom name', async ({ page }) => {
+  test('3: Save profile with custom name', async ({ page }) => {
     await page.goto(`/join/${eventId}`);
 
     const postPromise = page.waitForRequest((req) =>
@@ -62,6 +65,11 @@ test.describe('IntroChat E2E', () => {
     await page.locator('#nameInput').fill('Alice');
     await page.locator('#linkedinInput').fill('https://linkedin.com/in/alice');
     await page.locator('#slackInput').fill('@alice');
+
+    await page.getByRole('combobox').first().click();
+    await page.getByRole('option').first().click();
+    await page.keyboard.press('Escape');
+
     await page.getByText('Save Profile').click();
 
     const postReq = await postPromise;
@@ -72,44 +80,50 @@ test.describe('IntroChat E2E', () => {
     await expect(page.getByText('Select Room / Area')).not.toBeDisabled();
   });
 
-  test('5: Two-user match + chat page renders', async ({ browser, request }) => {
-    // Create a dedicated event for this test
-    const eventResp = await request.post('/api/events', {
-      data: { name: 'Match E2E Test' },
-    });
-    expect(eventResp.ok()).toBeTruthy();
-    const { event_id } = await eventResp.json();
+  test('4: Save profile, select room, verify people page', async ({ page }) => {
+    await page.goto(`/join/${eventId}`);
 
-    const roomsResp = await request.get(`/api/events/${event_id}/rooms`);
+    await page.locator('#nameInput').fill('Room Tester');
+    await page.getByRole('combobox').first().click();
+    await page.getByRole('option').first().click();
+    await page.keyboard.press('Escape');
+
+    await page.getByText('Save Profile').click();
+    await expect(page.getByRole('button', { name: /Profile saved/i })).toBeDisabled({ timeout: 10000 });
+
+    await page.getByText('Select Room / Area').click();
+    await expect(page.getByText('Where are you?')).toBeVisible({ timeout: 10000 });
+
+    await page.getByRole('combobox').click();
+    await page.getByRole('option').first().click();
+    await page.getByText('Select Room').click();
+
+    await expect(page.getByText('Find Chat Partners')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('5: Two-user match + chat page renders', async ({ browser, request }) => {
+    const roomsResp = await request.get(`/api/events/${eventId}/rooms`);
     expect(roomsResp.ok()).toBeTruthy();
     const rooms = await roomsResp.json();
     const roomId = rooms[0].id;
 
-    // User A: join
-    const joinRespA = await request.post(`/api/events/${event_id}/join`, {
+    const joinRespA = await request.post(`/api/events/${eventId}/join`, {
       data: { linkedin_url: '', slack_handle: '' },
     });
     expect(joinRespA.ok()).toBeTruthy();
     const { user_id: userIdA } = await joinRespA.json();
 
-    // User B: join
-    const joinRespB = await request.post(`/api/events/${event_id}/join`, {
+    const joinRespB = await request.post(`/api/events/${eventId}/join`, {
       data: { linkedin_url: '', slack_handle: '' },
     });
     expect(joinRespB.ok()).toBeTruthy();
     const { user_id: userIdB } = await joinRespB.json();
 
-    // Both select room
     await request.post(`/api/users/${userIdA}/room`, { data: { room_id: roomId } });
     await request.post(`/api/users/${userIdB}/room`, { data: { room_id: roomId } });
-
-    // A toggles available (enters waiting queue)
     await request.post(`/api/users/${userIdA}/available`, { data: { available: true } });
-
-    // B toggles available (triggers match with A)
     await request.post(`/api/users/${userIdB}/available`, { data: { available: true } });
 
-    // Poll for match
     let matchId: string | null = null;
     for (let i = 0; i < 20; i++) {
       await new Promise((r) => setTimeout(r, 500));
@@ -122,7 +136,6 @@ test.describe('IntroChat E2E', () => {
     }
     expect(matchId).toBeTruthy();
 
-    // Launch a browser page and navigate to the chat page
     const context = await browser.newContext();
     const chatPage = await context.newPage();
     await chatPage.goto(`/chat/${matchId}`);
@@ -131,24 +144,18 @@ test.describe('IntroChat E2E', () => {
   });
 
   test('6a: Full chat flow — connection exchanged', async ({ page, request }) => {
-    const eventResp = await request.post('/api/events', {
-      data: { name: 'Conn Exchange E2E' },
-    });
-    expect(eventResp.ok()).toBeTruthy();
-    const { event_id } = await eventResp.json();
-
-    const roomsResp = await request.get(`/api/events/${event_id}/rooms`);
+    const roomsResp = await request.get(`/api/events/${eventId}/rooms`);
     expect(roomsResp.ok()).toBeTruthy();
     const rooms = await roomsResp.json();
     const roomId = rooms[Math.floor(Math.random() * rooms.length)].id;
 
-    const joinRespA = await request.post(`/api/events/${event_id}/join`, {
+    const joinRespA = await request.post(`/api/events/${eventId}/join`, {
       data: { username: 'UserA', linkedin_url: 'https://linkedin.com/in/usera', slack_handle: '@usera' },
     });
     expect(joinRespA.ok()).toBeTruthy();
     const { user_id: userIdA } = await joinRespA.json();
 
-    const joinRespB = await request.post(`/api/events/${event_id}/join`, {
+    const joinRespB = await request.post(`/api/events/${eventId}/join`, {
       data: { username: 'UserB', linkedin_url: 'https://linkedin.com/in/userb', slack_handle: '@userb' },
     });
     expect(joinRespB.ok()).toBeTruthy();
@@ -176,7 +183,7 @@ test.describe('IntroChat E2E', () => {
       localStorage.setItem('introchat_user_id', args.userId);
       localStorage.setItem('introchat_event_id', args.eventId);
       localStorage.setItem('introchat_username', 'UserA');
-    }, { userId: userIdA, eventId: event_id });
+    }, { userId: userIdA, eventId: eventId });
 
     await page.goto(`/chat/${matchId}`);
     await expect(page.getByText('Chatting with')).toBeVisible({ timeout: 10000 });
@@ -198,24 +205,18 @@ test.describe('IntroChat E2E', () => {
   });
 
   test('6b: Full chat flow — connection declined', async ({ page, request }) => {
-    const eventResp = await request.post('/api/events', {
-      data: { name: 'Conn Decline E2E' },
-    });
-    expect(eventResp.ok()).toBeTruthy();
-    const { event_id } = await eventResp.json();
-
-    const roomsResp = await request.get(`/api/events/${event_id}/rooms`);
+    const roomsResp = await request.get(`/api/events/${eventId}/rooms`);
     expect(roomsResp.ok()).toBeTruthy();
     const rooms = await roomsResp.json();
     const roomId = rooms[Math.floor(Math.random() * rooms.length)].id;
 
-    const joinRespA = await request.post(`/api/events/${event_id}/join`, {
+    const joinRespA = await request.post(`/api/events/${eventId}/join`, {
       data: { username: 'UserA', linkedin_url: '', slack_handle: '' },
     });
     expect(joinRespA.ok()).toBeTruthy();
     const { user_id: userIdA } = await joinRespA.json();
 
-    const joinRespB = await request.post(`/api/events/${event_id}/join`, {
+    const joinRespB = await request.post(`/api/events/${eventId}/join`, {
       data: { username: 'UserB', linkedin_url: '', slack_handle: '' },
     });
     expect(joinRespB.ok()).toBeTruthy();
@@ -243,7 +244,7 @@ test.describe('IntroChat E2E', () => {
       localStorage.setItem('introchat_user_id', args.userId);
       localStorage.setItem('introchat_event_id', args.eventId);
       localStorage.setItem('introchat_username', 'UserA');
-    }, { userId: userIdA, eventId: event_id });
+    }, { userId: userIdA, eventId: eventId });
 
     await page.goto(`/chat/${matchId}`);
     await expect(page.getByText('Chatting with')).toBeVisible({ timeout: 10000 });

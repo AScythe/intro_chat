@@ -19,6 +19,19 @@ function renderWithRouter(eventId = 'TEST1234') {
   );
 }
 
+const MOCK_TOPICS = [{ id: 't1', name: 'AI Development', selected: true, is_default: true }, { id: 't2', name: 'DevOps', selected: true, is_default: true }];
+
+function mockFetchWithTopics(joinResponse: Record<string, unknown>) {
+  let callCount = 0;
+  return vi.fn().mockImplementation(() => {
+    callCount++;
+    if (callCount === 1) {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve(MOCK_TOPICS) });
+    }
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(joinResponse) });
+  });
+}
+
 describe('UserInfoPage', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -39,11 +52,8 @@ describe('UserInfoPage', () => {
   });
 
   it('saves profile with auto-generated username when name is empty', async () => {
-    const mockResponse = { user_id: 'user_abc123', username: 'User_abc12' };
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockResponse),
-    });
+    const mockJoinResponse = { user_id: 'user_abc123', username: 'User_abc12' };
+    globalThis.fetch = mockFetchWithTopics(mockJoinResponse);
 
     renderWithRouter();
     fireEvent.click(screen.getByText('Save Profile'));
@@ -65,11 +75,8 @@ describe('UserInfoPage', () => {
   });
 
   it('saves profile with custom name and enables select room', async () => {
-    const mockResponse = { user_id: 'user_abc123', username: 'Alex' };
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockResponse),
-    });
+    const mockJoinResponse = { user_id: 'user_abc123', username: 'Alex' };
+    globalThis.fetch = mockFetchWithTopics(mockJoinResponse);
 
     renderWithRouter();
     fireEvent.change(screen.getByPlaceholderText(/e\.g\. Alex/i), {
@@ -100,11 +107,8 @@ describe('UserInfoPage', () => {
   });
 
   it('re-enables save button when form is edited after save', async () => {
-    const mockResponse = { user_id: 'user_abc123', username: 'Alex' };
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockResponse),
-    });
+    const mockJoinResponse = { user_id: 'user_abc123', username: 'Alex' };
+    globalThis.fetch = mockFetchWithTopics(mockJoinResponse);
 
     renderWithRouter();
     fireEvent.change(screen.getByPlaceholderText(/e\.g\. Alex/i), {
@@ -125,5 +129,19 @@ describe('UserInfoPage', () => {
       expect(btn).not.toBeDisabled();
     });
     expect(screen.getByText('Select Room / Area')).toBeDisabled();
+  });
+
+  it('renders interest selector', async () => {
+    const mockTopics = [{ id: 't1', name: 'AI Development', selected: true, is_default: true }, { id: 't2', name: 'DevOps', selected: true, is_default: true }];
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockTopics),
+    });
+
+    renderWithRouter();
+
+    await waitFor(() => {
+      expect(screen.getByText('Select interests...')).toBeInTheDocument();
+    });
   });
 });

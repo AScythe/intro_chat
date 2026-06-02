@@ -8,10 +8,20 @@ import { UserProvider } from '@/context/UserContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { PeoplePage } from '@/pages/PeoplePage';
 
-const mockRooms = [
-  { id: 'room1', name: 'Main Hall' },
-  { id: 'room2', name: 'Table 1' },
-];
+const mockEventConfig = {
+  rooms: [
+    { id: 'room1', name: 'Main Hall', selected: true, is_default: true },
+    { id: 'room2', name: 'Table 1', selected: true, is_default: true },
+  ],
+  topics: [],
+};
+
+const mockRoomUsers = {
+  sample_users: [
+    { name: 'Alex_Coder', available: false, status: 'Busy coding' },
+    { name: 'Sarah_Dev', available: true, status: 'Looking to chat' },
+  ],
+};
 
 function renderWithProviders(eventId = 'TEST1234') {
   return render(
@@ -46,10 +56,15 @@ describe('PeoplePage', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     localStorage.clear();
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(mockRooms),
-    });
+    globalThis.fetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockEventConfig),
+      })
+      .mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockRoomUsers),
+      });
   });
 
   it('renders page header when room name is provided', async () => {

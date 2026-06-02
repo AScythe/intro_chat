@@ -23,8 +23,8 @@ function renderWithProviders(eventId = 'TEST1234') {
 }
 
 const mockRooms = [
-  { id: 'room1', name: 'Main Hall' },
-  { id: 'room2', name: 'Table 1' },
+  { id: 'room1', name: 'Main Hall', selected: false, is_default: true },
+  { id: 'room2', name: 'Table 1', selected: false, is_default: true },
 ];
 
 describe('RoomPage', () => {

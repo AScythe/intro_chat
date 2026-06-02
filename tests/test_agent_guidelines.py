@@ -4,7 +4,7 @@ test_agent_guidelines.py
 Description: Validates AGENTS.md specification-routing logic and structural integrity.
 Section 1 (routing): given hypothetical user messages, verifies that documented rules
 select the correct skill (via description keyword matching) and correct tool (via
-Phase 0 Hard Gate classification). No messages are executed — pure static routing
+Three-Tier Classification). No messages are executed — pure static routing
 verification. Section 2 (integrity): verifies all verifiable claims in AGENTS.md
 against the actual filesystem — file paths, command targets, docs, naming conventions,
 description headers, and tool availability.
@@ -18,9 +18,9 @@ import shutil
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-AGENTS_MD = os.path.join(PROJECT_ROOT, "..", "AGENTS.md")
-SKILLS_DIR = os.path.join(PROJECT_ROOT, "..", ".opencode", "skills")
+TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
+AGENTS_MD = os.path.join(TESTS_DIR, "..", "AGENTS.md")
+SKILLS_DIR = os.path.join(TESTS_DIR, "..", ".opencode", "skills")
 
 PASS = 0
 FAIL = 0
@@ -56,7 +56,7 @@ def extract_frontmatter(path: str) -> dict:
             result["description"] = desc
     return result
 
-REPO_ROOT = os.path.dirname(PROJECT_ROOT)
+REPO_ROOT = os.path.dirname(TESTS_DIR)
 
 def resolve(path: str) -> str:
     return os.path.join(REPO_ROOT, path)
@@ -117,7 +117,7 @@ DOC_PATHS = [
     "docs/DESIGN_SPEC.md", "AGENTS.md", "refs/AGENT_SETUP.md",
     "refs/PROJECT_BEST_PRACTICES.md", "refs/DOCUMENT_GUIDELINES.md",
 ]
-UTILITY_SKILLS = ["rebuild-indexes", "frontend-design", "shadcn", "run-e2e-tests"]
+UTILITY_SKILLS = ["rebuild-indexes", "frontend-design", "shadcn", "run-e2e-tests", "save-session"]
 
 EXECUTE_MESSAGE = (
     "THIS IS A HYPOTHETICAL TEST MESSAGE — "
@@ -205,6 +205,10 @@ SKILL_ROUTING_CASES = [
         "run e2e tests for the chat flow",
         "end to end test the app after connections change",
         "playwright tests for the new page",
+    ]),
+    ("save-session", [
+        "save session after the implementation",
+        "save the current conversation to docs",
     ]),
     ("update-agent-setup-md", [
         "update agent setup for the new tools",
@@ -551,7 +555,7 @@ def test_documentation_structure():
 def test_test_suite_structure():
     print("\n📋 Test Suite Structure — naming conventions match actual files")
 
-    test_dir = PROJECT_ROOT
+    test_dir = TESTS_DIR
     backend_tests = [f for f in os.listdir(test_dir) if f.startswith("test_") and f.endswith(".py")]
     check(len(backend_tests) >= 1, f"Backend tests follow test_*.py naming (found {len(backend_tests)})")
 
