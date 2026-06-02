@@ -1,14 +1,6 @@
 # websocket_handler.py
 # Description: WebSocket endpoint handler for real-time communication — processes JSON messages, manages room membership changes, and handles disconnection cleanup
 # ====
-import logging
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-logger = logging.getLogger(__name__)
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketDisconnect

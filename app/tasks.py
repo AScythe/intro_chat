@@ -1,34 +1,36 @@
 # tasks.py
 # Description: Daemon background thread that periodically checks for and removes expired matches from in-memory state to prevent stale data accumulation
 # ====
-import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-logger = logging.getLogger(__name__)
-
-from .state import active_matches, active_matches_lock
+from .state import store
 from .config import CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
 import time
 import threading
+
+def find_expired_matches(
+    active_matches: dict,
+    current_time: float,
+    threshold: float,
+) -> list[str]:
+    """[ARCH] Pure function — identify expired match IDs without side effects."""
+    return [
+        mid for mid, match in active_matches.items()
+        if current_time - match['created_at'] > threshold
+    ]
+
 
 def cleanup_expired_matches() -> None:
     """Background thread to clean up expired matches."""
     while True:
         time.sleep(CLEANUP_INTERVAL_SECONDS)
         current_time = time.time()
-        expired_matches = []
 
-        with active_matches_lock:
-            for match_id, match in active_matches.items():
-                if current_time - match['created_at'] > CLEANUP_THRESHOLD_SECONDS:
-                    expired_matches.append(match_id)
-
+        with store.lock:
+            expired_matches = find_expired_matches(
+                store.active_matches, current_time, CLEANUP_THRESHOLD_SECONDS
+            )
             for match_id in expired_matches:
-                del active_matches[match_id]
+                store.remove_match(match_id)
 
 def start_cleanup_thread() -> threading.Thread:
     """Start the cleanup thread as a daemon."""
