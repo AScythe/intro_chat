@@ -1,6 +1,6 @@
 # Design Spec — IntroChat
 
-> **Last updated:** 2026-05-31 20:15 EDT
+> **Last updated:** 2026-06-02 17:45 EDT
 
 ## Aesthetic Direction
 
@@ -16,23 +16,23 @@ The visual identity mirrors the product promise: *low-pressure, gentle connectio
 
 | Token | Hex | Role |
 |-------|-----|------|
-| `--background` | `#FDFBF7` | Cream paper — warm off-white page bg |
+| `--background` | `#FAFAFA` | Near-white warm off-white page bg |
 | `--foreground` | `#2D2A24` | Warm dark brown body text |
 | `--card` | `#FFFFFF` | White card surface |
 | `--card-foreground` | `#2D2A24` | Card text |
-| `--primary` | `#A8B5A2` | Sage green — primary actions |
+| `--primary` | `#9BB493` | Sage green — primary actions |
 | `--primary-foreground` | `#FFFFFF` | Text on primary |
 | `--secondary` | `#E8E0D8` | Warm taupe — secondary surfaces |
 | `--secondary-foreground` | `#2D2A24` | Text on secondary |
 | `--accent` | `#C4956B` | Warm caramel — accent/highlights |
 | `--accent-foreground` | `#FFFFFF` | Text on accent |
 | `--muted` | `#F0EBE3` | Muted warm beige |
-| `--muted-foreground` | `#8A8378` | Muted text |
+| `--muted-foreground` | `#867F79` | Muted text |
 | `--destructive` | `#D4A0A0` | Soft rose — errors/destructive |
 | `--destructive-foreground` | `#FFFFFF` | Text on destructive |
 | `--border` | `#E5DDD4` | Soft warm border |
 | `--input` | `#E5DDD4` | Input border |
-| `--ring` | `#A8B5A2` | Focus ring (sage) |
+| `--ring` | `#A6B5A1` | Focus ring (sage) |
 | `--radius` | `1rem` | Corner radius |
 
 ### Dark Mode
@@ -43,19 +43,19 @@ The visual identity mirrors the product promise: *low-pressure, gentle connectio
 | `--foreground` | `#E8E0D8` | Warm off-white body text |
 | `--card` | `#2A2722` | Dark card surface |
 | `--card-foreground` | `#E8E0D8` | Card text |
-| `--primary` | `#8A9B84` | Muted sage (dark mode) |
+| `--primary` | `#7B9871` | Muted sage (dark mode) |
 | `--primary-foreground` | `#1C1A17` | Text on primary |
 | `--secondary` | `#3D3831` | Dark warm taupe |
 | `--secondary-foreground` | `#E8E0D8` | Text on secondary |
 | `--accent` | `#B8845C` | Warm caramel (dark mode) |
 | `--accent-foreground` | `#1C1A17` | Text on accent |
 | `--muted` | `#2A2722` | Muted dark |
-| `--muted-foreground` | `#9C9488` | Muted text (dark mode) |
+| `--muted-foreground` | `#9A9189` | Muted text (dark mode) |
 | `--destructive` | `#B88484` | Soft rose (dark mode) |
 | `--destructive-foreground` | `#1C1A17` | Text on destructive |
 | `--border` | `#3D3831` | Dark border |
 | `--input` | `#3D3831` | Input border |
-| `--ring` | `#8A9B84` | Focus ring (muted sage) |
+| `--ring` | `#899A84` | Focus ring (muted sage) |
 
 ---
 
@@ -83,13 +83,22 @@ The visual identity mirrors the product promise: *low-pressure, gentle connectio
 | Page enter | Fade-up (translateY(8px) → 0) | 0.4s | ease-out |
 | Page exit | Fade-out (opacity 1 → 0) | 0.2s | ease-in |
 | Card hover | TranslateY(-2px) + shadow deepen | 0.2s | ease-out |
-| Button hover | Brightness 1.05 | 0.15s | ease-out |
+| Button hover (primary) | TranslateY(-2px) lift — no color change | 0.2s | ease-out |
+| Button hover (secondary/outline) | Fill + accent color + TranslateY(-2px) lift | 0.2s | ease-out |
 | Stagger children | 50ms delay per child | — | — |
 | Toast enter | Slide-in from right | 0.3s | ease-out |
 | Toast exit | Fade + slide-right | 0.2s | ease-in |
 | Progress step | Scale pulse on active step | 0.3s | ease-out |
 
 **Library:** framer-motion via `motion` package (already planned for install). CSS transitions for hover/focus states.
+
+### Button Interaction Design
+
+Buttons follow a two-tier visual hierarchy:
+
+- **Primary CTA** (`variant="default"`) — sage green fill, fixed color (no hover shift), lifts on hover (`-translateY(-2px)`). The fixed color means the button stays visually prominent at all times — users immediately know where to click without needing hover interaction.
+- **Secondary CTA** (`variant="outline"`) — bordered, fills with accent color on hover + lifts (`-translateY(-2px)`). The hover-activated fill provides clear interactive feedback without competing with the primary button's visual weight.
+- **Disabled state** — `opacity-50` applied uniformly across all variants. Grayed out, non-interactive until conditions are met.
 
 ---
 
@@ -108,10 +117,10 @@ The visual identity mirrors the product promise: *low-pressure, gentle connectio
 
 | Spec Element | HSL Value | CSS Variable | tailwind.config.js |
 |-------------|-----------|-------------|-------------------|
-| Background light | 40 30% 97% | `--background` | `colors.background` |
+| Background light | 40 6% 98% | `--background` | `colors.background` |
 | Foreground light | 40 5% 16% | `--foreground` | `colors.foreground` |
 | Card light | 0 0% 100% | `--card` | `colors.card` |
-| Primary (sage) light | 105 12% 67% | `--primary` | `colors.primary.DEFAULT` |
+| Primary (sage) light | 105 18% 64% | `--primary` | `colors.primary.DEFAULT` |
 | Accent (caramel) light | 30 40% 60% | `--accent` | `colors.accent.DEFAULT` |
 | Secondary (taupe) light | 30 20% 88% | `--secondary` | `colors.secondary.DEFAULT` |
 | Muted light | 35 20% 92% | `--muted` | `colors.muted.DEFAULT` |

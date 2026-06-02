@@ -189,7 +189,7 @@ cd frontend && npm test && cd ..
 cd frontend && npm run test:e2e && cd ..
 
 # Type-check frontend (run after TypeScript changes)
-cd frontend && npm run type-check && cd ..
+cd frontend && npx tsc --noEmit && cd ..
 ```
 
 ---

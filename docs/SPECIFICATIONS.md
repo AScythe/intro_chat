@@ -22,13 +22,13 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 ## ✅ How It Works (Core Logic Flow)
 
 1. **User creates or joins an event** → receives an 8-character event code
-2. **Sets up their profile** — optionally enters a display name, LinkedIn URL, and/or Slack handle (stored but never shared without double opt-in). If name is left blank, an anonymous `User_XXXXX` username is auto-generated.
+2. **Sets up their profile** — optionally enters a display name, LinkedIn URL, and/or Slack handle (stored but never shared without double opt-in). Also selects interests/topics from a chip-based selection to help others find conversation starters. If name is left blank, an anonymous `User_XXXXX` username is auto-generated.
 3. **Selects a room** (Main Hall, Table 1-5, Quiet Corner, Coffee Area) via dropdown
 4. **Browses nearby people and requests a chat** — sees who's in the same room, selects a person, and sends a chat request
 5. **Waits for acceptance** — the other person receives the request and accepts (or declines). Once accepted, both tap "I'm Ready to Chat!" and then "Start Chat - Both Ready!" to proceed
 6. **Match found!** → 60-second countdown → auto-redirect to chat page
 7. **30-second timed chat** with guided conversation prompts
-8. **Time's up** → option to extend the timer or chat indefinitely
+8. **Time's up** → option to extend the chat (one additional 30-second round) or end and proceed to connection exchange
 9. **Connection exchange** → navigated to a dedicated Connect page where both users independently choose Yes/No on a connection card. If both opt in, usernames are exchanged in real time via WebSocket; if either declines, the chat ends respectfully with a decline message
 
 ---
