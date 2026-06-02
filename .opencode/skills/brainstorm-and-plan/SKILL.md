@@ -19,7 +19,6 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 - [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the upstream problem description or prior plan document
-- [ ] Run baseline tests — all must pass
 - [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
 - [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
 
@@ -81,7 +80,7 @@ Evaluate the proposed approach against these principles. Surface concerns here.
 Follow the User Interaction Pattern in AGENTS.md — use the `question` tool with clickable selectable options for every user decision point. Provide `options` with `label` and `description` fields. Never use raw text prompts or unformatted "y/n" questions. Present one decision-point at a time, resolve, then present the next. Never present multiple items in a single message.
 
 1. **Clarify understanding** — restate requirements back to the user. Do not proceed until confirmed.
-2. **Surface ambiguities** — state ONE unclear point at a time. Present multiple interpretations if they exist for that point; do not pick silently. Resolve before moving to the next ambiguity.
+2. **Surface ambiguities** — state unclear point one at a time. Present multiple interpretations if they exist for that point; do not pick silently. Resolve before moving to the next ambiguity.
 3. **Discuss design approach** — present findings from Phase 1 evaluation (design principles, control flow). Discuss ONE trade-off or risk at a time. Push back on questionable approaches.
 4. **Confirm direction** — ensure the user agrees with the approach before producing the plan.
 5. **Document sources** — cite which docs/sections were consulted.

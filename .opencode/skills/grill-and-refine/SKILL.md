@@ -87,7 +87,7 @@ During **Risks**, probe for test fragility:
 
 Follow the User Interaction Pattern in AGENTS.md — use the `question` tool with clickable selectable options for every user decision point. Provide `options` with `label` and `description` fields. Never use raw text prompts or unformatted "y/n" questions. Present one decision-point at a time, resolve, then present the next.
 
-1. **Before starting:** use the `question` tool to let user flag each dimension as "needs discussion" or "skippable" — present only NAME, do not describe contents. Resolve skip list before proceeding.
+1. **Before starting:** identify which dimensions need discussion and which are skippable (obvious, no decisions needed). Skip skippable ones silently.
 2. Walk through each non-skipped dimension in order. For each:
    - State ONE finding and recommendation at a time
    - Use the `question` tool with concrete options (e.g., "server-side, client-side, or something else")

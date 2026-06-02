@@ -1,5 +1,7 @@
-# Description: Database maintenance script — deduplicates rows and removes User_* test users.
+# Description: Database maintenance script — deduplicates rows, removes User_* test users, purges orphaned events,
+# and optionally keeps only one event per database.
 # Run: uv run python utility/cleanup_db.py
+# Run with keep-event: uv run python utility/cleanup_db.py --keep-event 53aba7a9
 
 import sqlite3
 
@@ -56,7 +58,60 @@ def dedup_matches(cur):
     cur.execute("DELETE FROM matches WHERE user1_id NOT IN (SELECT id FROM users) OR user2_id NOT IN (SELECT id FROM users)")
 
 
-def process(db_path):
+def keep_only_event(cur, keep_id: str):
+    orphan_ids = [
+        r[0] for r in cur.execute("SELECT id FROM events WHERE id != ?", (keep_id,)).fetchall()
+    ]
+    if not orphan_ids:
+        print(f"  Only one event ({keep_id}) — nothing to remove.")
+        return
+    ph = ','.join('?' for _ in orphan_ids)
+    room_ids = [r[0] for r in cur.execute(f"SELECT id FROM rooms WHERE event_id IN ({ph})", orphan_ids).fetchall()]
+    if room_ids:
+        rp = ','.join('?' for _ in room_ids)
+        cur.execute(f"DELETE FROM room_sample_users WHERE room_id IN ({rp})", room_ids)
+    cur.execute(f"DELETE FROM user_interests WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM matches WHERE user1_id IN (SELECT id FROM users WHERE event_id IN ({ph})) OR user2_id IN (SELECT id FROM users WHERE event_id IN ({ph}))", orphan_ids + orphan_ids)
+    cur.execute(f"DELETE FROM users WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM rooms WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM event_topics WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM events WHERE id IN ({ph})", orphan_ids)
+    # Second pass: purge records left orphaned from previous runs (event_id no longer in events)
+    cur.execute("DELETE FROM event_topics WHERE event_id NOT IN (SELECT id FROM events)")
+    cur.execute("DELETE FROM user_interests WHERE event_id NOT IN (SELECT id FROM events)")
+    cur.execute("DELETE FROM room_sample_users WHERE room_id NOT IN (SELECT id FROM rooms)")
+    cur.execute("DELETE FROM users WHERE event_id NOT IN (SELECT id FROM events)")
+    cur.execute("DELETE FROM rooms WHERE event_id NOT IN (SELECT id FROM events)")
+    cur.execute("DELETE FROM matches WHERE user1_id NOT IN (SELECT id FROM users) OR user2_id NOT IN (SELECT id FROM users)")
+    print(f"  Kept event {keep_id}, removed {len(orphan_ids)} other event(s).")
+
+
+def remove_orphaned_events(cur):
+    orphan_ids = [
+        r[0] for r in cur.execute("""
+            SELECT e.id FROM events e
+            WHERE NOT EXISTS (SELECT 1 FROM rooms r WHERE r.event_id = e.id AND r.selected = 1)
+              AND NOT EXISTS (SELECT 1 FROM event_topics t WHERE t.event_id = e.id AND t.selected = 1)
+        """).fetchall()
+    ]
+    if not orphan_ids:
+        print("  No orphaned events found.")
+        return
+    ph = ','.join('?' for _ in orphan_ids)
+    room_ids = [r[0] for r in cur.execute(f"SELECT id FROM rooms WHERE event_id IN ({ph})", orphan_ids).fetchall()]
+    if room_ids:
+        rp = ','.join('?' for _ in room_ids)
+        cur.execute(f"DELETE FROM room_sample_users WHERE room_id IN ({rp})", room_ids)
+    cur.execute(f"DELETE FROM user_interests WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM matches WHERE user1_id IN (SELECT id FROM users WHERE event_id IN ({ph})) OR user2_id IN (SELECT id FROM users WHERE event_id IN ({ph}))", orphan_ids + orphan_ids)
+    cur.execute(f"DELETE FROM users WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM rooms WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM event_topics WHERE event_id IN ({ph})", orphan_ids)
+    cur.execute(f"DELETE FROM events WHERE id IN ({ph})", orphan_ids)
+    print(f"  Removed {len(orphan_ids)} orphaned event(s): {orphan_ids}")
+
+
+def process(db_path, keep_event_id=None):
     conn = sqlite3.connect(db_path)
     conn.execute("PRAGMA foreign_keys = OFF")
     cur = conn.cursor()
@@ -64,15 +119,39 @@ def process(db_path):
     tables = [r[0] for r in cur.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
     print(f"\n=== {db_path} ===")
 
-    if "events" in tables:
-        dedup_events(cur)
-    if "rooms" in tables:
-        dedup_rooms(cur)
-    if "users" in tables:
-        remove_user_prefix(cur)
-        dedup_users(cur)
-    if "matches" in tables:
-        dedup_matches(cur)
+    if keep_event_id and cur.execute("SELECT 1 FROM events WHERE id = ?", (keep_event_id,)).fetchone():
+        keep_only_event(cur, keep_event_id)
+    else:
+        if keep_event_id:
+            print(f"  Event {keep_event_id} not found in this DB — running standard cleanup.")
+        if "events" in tables:
+            dedup_events(cur)
+        if "events" in tables:
+            dedup_events(cur)
+        if "rooms" in tables:
+            dedup_rooms(cur)
+        if "users" in tables:
+            remove_user_prefix(cur)
+            dedup_users(cur)
+        if "matches" in tables:
+            dedup_matches(cur)
+        if "events" in tables and "rooms" in tables and "event_topics" in tables:
+            remove_orphaned_events(cur)
+
+    # Final pass: purge any records orphaned by prior steps
+    for t in tables:
+        if t == "event_topics":
+            cur.execute("DELETE FROM event_topics WHERE event_id NOT IN (SELECT id FROM events)")
+        elif t == "user_interests":
+            cur.execute("DELETE FROM user_interests WHERE event_id NOT IN (SELECT id FROM events)")
+        elif t == "room_sample_users":
+            cur.execute("DELETE FROM room_sample_users WHERE room_id NOT IN (SELECT id FROM rooms)")
+        elif t == "users":
+            cur.execute("DELETE FROM users WHERE event_id NOT IN (SELECT id FROM events)")
+        elif t == "rooms":
+            cur.execute("DELETE FROM rooms WHERE event_id NOT IN (SELECT id FROM events)")
+        elif t == "matches":
+            cur.execute("DELETE FROM matches WHERE user1_id NOT IN (SELECT id FROM users) OR user2_id NOT IN (SELECT id FROM users)")
 
     conn.commit()
 
@@ -88,6 +167,12 @@ def process(db_path):
 
 
 if __name__ == "__main__":
+    import sys
+    keep_event = None
+    args = sys.argv[1:]
+    for i, a in enumerate(args):
+        if a == "--keep-event" and i + 1 < len(args):
+            keep_event = args[i + 1]
     for db_path in DBS:
-        process(db_path)
+        process(db_path, keep_event_id=keep_event)
     print("\nDone.")
