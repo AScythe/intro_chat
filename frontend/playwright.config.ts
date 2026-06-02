@@ -17,6 +17,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: 1,
+  globalSetup: './tests/e2e/globalSetup.ts',
   reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
   use: {
     baseURL: 'http://127.0.0.1:5000',

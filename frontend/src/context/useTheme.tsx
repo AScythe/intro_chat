@@ -1,4 +1,4 @@
-// context/useTheme.ts
+// context/useTheme.tsx
 // Description: Theme context and hook — dark mode toggle with localStorage persistence and prefers-color-scheme detection
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';

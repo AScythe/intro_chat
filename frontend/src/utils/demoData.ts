@@ -1,13 +1,17 @@
-// demoData.ts
+// demoData.ts [CLEANUP]
 // Description: Demo/simulation data — sample users, fallback prompts, and mock responses
 
-export interface SamplePerson {
-  name: string;
-  available: boolean;
-  status: string;
+import type { SampleUserData } from '@/types/api';
+
+function freezeDeep<T>(obj: T): T {
+  if (obj && typeof obj === 'object') {
+    Object.freeze(obj);
+    Object.values(obj as Record<string, unknown>).forEach(freezeDeep);
+  }
+  return obj;
 }
 
-export const SAMPLE_USERS: Record<string, SamplePerson[]> = {
+export const SAMPLE_USERS: Record<string, SampleUserData[]> = freezeDeep({
   'Main Hall': [
     { name: 'Alex_Coder', available: false, status: 'Busy coding' },
     { name: 'Sarah_Dev', available: true, status: 'Looking to chat' },
@@ -19,31 +23,31 @@ export const SAMPLE_USERS: Record<string, SamplePerson[]> = {
     { name: 'Lisa_JS', available: false, status: 'Taking notes' },
   ],
   'Table 2': [
-    { name: 'Tom_React', available: false, status: 'Debugging' },
-    { name: 'Anna_Vue', available: true, status: 'Available' },
-    { name: 'Chris_Node', available: false, status: 'On a call' },
+    { name: 'Olga_Rust', available: true, status: 'Happy to meet' },
+    { name: 'Tom_Swift', available: false, status: 'On a call' },
   ],
   'Table 3': [
-    { name: 'Sam_AI', available: true, status: 'Looking for conversation' },
-    { name: 'Ruby_Data', available: false, status: 'Analyzing data' },
+    { name: 'Diana_Go', available: true, status: 'Just arrived' },
   ],
   'Table 4': [
-    { name: 'Ben_Mobile', available: false, status: 'Testing app' },
-    { name: 'Zoe_Flutter', available: true, status: 'Open to chat' },
+    { name: 'Raj_Java', available: false, status: 'Debugging' },
+    { name: 'Ella_Ruby', available: true, status: 'Excited to chat' },
+    { name: 'Finn_Web3', available: true, status: 'Browsing' },
   ],
   'Table 5': [
-    { name: 'Max_Cloud', available: true, status: 'Ready to talk' },
-    { name: 'Luna_AWS', available: false, status: 'Configuring servers' },
+    { name: 'Nina_ML', available: false, status: 'Training model' },
+    { name: 'Omar_Scala', available: true, status: 'Open for chat' },
   ],
   'Quiet Corner': [
-    { name: 'Eve_Designer', available: true, status: 'Quiet but open' },
+    { name: 'Zara_Read', available: false, status: 'Reading docs' },
+    { name: 'Kai_Write', available: true, status: 'Taking a break' },
   ],
   'Coffee Area': [
-    { name: 'Dan_DevOps', available: true, status: 'Coffee break - chat me!' },
-    { name: 'Maya_FullStack', available: false, status: 'Focused on laptop' },
-    { name: 'Leo_Backend', available: false, status: 'Reading documentation' },
+    { name: 'Liam_Chat', available: true, status: 'Grabbing coffee' },
+    { name: 'Sara_Design', available: false, status: 'Sketching UI' },
+    { name: 'Noah_Ops', available: true, status: 'Ready to connect' },
   ],
-};
+});
 
 export const RESPONSES: Record<string, { accepted: boolean; message: string }> = {
   Dan_DevOps: { accepted: true, message: "Hey! I'd love to chat about DevOps! Let's meet at the coffee table." },

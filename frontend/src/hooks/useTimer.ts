@@ -20,7 +20,18 @@ interface ChatTimerControls extends TimerControls {
   extend: (seconds: number) => void;
 }
 
-function useTimerBase(duration: number, callbacks?: TimerCallbacks) {
+interface TimerBaseState {
+  timeLeft: number;
+  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
+  isRunning: boolean;
+  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
+  intervalRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>;
+  callbacksRef: React.MutableRefObject<TimerCallbacks | undefined>;
+  clear: () => void;
+  getTimeLeft: () => number;
+}
+
+function useTimerBase(duration: number, callbacks?: TimerCallbacks): TimerBaseState {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);

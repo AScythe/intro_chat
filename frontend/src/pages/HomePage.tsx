@@ -14,6 +14,7 @@ import type { CreateEventResponse, QRResponse } from '@/types/api';
 export function HomePage() {
   const navigate = useNavigate();
   const [eventCode, setEventCode] = useState('');
+  const [editCode, setEditCode] = useState('');
   const [eventName, setEventName] = useState('');
   const [creating, setCreating] = useState(false);
   const [createdEvent, setCreatedEvent] = useState<{
@@ -26,6 +27,15 @@ export function HomePage() {
     const code = eventCode.trim().toUpperCase();
     if (code.length !== 8) return;
     navigate(`/join/${code}`);
+  }
+
+  function handleEdit() {
+    const code = editCode.trim();
+    if (code.length !== 8) {
+      toast.error('Please enter a valid 8-character event code.');
+      return;
+    }
+    navigate(`/organize/${code}`);
   }
 
   async function handleCreate() {
@@ -108,17 +118,40 @@ export function HomePage() {
         )}
 
         {createdEvent && (
-          <>
-            <QRDisplay qrCode={createdEvent.qrCode} eventCode={createdEvent.id} eventName={createdEvent.name} />
-            <Card>
-              <CardContent className="pt-6">
-                <Button className="w-full" onClick={() => navigate(`/join/${createdEvent.id}`)}>
-                  Join This Event
-                </Button>
-              </CardContent>
-            </Card>
-          </>
+          <QRDisplay
+            qrCode={createdEvent.qrCode}
+            eventCode={createdEvent.id}
+            eventName={createdEvent.name}
+            onOrganize={() => navigate(`/organize/${createdEvent.id}`)}
+          />
         )}
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-heading text-2xl">Edit an Event</CardTitle>
+            <CardDescription>Enter your event code to edit rooms, topics, and configuration</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-3">
+              <Input
+                type="text"
+                id="editEventCode"
+                placeholder="Enter event code"
+                maxLength={8}
+                value={editCode}
+                onChange={(e) => setEditCode(e.target.value)}
+              />
+              <div className="flex gap-2">
+                <Button onClick={handleEdit} disabled={editCode.trim().length !== 8}>
+                  Edit Event
+                </Button>
+                <Button variant="outline" onClick={() => navigate(`/join/${editCode.trim()}`)} disabled={editCode.trim().length !== 8}>
+                  Test This Event
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <section className="py-6">
           <h3 className="mb-8 text-center font-heading text-3xl text-foreground">

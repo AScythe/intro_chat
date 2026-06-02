@@ -2,9 +2,9 @@
 // Description: Hook managing chat request lifecycle — send request, wait for response, ready signaling
 
 import { useState, useCallback } from 'react';
-import { useDemoMode } from '@/hooks/useDemoMode';
+import { useDemoSimulation } from '@/hooks/useDemoSimulation';
 import { CONFIG } from '@/config/constants';
-import type { SamplePerson } from '@/utils/demoData';
+import type { SampleUserData } from '@/types/api';
 
 interface PersonResponse {
   accepted: boolean;
@@ -12,13 +12,13 @@ interface PersonResponse {
 }
 
 export function useChatRequest() {
-  const demo = useDemoMode(true);
-  const [requestedPerson, setRequestedPerson] = useState<SamplePerson | null>(null);
+  const demo = useDemoSimulation(true);
+  const [requestedPerson, setRequestedPerson] = useState<SampleUserData | null>(null);
   const [personResponse, setPersonResponse] = useState<PersonResponse | null>(null);
   const [yourReady, setYourReady] = useState(false);
   const [theirReady, setTheirReady] = useState(false);
 
-  const requestChat = useCallback((person: SamplePerson) => {
+  const requestChat = useCallback((person: SampleUserData) => {
     setRequestedPerson(person);
     setPersonResponse(null);
     setYourReady(false);

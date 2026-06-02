@@ -4,27 +4,29 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSocket } from '@/hooks/useSocket';
-import { useDemoMode } from '@/hooks/useDemoMode';
+import { useDemoSimulation } from '@/hooks/useDemoSimulation';
+import { fetchJSON } from '@/api/client';
 import { useChatRequest } from '@/hooks/useChatRequest';
 import { MatchCountdown } from '@/components/MatchCountdown';
 import { Button } from '@/components/ui/button';
 import { CONFIG } from '@/config/constants';
 import { NearbyUsersView, WaitingResponseView, AcceptedView } from '@/components/PeoplePageViews';
-import type { SamplePerson } from '@/utils/demoData';
+import type { SampleUserData } from '@/types/api';
+import type { RoomUsersResponse, EventConfigResponse } from '@/types/api';
 
 export function PeoplePage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const socket = useSocket();
-  const demo = useDemoMode(true);
+  const demo = useDemoSimulation(true);
   const { requestedPerson, personResponse, yourReady, theirReady, requestChat, imReady, cancelRequest } = useChatRequest();
 
   const locationState = location.state as { roomName?: string } | null;
   const roomName = locationState?.roomName;
 
-  const [nearbyUsers, setNearbyUsers] = useState<SamplePerson[]>([]);
-  const [selectedPerson, setSelectedPerson] = useState<SamplePerson | null>(null);
+  const [nearbyUsers, setNearbyUsers] = useState<SampleUserData[]>([]);
+  const [selectedPerson, setSelectedPerson] = useState<SampleUserData | null>(null);
   const [viewState, setViewState] = useState<'showing' | 'waitingResponse' | 'accepted' | 'matchFound'>('showing');
   const [matchUsername, setMatchUsername] = useState('');
   const [matchId, setMatchId] = useState('');
@@ -37,12 +39,28 @@ export function PeoplePage() {
   }, [roomName, eventId, navigate]);
 
   useEffect(() => {
-    if (!roomName) return;
-    const users = demo.addSampleUsers(roomName);
-    setNearbyUsers(users);
-  }, [roomName, demo]);
+    if (!roomName || !eventId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const config = await fetchJSON<EventConfigResponse>(`/api/events/${eventId}/config`);
+        const room = config.rooms.find((r) => r.name === roomName);
+        if (!room) throw new Error('Room not found in config');
+        const res = await fetchJSON<RoomUsersResponse>(`/api/events/${eventId}/rooms/${room.id}/users`);
+        if (!cancelled) {
+          setNearbyUsers(res.sample_users);
+        }
+      } catch {
+        if (!cancelled) {
+          const users = demo.addSampleUsers(roomName);
+          setNearbyUsers(users);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [roomName, eventId, demo]);
 
-  function handlePersonClick(person: SamplePerson) {
+  function handlePersonClick(person: SampleUserData) {
     if (!person.available) return;
     setSelectedPerson(person);
   }

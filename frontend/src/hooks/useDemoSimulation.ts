@@ -1,20 +1,21 @@
-// useDemoMode.ts
+// useDemoSimulation.ts [CLEANUP]
 // Description: Hook providing demo/simulation logic gated by VITE_ENABLE_DEMO feature flag
+// Replaces useDemoMode.ts — renamed to reflect full scope (5 methods, not just toggle)
 
 import { useMemo } from 'react';
 import { generateRandomString } from '@/utils/random';
 import { CONFIG } from '@/config/constants';
-import type { SamplePerson } from '@/utils/demoData';
+import type { SampleUserData } from '@/types/api';
 import { SAMPLE_USERS, RESPONSES } from '@/utils/demoData';
 
-export function useDemoMode(enabled?: boolean) {
+export function useDemoSimulation(enabled?: boolean) {
   return useMemo(() => {
     const isEnabled = enabled ?? false;
 
     return {
       isDemo: isEnabled,
 
-      addSampleUsers(roomName: string): SamplePerson[] {
+      addSampleUsers(roomName: string): SampleUserData[] {
         if (!isEnabled) return [];
         return SAMPLE_USERS[roomName] ?? [];
       },

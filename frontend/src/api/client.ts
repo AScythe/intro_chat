@@ -3,7 +3,7 @@
 
 async function fetchWithTimeout(
   url: string,
-  options: RequestInit = {},
+  options?: RequestInit,
   timeout = 10000,
 ): Promise<Response> {
   const controller = new AbortController();
@@ -31,7 +31,7 @@ async function parseJSON<T>(response: Response): Promise<T> {
 
 export async function fetchJSON<T>(
   url: string,
-  options: RequestInit = {},
+  options?: RequestInit,
 ): Promise<T> {
   const response = await fetchWithTimeout(url, options);
   return parseJSON<T>(response);

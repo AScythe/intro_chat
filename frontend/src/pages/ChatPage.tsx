@@ -13,14 +13,6 @@ import { CONFIG } from '@/config/constants';
 import { formatDuration } from '@/utils/format';
 import { ErrorView, ChatLoadingView, ChattingView, TimeUpView, ExtendedView } from '@/components/ChatPageViews';
 
-const FALLBACK_PROMPTS = [
-  "What's one thing you're excited about this weekend?",
-  "What's your favorite snack at hackathons?",
-  "If you could steal one skill from another hacker, what would it be?",
-  "What's your favorite debugging story?",
-  "What's the most interesting project you've worked on recently?",
-];
-
 type ChatState = 'loading' | 'chatting' | 'timeUp' | 'extended';
 
 export function ChatPage() {
@@ -72,7 +64,7 @@ export function ChatPage() {
   function loadPrompts() {
     fetchJSON<string[]>('/api/prompts')
       .then(setPrompts)
-      .catch(() => setPrompts([...FALLBACK_PROMPTS]));
+      .catch(() => setPrompts([]));
   }
 
   function connectSocket() {

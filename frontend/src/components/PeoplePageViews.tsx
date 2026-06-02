@@ -4,7 +4,7 @@
 import { PersonCard } from '@/components/PersonCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { SamplePerson } from '@/utils/demoData';
+import type { SampleUserData } from '@/types/api';
 
 export interface PersonResponse {
   accepted: boolean;
@@ -13,9 +13,9 @@ export interface PersonResponse {
 
 interface NearbyUsersViewProps {
   roomName: string;
-  nearbyUsers: SamplePerson[];
-  selectedPerson: SamplePerson | null;
-  onPersonClick: (person: SamplePerson) => void;
+  nearbyUsers: SampleUserData[];
+  selectedPerson: SampleUserData | null;
+  onPersonClick: (person: SampleUserData) => void;
   onRequestChat: () => void;
   onChangeRoom: () => void;
 }
@@ -64,7 +64,7 @@ export function NearbyUsersView({ roomName, nearbyUsers, selectedPerson, onPerso
 }
 
 interface WaitingResponseViewProps {
-  requestedPerson: SamplePerson;
+  requestedPerson: SampleUserData;
   onCancel: () => void;
 }
 
@@ -75,29 +75,20 @@ export function WaitingResponseView({ requestedPerson, onCancel }: WaitingRespon
         <CardTitle className="font-heading text-2xl">Request Sent</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="max-w-sm">
-          <PersonCard person={requestedPerson} />
+        <div className="rounded-xl border-l-4 border-primary bg-muted p-5">
+          <p className="text-sm text-foreground">
+            Request sent to <span className="font-semibold">{requestedPerson.name}</span>.
+            Waiting for response...
+          </p>
         </div>
-        <div className="space-y-3 rounded-xl border bg-muted p-5">
-          <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
-            <span className="text-sm text-foreground">You: Request sent</span>
-          </div>
-          <div className="flex animate-pulse items-center gap-3 rounded-lg border bg-card p-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-lg">⏳</span>
-            <span className="text-sm text-foreground">{requestedPerson.name}: Waiting for response...</span>
-          </div>
-        </div>
-        <Button variant="outline" onClick={onCancel}>
-          Cancel Request
-        </Button>
+        <Button variant="outline" onClick={onCancel}>Cancel Request</Button>
       </CardContent>
     </Card>
   );
 }
 
 interface AcceptedViewProps {
-  requestedPerson: SamplePerson;
+  requestedPerson: SampleUserData;
   personResponse: PersonResponse;
   yourReady: boolean;
   theirReady: boolean;

@@ -1,15 +1,17 @@
 // QRDisplay.tsx
 // Description: QR code image display with event code shown below
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface QRDisplayProps {
   qrCode: string;
   eventCode: string;
   eventName: string;
+  onOrganize?: () => void;
 }
 
-export function QRDisplay({ qrCode, eventCode, eventName }: QRDisplayProps) {
+export function QRDisplay({ qrCode, eventCode, eventName, onOrganize }: QRDisplayProps) {
   return (
     <Card>
       <CardHeader>
@@ -32,6 +34,11 @@ export function QRDisplay({ qrCode, eventCode, eventName }: QRDisplayProps) {
             <span className="font-medium text-foreground">Event Name:</span> {eventName}
           </p>
         </div>
+        {onOrganize && (
+          <Button className="w-full" onClick={onOrganize}>
+            Organize Event
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

@@ -1,11 +1,11 @@
 // PersonCard.tsx
 // Description: Person selector card showing username, availability status, and click-to-select
 
-import type { SamplePerson } from '@/utils/demoData';
+import type { SampleUserData } from '@/types/api';
 import { cn } from '@/lib/utils';
 
 interface PersonCardProps {
-  person: SamplePerson;
+  person: SampleUserData;
   selected?: boolean;
   onClick?: () => void;
 }

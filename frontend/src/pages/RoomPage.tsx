@@ -98,6 +98,17 @@ export function RoomPage() {
               <Skeleton className="h-12 w-32" />
             </CardContent>
           </Card>
+        ) : rooms.length === 0 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-heading text-2xl">No Rooms Available</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                This event hasn't configured any rooms yet. Please check back later.
+              </p>
+            </CardContent>
+          </Card>
         ) : (
           <RoomSelector
             rooms={rooms}

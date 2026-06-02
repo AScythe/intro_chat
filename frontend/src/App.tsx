@@ -15,6 +15,7 @@ import { RoomPage } from '@/pages/RoomPage';
 import { ChatPage } from '@/pages/ChatPage';
 import { PeoplePage } from '@/pages/PeoplePage';
 import { ConnectPage } from '@/pages/ConnectPage';
+import { OrganizeEventPage } from '@/pages/OrganizeEventPage';
 
 const STEPS = [
   { label: 'Join', path: '/' },
@@ -113,6 +114,7 @@ function AnimatedRoutes() {
           <Route path="/people/:eventId" element={<PeoplePage />} />
           <Route path="/chat/:matchId" element={<ChatPage />} />
           <Route path="/connect/:matchId" element={<ConnectPage />} />
+          <Route path="/organize/:eventId" element={<OrganizeEventPage />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
