@@ -150,7 +150,7 @@ intro_chat/
 │   ├── DOCUMENT_GUIDELINES.md  # Document scope & governance
 │   └── PROJECT_BEST_PRACTICES.md # Universal coding best practices
 │
-├── graphify-out/                  # Graphify knowledge graph outputs (auto-generated — rebuild via `rebuild-indexes` skill)
+├── graphify-out/                  # Graphify knowledge graph outputs (auto-generated — rebuild via `rebuild-test-and-indexes` skill)
 │   └── graph.json             # Knowledge graph data
 │
 ├── utility/                       # Maintenance and utility scripts
@@ -565,7 +565,7 @@ Dual-section validation suite. Section 1 (routing): verifies AGENTS.md skill-rou
 - `test_commands_reference()` — verifies command target files exist and package.json has build/dev/test/test:e2e scripts
 - `test_documentation_structure()` — verifies all 8 documented doc paths exist
 - `test_test_suite_structure()` — verifies backend `test_*.py`, frontend `*.test.{ts,tsx}`, E2E `*.spec.ts` naming conventions
-- `test_utility_skills()` — verifies 4 utility skill files exist (rebuild-indexes, frontend-design, shadcn, run-e2e-tests)
+- `test_utility_skills()` — verifies 4 utility skill files exist (rebuild-test-and-indexes, frontend-design, shadcn, run-e2e-tests)
 - `test_documentation_discipline()` — verifies all Python files in app/ have `# Description:` header and all TS/TSX files in frontend/src/ have description header
 - `test_tooling_rules()` — verifies `uv` and `npm` tools available on PATH
 - `main()` — runs all test functions, reports PASS/FAIL count

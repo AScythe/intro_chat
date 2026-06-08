@@ -127,7 +127,7 @@ Stage 3: Verify — ast-grep (structural pattern confirmation) → Read (exact l
 - **Periodic test health audit** — inspect test files for stale file paths, misleading comments, and coverage gaps (files tested for exports but missing from existence checks). A passing test suite can still have stale references.
 - **Audit after restructure/migration** — update owning skills; grep for stale patterns.
 - **Consistency pass** — after multi-file changes, read affected files end-to-end.
-- **Keep index/graph current** — always run `rebuild-indexes` before review verification (handled by Phase 0 of `review-implementation`). If querying graph/index mid-implementation, rebuild manually.
+- **Keep index/graph current** — always run `rebuild-test-and-indexes` before review verification (handled by Phase 0 of `review-implementation`). If querying graph/index mid-implementation, rebuild manually.
 
 ---
 
@@ -213,11 +213,11 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 
 **Rule:** Non-phase skills are invoked as sub-steps within agentic phases or on-demand — never as standalone top-level phases. Load via `skill(name: "<skill-name>")` when their task is needed.
 
-- **Rebuild indexes:** Before review verification (Phase 0 of `review-implementation`), or standalone request — see `rebuild-indexes` skill.
+- **Rebuild indexes:** Before review verification (Phase 0 of `review-implementation`), or standalone request — see `rebuild-test-and-indexes` skill.
 - **Frontend/UIUX work:** For UI/UX frontend tasks, use `frontend-design` (design spec) then `shadcn` (implementation) sequentially — see each skill for full behavioral rules.
 - **End-to-end tests:** Run Playwright E2E tests standalone — auto-installs Chromium, builds SPA, starts app with temp DB — see `run-e2e-tests` skill.
 - **Save session:** Save conversation timeline to `docs/sessions/` at workflow transitions — see `save-session` skill. Session files include a YAML frontmatter header (~200 tokens) and are re-readable via Session Continuity Check.
-- **Update docs:** Sync documentation after code changes — delegates to `update-architecture-md`, `update-readme-md`, `update-agent-setup-md`, `update-specifications-md`, `update-agents-md`, and `update-best-practices-md` skills. Triggered at end of session via `update-docs`.
+- **Update docs:** Sync documentation after code changes — delegates to `update-architecture-md`, `update-readme-md`, `update-agent-setup-md`, `update-specifications-md`, `update-agents-md`, and `update-best-practices-md` skills. **Dual mode:** explicit (standalone) performs full codebase + session scan; implicit (auto-called by `review-implementation` Phase 3) uses git diff delta for lightweight sync.
 
 ## Session Continuity Check
 
@@ -262,5 +262,5 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 
 ## Tooling Rules
 
-- **Code index & knowledge graph:** Auto-generated — rebuild via `rebuild-indexes` skill. ❌ Never edit manually.
+- **Code index & knowledge graph:** Auto-generated — rebuild via `rebuild-test-and-indexes` skill. ❌ Never edit manually.
 - **Package manager:** `uv` for Python, `npm` for frontend. Never use pip or yarn directly.

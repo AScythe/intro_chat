@@ -270,7 +270,7 @@ The `.opencode/skills/` directory contains 20 skills implementing a Agentic Deve
 | — | `update-best-practices-md` | Build |
 | — | `update-readme-md` | Build |
 | — | `update-specifications-md` | Build |
-| — | `rebuild-indexes` | Build |
+| — | `rebuild-test-and-indexes` | Build |
 | — | `save-session` | Build |
 | — | `frontend-design` | Plan |
 | — | `shadcn` | Build |

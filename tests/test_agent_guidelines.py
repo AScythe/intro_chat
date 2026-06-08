@@ -117,7 +117,7 @@ DOC_PATHS = [
     "docs/DESIGN_SPEC.md", "AGENTS.md", "refs/AGENT_SETUP.md",
     "refs/PROJECT_BEST_PRACTICES.md", "refs/DOCUMENT_GUIDELINES.md",
 ]
-UTILITY_SKILLS = ["rebuild-indexes", "frontend-design", "shadcn", "run-e2e-tests", "save-session"]
+UTILITY_SKILLS = ["rebuild-test-and-indexes", "frontend-design", "shadcn", "run-e2e-tests", "save-session"]
 
 EXECUTE_MESSAGE = (
     "THIS IS A HYPOTHETICAL TEST MESSAGE — "
@@ -196,7 +196,7 @@ SKILL_ROUTING_CASES = [
 
     # ── Utility / Tool Skills (8) ─────────────────────────────────
 
-    ("rebuild-indexes", [
+    ("rebuild-test-and-indexes", [
         "rebuild indexes after the matchmaking changes",
         "update indexes for the new modules",
         "reindex the codebase before review",

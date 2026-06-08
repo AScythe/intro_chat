@@ -14,7 +14,6 @@
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow, per-function detail | Developers, AI agents | Code structure change | Technical, implementation |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, pitch, Out of Scope, privacy | Product owners, devs, AI agents, evaluators/stakeholders | Product scope change | Product, pitch, vision, spec, privacy |
 | **DESIGN_SPEC.md** | Visual design spec, color system, typography, motion | Developers, designers, AI agents | Design or theme change | Visual, aesthetic |
-| **DEMO_GUIDE.md** | Demo presentation, walkthrough, step-by-step instructions | Presenters, judges | Demo flow change | Practical, step-by-step |
 | **AGENTS.md** | Agentic Workflow Rules by workflow phase, permissions, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | After each session | Educational, guidelines |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | New doc added | Meta, governance |
@@ -169,46 +168,9 @@ Product specification and vision. Answers "Why does this exist?", "What problem 
 
 ---
 
-## 4. DEMO_GUIDE.md
+## 4. DEMO_GUIDE.md (Archived)
 
-### Scope
-Practical demo execution guide. Answers "How do I demonstrate this?", "What should I highlight?", "What are the test scenarios?".
-
-### Audience
-- Presenters demonstrating the app
-- Evaluators and reviewers assessing the demo (judges, stakeholders, technical reviewers)
-
-### Key Differentiator
-**Action over description.** Not what the product does — exactly what to click, what to say, what to expect at each step. Written for a presenter under pressure who needs to deliver a smooth demo. Every step must have a clear expected result. If it can't be demonstrated, it doesn't belong here.
-
-### What to Include
-- **Document header** — "Last verified: [date] against [version/commit]". Demo guides go stale fast; currency must be explicit.
-- **Prerequisites** — what must be running before the demo starts (services running, env vars set, data pre-loaded)
-- **Quick start walkthrough** — ordered steps to reach a working demo state from scratch
-- **Key features to demonstrate** — what to highlight and in what order for maximum impact
-- **Testing scenarios** — discrete flows with exact actions and expected results. "Click X, expect Y to appear."
-- **UI highlights** — what the runner should point to on screen at each stage
-- **Technical features to highlight** — for technical evaluators who care about implementation
-- **Demo tips** — separate guidance for different audience types (what technical evaluators care about vs. what general users care about)
-- **Fallback options** — what to do if something breaks live. Must be actionable ("if X breaks, do Y"), not vague reassurance.
-- **Reset instructions** — how to restore demo state after a run so it can be shown again
-- **Success signals** — what the audience should feel or see at the end. Not technical metrics.
-
-### What NOT to Include
-- ❌ Product vision, problem statement, or pitch — these go in SPECIFICATIONS.md
-- ❌ Technical architecture or module descriptions — these go in ARCHITECTURE.md
-- ❌ Full API endpoint tables — summaries go in README.md, detailed data flow goes in ARCHITECTURE.md
-- ❌ AI agent permissions or operational rules — these go in AGENTS.md
-- ❌ Best practices or coding philosophy — these go in PROJECT_BEST_PRACTICES.md
-- ❌ Installation or setup instructions — these go in README.md
-
-### Content Boundaries
-- **Testing scenarios:** Step-by-step actions with expected results. Not technical implementation.
-- **Demo tips:** Must have separate sections for technical evaluators vs. general users. They care about different things.
-- **Fallback options:** Must be actionable. "If the QR code doesn't load, refresh the page and try again." Not "try again later."
-- **Success signals:** How the audience feels or what they see. Not technical metrics.
-- **Language:** Presenter-focused throughout. Assume the reader is on stage with people watching.
-- **Currency:** Always include a header: "Last verified: [date] against [version/commit]." Update this on every demo flow change.
+> **Archived:** Content moved to [Appendix: Archived Documents](#appendix-archived-documents) at the end of this file.
 
 ---
 
@@ -411,7 +373,6 @@ review-implementation (1st pass)
 | **update-agents-md** | `AGENTS.md` (full), `ARCHITECTURE.md`, `SPECIFICATIONS.md`, `README.md` | `AGENTS.md` |
 | **update-specifications-md** | `SPECIFICATIONS.md` (full), `README.md` | `SPECIFICATIONS.md` |
 | **update-readme-md** | `README.md` (full) | `README.md` |
-| **update-demo-guide-md** | `DEMO_GUIDE.md` (full), `README.md` | `DEMO_GUIDE.md` |
 | **update-best-practices-md** | `PROJECT_BEST_PRACTICES.md` (full), `.opencode/skills/*/SKILL.md`, `docs/PLAN_*.md`, session history, changed files only (not full codebase) | `PROJECT_BEST_PRACTICES.md` |
 
 ---
@@ -428,6 +389,53 @@ Before adding content to any document, verify:
 - [ ] If content spans multiple purposes, I've split it appropriately across documents
 - [ ] I've added cross-references instead of duplicating content
 - [ ] I've written for the target document's specific audience, not a general audience
+
+---
+
+## Appendix: Archived Documents
+
+### DEMO_GUIDE.md (Archived)
+
+> **Archived:** This guide was preserved from the active document set. It is kept here for reference but is no longer actively maintained.
+
+#### Scope
+Practical demo execution guide. Answers "How do I demonstrate this?", "What should I highlight?", "What are the test scenarios?".
+
+#### Audience
+- Presenters demonstrating the app
+- Evaluators and reviewers assessing the demo (judges, stakeholders, technical reviewers)
+
+#### Key Differentiator
+**Action over description.** Not what the product does — exactly what to click, what to say, what to expect at each step. Written for a presenter under pressure who needs to deliver a smooth demo. Every step must have a clear expected result. If it can't be demonstrated, it doesn't belong here.
+
+#### What to Include
+- **Document header** — "Last verified: [date] against [version/commit]". Demo guides go stale fast; currency must be explicit.
+- **Prerequisites** — what must be running before the demo starts (services running, env vars set, data pre-loaded)
+- **Quick start walkthrough** — ordered steps to reach a working demo state from scratch
+- **Key features to demonstrate** — what to highlight and in what order for maximum impact
+- **Testing scenarios** — discrete flows with exact actions and expected results. "Click X, expect Y to appear."
+- **UI highlights** — what the runner should point to on screen at each stage
+- **Technical features to highlight** — for technical evaluators who care about implementation
+- **Demo tips** — separate guidance for different audience types (what technical evaluators care about vs. what general users care about)
+- **Fallback options** — what to do if something breaks live. Must be actionable ("if X breaks, do Y"), not vague reassurance.
+- **Reset instructions** — how to restore demo state after a run so it can be shown again
+- **Success signals** — what the audience should feel or see at the end. Not technical metrics.
+
+#### What NOT to Include
+- ❌ Product vision, problem statement, or pitch — these go in SPECIFICATIONS.md
+- ❌ Technical architecture or module descriptions — these go in ARCHITECTURE.md
+- ❌ Full API endpoint tables — summaries go in README.md, detailed data flow goes in ARCHITECTURE.md
+- ❌ AI agent permissions or operational rules — these go in AGENTS.md
+- ❌ Best practices or coding philosophy — these go in PROJECT_BEST_PRACTICES.md
+- ❌ Installation or setup instructions — these go in README.md
+
+#### Content Boundaries
+- **Testing scenarios:** Step-by-step actions with expected results. Not technical implementation.
+- **Demo tips:** Must have separate sections for technical evaluators vs. general users. They care about different things.
+- **Fallback options:** Must be actionable. "If the QR code doesn't load, refresh the page and try again." Not "try again later."
+- **Success signals:** How the audience feels or what they see. Not technical metrics.
+- **Language:** Presenter-focused throughout. Assume the reader is on stage with people watching.
+- **Currency:** Always include a header: "Last verified: [date] against [version/commit]." Update this on every demo flow change.
 
 ---
 
