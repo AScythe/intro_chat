@@ -1,6 +1,6 @@
 ---
 name: save-session
-description: 'Save the current session conversation (excluding thinking blocks) to a formatted timeline file in docs/sessions/. Invoked as a sub-step from check-plan-readiness, implement-plan, review-implementation, modularize-and-clean, or improve-architecture. Use after any write-phase skill, or when the user says "save session" or similar.'
+description: 'Save the current session conversation (excluding thinking blocks) to a formatted timeline file in docs/sessions/. Invoked as a sub-step from implement-plan and review-implementation. Use after any write-phase skill, or when the user says "save session" or similar.'
 ---
 
 ## What I do
@@ -222,4 +222,4 @@ Session file created/appended at `docs/sessions/SESSION_*.md`. Meta file updated
 State clearly: "**Session saved at `docs/sessions/SESSION_...`. <summary of what was done>**"
 
 ### Next Step
-Return to the calling skill's workflow (check-plan-readiness, implement-plan, review-implementation, modularize-and-clean, or improve-architecture) and continue from where the save-session call was made.
+Return to the calling skill's workflow (implement-plan or review-implementation) and continue from where the save-session call was made.

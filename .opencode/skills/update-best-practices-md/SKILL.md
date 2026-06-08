@@ -16,6 +16,12 @@ Mine session conversations, changed files, skills, and plan files for reusable, 
 
 ---
 
+## Invocation Modes
+
+This skill supports two invocation modes. **Explicit** (default, standalone): follows the full Investigation Protocol below. **Implicit** (invoked by `update-docs` Phase 3): investigation is scoped to diff files from the caller. In implicit mode the full Investigation Protocol below is replaced by a delta scan — only analyze changed files against the current document. Graphify context is provided by `update-docs`; skip the Phase 0 graphify query.
+
+---
+
 ## Content Rules
 
 ### Quality Gates
@@ -57,7 +63,9 @@ Mine session conversations, changed files, skills, and plan files for reusable, 
 | **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
+| **DESIGN_SPEC.md** | Visual design spec, color system, typography, motion | Developers, designers, AI agents | Visual / Aesthetic | Design system, color tokens, typography scale, motion principles |
 | **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
+| **AGENT_SETUP.md** | Agent development environment setup and configuration | Developers, AI agents | Setup / Operational | Tool dependencies, MCP config, skill files, PATH, global and project config |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
 
@@ -100,14 +108,16 @@ The skeleton below is used for every project's `PROJECT_BEST_PRACTICES.md`. Mark
 - [ ] Review changed files for observable patterns
 - [ ] Read existing PROJECT_BEST_PRACTICES.md — understand current practices
 - [ ] Read skills directory for methodology patterns
+- [ ] Determine invocation mode — if implicit, skip full codebase walk and accept scope from caller (diff context)
 
 ## Workflow
 
+> **Explicit mode only.** For implicit mode see Invocation Modes.
+>
 > **Investigation Protocol:** Investigation compares the current document against the current codebase and session — not just against previous session changes. Pre-existing discrepancies (missing practices, stale entries, format violations) are gaps to flag regardless of when they were introduced. Session changes are one source, not the only trigger.
 
-### Phase 1: Plan (read-only)
+### Phase 1: Investigate
 
-#### 1. Investigate
 Read sources in this priority order:
 
 1. Existing `PROJECT_BEST_PRACTICES.md` — compare every section against current codebase reality
@@ -116,19 +126,21 @@ Read sources in this priority order:
 4. Plan files — design rationale
 5. Changed files — observable patterns
 
-#### 2. Read the Current Document
-- Check if `refs/PROJECT_BEST_PRACTICES.md` exists — create it if not
+### Phase 2: Read the Current Document
 
-#### 3. Identify Gaps and Issues
+Check if `refs/PROJECT_BEST_PRACTICES.md` exists — create it if not.
+
+### Phase 3: Identify Gaps and Issues
+
 For each **What to Include** category and each existing entry: is it still accurate? Are there missing entries? Are existing entries stale?
 
-#### 4. Present Candidates
+#### Present Candidates
+
+Present identified gaps and proposed changes to the user.
 
 ### Gate: User Confirmation
 
-### Phase 2: Implement
-
-#### 5. Assemble or Update the Document
+### Phase 4: Assemble or Update the Document
 
 **If PROJECT_BEST_PRACTICES.md doesn't exist (create from scratch):**
 1. Start with the **Universal Template** from this skill
@@ -145,7 +157,7 @@ For each **What to Include** category and each existing entry: is it still accur
 - Follow the triage: existing entries get improved (merged or tightened) over creating duplicates
 - Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
-#### 6. Verify
+### Phase 5: Verify
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
@@ -163,8 +175,27 @@ For each **What to Include** category and each existing entry: is it still accur
 - [ ] **§7 Session Lessons Learned** contains only genuinely cross-cutting lessons — not overflow from other sections
 - [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)
 
-#### 7. Route Skill Improvements
+#### Route Skill Improvements
 If this session identified improvements to `update-best-practices-md/SKILL.md` itself:
 
 - **Minor gaps** (wording, format tweaks, missing edge cases) → fix in-place, list the changes in your output
 - **Significant gaps** (structural changes, missing phases, broken workflow) → do not fix in-place. Present as candidates in the Gate summary so the user can decide.
+
+## Hand-off
+- Phase 1: Investigation complete — codebase scanned, sessions mined for lessons
+- Phase 2: Current document read and compared
+- Phase 3: Gaps and issues identified
+- Gate: User confirmed proposed diffs
+- Phase 4: Document assembled or updated
+- Phase 5: Verification complete — all checks pass
+
+## Outputs & Triggers
+
+### Output
+Updated `refs/PROJECT_BEST_PRACTICES.md` at `refs/PROJECT_BEST_PRACTICES.md`.
+
+### Exit Declaration
+State clearly: "**PROJECT_BEST_PRACTICES.md updated. All checks pass.**"
+
+### Next Step
+Return to `update-docs` orchestrator for cross-reference audit.

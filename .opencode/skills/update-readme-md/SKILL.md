@@ -17,6 +17,12 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 
 ---
 
+## Invocation Modes
+
+This skill supports two invocation modes. **Explicit** (default, standalone): follows the full Investigation Protocol below. **Implicit** (invoked by `update-docs` Phase 3): investigation is scoped to diff files from the caller. In implicit mode the full Investigation Protocol below is replaced by a delta scan — only analyze changed files against the current document. Graphify context is provided by `update-docs`; skip the Phase 0 graphify query.
+
+---
+
 ## Content Rules
 
 ### Quality Gates
@@ -56,7 +62,9 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 | **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
+| **DESIGN_SPEC.md** | Visual design spec, color system, typography, motion | Developers, designers, AI agents | Visual / Aesthetic | Design system, color tokens, typography scale, motion principles |
 | **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
+| **AGENT_SETUP.md** | Agent development environment setup and configuration | Developers, AI agents | Setup / Operational | Tool dependencies, MCP config, skill files, PATH, global and project config |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
 
@@ -64,6 +72,9 @@ Mine the codebase and session history, then update or create `docs/README.md` so
 - One purpose per document — if content fits two documents, choose the PRIMARY purpose
 - Cross-reference, don't copy — use `See <DOC>.md` links instead of duplicating
 - If content belongs elsewhere, note it with `→ Redirect to <filename>` — do not include it in this document
+
+**Boundary rules** (document-specific guardrails):
+- Setup covers only the user-facing project setup (Python deps, env vars, run commands) — agent toolchain setup (opencode, AI assistant CLI, MCP servers, semantic search, knowledge graph, skills, /commands) belongs in AGENT_SETUP.md
 
 ---
 
@@ -130,12 +141,15 @@ Optional sections (include only if applicable): Table of Contents, Shields/badge
 - [ ] Verify source code and project state are current
 - [ ] Read existing README.md — understand current documented state
 - [ ] Verify all setup instructions against actual environment
+- [ ] Determine invocation mode — if implicit, skip full codebase walk and accept scope from caller (diff context)
 
 ## Workflow
 
+> **Explicit mode only.** For implicit mode see Invocation Modes.
+>
 > **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Pre-existing discrepancies (wrong setup steps, outdated feature claims, stale quick-start instructions) are gaps to flag regardless of when they were introduced.
 
-### 1. Investigate the Codebase
+### Phase 1: Investigate the Codebase
 Read highest-value sources first:
 
 1. `README*` (if it exists — check what needs updating)
@@ -143,18 +157,22 @@ Read highest-value sources first:
 3. Source code entrypoints — what does the pipeline do end-to-end?
 4. Existing `docs/ARCHITECTURE.md`
 
-### 2. Read the Current Document
+### Phase 2: Read the Current Document
 - Check if `docs/README.md` exists — create it if not
 - Flag outdated content
 
-### 3. Identify Gaps and Issues
+### Phase 3: Identify Gaps and Issues
 For each **What to Include** item: does it exist? Is it accurate?
 
 **Cross-reference checks:**
 - Does "How to Use" match actual app pages and navigation order? Map each step to a route/page — no skipped or merged steps
 - Do all features in the feature list still exist in the app? Verify each against actual user-facing functionality
 
-### 4. Assemble or Update the Document
+### Gate: User Confirmation
+
+Present proposed oldString→newString diffs to the user for approval before applying any edits. Use the `question` tool with clickable options.
+
+### Phase 4: Assemble or Update the Document
 
 **If README.md doesn't exist (create from scratch):**
 1. Start with the **Universal Template** from this skill
@@ -170,7 +188,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 - Quick start steps must work based on actual project files
 - Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
-### 5. Verify
+### Phase 5: Verify
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
@@ -199,3 +217,22 @@ For each **What to Include** item: does it exist? Is it accurate?
 - [ ] If features were added/removed/renamed, verify README (benefits) and SPECS (rationale) are both synced
 - [ ] Language is appropriate for a non-technical first-time visitor
 - [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)
+
+## Hand-off
+- Phase 1: Investigation complete — codebase scanned, feature list extracted, setup steps verified
+- Phase 2: Current document read and compared against codebase
+- Phase 3: Gaps and issues identified
+- Gate: User confirmed proposed diffs
+- Phase 4: Document assembled or updated
+- Phase 5: Verification complete — all checks pass
+
+## Outputs & Triggers
+
+### Output
+Updated `docs/README.md` at `docs/README.md`.
+
+### Exit Declaration
+State clearly: "**README.md updated. All checks pass.**"
+
+### Next Step
+Return to `update-docs` orchestrator for cross-reference audit.

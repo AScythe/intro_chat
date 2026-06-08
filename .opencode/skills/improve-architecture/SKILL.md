@@ -16,7 +16,7 @@ description: 'Scan project-level structure — directory layout, package organiz
 
 ## Phase 0: Prerequisites
 
-- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
+- [ ] Check for context continuity — see AGENTS.md §Session Continuity Check for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the review pass findings (from review-implementation)
 - [ ] Run baseline tests — all must pass
 - [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
@@ -36,7 +36,7 @@ Scan all 8 areas in order. Priority definitions:
 - **P1** — Should fix: increases cognitive load or refactoring risk
 - **P2** — Nice to fix: style or convention inconsistency
 
-**Codebase Exploration:** See [AGENTS.md §Codebase Exploration](../../../AGENTS.md). Use **graphify** community detection to identify natural architecture boundaries — tightly-coupled groups stay together, loosely-connected candidates separate. Use **ast_grep_search** to find import violations, naming convention breaks, and dead exports across the codebase in one pass. Use **cocoindex-code** to discover similar code that should be consolidated.
+**Codebase Exploration:** See AGENTS.md §Codebase Exploration. Use **graphify** community detection to identify natural architecture boundaries — tightly-coupled groups stay together, loosely-connected candidates separate. Use **ast_grep_search** to find import violations, naming convention breaks, and dead exports across the codebase in one pass. Use **cocoindex-code** to discover similar code that should be consolidated.
 
 Layer separation (config → state → logic → persistence) and leaf module pattern (leafs export only, never import internal) inform areas 1 (directory org), 2 (import hygiene), and 7 (module boundaries).
 
@@ -117,26 +117,16 @@ When multiple approved items touch the same file or directory, sort by dependenc
 When the user triggers both `improve-architecture` and `modularize-and-clean` together:
 
 1. **Phase 1 runs in parallel** with `modularize-and-clean` Phase 1 — each skill independently scans its defined scope (structure vs code-level quality)
-2. **Merge phase**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan document (see [check-plan-readiness template format](../../../AGENTS.md#agentic-workflow-skills))
+2. **Merge phase**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan document (see check-plan-readiness template format in AGENTS.md §Agentic Workflow Skills)
 3. **Unified plan** covers all findings from both skills, deduplicated and re-prioritized with P0–P2 labels per skill
 4. **User approval**: Present the unified plan for approval
 5. **Apply batches**: Structural changes carry `[ARCH]` flags, code-quality changes carry `[CLEANUP]` flags — never mix flags in the same batch
 6. **Review**: Route to `review-implementation`
 
-## Save Session (before hand-off)
-
-After all architecture improvements are applied and verified, load and execute the `save-session` skill before proceeding to hand-off.
-
-**Steps:**
-1. Load the skill: `skill(name: "save-session")`
-2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
-3. After save completes, proceed to Hand-off below
-
 ## Hand-off
 - Phase 1: All 8 areas evaluated, findings presented with priorities
 - Gate: User approved (or selected specific items)
 - Phase 2: All approved items applied or explicitly skipped (with reason)
-- Phase 3: Architecture session saved
 - Full test suite passes with same or documented test count change
 - Every changed line carries `[ARCH]` flag — zero non-ARCH flags
 
@@ -154,4 +144,4 @@ Prioritized list (P0–P2) with file:line references. Structural changes with [A
 State clearly: "**Architecture improvements complete. Review implementation? Say 'review' to trigger review of the implementation.**"
 
 ### Next Step
-User invokes `review-implementation` — switch to Plan mode before proceeding.
+User invokes `review-implementation` **recommend to switch to Plan mode before proceeding**.

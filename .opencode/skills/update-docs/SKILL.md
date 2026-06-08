@@ -9,11 +9,30 @@ description: 'Analyze session changes and sync all project documentation by dele
 - Update each doc in dependency order
 - Verify cross-reference integrity across all project docs
 - Route to push-to-git
+- **Auto-execute update-docs (implicit) on success** — when invoked from review-implementation Phase 3
+
+## Purpose
+
+Two invocation modes with fundamentally different detection strategies:
+
+| Aspect | Explicit (standalone) | Implicit (Phase 3 of review-implementation) |
+|--------|----------------------|----------------------------------------------|
+| Detection | Full codebase + session history | git diff delta |
+| Scope | ALL docs — full analysis | Only docs matching changed files |
+| Investigation | Full: graphify + codebase walk + session | Light: graphify for context, skip full codebase walk |
+| Proposal | Full per-doc proposals | Delta-only proposals |
+| Approval | Serial per-doc review (full diff display) | Quick summary per doc (question tool) |
+| Apply | After approval per doc | After quick approval per doc |
+| Verify | Cross-reference integrity | Cross-reference integrity (always runs) |
+| Blocking | Yes — user must complete review | Non-blocking — failures warn but don't halt caller |
 
 ## Boundaries
 - **Read-only analysis.** Review session changes and trigger syncs — do not create content for docs that had no changes.
 - **One pass at end.** Sync all docs in one batch at end of session, not after every commit or phase.
 - **Cross-reference integrity.** All `See ...` links must resolve after syncs complete.
+- **Only doc files** — never modifies source code. Only updates files in `docs/` and `refs/`.
+- **Non-blocking in implicit mode** — failures produce warnings but do not halt the caller.
+- **Blocking in explicit mode** — user must complete the review before proceeding.
 
 ## Content Rules
 
@@ -28,14 +47,18 @@ description: 'Analyze session changes and sync all project documentation by dele
 - Cross-reference verification — ensure all `See ...` links resolve
 - Hand-off instruction to `push-to-git`
 
-
 ## Phase 0: Prerequisites
 
-- [ ] Review session changes — git diff, [FLAG] annotations, conversation history
+- [ ] Determine invocation mode — explicit (standalone "sync docs") or implicit (Phase 3 of review-implementation)
+- [ ] If explicit: review session changes — git diff, [FLAG] annotations, conversation history
 - [ ] Match changes against Doc Sync Triggers table
 - [ ] Read AGENTS.md doc sync triggers table
 
-## Document Update Workflow
+---
+
+## Explicit Path (standalone "sync docs")
+
+**Detection method:** Full codebase + session history — the entire project is the source of truth. Review all changes (git diff, flags, conversation) to determine which docs need updating. Used when invoked directly by the user.
 
 ### Phase 1: Inventory
 
@@ -47,13 +70,14 @@ description: 'Analyze session changes and sync all project documentation by dele
    |-------------|-----------------|
    | New/deleted/renamed file, module restructure, new endpoint, changed function signature | `docs/ARCHITECTURE.md` |
    | New feature, changed user journey, updated privacy, changed Out of Scope | `docs/SPECIFICATIONS.md` |
+   | Design spec created/updated, color system, typography/motion changes, UI theme changes, frontend-design skill output | `docs/DESIGN_SPEC.md` |
    | Changed setup steps, new CLI command, new env var, new user-visible feature | `docs/README.md` |
    | Changed behavioral rules, new file ownership entry, updated commands | `AGENTS.md` |
-    | Changed tooling setup, new MCP server, changed env requirements | `refs/AGENT_SETUP.md` |
-    | Recurring pattern, new debugging lesson, new skill methodology insight | `refs/PROJECT_BEST_PRACTICES.md` |
+   | Changed tooling setup, new MCP server, changed env requirements | `refs/AGENT_SETUP.md` |
+   | Recurring pattern, new debugging lesson, new skill methodology insight | `refs/PROJECT_BEST_PRACTICES.md` |
    | New document added, document scope/boundary change, doc structure change | `refs/DOCUMENT_GUIDELINES.md` |
 
-3. **List which docs to update** — for each change type that occurred, note the corresponding doc. If none match, skip to Phase 3.
+3. **List which docs to update** — for each change type that occurred, note the corresponding doc. If none match, skip to Phase 5.
 
 ### Phase 2: Propose (Parallel Analysis)
 
@@ -97,10 +121,66 @@ If a user rejected or modified a proposal, skip or adjust accordingly.
 - [ ] No orphaned sections — every section in each doc is reachable from another doc or from the doc's own TOC
 - [ ] No stale redirects — `→ Redirect to <filename>` markers are removed if the target document no longer exists
 
+---
+
+## Implicit Path (Phase 3 of review-implementation)
+
+**Detection method:** git diff delta — only files that changed. Determine which docs need updating by matching change types against Doc Sync Triggers. No full codebase scan. Used when auto-invoked by `review-implementation` Phase 3 after successful sign-off.
+
+### Phase 1: Scope (git diff)
+
+1. Run `git diff HEAD --name-only` to list changed files
+2. Match changed files against the Doc Sync Triggers table
+3. If no triggers match → skip to Phase 3 (Verify cross-references only)
+4. Build update list: only docs whose trigger patterns match changed files
+
+### Phase 2: Propose (Delta Analysis)
+
+For each doc in the update list, launch a Task sub-agent to analyze and propose delta diffs. Each sub-agent is **read-only** — investigates the diff context and returns proposals, but does NOT apply any edits.
+
+Sub-agents in implicit mode:
+- Run `graphify query_graph` for context on changed modules
+- Skip the full codebase walk (only analyze files from git diff)
+- Return ONLY proposals related to diff files (delta), not full doc rewrites
+
+Launch all sub-agents in parallel:
+
+1. `docs/ARCHITECTURE.md` → instruct sub-agent to load `skill(name: "update-architecture-md")` with `mode="implicit"` and diff context
+2. `docs/SPECIFICATIONS.md` → instruct sub-agent to load `skill(name: "update-specifications-md")` with `mode="implicit"` and diff context
+3. `AGENTS.md` → instruct sub-agent to load `skill(name: "update-agents-md")` with `mode="implicit"` and diff context
+4. `docs/README.md` → instruct sub-agent to load `skill(name: "update-readme-md")` with `mode="implicit"` and diff context
+5. `refs/PROJECT_BEST_PRACTICES.md` → instruct sub-agent to load `skill(name: "update-best-practices-md")` with `mode="implicit"` and diff context
+6. `refs/AGENT_SETUP.md` → instruct sub-agent to load `skill(name: "update-agent-setup-md")` with `mode="implicit"` and diff context
+7. `refs/DOCUMENT_GUIDELINES.md` — inline analysis with diff context (no dedicated skill)
+
+Each sub-agent returns: a list of `{filePath, oldString, newString, reason}` objects. No edits are applied.
+
+### Phase 3: Quick Approval
+
+Collect all proposals from Phase 2. Present a summary of each document's proposed changes to the user **one doc at a time** using the `question` tool.
+
+For each doc that has proposals:
+1. Show a brief summary (e.g., "Architecture: 3 entries updated — new connection_service.py, renamed handlers")
+2. Ask user: approve or reject (yes/no) per doc
+3. Lighter than full review — no full diff display per edit
+
+### Phase 4: Apply
+
+Apply approved proposals from Phase 3 using the `edit` tool. Apply one doc at a time — run full test suite before moving to the next doc.
+
+If a user rejected a proposal, skip accordingly.
+
+### Phase 5: Verify (Cross-Reference Audit)
+
+- [ ] All `See <DOC>.md` links between documents resolve to existing headings
+- [ ] No dead anchor references — every `#section-name` target exists in the target doc
+- [ ] No orphaned sections — every section in each doc is reachable from another doc or from the doc's own TOC
+- [ ] No stale redirects — `→ Redirect to <filename>` markers are removed if the target document no longer exists
+
 ## Hand-off
 - Phase 1: Session changes inventoried and matched against Doc Sync Triggers
 - Phase 2: All applicable docs have proposals generated (parallel analysis, no writes)
-- Phase 3: User reviewed and approved/rejected each proposal (serial, one doc at a time)
+- Phase 3: User reviewed and approved/rejected each proposal
 - Phase 4: Approved edits applied (one doc at a time, tests pass between each)
 - Phase 5: Cross-references verified — no dead links, orphaned sections, or stale redirects
 
@@ -115,7 +195,9 @@ If interrupted mid-phase: record current state in a TODO or pending list, offer 
 All applicable docs updated via propose-review-apply pipeline. Cross-references verified across all project docs. No dead links, orphaned sections, or stale redirects.
 
 ### Exit Declaration
-State clearly: "**Documentation sync complete. All applicable syncs run, cross-references verified. Proceed to push-to-git? Say 'push' to trigger pushing the changes to git.**"
+- **Explicit mode:** State clearly: "**Documentation sync complete. All applicable syncs run, cross-references verified. Proceed to push-to-git? Say 'push' to trigger pushing the changes to git.**"
+- **Implicit mode:** State clearly: "**Documentation sync complete (implicit). Delta updates applied, cross-references verified.**"
 
 ### Next Step
-User invokes `push-to-git` (Build mode — same mode, no switch needed).
+- **Explicit mode:** User invokes `push-to-git` (Build mode — same mode, no switch needed).
+- **Implicit mode:** Control returns to `review-implementation` Hand-off (no user action needed).

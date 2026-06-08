@@ -17,6 +17,12 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 
 ---
 
+## Invocation Modes
+
+This skill supports two invocation modes. **Explicit** (default, standalone): follows the full Investigation Protocol below. **Implicit** (invoked by `update-docs` Phase 3): investigation is scoped to diff files from the caller. In implicit mode the full Investigation Protocol below is replaced by a delta scan — only analyze changed files against the current document. Graphify context is provided by `update-docs`; skip the Phase 0 graphify query.
+
+---
+
 ## Content Rules
 
 ### Quality Gates
@@ -52,7 +58,9 @@ Analyze the codebase and session history, then update or create `docs/ARCHITECTU
 | **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
+| **DESIGN_SPEC.md** | Visual design spec, color system, typography, motion | Developers, designers, AI agents | Visual / Aesthetic | Design system, color tokens, typography scale, motion principles |
 | **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
+| **AGENT_SETUP.md** | Agent development environment setup and configuration | Developers, AI agents | Setup / Operational | Tool dependencies, MCP config, skill files, PATH, global and project config |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
 
@@ -127,12 +135,15 @@ Optional sections (include only if applicable): sub-architecture reference links
 - [ ] Read existing ARCHITECTURE.md — understand current documented structure
 - [ ] Run codebase search for new modules added since last sync
 - [ ] Consult docs/README.md for project overview
+- [ ] Determine invocation mode — if implicit, skip full codebase walk and accept scope from caller (diff context)
 
 ## Workflow
 
+> **Explicit mode only.** For implicit mode see Invocation Modes.
+>
 > **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Pre-existing discrepancies (stale paths, outdated descriptions, missing sections, incorrect claims) are gaps to flag regardless of when they were introduced.
 
-### 1. Investigate the Codebase
+### Phase 1: Investigate the Codebase
 Read highest-value sources first in this priority order:
 
 1. Source code files — entry points, modules, all source files in the project's main directories
@@ -153,7 +164,7 @@ For each source, extract:
 
 **Check session history for design rationale:** Review the current conversation for explanations of *why* a pattern was chosen, trade-offs discussed, and decisions made during debugging that reveal architectural intent. Capture only rationale — not session-specific debugging details.
 
-### 1.5 Extract Descriptions from Source Files
+#### Extract Descriptions from Source Files
 
 For every source file in the project's main source directories:
 
@@ -176,7 +187,7 @@ Scan first 10 lines for pattern matching the project's description convention:
 - File exists in architecture doc but not in codebase → mark for removal
 - File has no description header → mark as `missing`
 
-### 1.75 Extract Per-Function Details
+#### Extract Per-Function Details
 
 For every source file that contains functions/classes:
 
@@ -205,14 +216,14 @@ For every source file that contains functions/classes:
 - `function_name(params)` — one-line purpose (what it does for the system)
 ```
 
-### 2. Read the Current Document
+### Phase 2: Read the Current Document
 - Check if `docs/ARCHITECTURE.md` exists — create it if not
 - Read existing content section by section
 - Flag anything outdated (wrong file tree, missing modules, stale descriptions)
 - Flag missing items from **What to Include**
 - Flag content that violates the boundary rules
 
-### 3. Identify Gaps and Issues
+### Phase 3: Identify Gaps and Issues
 
 **From Investigation:**
 - Files marked `new` → need entries added in Module Descriptions
@@ -229,7 +240,11 @@ For every source file that contains functions/classes:
 - Are all numeric claims (file counts, page export counts, test file counts, etc.) verified against actual source? Cross-reference each number against the real codebase
 - Are cross-references between files in the tree and their documented descriptions accurate? Every file path in the tree must correspond to an actual existing file
 
-### 4. Assemble or Update the Document
+### Gate: User Confirmation
+
+Present proposed oldString→newString diffs to the user for approval before applying any edits. Use the `question` tool with clickable options.
+
+### Phase 4: Assemble or Update the Document
 
 **If ARCHITECTURE.md doesn't exist (create from scratch):**
 1. Start with the **Universal Template** from this skill
@@ -254,7 +269,7 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 2. List every function in source file order (top to bottom)
 3. One-line purpose only — no implementation logic
 
-### 5. Verify
+### Phase 5: Verify
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
@@ -279,3 +294,22 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 - [ ] Function entries are one-line purpose only — no implementation logic
 - [ ] Missing descriptions are flagged with `⚠️` marker — never invent descriptions
 - [ ] `> **Last verified:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)
+
+## Hand-off
+- Phase 1: Investigation complete — codebase scanned, descriptions extracted, per-function detail collected
+- Phase 2: Current document read and compared against codebase
+- Phase 3: Gaps and issues identified
+- Gate: User confirmed proposed diffs
+- Phase 4: Document assembled or updated
+- Phase 5: Verification complete — all checks pass
+
+## Outputs & Triggers
+
+### Output
+Updated `docs/ARCHITECTURE.md` at `docs/ARCHITECTURE.md`.
+
+### Exit Declaration
+State clearly: "**ARCHITECTURE.md updated. All checks pass.**"
+
+### Next Step
+Return to `update-docs` orchestrator for cross-reference audit.

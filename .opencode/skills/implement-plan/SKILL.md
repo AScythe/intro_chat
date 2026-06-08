@@ -14,48 +14,48 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 - **Plan file is read-only.** Never create or modify `docs/PLAN_*.md`.
 - **No scope creep.** Only implement what the plan specifies — nothing speculative, no unrelated fixes.
 
-## Documents to Read
+## Phase 0: Prerequisites
+
+- [ ] Check for context continuity — see AGENTS.md §Session Continuity Check for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
+- [ ] Read the approved plan (docs/PLAN_*) — verify all 8 gates pass
+- [ ] Run baseline tests — all must pass before any changes
+
+## Implementation Workflow
+
+### Phase 1: Setup
+**Purpose:** Read docs, understand the full plan, establish blast radius, and map all batches before writing a single line of code.
+
+#### Step 1: Read Docs
+**Purpose:** Understand constraints and scope boundaries before looking at code.
 
 - **`SPECIFICATIONS.md`**: "Out of Scope"
 - **`docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only
 - **`docs/PLAN_*.md`**: Task Breakdown section (batches map 1:1)
 
-## Phase 0: Prerequisites
+#### Step 2: Read Plan Fully
+**Purpose:** Understand the full plan — what's being built, in what order, and what each batch requires. Phase 0 confirmed gates passed; this step is about comprehension, not re-gating.
 
-- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
-- [ ] Read the approved plan (docs/PLAN_*) — verify all 8 gates pass
-- [ ] Run baseline tests — all must pass before any changes
-- [ ] Run `graphify query_graph "<task scope>"` — mandatory blast-radius check. Knowing the exact file paths is not enough; graphify reveals relationship context you might miss. This is the first step, not a fallback.
-- [ ] Based on graphify output, run `cocoindex-code_search` or `ast_grep_search` if deeper search is warranted
-- [ ] Identify all files to create/modify/remove
+- Read all sections of the plan, not just Task Breakdown
+- Map each test file to its plan task (1:1 to Task Breakdown items)
+- If anything is unclear, use the `question` tool to ask — provide selectable `options` with `label` and `description` fields. Rely on the auto-added "Type your own answer" for free-form input
 
-## Implementation Workflow
+#### Step 3: Codebase Exploration
+**Purpose:** Establish blast radius and locate all affected code before mapping batches — file paths alone are insufficient.
 
-### Phase 1: Setup
+Apply the tier-based pipeline from AGENTS.md §Codebase Exploration. Run broadly first, then narrow:
 
-**Verify readiness and map the work.**
+- `graphify query_graph "<task scope>"` — mandatory blast-radius check; reveals relationship context that file paths alone won't show
+- `graphify path "X" "Y"` — trace relationship between two modules when data flow matters
+- `cocoindex-code_search` — find code by intent when plan's key terms may not match exact names
+- `ast_grep_search` — validate structural patterns and entry points across the affected scope
 
-- Verify all 8 gates pass. Do not proceed if any failed.
-- Read the plan fully — batches map 1:1 to the plan's Task Breakdown items.
-- Identify files to create, modify, or remove. Map each test file to a plan task.
-- If anything is unclear, use the `question` tool to ask — provide selectable `options` with `label` and `description` fields. Rely on the auto-added "Type your own answer" for free-form input.
+#### Step 4: Map Batches
+**Purpose:** Translate the plan's Task Breakdown into a concrete, dependency-ordered execution sequence.
 
-### Codebase Exploration
+- Identify all files to create, modify, or remove
+- Confirm order: dependencies must be implemented before dependents
 
-See [AGENTS.md §Codebase Exploration](../../../AGENTS.md) for the full decision framework. This skill has additional tool guidance specific to implementation work:
-
-**Assessing impact:** Before starting a batch, use the pipeline (graphify→cocoindex→ast-grep) to understand blast radius. Start with `graphify query "impact of changing $MODULE"` to discover all connected concepts, or `graphify path "X" "Y"` to find the relationship path between two modules. This prevents missing downstream effects.
-
-**Finding code:** Prefer **cocoindex-code** semantic search over `grep` when searching by purpose or intent (e.g. "find where we validate emails"). Prefer **ast_grep_search** over `grep` when searching by code structure (e.g. all `try/except` blocks with `pass`, or all calls to a deprecated function).
-
-**Rewriting code:** Prefer **ast_grep_replace** over `edit` for:
-- Pattern-based rewrites across multiple files (e.g. replace `get_user(id)` with `User.fetch(id)` everywhere)
-- Structural changes where whitespace, comment, or formatting variations must not break the match
-- Any rewrite where syntactic validity matters — ast-grep output is always valid AST, avoiding the "forgot closing brace" class of errors
-
-`ast_grep_replace` defaults to `dryRun: true`. Preview results first, then set `dryRun: false` to apply.
-
-### Guiding Principles
+### Guiding Principles (reference — apply throughout all Phase 2 batches)
 
 #### Simplicity First
 Minimum code that solves the problem. Nothing speculative.
@@ -117,6 +117,18 @@ Every file requires a file-level `# Description:`/`// Description:`/`/* Descript
 When a test fails after a change, classify before acting. See "Failure Triage" table in `AGENTS.md`. Never auto-revert on first failure.
 
 ### Phase 2: Iterate
+**Purpose:** Implement the plan batch by batch using TDD, flagging every change and verifying after each batch before proceeding.
+
+#### Tool Guidance (use during batch implementation)
+
+**Finding code:** Prefer **cocoindex-code** semantic search over `grep` when searching by purpose or intent (e.g. "find where we validate emails"). Prefer **ast_grep_search** over `grep` when searching by code structure (e.g. all `try/except` blocks with `pass`, or all calls to a deprecated function).
+
+**Rewriting code:** Prefer **ast_grep_replace** over `edit` for:
+- Pattern-based rewrites across multiple files (e.g. replace `get_user(id)` with `User.fetch(id)` everywhere)
+- Structural changes where whitespace, comment, or formatting variations must not break the match
+- Any rewrite where syntactic validity matters — ast-grep output is always valid AST, avoiding the "forgot closing brace" class of errors
+
+`ast_grep_replace` defaults to `dryRun: true`. Preview results first, then set `dryRun: false` to apply.
 
 **Per-batch TDD loop: test → implement → flag → verify.**
 
@@ -195,8 +207,7 @@ def create_session(now=None, new_id=None):
 Every batch that adds or modifies logic must include its test file(s) in `tests/`. A batch is not complete until its tests are saved and passing.
 
 ### Phase 3: Verify
-
-**After all batches, run full verification and audit.**
+**Purpose:** After all batches complete, run full verification and audit to confirm the implementation is correct, clean, and within scope before handing off to review.
 
 1. **Run full test suite** — all pass
 2. **Run lint and typecheck** — clean
@@ -211,9 +222,11 @@ Every batch that adds or modifies logic must include its test file(s) in `tests/
 11. **Plan file unchanged** — read-only constraint verified
 12. **Idempotency check** — re-running the same operation produces the same result? No state changes on repeated calls?
 
-## Save Session (before hand-off)
+### Phase 4: Save Session
+**Purpose:** Capture the implementation conversation before review begins — ensures context is not lost across sessions.
+**Content captured:** YAML frontmatter (session, date, phase, goal, plan reference, files), timestamped user/assistant exchanges, and tool results truncated to ~10 lines. During implementation this includes: approved plan context, user instructions, agent reads/edits/test runs per batch, per-batch verification results, and full test suite output. Thinking blocks and system compaction summaries are excluded.
 
-After Phase 3 Verify completes, load and execute the `save-session` skill before proceeding to hand-off. This captures the implementation conversation before review begins.
+Only reached after Phase 3 Verify completes successfully.
 
 **Steps:**
 1. Load the skill: `skill(name: "save-session")`
@@ -241,4 +254,4 @@ All code changes with `[FLAG]` annotations. Full test suite passes. All success 
 State clearly: "**Implementation complete. Proceed to review the implementation? Say 'review' to trigger review of the implementation.**"
 
 ### Next Step
-User invokes `review-implementation` — **switch to Plan mode before proceeding**.
+User invokes `review-implementation`.

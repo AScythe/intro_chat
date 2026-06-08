@@ -21,26 +21,33 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 
 ## Phase 0: Prerequisites
 
-- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
+- [ ] Check for context continuity — see AGENTS.md §Session Continuity Check for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the review pass findings (from review-implementation)
 - [ ] Run baseline tests — all must pass
-- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
-- [ ] Read ARCHITECTURE.md for current documented structure
 
-## Documents to Read
-
-- **`docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", relevant module descriptions
-- **Source files** — read files identified during scanning to confirm structural issues before reporting
 
 ## Modularization and Cleanup Workflow
 
 ### Phase 1: Analyze (read-only)
+**Purpose:** Understand the codebase's structure, scan all 11 quality scopes, and compile a candidate list — all before presenting anything to the user.
 
-First, read the test suite — imports will be adapted during cleanup.
+#### Step 1: Read Docs and Test Suite
+**Purpose:** Establish the documented structure and understand existing test imports — imports will need adaptation during Phase 2.
 
-Apply Codebase Exploration (see [AGENTS.md §Codebase Exploration](../../../AGENTS.md)). Use **graphify** community detection to identify strongly-connected components — same communities stay together, different communities are extraction candidates. Query `graphify path "A" "B"` to assess coupling before splitting. Use **ast_grep_search** for DRY analysis and **ast_grep_replace** with `dryRun: true` for rename preview. Use **cocoindex-code** to find related functions with different naming conventions.
+- **`docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", relevant module descriptions
+- Read the test suite — note import paths that will be adapted during cleanup
 
-Then examine source files across 11 scopes:
+#### Step 2: Codebase Exploration
+**Purpose:** Orient on the codebase's community structure and coupling before scanning individual scopes.
+
+Apply the tier-based pipeline from AGENTS.md §Codebase Exploration:
+- `graphify` community detection — identify strongly-connected components; same communities stay together, different communities are extraction candidates
+- `graphify path "A" "B"` — assess coupling between two modules before splitting
+- `ast_grep_search` — DRY analysis across files; `ast_grep_replace` with `dryRun: true` for rename preview
+- `cocoindex-code_search` — find related functions with different naming conventions
+
+#### Step 3: Scan 11 Scopes
+**Purpose:** Systematically examine source files for structural quality issues. Prefer extractions that improve testability — separate pure logic from I/O. Follow the leaf module pattern (leafs export only, never import internal). Separate by layer (config → state → logic → persistence). Split triggers: >200 lines, mixed concerns, or circular imports.
 
 - **Import structure** — circular/sibling-to-sibling imports
 - **Shared code (DRY)** — duplicated logic across files
@@ -54,9 +61,8 @@ Then examine source files across 11 scopes:
 - **Immutability** — mutable defaults, shared mutable state, internal collections returned directly
 - **Referential transparency** — I/O mixed with business logic, hidden state reads
 
-Prefer extractions that improve testability — separate pure logic from I/O. Follow the leaf module pattern (leafs export only, never import internal). Separate by layer (config → state → logic → persistence). Split triggers: >200 lines, mixed concerns, or circular imports.
-
-#### 3. Compile Candidate List
+#### Step 4: Compile Candidate List
+**Purpose:** Organize findings for user review before any changes are applied.
 
 Present findings categorized by scope with file:line references and proposed changes.
 
@@ -82,6 +88,7 @@ Present the candidate list and use the `question` tool to ask for approval: **"S
 Wait for explicit approval before Phase 2.
 
 ### Phase 2: Apply (batch-by-batch)
+**Purpose:** Apply the approved candidates in dependency-ordered batches, verifying after each one before proceeding.
 
 > **Before applying:** run full test suite + lint. Flag pre-existing failures.
 
@@ -133,27 +140,33 @@ After all batches, produce a verbal markdown change-log grouped by scope with `[
 
 When the user triggers both `modularize-and-clean` and `improve-architecture` together:
 
-1. **Phase 1 runs in parallel** with `improve-architecture` Phase 1 — each skill independently scans its defined scope (code-level quality vs structure)
-2. **Merge phase**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan document (see [check-plan-readiness template format](../../../AGENTS.md#agentic-workflow-skills))
-3. **Unified plan** covers all findings from both skills, deduplicated and re-prioritized
-4. **User approval**: Present the unified plan for approval
-5. **Apply batches**: Code-quality changes carry `[CLEANUP]` flags, structural changes carry `[ARCH]` flags — never mix flags in the same batch
-6. **Review**: Route to `review-implementation`
+**Step 1: Parallel Phase 1**
+Both skills run their Phase 1 independently — each scanning their defined scope without waiting for the other.
 
-## Save Session (before hand-off)
+**Step 2: Merge into Plan Doc**
+Combine both Phase 1 outputs into a unified plan document saved to `docs/`:
 
-After all batches are applied and verified, load and execute the `save-session` skill before proceeding to hand-off. This captures the cleanup conversation before review.
+File: `docs/CLEANUP_ARCH_YYYY_MM_DD.md`
 
-**Steps:**
-1. Load the skill: `skill(name: "save-session")`
-2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
-3. After save completes, proceed to Hand-off below
+Sections:
+- **Modularize-and-clean findings** — candidates grouped by scope with file:line references
+- **Improve-architecture findings** — P0/P1/P2 prioritized list with file:line references
+- **Conflicts** — items where both skills affect the same file; resolve before applying
+- **Proposed batch order** — dependency-sorted sequence covering both finding sets
+
+**Step 3: User Approval Gate**
+Present the plan doc and use the `question` tool to get explicit approval. Wait for sign-off before applying any changes.
+
+**Step 4: Apply Batches**
+Apply in dependency order. Code-quality changes carry `[CLEANUP]` flags, structural changes carry `[ARCH]` flags — never mix flags in the same batch.
+
+**Step 5: Route to review-implementation**
+After all batches pass, route to `review-implementation`.
 
 ## Hand-off
 - Phase 1: All 11 scopes scanned, candidate list compiled
 - Gate: User approved
 - Phase 2: Approved batches applied or explicitly skipped
-- Phase 3: Cleanup session saved
 - All changed lines carry [CLEANUP]
 - Full test suite and lint pass
 - Verbal change-log produced

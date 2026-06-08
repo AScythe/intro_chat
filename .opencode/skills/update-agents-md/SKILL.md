@@ -18,6 +18,12 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 
 ---
 
+## Invocation Modes
+
+This skill supports two invocation modes. **Explicit** (default, standalone): follows the full Investigation Protocol below. **Implicit** (invoked by `update-docs` Phase 3): investigation is scoped to diff files from the caller. In implicit mode the full Investigation Protocol below is replaced by a delta scan — only analyze changed files against the current document. Graphify context is provided by `update-docs`; skip the Phase 0 graphify query.
+
+---
+
 ## Content Rules
 
 ### Quality Gates
@@ -36,7 +42,7 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 - **Failure Triage** — classification table with symptom, cause, action (import path, brittle test, behavioral regression, baseline failure, flaky)
 - **Commands Reference** — exact CLI commands for common operations (build, run, test, lint, cleanup)
 - **Test Suite Structure** — if the project has a `tests/` directory, document: naming convention, file-table with run commands, and policies
-- **Utility Skills** — non-phase skills (rebuild-indexes, frontend-design+shadcn, run-e2e-tests) as prose descriptions
+- **Utility Skills** — non-phase skills (rebuild-test-and-indexes, frontend-design+shadcn, run-e2e-tests) as prose descriptions
 - **Session Continuity Check** — trigger conditions (automatic heuristic, user "continue"), policy (header only, archived sessions, sub-agent context)
 - **Documentation Structure table** — file-to-location map so agents know where each doc lives
 - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
@@ -49,7 +55,9 @@ The result is a project-specific `AGENTS.md` that accurately reflects that proje
 | **README.md** | User-facing setup, usage, features, installation | End users, new developers | User-facing | Install/run commands, user-facing features, quick-start |
 | **ARCHITECTURE.md** | Technical structure, modules, file tree, implementation, data flow | Developers, AI agents | Technical | Module descriptions, import graph, design decisions (technical) |
 | **SPECIFICATIONS.md** | Product vision, user journey, problem statement, Out of Scope | Product owners, devs, AI agents | Product / Vision | Product vision, user journey, feature rationale, Out of Scope |
+| **DESIGN_SPEC.md** | Visual design spec, color system, typography, motion | Developers, designers, AI agents | Visual / Aesthetic | Design system, color tokens, typography scale, motion principles |
 | **AGENTS.md** | Agent behavioral rules, file ownership, operational constraints | AI agents | Operational | Agent behavioral rules, file ownership table, commands, failure triage, test suite conventions |
+| **AGENT_SETUP.md** | Agent development environment setup and configuration | Developers, AI agents | Setup / Operational | Tool dependencies, MCP config, skill files, PATH, global and project config |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI agents | Educational | Universal coding practices, skill methodologies |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | Governance | Document metadata, content boundaries |
 
@@ -101,7 +109,7 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 <!-- FILL: test-suite-section -->
 
 ## Utility Skills
-[Non-phase skill references — rebuild-indexes, frontend-design+shadcn, run-e2e-tests]
+[Non-phase skill references — rebuild-test-and-indexes, frontend-design+shadcn, run-e2e-tests]
 
 ## Session Continuity Check
 [Trigger conditions: automatic heuristic (session files exist + <3 user messages), user "continue" after compaction. Policy: header only (~200 tokens), archived sessions never auto-read, sub-agent extracts 1-3 relevant lines]
@@ -125,14 +133,17 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 - [ ] Read project config files (e.g., `pyproject.toml`, `package.json`, `Cargo.toml`, `go.mod`) for test commands and structure
 - [ ] Scan `tests/` directory for test files and conventions
 - [ ] Scan `.opencode/skills/*/SKILL.md` for behavioral rules that appear in multiple skills (universalization candidates)
+- [ ] Determine invocation mode — if implicit, skip full codebase walk and accept scope from caller (diff context)
 
 ---
 
 ## Workflow
 
+> **Explicit mode only.** For implicit mode see Invocation Modes.
+>
 > **Investigation Protocol:** Investigation compares the current document against the current codebase — not against previous session changes. Pre-existing discrepancies (outdated file ownership, missing sections, wrong commands, stale behavioral rules) are gaps to flag regardless of when they were introduced.
 
-### 1. Investigate the Codebase
+### Phase 1: Investigate the Codebase
 Read in priority order:
 1. Project entry points and their sub-modules — extract behavioral patterns, modification constraints, resource management rules
 2. Configuration files — extract constants, flags, environment variable bindings
@@ -153,18 +164,22 @@ For each **What to Include** item, collect the data. This fills the `<!-- FILL: 
 - **Failure Triage** — project-specific symptom→cause→action rows
 - **Skill Loading Priority** — verify `skill` loading rules are present and accurate
 
-### 2. Read the Current Document
+### Phase 2: Read the Current Document
 - Check if `AGENTS.md` exists at the project root — create if not
 - Flag outdated or missing items
 
-### 3. Identify Gaps and Issues
+### Phase 3: Identify Gaps and Issues
 For each **What to Include** item and each **Universal Template** marker: does it exist? Is it accurate?
 
 **Cross-reference checks:**
 - Does the file ownership table account for all files added or removed since last sync? Cross-reference every entry against current filesystem
 - Does the test suite structure match actual test files on disk? Verify every entry in the test table exists in the filesystem
 
-### 4. Assemble or Update the Document
+### Gate: User Confirmation
+
+Present proposed oldString→newString diffs to the user for approval before applying any edits. Use the `question` tool with clickable options.
+
+### Phase 4: Assemble or Update the Document
 
 **If AGENTS.md doesn't exist (create from scratch):**
 1. Start with the **Universal Template** from this skill
@@ -181,7 +196,7 @@ For each **What to Include** item and each **Universal Template** marker: does i
 - Never rewrite the whole file — use targeted edits on changed sections only
 - Update the `> **Last updated:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
 
-### 5. Verify
+### Phase 5: Verify
 
 **Integrity & Scope:**
 - [ ] Every piece of content belongs in this document per the What NOT to Include table — redirect if it belongs elsewhere
@@ -212,3 +227,22 @@ For each **What to Include** item and each **Universal Template** marker: does i
 - [ ] Tooling conventions documented as behavioral rules, not tool names
 - [ ] Cross-references between documents are accurate (use relative paths)
 - [ ] `> **Last updated:**` date is current — updated to today (YYYY-MM-DD HH:MM TZ)
+
+## Hand-off
+- Phase 1: Investigation complete — codebase scanned, behavioral rules extracted, file ownership mapped
+- Phase 2: Current document read and compared against codebase
+- Phase 3: Gaps and issues identified
+- Gate: User confirmed proposed diffs
+- Phase 4: Document assembled or updated
+- Phase 5: Verification complete — all checks pass
+
+## Outputs & Triggers
+
+### Output
+Updated `AGENTS.md` at `AGENTS.md`.
+
+### Exit Declaration
+State clearly: "**AGENTS.md updated. All checks pass.**"
+
+### Next Step
+Return to `update-docs` orchestrator for cross-reference audit.

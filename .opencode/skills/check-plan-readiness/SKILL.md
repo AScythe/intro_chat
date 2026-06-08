@@ -17,15 +17,15 @@ description: 'Create the finalized plan document from conversation context, veri
 
 ## Phase 0: Prerequisites
 
-- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
+- [ ] Check for context continuity — see AGENTS.md §Session Continuity Check for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the upstream plan (from brainstorm-and-plan or grill-and-refine) — all sections
-- [ ] Verify all 8 gates from the prior plan are closed
+- [ ] Confirm upstream plan contains all required sections (approach, files, testing, success criteria) before writing the document
 - [ ] Confirm the plan document does not already exist in docs/
-- [ ] Read ARCHITECTURE.md for plan structure conventions
 
 ## Plan Document Lifecycle
 
 ### Phase 1: Gather from Conversation Context
+**Purpose:** Extract all inputs needed to populate the plan document — from conversation context only. No codebase analysis at this stage.
 
 Collect from upstream skills. No additional analysis needed.
 
@@ -39,6 +39,7 @@ Collect from upstream skills. No additional analysis needed.
 - **Resolved dimensions** → feeds Gates 2–7
 
 ### Phase 2: Create the Plan Document
+**Purpose:** Write the plan file from Phase 1 inputs. No analysis — pure assembly from gathered context.
 
 **Sequential numbering** — scan `docs/` for existing `PLAN_*.md` files and increment the highest. Use `PLAN_YYYY_MM_DD_XXX.md` format.
 
@@ -52,7 +53,6 @@ Populate each section from Phase 1 inputs using this template:
 ## Problem Statement
 
 ## Goals & Non-Goals
-
 ### Goals
 ### Non-Goals
 
@@ -61,7 +61,6 @@ Populate each section from Phase 1 inputs using this template:
 ## Technical Approach
 
 ## Implementation Plan
-
 ### Files to Create, Modify, or Remove
 ### Architecture & Design Decisions
 ### Testing Strategy
@@ -73,7 +72,6 @@ Populate each section from Phase 1 inputs using this template:
 ---
 
 ## Grill Outcomes
-
 ### Dimension: [name]
 - Decision: [what was decided]
 - Rationale: [why this choice]
@@ -92,8 +90,9 @@ Each task must be independently testable and map 1:1 to a batch:
 4. **Phase headers** — use `#### Phase N: Name`
 
 ### Phase 3: Verify Gates
+**Purpose:** Confirm the plan document is complete and sound before declaring it ready for implementation.
 
-**Presence check, not re-probe** — verify each criterion is present in the plan file.
+**Presence check, not re-probe** — verify each criterion is present in the plan file. Exception: Gate 8 requires an active `graphify get_community` query to verify scope coverage — it cannot be satisfied by presence alone.
 
 Check each of the following against the plan file:
 
@@ -125,7 +124,10 @@ After checking all gates, append the results table:
 | Community Coverage | ✅ / ❌ | ... |
 ```
 
-## On Failure
+### Phase 4: Triage Failures
+**Purpose:** Resolve failed gates before proceeding — minor issues fixed in place, significant ones resolved interactively with the user.
+
+Only reached if one or more gates fail in Phase 3.
 
 1. List which gates failed and why
 2. Assess severity:
@@ -138,20 +140,11 @@ After checking all gates, append the results table:
      5. After all resolved, summarize confirmed decisions
 3. Re-check all gates after resolution
 
-## Save Session (on pass)
-
-If all gates pass, load and execute the `save-session` skill before proceeding to hand-off. This captures the planning conversation before implementation begins.
-
-**Steps:**
-1. Load the skill: `skill(name: "save-session")`
-2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
-3. After save completes, proceed to Hand-off below
-
 ## Hand-off
 - Phase 1: Inputs gathered from brainstorm + grill
 - Phase 2: Plan file created with all sections populated
 - Phase 3: All 8 gates checked, results appended
-- Phase 4: Session conversation saved (on pass)
+- Phase 4: Failed gates triaged (minor: fixed in place; significant: resolved interactively)
 - Pass → route to implement-plan. Fail → triaged (minor: fixed; significant: route to grill-and-refine)
 
 ---
@@ -168,7 +161,7 @@ State clearly: "**All planning gates pass. Plan saved at `docs/PLAN_...`. Ready 
 State clearly: "**Gate failure: [list failed gates]. Triage: [minor → fixed in place | significant → let's resolve these: list affected dimensions].**"
 
 ### Next Step (pass)
-User invokes `implement-plan` (Build mode — same mode, no switch needed).
+User invokes `implement-plan`.
 
 ### Next Step (fail)
-User invokes `grill-and-refine` (Plan mode) to resolve the failed gates.
+User invokes `grill-and-refine` to resolve the failed gates.

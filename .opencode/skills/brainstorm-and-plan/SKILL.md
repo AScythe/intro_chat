@@ -17,50 +17,55 @@ description: 'Brainstorming and planning stage. Analyze requirements against pro
 
 ## Phase 0: Prerequisites
 
-- [ ] Check for context continuity — see [AGENTS.md §Session Continuity Check](../../../AGENTS.md#session-continuity-check) for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
+- [ ] Check for context continuity — see AGENTS.md §Session Continuity Check for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the upstream problem description or prior plan document
-- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
-- [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
+- [ ] Run baseline tests — all must pass before analysis begins
+- [ ] Classify task scope (Tier 1/2/3) per AGENTS.md §Codebase Exploration — determines depth of Phase 1 exploration
 
 ## Guidelines
 
-### Phase 1: Analyze (agent only)
+### Phase 1: Analyze Requirements (agent only, read-only)
+**Purpose:** Deeply understand the codebase, validate docs, and stress-test the proposed approach — all before surfacing anything to the user in Phase 2.
 
-Follow this layered analysis pipeline — all read-only:
+#### Step 1: Codebase Exploration
+**Purpose:** Orient on the architecture and locate relevant code before reading docs or source files.
 
-**Codebase Exploration** — See [AGENTS.md §Codebase Exploration](../../../AGENTS.md) for the full decision framework. For complex questions, use the pipeline (graphify→cocoindex→ast-grep) rather than picking one tool. Use these skill-specific commands during analysis:
+Apply the tier-based pipeline from AGENTS.md §Codebase Exploration. For planning tasks, prioritize orientation commands before narrowing:
 
-- **graphify** — macro-level architecture map before diving into files:
-  - `graphify_query_graph "..."` — broad concept search (e.g. "which modules handle SRT processing")
-  - `graphify_god_nodes` — discover core abstractions (most-connected modules in the project)
-  - `graphify_get_community <id>` — see all files in a dependency community
-  - `graphify_shortest_path "A" "B"` — relationship mapping between two modules
+- `graphify_god_nodes` — identify the project's most-connected modules to orient on key seams
+- `graphify_query_graph "..."` — broad concept search scoped to the task (e.g. "which modules handle SRT processing")
+- `graphify_get_community <id>` — see all files in a relevant dependency community
+- `graphify_shortest_path "A" "B"` — trace the relationship between two modules when understanding data flow
+- `cocoindex-code_search` — search by natural language intent when exact names are unknown; set `refresh_index: False` for consecutive queries
+- `ast_grep_search` — verify structural patterns and entry points (e.g. `def main()`, `load_*_log($$$)`) after scoping with graphify
 
-- **cocoindex-code** — search by natural language intent (e.g. "where are user sessions created" or "how are tracking logs saved"):
-  - Set `refresh_index: False` for faster consecutive queries when code hasn't changed
+#### Step 2: Consult Docs
+**Purpose:** Extract product and architectural context before reading source code — docs are cheaper and often sufficient.
 
-- **ast_grep_search** — understand structural patterns (e.g. `load_*_log($$$)` to find JSON tracking log loaders across stages, or `def main()` to identify all pipeline entry points) before diving into files
+Read only sections relevant to the task (Grep→Read pattern — grep for heading line number, Read with offset/limit). Do not read entire docs.
 
-**Layer 1: Consult docs (`docs/`)**
-- Read only the sections relevant to the task (Grep→Read pattern — grep for heading line number, Read with offset/limit). Do not read entire docs.
-- Map the task type to the right document:
-  - Product context, user flow, feature scope, privacy → `SPECIFICATIONS.md` (read: "Problem", "Solution", "How It Works", "Core Features", "User Flow", "Out of Scope", "Hard Constraints")
-  - Module structure, data flow, API design → `docs/ARCHITECTURE.md` (read: "Project Structure", "Module Descriptions" relevant entries, "Import Structure", "Modifying Instructions")
-- `PROJECT_BEST_PRACTICES.md` is excluded at this stage — coding patterns are implementation concerns, not planning concerns.
+- Product context, user flow, feature scope, privacy → `SPECIFICATIONS.md` (read: "Problem", "Solution", "How It Works", "Core Features", "User Flow", "Out of Scope", "Hard Constraints")
+- Module structure, data flow, API design → `docs/ARCHITECTURE.md` (read: "Project Structure", "Module Descriptions" relevant entries, "Import Structure", "Modifying Instructions")
+- `PROJECT_BEST_PRACTICES.md` — excluded at this stage; coding patterns are implementation concerns, not planning concerns
 
-**Layer 2: Spot-check doc accuracy**
-- Read key source files referenced in the docs to confirm the doc is not stale. Use the project tree in `docs/ARCHITECTURE.md` to locate the right file.
-- Use `cocoindex-code_search` to verify functions mentioned in docs still exist under those names
-- Use `graphify_query_graph "module_name"` to verify documented module relationships match the graph
-- If the doc matches the code → extract relevant info and proceed to planning.
-- If the doc is stale or wrong → note the gap, then examine more files to understand the full picture before planning.
+#### Step 3: Spot-Check Doc Accuracy
+**Purpose:** Confirm docs are not stale before trusting them for planning — a wrong doc is worse than no doc.
 
-**Layer 3: Fallback (only if no relevant docs exist)**
-- Examine the relevant source code files directly.
+Ceiling: check ≤4 source files. If stale, examine ≤2 additional files, then proceed regardless — do not spiral.
 
-**Layer 4: Evaluate design approach**
+- Use `cocoindex-code_search "<function name>"` to verify functions mentioned in docs still exist
+- Use `graphify_query_graph "<module name>"` to verify documented module relationships match the graph
+- If doc matches code → extract relevant info and proceed
+- If doc is stale → note the gap explicitly, check ≤2 more files, then proceed
 
-Evaluate the proposed approach against these principles. Surface concerns here.
+#### Step 4: Fallback — Direct Source Reading
+**Purpose:** Only when no relevant docs exist or all docs are confirmed stale.
+
+#### Step 5: Evaluate Design Approach
+
+**Purpose:** Stress-test the proposed approach against design principles before presenting anything to the user. Surface concerns here, not during implementation.
+
+Evaluate against these principles:
 
 - **Deep modules** — simple public interface, complex logic hidden inside
 - **Pure functions** — same input → same output, no side effects
@@ -76,6 +81,7 @@ Evaluate the proposed approach against these principles. Surface concerns here.
 - **Control flow clarity** — straightforward flow; convoluted logic is a design problem
 
 ### Phase 2: Interactive Walkthrough (with user)
+**Purpose:** Confirm understanding and approach with the user before producing any plan output. This is a critical alignment step — do not skip or rush.
 
 Follow the User Interaction Pattern in AGENTS.md — use the `question` tool with clickable selectable options for every user decision point. Provide `options` with `label` and `description` fields. Never use raw text prompts or unformatted "y/n" questions. Present one decision-point at a time, resolve, then present the next. Never present multiple items in a single message.
 
@@ -85,8 +91,7 @@ Follow the User Interaction Pattern in AGENTS.md — use the `question` tool wit
 4. **Confirm direction** — ensure the user agrees with the approach before producing the plan.
 5. **Document sources** — cite which docs/sections were consulted.
 
-### Phase 3: Produce the Plan
-
+### Phase 3: Produce Initial Plan
 **Produce an initial plan verbally.** The plan must specify:
 - Approach and high-level design decisions
 - Files to create, modify, or remove
@@ -108,7 +113,7 @@ Follow the User Interaction Pattern in AGENTS.md — use the `question` tool wit
 Initial (broad-strokes) plan (verbal).
 
 ### Exit Declaration
-State clearly: "**Initial plan ready. Want to grill the plan or check for readiness? Say 'grill' to trigger grilling the plan.**"
+State clearly: "**Initial plan ready. Want to grill the plan or check for readiness? Say 'grill' to trigger grilling the plan, or say 'check' to trigger checking the readiness of the plan. Remember to switch to Build mode when you check plan readiness.**"
 
 ### Next Step
-User invokes `grill-and-refine` (Plan mode) or `check-plan-readiness` (Build mode — switch needed).
+User invokes `grill-and-refine` or `check-plan-readiness`.

@@ -19,41 +19,39 @@ description: 'Interview relentlessly about a plan or design until reaching share
 
 - [ ] Read the upstream plan (from brainstorm-and-plan) — all sections
 - [ ] Verify the plan has all required sections (approach, files, testing, success criteria)
-- [ ] Run baseline tests — all must pass
-- [ ] Apply Codebase Exploration per task type (see AGENTS.md §Codebase Exploration)
-- [ ] Read ARCHITECTURE.md, SPECIFICATIONS.md, relevant source files
+- [ ] Classify task scope (Tier 1/2/3) per AGENTS.md §Codebase Exploration — determines depth of Phase 1 exploration
 
-## Documents to Read
+## How to Grill
+
+### Phase 1: Analyze (agent only, read-only)
+**Purpose:** Explore the codebase to validate and challenge every aspect of the plan — all before involving the user in Phase 2. Complete all three steps before Phase 2; do not surface findings mid-analysis.
+
+Use Grep→Read pattern (grep for heading line number, Read with offset/limit). Do not read entire docs.
 
 - **`docs/ARCHITECTURE.md`** — "Project Structure", "Module Descriptions" (relevant), "Data Flow", "Key Design Decisions", "Import Structure", "Critical Implementation Details"
 - **`SPECIFICATIONS.md`** — "Hard Constraints", "Out of Scope"
 
-## How to Grill
+#### Step 2: Codebase Exploration
+**Purpose:** Verify the plan's scope is complete — discover code the plan may have missed before probing individual dimensions.
 
-### Phase 1: Analyze (agent only)
+Apply the tier-based pipeline from AGENTS.md §Codebase Exploration. Run broadly first to establish scope, then narrow per dimension:
 
-**Analyze alone first** — explore the codebase independently before the user walkthrough.
+- `graphify query_graph "..."` — broad concept search across the plan's scope; `graphify path "X" "Y"` for blast radius between modules
+- `cocoindex-code_search` — find functions by natural language intent when the plan's key terms may not match code names
+- `ast_grep_search` — validate structural assumptions (e.g. all `try/except` blocks, all calls to a deprecated function)
+- `grep / read` — fallback for exact-text details uncovered by tools above
 
-Start with the initial plan (from `brainstorm-and-plan` output). Explore identified files/code for each dimension:
+#### Step 3: Probe Each Dimension
+**Purpose:** For each of the 7 dimensions, gather concrete findings to bring into the user walkthrough.
 
-Use Codebase Exploration to verify the plan's coverage completeness across all dimensions (see [AGENTS.md §Codebase Exploration](../../../AGENTS.md)). For complex plans, run the pipeline (graphify→cocoindex→ast-grep) first to discover scope before grilling individual dimensions:
-
-**graphify** — query the knowledge graph for concepts, communities, and connections across the entire codebase. Use `graphify query "..."` for broad context, `graphify path "X" "Y"` for blast radius between modules.
-
-**cocoindex-code** — search by natural language intent to find functions even when key terms don't match the plan. Verify the plan mentions all relevant code paths.
-
-**ast_grep_search** — understand structural patterns (e.g. all `try/except` blocks, all calls to a deprecated function) to validate the plan's assumptions about code structure.
-
-**grep / read** — fall back to exact-text search and file reading for details uncovered by the tools above.
-
-**Gap grilling** — when comparing two sources (template vs implementation, spec vs code), test each gap against four questions:
+**Gap grilling method** — when comparing two sources (template vs implementation, spec vs code), test each gap against four questions before acting on it:
 
 1. Is it truly additive?
 2. Does it affect output or methodology?
 3. Which document owns it?
 4. What's the cost/benefit?
 
-Only act on gaps that survive the grill.
+Only act on gaps that survive all four questions.
 
 | Dimension | What to probe |
 |-----------|--------------|
@@ -65,9 +63,7 @@ Only act on gaps that survive the grill.
 | **Consistency** | Conflicts with existing patterns? Straightforward control flow? |
 | **Code Discovery** | Plan missed related concepts? `graphify path "X" "Y"` for blast radius between planned and missed modules. |
 
-#### Testability Probe
-
-During **Dependencies**, probe for eight anti-patterns:
+**Testability probe — run during Dependencies:**
 
 - **AP1: Non-determinism** — clocks, RNG, or network calls make tests non-repeatable?
 - **AP2: Untestable I/O fusion** — a function that reads external state AND contains decision logic based on that state?
@@ -78,16 +74,17 @@ During **Dependencies**, probe for eight anti-patterns:
 - **AP7: Non-idempotent writes** — running the same write operation twice produces different state?
 - **AP8: Mutable outputs** — function returns a list/dict the caller can accidentally mutate?
 
-During **Risks**, probe for test fragility:
+**Test fragility probe — run during Risks:**
 
 - **Brittle assertions** — testing type rather than value?
 - **Test doubles confusion** — mocking when a stub or fake would do?
 
 ### Phase 2: Interactive Walkthrough (with user)
+**Purpose:** To identify and resolve any gaps in the plan through a structured conversation with the user. This is a critical alignment step — do not skip or rush.
 
 Follow the User Interaction Pattern in AGENTS.md — use the `question` tool with clickable selectable options for every user decision point. Provide `options` with `label` and `description` fields. Never use raw text prompts or unformatted "y/n" questions. Present one decision-point at a time, resolve, then present the next.
 
-1. **Before starting:** identify which dimensions need discussion and which are skippable (obvious, no decisions needed). Skip skippable ones silently.
+1. **Before starting:** flag each dimension by NAME only as "needs discussion" or "skippable" — do not describe contents. Present the skip list to the user for confirmation before proceeding.
 2. Walk through each non-skipped dimension in order. For each:
    - State ONE finding and recommendation at a time
    - Use the `question` tool with concrete options (e.g., "server-side, client-side, or something else")
@@ -96,6 +93,7 @@ Follow the User Interaction Pattern in AGENTS.md — use the `question` tool wit
 3. After all dimensions, summarize confirmed decisions
 
 ### Phase 3: Produce the Revised Plan
+**Purpose:** Compile a revised plan that incorporates all confirmed decisions from the walkthrough, formatted as copy-ready blocks for the next stage.
 
 **Copy-ready outputs** — format resolved dimensions as blocks the next stage can paste directly into the plan document. Use this template for each:
 
@@ -131,4 +129,4 @@ Revised plan (verbal) formatted as a ready-to-copy code block.
 State clearly: "**Grill complete. Check for plan readiness? Say 'check' to trigger checking the readiness of the plan. Remember to switch to Build mode**"
 
 ### Next Step
-User invokes `check-plan-readiness` — **switch to Build mode before proceeding**.
+User invokes `check-plan-readiness`.
