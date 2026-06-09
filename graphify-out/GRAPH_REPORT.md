@@ -1,16 +1,16 @@
 # Graph Report - intro_chat  (2026-06-09)
 
 ## Corpus Check
-- 210 files · ~178,815 words
+- 211 files · ~179,391 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3610 nodes · 4785 edges · 191 communities (173 shown, 18 thin omitted)
+- 3142 nodes · 3730 edges · 185 communities (163 shown, 22 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f37cfaf9`
+- Built from commit: `13f76abc`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -79,7 +79,6 @@
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
-- [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
 - [[_COMMUNITY_Community 67|Community 67]]
@@ -190,31 +189,25 @@
 - [[_COMMUNITY_Community 173|Community 173]]
 - [[_COMMUNITY_Community 174|Community 174]]
 - [[_COMMUNITY_Community 177|Community 177]]
-- [[_COMMUNITY_Community 178|Community 178]]
-- [[_COMMUNITY_Community 179|Community 179]]
 - [[_COMMUNITY_Community 180|Community 180]]
 - [[_COMMUNITY_Community 181|Community 181]]
 - [[_COMMUNITY_Community 182|Community 182]]
 - [[_COMMUNITY_Community 183|Community 183]]
 - [[_COMMUNITY_Community 184|Community 184]]
 - [[_COMMUNITY_Community 185|Community 185]]
-- [[_COMMUNITY_Community 186|Community 186]]
-- [[_COMMUNITY_Community 187|Community 187]]
-- [[_COMMUNITY_Community 188|Community 188]]
-- [[_COMMUNITY_Community 189|Community 189]]
 - [[_COMMUNITY_Community 190|Community 190]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 33 edges
-2. `Button` - 31 edges
-3. `7. Session Lessons Learned` - 30 edges
-4. `Module Descriptions` - 26 edges
-5. `Tests` - 24 edges
-6. `5. AGENTS.md` - 24 edges
-7. `fetchJSON()` - 23 edges
-8. `Card` - 21 edges
-9. `CardContent` - 21 edges
-10. `main()` - 21 edges
+1. `7. Session Lessons Learned` - 30 edges
+2. `Module Descriptions` - 26 edges
+3. `cn()` - 25 edges
+4. `Tests` - 24 edges
+5. `5. AGENTS.md` - 24 edges
+6. `Frontend Modules (React SPA)` - 21 edges
+7. `6. PROJECT_BEST_PRACTICES.md` - 20 edges
+8. `main()` - 20 edges
+9. `2. ARCHITECTURE.md` - 19 edges
+10. `3. SPECIFICATIONS.md` - 19 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_database()` --calls--> `init_db()`  [INFERRED]
@@ -228,59 +221,51 @@
 - `test_qr_utils()` --calls--> `generate_qr_data_uri()`  [INFERRED]
   tests/test_app.py → app/qr_utils.py
 
-## Communities (191 total, 18 thin omitted)
+## Communities (185 total, 22 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.10
 Nodes (19): Agentic Workflow Skills, Codebase Exploration, code:block1 (Stage 1: Scope — graphify query_graph (see Tier rules above)), Commands Reference, Discipline, Documentation Discipline, Documentation Structure, Failure Triage (+11 more)
 
-### Community 1 - "Community 1"
-Cohesion: 0.11
-Nodes (21): Abort Paths, Architecture Improvement Workflow, Boundaries, code:python (def create_session(now=None, new_id=None):), Combined execution with modularize-and-clean, Conflict Resolution, Documents to Read, Exit Declaration (+13 more)
-
 ### Community 2 - "Community 2"
-Cohesion: 0.10
-Nodes (25): 3. Compile Candidate List, Abort Paths, Batching Rules, Boundaries, Change-Log (verbal), code:block1 ([DEAD] <file:line> — <symbol> — <evidence> → Recommend: <Rem), Combined execution with improve-architecture, Documents to Read (+17 more)
+Cohesion: 0.67
+Nodes (3): 3. Compile Candidate List, Documents to Read, Save Session (before hand-off)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.07
-Nodes (33): 1.5 Extract Descriptions from Source Files, 1.75 Extract Per-Function Details, 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify, Audience (+25 more)
+Cohesion: 0.29
+Nodes (7): 1.5 Extract Descriptions from Source Files, 1.75 Extract Per-Function Details, 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify
 
 ### Community 4 - "Community 4"
-Cohesion: 0.05
-Nodes (45): Abort Paths, Archive Plan (on success), Boundaries, Check Git Status, Check Test Quality, Code Property Audit, Codebase Exploration, code:bash (python -m pytest tests/ -v) (+37 more)
+Cohesion: 0.15
+Nodes (13): Check Git Status, Check Test Quality, Code Property Audit, Codebase Exploration, Documents to Read, Read the Diff, Run All Tests, Run Build (+5 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.08
-Nodes (35): Abort Paths, Batch Flags, Boundaries, Code Optimization for Testing and AI Collaboration, Codebase Exploration, code:python (import logging), code:python (def create_session(now=None, new_id=None):), Documents to Read (+27 more)
+Cohesion: 0.50
+Nodes (4): Codebase Exploration, Documents to Read, Guiding Principles, Save Session (before hand-off)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.08
-Nodes (30): 1. Scan Global State, 2. Scan Project State, 3. Read the Current Document, 4. Identify Gaps and Issues, 5. Assemble or Update the Document, 6. Verify, Audience, code:markdown (# [Project Name] Agent Setup) (+22 more)
+Cohesion: 0.33
+Nodes (6): 1. Scan Global State, 2. Scan Project State, 3. Read the Current Document, 4. Identify Gaps and Issues, 5. Assemble or Update the Document, 6. Verify
 
 ### Community 7 - "Community 7"
-Cohesion: 0.13
-Nodes (18): Boundaries (read-only phase), code:block1 (### Dimension: [name]), Documents to Read, Exit Declaration, Hand-off, How to Grill, Next Step, Output (+10 more)
+Cohesion: 0.67
+Nodes (3): Documents to Read, Phase 1: Analyze (agent only), Testability Probe
 
 ### Community 8 - "Community 8"
-Cohesion: 0.09
-Nodes (27): 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify, Audience, code:markdown (# AGENTS.md), Content Rules (+19 more)
+Cohesion: 0.40
+Nodes (5): 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify
 
 ### Community 9 - "Community 9"
-Cohesion: 0.09
-Nodes (27): 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify, Audience, code:markdown (# [Project Name]), Content Rules (+19 more)
+Cohesion: 0.40
+Nodes (5): 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify
 
 ### Community 10 - "Community 10"
-Cohesion: 0.09
-Nodes (27): 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify, Audience, code:markdown (# Specifications — [Project Name]), Content Rules (+19 more)
-
-### Community 11 - "Community 11"
-Cohesion: 0.12
-Nodes (19): Boundaries (read-only phase), Exit Declaration, Guidelines, Hand-off, Next Step, Output, Outputs & Triggers, Phase 0: Prerequisites (+11 more)
+Cohesion: 0.40
+Nodes (5): 1. Investigate the Codebase, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify
 
 ### Community 12 - "Community 12"
-Cohesion: 0.12
-Nodes (21): 7.15 Matchmaking Queue Filter Direction, 7.16 Root Pattern Extraction, 7.16 TypedDict for Structured In-Memory State, 7.17 Sequential Numbering for Plan Files, 7.17 Thread Safety for Shared Mutable State, 7.18 Root Pattern Extraction, 7.21 Skill Audit After Content Restructure, 7.22 Exhaustive Section Mapping (+13 more)
+Cohesion: 0.11
+Nodes (25): 7.16 Root Pattern Extraction, 7.16 TypedDict for Structured In-Memory State, 7.17 Sequential Numbering for Plan Files, 7.17 Thread Safety for Shared Mutable State, 7.18 Root Pattern Extraction, 7.18 Skill Rename Protocol, 7.19 Workflow Handoff with Outputs & Triggers + Hand-off Checklists, 7.20 WebSocket Accept Once (+17 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.11
@@ -295,15 +280,15 @@ Cohesion: 0.06
 Nodes (36): Components, Frontend Modules (React SPA), `frontend/src/api/client.ts` (API Client), `frontend/src/components/ChatPageViews.tsx`, `frontend/src/components/ConnectionCard.tsx`, `frontend/src/components/MatchCountdown.tsx`, `frontend/src/components/PeoplePageViews.tsx`, `frontend/src/components/PersonCard.tsx` (+28 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.16
-Nodes (21): 8.10 Batch by Logical Concern, Not Line Count, 8.1 Permission Control, 8.2 Executable Sources of Truth, 8.3 Filename as Stable Key, 8.4 Preserve Manual, Regenerate Auto, 8.5 Diff Logging for Automation, 8.6 Cross-Language Extraction Pattern, 8.7 Description Headers Go in Source Code Only (+13 more)
+Cohesion: 0.14
+Nodes (24): 7.24 Consistency Pass as Final Cross-Cutting Step, 8.10 Batch by Logical Concern, Not Line Count, 8.1 Permission Control, 8.2 Executable Sources of Truth, 8.3 Filename as Stable Key, 8.4 Preserve Manual, Regenerate Auto, 8.5 Diff Logging for Automation, 8.6 Cross-Language Extraction Pattern (+16 more)
 
 ### Community 17 - "Community 17"
-Cohesion: 0.25
-Nodes (13): create_match(), find_match(), find_or_enqueue_match(), notify_match_found(), persist_match(), [ARCH] DB insert only — create match record and return match_id., [ARCH] In-memory state update — active_matches, waiting_queue, availability., [ARCH] WebSocket broadcast only — notify matched users. (+5 more)
+Cohesion: 0.28
+Nodes (11): create_match(), find_or_enqueue_match(), notify_match_found(), persist_match(), [ARCH] DB insert only — create match record and return match_id., [ARCH] In-memory state update — active_matches, waiting_queue, availability., [ARCH] WebSocket broadcast only — notify matched users., update_match_state() (+3 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.14
+Cohesion: 0.13
 Nodes (17): 8.11 Persistent Decision Artifacts, code:block57 (docs/), code:block58, code:block59, code:block60, code:block61, code:block62, code:block63 (+9 more)
 
 ### Community 19 - "Community 19"
@@ -323,8 +308,8 @@ Cohesion: 0.17
 Nodes (12): Agentic Workflow Skills, code:json ({), code:gitignore (node_modules), Configuration Reference, Gitignore Configuration, Global Configuration Files, Global Tool Installations, Nested `.opencode/.gitignore` (+4 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.19
-Nodes (14): get_rooms_for_event(), insert_default_rooms(), insert_default_topics(), Generate an 8-character hex ID from a random UUID., Generate an 8-character hex ID from a random UUID., Insert default rooms for a given event if none exist., Insert default rooms for a given event if none exist., Insert default topics for a given event. (+6 more)
+Cohesion: 0.22
+Nodes (12): get_rooms_for_event(), insert_default_rooms(), insert_default_topics(), Generate an 8-character hex ID from a random UUID., Insert default rooms for a given event if none exist., Insert default topics for a given event., Fetch all rooms for an event as {id, name} dicts., short_id() (+4 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.10
@@ -359,12 +344,12 @@ Cohesion: 0.18
 Nodes (10): 4. DEMO_GUIDE.md (Archived), 8. Workflow-to-Document Dependency, Anti-Duplication Rules, Checklist Before Adding Content, code:block2 (review-implementation (1st pass)), Core Pipeline, Doc Sync Steps (Post-Implementation), Document Guidelines - IntroChat (+2 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.15
-Nodes (22): ConnectionCard(), ConnectionCardProps, onNo, onYes, MatchCountdownProps, onGoToChat, QRDisplay(), QRDisplayProps (+14 more)
+Cohesion: 0.13
+Nodes (23): ConnectionCard(), ConnectionCardProps, onNo, onYes, MatchCountdown(), MatchCountdownProps, onGoToChat, QRDisplay() (+15 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.12
-Nodes (36): check(), extract_frontmatter(), main(), Verify that each loadable skill's description contains trigger keywords     that, Verify that for each Phase 0 Hard Gate classification, the documented     primar, Verify that each loadable skill's description contains trigger keywords     that, Verify that each loadable skill's description contains trigger keywords     that, Verify messages that should NOT match any skill (fall through to default). (+28 more)
+Cohesion: 0.15
+Nodes (30): check(), extract_frontmatter(), main(), Verify that each loadable skill's description contains trigger keywords     that, Verify that each loadable skill's description contains trigger keywords     that, Verify that for each Phase 0 Hard Gate classification, the documented     primar, Verify that for each Phase 0 Hard Gate classification, the documented     primar, Verify messages that should NOT match any skill (fall through to default). (+22 more)
 
 ### Community 34 - "Community 34"
 Cohesion: 0.05
@@ -375,12 +360,12 @@ Cohesion: 0.05
 Nodes (42): dependencies, class-variance-authority, clsx, cmdk, lucide-react, motion, @radix-ui/react-checkbox, @radix-ui/react-dialog (+34 more)
 
 ### Community 36 - "Community 36"
-Cohesion: 0.12
-Nodes (32): MatchCountdown(), AcceptedView(), AcceptedViewProps, NearbyUsersView(), NearbyUsersViewProps, PersonResponse, anotherPerson, onCancel (+24 more)
+Cohesion: 0.11
+Nodes (28): CONFIG, PersonResponse, alice, bob, { result }, useChatRequest(), id, response (+20 more)
 
 ### Community 37 - "Community 37"
-Cohesion: 0.06
-Nodes (54): main(), Test that all required files exist, Test that all required files exist, Test database initialization and basic operations, Test database initialization and basic operations, Test conversation prompts, Test that state constants are correctly defined, Test conversation prompts (+46 more)
+Cohesion: 0.07
+Nodes (39): main(), Test that all required files exist, Test database initialization and basic operations, Test conversation prompts, Test that all modular components can be imported, Test that state constants are correctly defined, Test home page renders, Test all API endpoints respond correctly (+31 more)
 
 ### Community 38 - "Community 38"
 Cohesion: 0.06
@@ -423,8 +408,8 @@ Cohesion: 0.07
 Nodes (28): Architecture & Design Decisions, code:json ({"id": "x", "file_type": "code", "label": ""}), Dimension: Alternatives, Dimension: Assumptions, Dimension: Dependencies, Dimension: Edge Cases, Dimension: Risks, Files to Create, Modify, or Remove (+20 more)
 
 ### Community 48 - "Community 48"
-Cohesion: 0.12
-Nodes (14): init_db(), spa_catch_all(), on_startup(), spa_catch_all(), save_event_config(), index(), cleanup_expired_matches(), find_expired_matches() (+6 more)
+Cohesion: 0.17
+Nodes (8): init_db(), on_startup(), cleanup_expired_matches(), find_expired_matches(), [ARCH] Pure function — identify expired match IDs without side effects., Background thread to clean up expired matches., Start the cleanup thread as a daemon., start_cleanup_thread()
 
 ### Community 49 - "Community 49"
 Cohesion: 0.07
@@ -435,12 +420,12 @@ Cohesion: 0.07
 Nodes (26): Architecture & Design Decisions, code:bash (uv run python tests/test_agent_guidelines.py), code:bash (uv run python tests/test_app.py), Dimension: Alternatives, Dimension: Assumptions, Dimension: Code Discovery, Dimension: Consistency, Dimension: Dependencies (+18 more)
 
 ### Community 51 - "Community 51"
-Cohesion: 0.12
-Nodes (29): ChatLoadingView(), ChatLoadingViewProps, ChattingView(), ChattingViewProps, ErrorView(), ErrorViewProps, ExtendedView(), ExtendedViewProps (+21 more)
+Cohesion: 0.13
+Nodes (24): ChatLoadingView(), ChatLoadingViewProps, ChattingView(), ChattingViewProps, ErrorView(), ErrorViewProps, ExtendedView(), ExtendedViewProps (+16 more)
 
 ### Community 52 - "Community 52"
-Cohesion: 0.22
-Nodes (10): SocketProvider(), UserProvider(), renderWithProviders(), mockEventConfig, mockRooms, mockRoomUsers, renderDirectAccess(), renderWithProviders() (+2 more)
+Cohesion: 0.29
+Nodes (6): RoomSelectorProps, Room, SelectContent, SelectItem, SelectTrigger, Skeleton()
 
 ### Community 53 - "Community 53"
 Cohesion: 0.08
@@ -463,8 +448,8 @@ Cohesion: 0.08
 Nodes (24): Architecture & Design Decisions, Batch 1: `docs/README.md`, Batch 2: `docs/SPECIFICATIONS.md`, Batch 3: `AGENTS.md`, Batch 4: `refs/PROJECT_BEST_PRACTICES.md`, Batch 5: `refs/AGENT_SETUP.md`, Dimension: Change Content per Document, Dimension: Scope Boundary (+16 more)
 
 ### Community 58 - "Community 58"
-Cohesion: 0.11
-Nodes (34): main(), Test that constants.ts has all expected config properties, Test that util files export all expected functions, Test that util files export all expected functions, Test that hooks export all expected functions, Test that hooks export all expected functions, Test that all components export their expected React components, Test that all components export their expected React components (+26 more)
+Cohesion: 0.15
+Nodes (24): main(), Test that constants.ts has all expected config properties, Test that util files export all expected functions, Test that hooks export all expected functions, Test that all components export their expected React components, Test that all required frontend source files exist, Test that page components are exported, Test that App.tsx references all pages and contexts (+16 more)
 
 ### Community 59 - "Community 59"
 Cohesion: 0.08
@@ -486,13 +471,9 @@ Nodes (22): Architecture & Design Decisions, Files to Create, Modify, or Remove,
 Cohesion: 0.09
 Nodes (22): Boundaries, code:block1 (ccc index), code:block2 (graphify .), code:bash (git diff --name-only "$(git merge-base HEAD main)" HEAD), code:powershell (git diff --name-only $(git merge-base HEAD main) HEAD), code:block5 (.py, .ts, .tsx, .js, .jsx, .css, .json, .html, .toml), Exit Declaration, Explicit Path (standalone "rebuild indexes") (+14 more)
 
-### Community 64 - "Community 64"
-Cohesion: 0.08
-Nodes (27): Boundaries, code:powershell (New-Item -ItemType Directory -Path "docs/sessions" -Force), code:powershell ($mostRecent = $files | Sort-Object -Descending | Select-Obje), code:block11 (Restored context from {filename}: goal={goal}, phase={phase}), code:powershell (New-Item -ItemType Directory -Path "archive/sessions" -Force), code:powershell (# List all SESSION_*.md files in both directories), code:yaml (---), code:markdown (## User YYYY-MM-DD HH:MM) (+19 more)
-
 ### Community 65 - "Community 65"
-Cohesion: 0.07
-Nodes (35): 1. Investigate, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Present Candidates, 5. Assemble or Update the Document, 6. Verify, 7. Route Skill Improvements, Audience (+27 more)
+Cohesion: 0.22
+Nodes (9): 1. Investigate, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Present Candidates, 5. Assemble or Update the Document, 6. Verify, 7. Route Skill Improvements, Phase 1: Plan (read-only) (+1 more)
 
 ### Community 66 - "Community 66"
 Cohesion: 0.09
@@ -519,8 +500,8 @@ Cohesion: 0.10
 Nodes (20): Approach & Design Decisions, Dimension: Alternatives, Dimension: Assumptions, Dimension: Consistency, Dimension: Dependencies, Dimension: Edge Cases, Dimension: Risks, Files to Create, Modify, or Remove (+12 more)
 
 ### Community 72 - "Community 72"
-Cohesion: 0.11
-Nodes (22): Boundaries (gate-driven phase), code:markdown (# PLAN_YYYY_MM_DD_XXX), code:markdown (## Readiness Gate Results), Exit Declaration (fail), Exit Declaration (pass), Hand-off, Next Step (fail), Next Step (pass) (+14 more)
+Cohesion: 0.67
+Nodes (3): On Failure, Phase 5: Save Session, Save Session (on pass)
 
 ### Community 73 - "Community 73"
 Cohesion: 0.10
@@ -531,7 +512,7 @@ Cohesion: 0.10
 Nodes (19): Approved candidates (for user to approve), Approved candidates (for user to approve), Batch 1 [CONCURRENT] — Independent changes, Batch 2 [SEQUENTIAL on routes.py] — QR extraction, Batch 3 [CONCURRENT] — Frontend extraction, Batch 4 — Prompt deduplication, Batching Strategy, Findings (+11 more)
 
 ### Community 75 - "Community 75"
-Cohesion: 0.13
+Cohesion: 0.10
 Nodes (19): 1. Gather Changes, 2. Categorize, 3. Present Groups, 4. Commit and Push Each Group, 5. Done, Auto-Generated Commit Messages, Boundaries, code:block1 (<action> <group description>) (+11 more)
 
 ### Community 76 - "Community 76"
@@ -547,12 +528,8 @@ Cohesion: 0.11
 Nodes (18): Architecture & Design Decisions, Files to Create, Modify, or Remove, Goals, Goals & Non-Goals, Implementation Plan, Non-Goals, Open Questions & Risks, Phase 1: Config & Test File (+10 more)
 
 ### Community 79 - "Community 79"
-Cohesion: 0.13
-Nodes (25): cn(), UserInfoPage(), Badge(), BadgeProps, badgeVariants, Checkbox, Command, CommandDialog() (+17 more)
-
-### Community 80 - "Community 80"
 Cohesion: 0.10
-Nodes (27): Abort Paths, Boundaries, Content Rules, Document Update Workflow, Exit Declaration, Explicit Path (standalone "sync docs"), Hand-off, Implicit Path (Phase 3 of review-implementation) (+19 more)
+Nodes (25): PromptCard(), PromptCardProps, { container }, cn(), Badge(), BadgeProps, badgeVariants, Checkbox (+17 more)
 
 ### Community 81 - "Community 81"
 Cohesion: 0.11
@@ -591,8 +568,8 @@ Cohesion: 0.12
 Nodes (15): 1. Investigate the Pipeline, 2. Read the Current Document, 3. Identify Gaps and Issues, 4. Assemble or Update the Document, 5. Verify, Audience, code:markdown (# [Project Name] Demo Guide), Content Rules (+7 more)
 
 ### Community 90 - "Community 90"
-Cohesion: 0.18
-Nodes (14): create_event(), exchange_connection(), generate_qr(), get_match(), get_prompts(), get_rooms(), get_user_match(), index() (+6 more)
+Cohesion: 0.16
+Nodes (17): generate_qr_data_uri(), Generate a base64-encoded PNG data URI from a string., generate_qr(), create_event(), exchange_connection(), generate_qr(), get_match(), get_prompts() (+9 more)
 
 ### Community 91 - "Community 91"
 Cohesion: 0.13
@@ -627,19 +604,19 @@ Cohesion: 0.17
 Nodes (11): Approach & Design Decisions, Edge Cases, Files to Create, Modify, or Remove, Grill Outcomes, Implementation Plan, PLAN_2026_05_13_004, Readiness Gate Results, Requirements / Problem (+3 more)
 
 ### Community 99 - "Community 99"
-Cohesion: 0.27
-Nodes (10): loadUserFromStorage(), saveUserToStorage(), { result }, UserContext, UserData, clearUserId(), getData(), getUserId() (+2 more)
+Cohesion: 0.06
+Nodes (31): SocketProvider(), Subscription, loadUserFromStorage(), saveUserToStorage(), { result }, UserProvider(), SocketContext, SocketContextValue (+23 more)
 
 ### Community 100 - "Community 100"
-Cohesion: 0.14
+Cohesion: 0.15
 Nodes (12): Aesthetic Direction, Button Interaction Design, Color System, Dark Mode, Dark Mode, Dark Mode, Design Spec — IntroChat, Design Token Mapping (+4 more)
 
 ### Community 101 - "Community 101"
-Cohesion: 0.15
-Nodes (16): ChipItem, added, defaultItems, { result }, { result, rerender }, selectedState1, selectedState2, useChipSelection() (+8 more)
+Cohesion: 0.22
+Nodes (9): ChatTimerControls, onComplete, onTick, { result }, TimerBaseState, TimerCallbacks, TimerControls, useChatTimer() (+1 more)
 
 ### Community 102 - "Community 102"
-Cohesion: 0.50
+Cohesion: 0.43
 Nodes (7): CreateEventRequest, ExchangeConnectionRequest, JoinEventRequest, SaveEventConfigRequest, SetAvailabilityRequest, SetUserRoomRequest, BaseModel
 
 ### Community 104 - "Community 104"
@@ -659,8 +636,8 @@ Cohesion: 0.05
 Nodes (65): 1.1 Module Responsibility Pattern, 1.2 Separation of Concerns, 1.3 Frontend Modularization, 1.4 Module Communication, 1.5 When to Split a Module, 1.6 Documentation-Driven Module Design, 1.7 Surgical Edit Pattern, 1.8 One Logical Change Per Edit (+57 more)
 
 ### Community 108 - "Community 108"
-Cohesion: 0.25
-Nodes (6): HomePage(), buttons, input, joinEventHeaders, mockResponse, nameInput
+Cohesion: 0.24
+Nodes (12): 7.10 Interactive Walkthrough — One Item at a Time, Names Only, 7.11 Presence Check Over Re-Probe, 7.12 Triage Routing, 7.13 Preserve File Description Comments, 7.14 Windows Shell Quoting Workaround, 7.15 Matchmaking Queue Filter Direction, code:block34 (✅ One item at a time:), code:block35 (✅ Presence check: "Does the plan state confirmed assumptions) (+4 more)
 
 ### Community 109 - "Community 109"
 Cohesion: 0.67
@@ -727,20 +704,20 @@ Cohesion: 0.06
 Nodes (31): Architecture & Design Decisions, Backend Logic, Dimension: Alternatives, Dimension: Assumptions, Dimension: Code Discovery, Dimension: Consistency, Dimension: Dependencies, Dimension: Edge Cases (+23 more)
 
 ### Community 130 - "Community 130"
-Cohesion: 0.29
-Nodes (10): 7.10 Interactive Walkthrough — One Item at a Time, Names Only, 7.1 Syntax Verification, 7.2 Import Discipline, 7.8 Gap Grilling Methodology, 7.9 Docs-First Analysis Pipeline, code:bash (uv run python -m py_compile **/*.py), code:python (# ✅ import sqlite3; from .state import active_users), code:block32 (Gap found: "Prefer wiring files over leaf files") (+2 more)
+Cohesion: 0.36
+Nodes (8): 7.1 Syntax Verification, 7.2 Import Discipline, 7.8 Gap Grilling Methodology, 7.9 Docs-First Analysis Pipeline, code:bash (uv run python -m py_compile **/*.py), code:python (# ✅ import sqlite3; from .state import active_users), code:block32 (Gap found: "Prefer wiring files over leaf files"), code:block33 (Task: Add a new API endpoint)
 
 ### Community 131 - "Community 131"
-Cohesion: 0.27
-Nodes (9): ChatTimerControls, onComplete, onTick, { result }, TimerBaseState, TimerCallbacks, TimerControls, useChatTimer() (+1 more)
+Cohesion: 0.13
+Nodes (16): AcceptedView(), AcceptedViewProps, NearbyUsersView(), NearbyUsersViewProps, PersonResponse, anotherPerson, onCancel, onImReady (+8 more)
 
 ### Community 132 - "Community 132"
 Cohesion: 0.40
 Nodes (5): `app/qr_utils.py` (QR Code Generator), Functions, Functions, Functions, Functions
 
 ### Community 133 - "Community 133"
-Cohesion: 0.12
-Nodes (20): fetchJSON(), fetchWithTimeout(), parseJSON(), data, promise, input, mockConfig, roomInput (+12 more)
+Cohesion: 0.09
+Nodes (21): fetchJSON(), fetchWithTimeout(), parseJSON(), data, promise, ChipItem, added, defaultItems (+13 more)
 
 ### Community 134 - "Community 134"
 Cohesion: 0.43
@@ -763,8 +740,8 @@ Cohesion: 0.09
 Nodes (21): Architecture & Design Decisions, Files to Create, Modify, or Remove, Goals, Goals & Non-Goals, Grill Outcomes, Implementation Plan, Issue 1 — Button placement in QRDisplay, Issue 2 — Room filtering by `selected` (+13 more)
 
 ### Community 139 - "Community 139"
-Cohesion: 0.12
-Nodes (15): handle_connection_exchange(), [ARCH] Process a user's connection-exchange decision and broadcast if both users, generate_qr_data_uri(), Generate a base64-encoded PNG data URI from a string., Generate a base64-encoded PNG data URI from a string., exchange_connection(), generate_qr(), get_event_topics() (+7 more)
+Cohesion: 0.16
+Nodes (8): handle_connection_exchange(), [ARCH] Process a user's connection-exchange decision and broadcast if both users, exchange_connection(), get_match(), join_event(), set_availability(), set_user_room(), UserData
 
 ### Community 140 - "Community 140"
 Cohesion: 0.10
@@ -791,16 +768,16 @@ Cohesion: 0.12
 Nodes (16): Batch 1: [CLEANUP] Dead code & duplicate logging, Batch 2: [CLEANUP] Type hints, imports & error handling, Batch 3: [CLEANUP] DRY violations & naming, Batch 4: [ARCH] Architecture improvements — split mixed concerns, Batch 5: [ARCH] Thread safety, Batch 6: [ARCH] Documentation sync, Files to Modify (complete list), Goals (+8 more)
 
 ### Community 147 - "Community 147"
-Cohesion: 0.21
-Nodes (8): Subscription, SocketContext, SocketContextValue, handler, mock, msg, { result }, WsHandler
+Cohesion: 0.31
+Nodes (7): generateRandomString(), generateUsername(), a, b, result, result12, result4
 
 ### Community 148 - "Community 148"
 Cohesion: 0.14
 Nodes (13): Batch Order (Dependency-Sorted), Goals, Goals & Non-Goals, HIGH (P1), LOW (P2), MEDIUM (P1/P2), Non-Goals, PLAN_2026_06_02_049 (+5 more)
 
 ### Community 149 - "Community 149"
-Cohesion: 0.06
-Nodes (36): Boundaries, code:block1 (ccc index), code:block2 (graphify .), code:block3 (graphify update .), code:bash (git diff --name-only "$(git merge-base HEAD main)" HEAD), code:powershell (git diff --name-only $(git merge-base HEAD main) HEAD), code:block6 (.py, .ts, .tsx, .js, .jsx, .css, .json, .html, .toml), Exit Declaration (+28 more)
+Cohesion: 0.05
+Nodes (38): Boundaries, code:block1 (ccc index), code:block2 (graphify .), code:block3 (graphify update .), code:block4 (uv run python utility/dedup_graph_nodes.py), code:bash (git diff --name-only "$(git merge-base HEAD main)" HEAD), code:powershell (git diff --name-only $(git merge-base HEAD main) HEAD), code:block7 (.py, .ts, .tsx, .js, .jsx, .css, .json, .html, .toml) (+30 more)
 
 ### Community 150 - "Community 150"
 Cohesion: 0.18
@@ -811,16 +788,12 @@ Cohesion: 0.30
 Nodes (10): Assistant 2026-06-01, Assistant 2026-06-01, Assistant 2026-06-01, Assistant 2026-06-01, Assistant 2026-06-01, User 2026-06-01, User 2026-06-01, User 2026-06-01 (+2 more)
 
 ### Community 152 - "Community 152"
-Cohesion: 0.24
-Nodes (10): ConnectPage(), AnimatedRoutes(), App(), getCurrentStep(), pageTransition, pageVariants, ProgressStepper(), STEPS (+2 more)
+Cohesion: 0.08
+Nodes (18): Theme, ThemeContext, ThemeContextValue, ThemeProvider(), useTheme(), HomePage(), buttons, input (+10 more)
 
 ### Community 153 - "Community 153"
 Cohesion: 0.08
 Nodes (25): Architecture & Design Decisions, code:block1 (## Workflow), code:block2 (## Hand-off), code:block3 (## Outputs & Triggers), Files to Create, Modify, or Remove, Goals, Goals & Non-Goals, Hand-off (added after Verify) (+17 more)
-
-### Community 154 - "Community 154"
-Cohesion: 0.25
-Nodes (7): After creating the file, code:block1 (---), code:block2 (---), If type is "command", If type is "global-command", If type is "global-skill", If type is "skill"
 
 ### Community 155 - "Community 155"
 Cohesion: 0.05
@@ -855,16 +828,8 @@ Cohesion: 0.50
 Nodes (4): `app/prompts.py` (Conversation Prompts), `app/sample_users.py` (Sample Users), Data, Data
 
 ### Community 177 - "Community 177"
-Cohesion: 0.36
-Nodes (8): 7.11 Presence Check Over Re-Probe, 7.12 Triage Routing, 7.13 Preserve File Description Comments, 7.14 Windows Shell Quoting Workaround, code:block35 (✅ Presence check: "Does the plan state confirmed assumptions), code:block36 (readiness-check finds:), code:python (# ✅ Preserve and update), code:powershell (# ❌ PowerShell mangles embedded double quotes in f-strings)
-
-### Community 178 - "Community 178"
-Cohesion: 0.33
-Nodes (5): a, b, result, result12, result4
-
-### Community 179 - "Community 179"
-Cohesion: 0.28
-Nodes (6): btn, MOCK_TOPICS, mockJoinResponse, mockResponse, mockTopics, renderWithRouter()
+Cohesion: 0.25
+Nodes (7): After creating the file, code:block1 (---), code:block2 (---), If type is "command", If type is "global-command", If type is "global-skill", If type is "skill"
 
 ### Community 180 - "Community 180"
 Cohesion: 0.08
@@ -890,45 +855,29 @@ Nodes (19): Architecture & Design Decisions, Contradiction prevention, Files to 
 Cohesion: 0.15
 Nodes (12): Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-09, User 2026-06-08, User 2026-06-08 (+4 more)
 
-### Community 186 - "Community 186"
-Cohesion: 0.40
-Nodes (4): id, response, { result }, users
-
-### Community 187 - "Community 187"
-Cohesion: 0.47
-Nodes (7): applyTheme(), getInitialTheme(), Theme, ThemeContext, ThemeContextValue, ThemeProvider(), useTheme()
-
-### Community 188 - "Community 188"
-Cohesion: 0.40
-Nodes (4): id, response, { result }, users
-
-### Community 189 - "Community 189"
-Cohesion: 0.28
-Nodes (9): 7.18 Skill Rename Protocol, 7.19 Workflow Handoff with Outputs & Triggers + Hand-off Checklists, 7.20 WebSocket Accept Once, 7.24 Consistency Pass as Final Cross-Cutting Step, code:block43 (# ✅ docs/ has 001, 002 → next is 003), code:block44 (# After rename, verify with:), code:block45 (improve-architecture), code:python (# ✅ Route handler accepts, manager only registers) (+1 more)
-
 ### Community 190 - "Community 190"
 Cohesion: 0.25
 Nodes (8): Appendix: Archived Documents, Audience, Content Boundaries, DEMO_GUIDE.md (Archived), Key Differentiator, Scope, What NOT to Include, What to Include
 
 ## Knowledge Gaps
-- **2088 isolated node(s):** `$schema`, `plugin`, `*`, `type`, `command` (+2083 more)
+- **1970 isolated node(s):** `code:block1 (---)`, `code:block2 (---)`, `If type is "global-skill"`, `If type is "global-command"`, `After creating the file` (+1965 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 79` to `Community 32`, `Community 35`, `Community 36`, `Community 133`, `Community 51`?**
+- **Why does `cn()` connect `Community 79` to `Community 32`, `Community 35`, `Community 131`, `Community 51`, `Community 52`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **Why does `clsx` connect `Community 35` to `Community 79`?**
-  _High betweenness centrality (0.002) - this node is a cross-community bridge._
-- **What connects `$schema`, `plugin`, `*` to the rest of the system?**
-  _2180 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
+- **What connects `code:block1 (---)`, `code:block2 (---)`, `If type is "global-skill"` to the rest of the system?**
+  _2026 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.11462450592885376 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.09686609686609686 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.07394957983193277 - nodes in this community are weakly interconnected._
+- **Should `Community 12` be split into smaller, more focused modules?**
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._
+- **Should `Community 13` be split into smaller, more focused modules?**
+  _Cohesion score 0.1111111111111111 - nodes in this community are weakly interconnected._
+- **Should `Community 15` be split into smaller, more focused modules?**
+  _Cohesion score 0.05555555555555555 - nodes in this community are weakly interconnected._
