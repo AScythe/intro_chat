@@ -193,7 +193,7 @@ Graphify usage rules are already committed in `AGENTS.md` and the MCP server is 
 | File | Purpose |
 |------|---------|
 | `~/.config/opencode/opencode.json` | OpenCode global config: permissions (build mode: edit/write/bash = ask), lsp enabled |
-| `~/.config/opencode/commands/scaffold.md` | Custom `/scaffold` command for generating skills and commands |
+| `.opencode/commands/scaffold.md` | Custom `/scaffold` command for generating skills and commands (project-level) |
 | `~/.cocoindex_code/global_settings.yml` | Default embedding model for semantic search |
 
 ### Global Tool Installations
@@ -318,7 +318,7 @@ Only `node_modules` and `bun.lock` are ignored here. The files `package.json` an
 
 ### `/scaffold`
 
-Creates new OpenCode skills and commands from templates. Defined globally at `~/.config/opencode/commands/scaffold.md`.
+Creates new OpenCode skills and commands from templates. Defined at `.opencode/commands/scaffold.md` (project-level).
 
 Usage:
 
@@ -403,22 +403,25 @@ To reuse this project's agent development environment in a **new project** (not 
 
 1. **Create the directory structure** in your new project:
    ```
-   .opencode/skills/
-   tests/
-   refs/
-   ```
+    .opencode/skills/
+    .opencode/commands/
+    tests/
+    refs/
+    ```
 
 2. **Copy skills** — From the source project's `.opencode/skills/`, copy every `<skill-name>/SKILL.md` folder into your new project's `.opencode/skills/`. Keep the same folder structure.
 
-3. **Copy OpenCode plugin manifests** — From the source project's `.opencode/`, copy `package.json` and `package-lock.json` into your new project's `.opencode/`.
+3. **Copy commands** — From the source project's `.opencode/commands/`, copy every `.md` file into your new project's `.opencode/commands/`.
 
-4. **Copy agent guidelines test** — From the source project's `tests/`, copy `test_agent_guidelines.py` into your new project's `tests/`.
+4. **Copy OpenCode plugin manifests** — From the source project's `.opencode/`, copy `package.json` and `package-lock.json` into your new project's `.opencode/`.
 
-5. **Copy reference documents** — From the source project's `refs/`, copy all `.md` files (`AGENT_SETUP.md`, `PROJECT_BEST_PRACTICES.md`, `DOCUMENT_GUIDELINES.md`) into your new project's `refs/`.
+5. **Copy agent guidelines test** — From the source project's `tests/`, copy `test_agent_guidelines.py` into your new project's `tests/`.
 
-6. **Copy project config** — From the source project root, copy `opencode.json` into your new project's root.
+6. **Copy reference documents** — From the source project's `refs/`, copy all `.md` files (`AGENT_SETUP.md`, `PROJECT_BEST_PRACTICES.md`, `DOCUMENT_GUIDELINES.md`) into your new project's `refs/`.
 
-7. **Add gitignore rules** — Append these tool-related rules to your new project's `.gitignore`:
+7. **Copy project config** — From the source project root, copy `opencode.json` into your new project's root.
+
+8. **Add gitignore rules** — Append these tool-related rules to your new project's `.gitignore`:
    ```gitignore
    .opencode/node_modules/
    /.cocoindex_code/
