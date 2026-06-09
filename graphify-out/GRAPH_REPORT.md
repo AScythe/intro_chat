@@ -1,16 +1,16 @@
 # Graph Report - intro_chat  (2026-06-09)
 
 ## Corpus Check
-- 209 files · ~178,504 words
+- 210 files · ~178,815 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3602 nodes · 4778 edges · 191 communities (173 shown, 18 thin omitted)
+- 3610 nodes · 4785 edges · 191 communities (173 shown, 18 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 7 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0b73da8c`
+- Built from commit: `f37cfaf9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -212,9 +212,9 @@
 5. `Tests` - 24 edges
 6. `5. AGENTS.md` - 24 edges
 7. `fetchJSON()` - 23 edges
-8. `Frontend Modules (React SPA)` - 21 edges
-9. `Card` - 21 edges
-10. `CardContent` - 21 edges
+8. `Card` - 21 edges
+9. `CardContent` - 21 edges
+10. `main()` - 21 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_database()` --calls--> `init_db()`  [INFERRED]
@@ -280,7 +280,7 @@ Nodes (19): Boundaries (read-only phase), Exit Declaration, Guidelines, Hand-off
 
 ### Community 12 - "Community 12"
 Cohesion: 0.12
-Nodes (22): 7.13 Preserve File Description Comments, 7.14 Windows Shell Quoting Workaround, 7.15 Matchmaking Queue Filter Direction, 7.16 Root Pattern Extraction, 7.16 TypedDict for Structured In-Memory State, 7.17 Thread Safety for Shared Mutable State, 7.21 Skill Audit After Content Restructure, 7.22 Exhaustive Section Mapping (+14 more)
+Nodes (21): 7.15 Matchmaking Queue Filter Direction, 7.16 Root Pattern Extraction, 7.16 TypedDict for Structured In-Memory State, 7.17 Sequential Numbering for Plan Files, 7.17 Thread Safety for Shared Mutable State, 7.18 Root Pattern Extraction, 7.21 Skill Audit After Content Restructure, 7.22 Exhaustive Section Mapping (+13 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.11
@@ -296,15 +296,15 @@ Nodes (36): Components, Frontend Modules (React SPA), `frontend/src/api/client.t
 
 ### Community 16 - "Community 16"
 Cohesion: 0.16
-Nodes (21): 7.24 Consistency Pass as Final Cross-Cutting Step, 8.1 Permission Control, 8.2 Executable Sources of Truth, 8.3 Filename as Stable Key, 8.4 Preserve Manual, Regenerate Auto, 8.5 Diff Logging for Automation, 8.6 Cross-Language Extraction Pattern, 8.7 Description Headers Go in Source Code Only (+13 more)
+Nodes (21): 8.10 Batch by Logical Concern, Not Line Count, 8.1 Permission Control, 8.2 Executable Sources of Truth, 8.3 Filename as Stable Key, 8.4 Preserve Manual, Regenerate Auto, 8.5 Diff Logging for Automation, 8.6 Cross-Language Extraction Pattern, 8.7 Description Headers Go in Source Code Only (+13 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.25
 Nodes (13): create_match(), find_match(), find_or_enqueue_match(), notify_match_found(), persist_match(), [ARCH] DB insert only — create match record and return match_id., [ARCH] In-memory state update — active_matches, waiting_queue, availability., [ARCH] WebSocket broadcast only — notify matched users. (+5 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.11
-Nodes (20): 8.10 Batch by Logical Concern, Not Line Count, 8.11 Persistent Decision Artifacts, code:block55 (Phase                          Gate                         ), code:block56 (✅ Good batch: "Add POST /api/users endpoint + its test" (3 f), code:block57 (docs/), code:block58, code:block59, code:block60 (+12 more)
+Cohesion: 0.14
+Nodes (17): 8.11 Persistent Decision Artifacts, code:block57 (docs/), code:block58, code:block59, code:block60, code:block61, code:block62, code:block63 (+9 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.07
@@ -359,8 +359,8 @@ Cohesion: 0.18
 Nodes (10): 4. DEMO_GUIDE.md (Archived), 8. Workflow-to-Document Dependency, Anti-Duplication Rules, Checklist Before Adding Content, code:block2 (review-implementation (1st pass)), Core Pipeline, Doc Sync Steps (Post-Implementation), Document Guidelines - IntroChat (+2 more)
 
 ### Community 32 - "Community 32"
-Cohesion: 0.12
-Nodes (34): ConnectionCard(), ConnectionCardProps, onNo, onYes, MatchCountdownProps, QRDisplay(), QRDisplayProps, img (+26 more)
+Cohesion: 0.15
+Nodes (22): ConnectionCard(), ConnectionCardProps, onNo, onYes, MatchCountdownProps, onGoToChat, QRDisplay(), QRDisplayProps (+14 more)
 
 ### Community 33 - "Community 33"
 Cohesion: 0.12
@@ -375,8 +375,8 @@ Cohesion: 0.05
 Nodes (42): dependencies, class-variance-authority, clsx, cmdk, lucide-react, motion, @radix-ui/react-checkbox, @radix-ui/react-dialog (+34 more)
 
 ### Community 36 - "Community 36"
-Cohesion: 0.13
-Nodes (26): MatchCountdown(), onGoToChat, CONFIG, PersonResponse, alice, bob, { result }, useChatRequest() (+18 more)
+Cohesion: 0.12
+Nodes (32): MatchCountdown(), AcceptedView(), AcceptedViewProps, NearbyUsersView(), NearbyUsersViewProps, PersonResponse, anotherPerson, onCancel (+24 more)
 
 ### Community 37 - "Community 37"
 Cohesion: 0.06
@@ -435,11 +435,11 @@ Cohesion: 0.07
 Nodes (26): Architecture & Design Decisions, code:bash (uv run python tests/test_agent_guidelines.py), code:bash (uv run python tests/test_app.py), Dimension: Alternatives, Dimension: Assumptions, Dimension: Code Discovery, Dimension: Consistency, Dimension: Dependencies (+18 more)
 
 ### Community 51 - "Community 51"
-Cohesion: 0.11
-Nodes (34): ChatLoadingView(), ChatLoadingViewProps, ChattingView(), ChattingViewProps, ErrorView(), ErrorViewProps, ExtendedView(), ExtendedViewProps (+26 more)
+Cohesion: 0.12
+Nodes (29): ChatLoadingView(), ChatLoadingViewProps, ChattingView(), ChattingViewProps, ErrorView(), ErrorViewProps, ExtendedView(), ExtendedViewProps (+21 more)
 
 ### Community 52 - "Community 52"
-Cohesion: 0.19
+Cohesion: 0.22
 Nodes (10): SocketProvider(), UserProvider(), renderWithProviders(), mockEventConfig, mockRooms, mockRoomUsers, renderDirectAccess(), renderWithProviders() (+2 more)
 
 ### Community 53 - "Community 53"
@@ -547,8 +547,8 @@ Cohesion: 0.11
 Nodes (18): Architecture & Design Decisions, Files to Create, Modify, or Remove, Goals, Goals & Non-Goals, Implementation Plan, Non-Goals, Open Questions & Risks, Phase 1: Config & Test File (+10 more)
 
 ### Community 79 - "Community 79"
-Cohesion: 0.12
-Nodes (26): { container }, TimerProps, cn(), Badge(), BadgeProps, badgeVariants, Checkbox, Command (+18 more)
+Cohesion: 0.13
+Nodes (25): cn(), UserInfoPage(), Badge(), BadgeProps, badgeVariants, Checkbox, Command, CommandDialog() (+17 more)
 
 ### Community 80 - "Community 80"
 Cohesion: 0.10
@@ -627,16 +627,16 @@ Cohesion: 0.17
 Nodes (11): Approach & Design Decisions, Edge Cases, Files to Create, Modify, or Remove, Grill Outcomes, Implementation Plan, PLAN_2026_05_13_004, Readiness Gate Results, Requirements / Problem (+3 more)
 
 ### Community 99 - "Community 99"
-Cohesion: 0.21
-Nodes (12): loadUserFromStorage(), saveUserToStorage(), { result }, { result }, UserContext, UserContextValue, UserData, clearUserId() (+4 more)
+Cohesion: 0.27
+Nodes (10): loadUserFromStorage(), saveUserToStorage(), { result }, UserContext, UserData, clearUserId(), getData(), getUserId() (+2 more)
 
 ### Community 100 - "Community 100"
 Cohesion: 0.14
 Nodes (12): Aesthetic Direction, Button Interaction Design, Color System, Dark Mode, Dark Mode, Dark Mode, Design Spec — IntroChat, Design Token Mapping (+4 more)
 
 ### Community 101 - "Community 101"
-Cohesion: 0.22
-Nodes (8): ChipItem, added, defaultItems, { result }, { result, rerender }, selectedState1, selectedState2, useChipSelection()
+Cohesion: 0.15
+Nodes (16): ChipItem, added, defaultItems, { result }, { result, rerender }, selectedState1, selectedState2, useChipSelection() (+8 more)
 
 ### Community 102 - "Community 102"
 Cohesion: 0.50
@@ -655,12 +655,12 @@ Cohesion: 0.50
 Nodes (4): Maintenance Scripts, `utility/cleanup_db.py`, `utility/enhance_graph_viewer.py`, `utility/filter_graph.py`
 
 ### Community 107 - "Community 107"
-Cohesion: 0.18
-Nodes (19): 6.10 Verify Presence and Quality, Not Absence, 6.14 Documentation Conciseness & Anti-Bloat, 6.1 One Purpose Per Document, 6.2 Key Differentiator Per Document, 6.3 Quality Gates Before Content, 6.4 Routing Table Over Decision Tree, 6.5 Document Boundary Tensions, 6.6 Comments-First Documentation (+11 more)
+Cohesion: 0.05
+Nodes (65): 1.1 Module Responsibility Pattern, 1.2 Separation of Concerns, 1.3 Frontend Modularization, 1.4 Module Communication, 1.5 When to Split a Module, 1.6 Documentation-Driven Module Design, 1.7 Surgical Edit Pattern, 1.8 One Logical Change Per Edit (+57 more)
 
 ### Community 108 - "Community 108"
-Cohesion: 0.29
-Nodes (5): buttons, input, joinEventHeaders, mockResponse, nameInput
+Cohesion: 0.25
+Nodes (6): HomePage(), buttons, input, joinEventHeaders, mockResponse, nameInput
 
 ### Community 109 - "Community 109"
 Cohesion: 0.67
@@ -727,20 +727,20 @@ Cohesion: 0.06
 Nodes (31): Architecture & Design Decisions, Backend Logic, Dimension: Alternatives, Dimension: Assumptions, Dimension: Code Discovery, Dimension: Consistency, Dimension: Dependencies, Dimension: Edge Cases (+23 more)
 
 ### Community 130 - "Community 130"
-Cohesion: 0.24
-Nodes (12): 7.10 Interactive Walkthrough — One Item at a Time, Names Only, 7.11 Presence Check Over Re-Probe, 7.12 Triage Routing, 7.2 Import Discipline, 7.8 Gap Grilling Methodology, 7.9 Docs-First Analysis Pipeline, code:python (# ✅ import sqlite3; from .state import active_users), code:block32 (Gap found: "Prefer wiring files over leaf files") (+4 more)
+Cohesion: 0.29
+Nodes (10): 7.10 Interactive Walkthrough — One Item at a Time, Names Only, 7.1 Syntax Verification, 7.2 Import Discipline, 7.8 Gap Grilling Methodology, 7.9 Docs-First Analysis Pipeline, code:bash (uv run python -m py_compile **/*.py), code:python (# ✅ import sqlite3; from .state import active_users), code:block32 (Gap found: "Prefer wiring files over leaf files") (+2 more)
 
 ### Community 131 - "Community 131"
-Cohesion: 0.15
-Nodes (15): 1.1 Module Responsibility Pattern, 1.2 Separation of Concerns, 1.3 Frontend Modularization, 1.4 Module Communication, 1.5 When to Split a Module, 1.6 Documentation-Driven Module Design, 1.7 Surgical Edit Pattern, 1. Modularization Techniques (+7 more)
+Cohesion: 0.27
+Nodes (9): ChatTimerControls, onComplete, onTick, { result }, TimerBaseState, TimerCallbacks, TimerControls, useChatTimer() (+1 more)
 
 ### Community 132 - "Community 132"
 Cohesion: 0.40
 Nodes (5): `app/qr_utils.py` (QR Code Generator), Functions, Functions, Functions, Functions
 
 ### Community 133 - "Community 133"
-Cohesion: 0.15
-Nodes (12): fetchJSON(), fetchWithTimeout(), parseJSON(), data, promise, input, mockConfig, roomInput (+4 more)
+Cohesion: 0.12
+Nodes (20): fetchJSON(), fetchWithTimeout(), parseJSON(), data, promise, input, mockConfig, roomInput (+12 more)
 
 ### Community 134 - "Community 134"
 Cohesion: 0.43
@@ -811,16 +811,16 @@ Cohesion: 0.30
 Nodes (10): Assistant 2026-06-01, Assistant 2026-06-01, Assistant 2026-06-01, Assistant 2026-06-01, Assistant 2026-06-01, User 2026-06-01, User 2026-06-01, User 2026-06-01 (+2 more)
 
 ### Community 152 - "Community 152"
-Cohesion: 0.25
-Nodes (14): ConnectPage(), HomePage(), OrganizeEventPage(), RoomPage(), UserInfoPage(), AnimatedRoutes(), App(), getCurrentStep() (+6 more)
+Cohesion: 0.24
+Nodes (10): ConnectPage(), AnimatedRoutes(), App(), getCurrentStep(), pageTransition, pageVariants, ProgressStepper(), STEPS (+2 more)
 
 ### Community 153 - "Community 153"
 Cohesion: 0.08
 Nodes (25): Architecture & Design Decisions, code:block1 (## Workflow), code:block2 (## Hand-off), code:block3 (## Outputs & Triggers), Files to Create, Modify, or Remove, Goals, Goals & Non-Goals, Hand-off (added after Verify) (+17 more)
 
 ### Community 154 - "Community 154"
-Cohesion: 0.17
-Nodes (16): AcceptedView(), AcceptedViewProps, NearbyUsersView(), NearbyUsersViewProps, PersonResponse, anotherPerson, onCancel, onImReady (+8 more)
+Cohesion: 0.25
+Nodes (7): After creating the file, code:block1 (---), code:block2 (---), If type is "command", If type is "global-command", If type is "global-skill", If type is "skill"
 
 ### Community 155 - "Community 155"
 Cohesion: 0.05
@@ -855,8 +855,8 @@ Cohesion: 0.50
 Nodes (4): `app/prompts.py` (Conversation Prompts), `app/sample_users.py` (Sample Users), Data, Data
 
 ### Community 177 - "Community 177"
-Cohesion: 0.32
-Nodes (12): 5.1 TestClient Over Live Server, 5.2 TDD Tests Are Permanent Regression Tests, 5.3 Test References Updated in Same Batch as Code Changes, 5.4 Test Health Audit, 5.5 File Existence Checks in Tests, 5. Testing, code:bash (uv run python -c "from app import app"  # Syntax check), code:python (# ✅ Use TestClient — no server process needed) (+4 more)
+Cohesion: 0.36
+Nodes (8): 7.11 Presence Check Over Re-Probe, 7.12 Triage Routing, 7.13 Preserve File Description Comments, 7.14 Windows Shell Quoting Workaround, code:block35 (✅ Presence check: "Does the plan state confirmed assumptions), code:block36 (readiness-check finds:), code:python (# ✅ Preserve and update), code:powershell (# ❌ PowerShell mangles embedded double quotes in f-strings)
 
 ### Community 178 - "Community 178"
 Cohesion: 0.33
@@ -891,44 +891,44 @@ Cohesion: 0.15
 Nodes (12): Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-08, Assistant 2026-06-09, User 2026-06-08, User 2026-06-08 (+4 more)
 
 ### Community 186 - "Community 186"
-Cohesion: 0.29
-Nodes (11): 1.8 One Logical Change Per Edit, 2.1 Server Binding for Browser Access, 2.2 Portable Config Paths, 2. Configuration, 3. Error Handling, 4. State Management, code:python (if not input: return {'error': 'No data'}, 400), code:python (if user_id not in active_users:) (+3 more)
+Cohesion: 0.40
+Nodes (4): id, response, { result }, users
 
 ### Community 187 - "Community 187"
 Cohesion: 0.47
 Nodes (7): applyTheme(), getInitialTheme(), Theme, ThemeContext, ThemeContextValue, ThemeProvider(), useTheme()
 
 ### Community 188 - "Community 188"
-Cohesion: 0.27
-Nodes (10): 6.11 Single Canonical Location for Artifacts, 6.12 File Description Convention Across All Languages, 6.13 ARCHITECTURE.md Project Structure Tree Synced from Source, 7.1 Syntax Verification, code:block25 (# ✅ All archive plan files in archive/plan/), code:typescript (// Timer.tsx), code:python (# matchmaking.py), code:css (/* style.css */) (+2 more)
+Cohesion: 0.40
+Nodes (4): id, response, { result }, users
 
 ### Community 189 - "Community 189"
 Cohesion: 0.28
-Nodes (9): 7.17 Sequential Numbering for Plan Files, 7.18 Root Pattern Extraction, 7.18 Skill Rename Protocol, 7.19 Workflow Handoff with Outputs & Triggers + Hand-off Checklists, 7.20 WebSocket Accept Once, code:block42 (Symptom: "Don't accept a WebSocket twice."), code:block43 (# ✅ docs/ has 001, 002 → next is 003), code:block44 (# After rename, verify with:) (+1 more)
+Nodes (9): 7.18 Skill Rename Protocol, 7.19 Workflow Handoff with Outputs & Triggers + Hand-off Checklists, 7.20 WebSocket Accept Once, 7.24 Consistency Pass as Final Cross-Cutting Step, code:block43 (# ✅ docs/ has 001, 002 → next is 003), code:block44 (# After rename, verify with:), code:block45 (improve-architecture), code:python (# ✅ Route handler accepts, manager only registers) (+1 more)
 
 ### Community 190 - "Community 190"
 Cohesion: 0.25
 Nodes (8): Appendix: Archived Documents, Audience, Content Boundaries, DEMO_GUIDE.md (Archived), Key Differentiator, Scope, What NOT to Include, What to Include
 
 ## Knowledge Gaps
-- **2083 isolated node(s):** `Agentic Workflow Skills`, `Skill Loading Priority`, `Three-Tier Classification`, `Tool Reference`, `Discipline` (+2078 more)
+- **2088 isolated node(s):** `$schema`, `plugin`, `*`, `type`, `command` (+2083 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **18 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Module Descriptions` connect `Community 13` to `Community 161`, `Community 162`, `Community 132`, `Community 106`, `Community 109`, `Community 110`, `Community 15`, `Community 19`, `Community 117`, `Community 121`, `Community 122`, `Community 124`, `Community 93`?**
+- **Why does `cn()` connect `Community 79` to `Community 32`, `Community 35`, `Community 36`, `Community 133`, `Community 51`?**
   _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `cn()` connect `Community 79` to `Community 32`, `Community 51`, `Community 154`, `Community 35`?**
-  _High betweenness centrality (0.003) - this node is a cross-community bridge._
-- **Why does `Architecture - IntroChat` connect `Community 19` to `Community 13`?**
-  _High betweenness centrality (0.001) - this node is a cross-community bridge._
-- **What connects `Agentic Workflow Skills`, `Skill Loading Priority`, `Three-Tier Classification` to the rest of the system?**
-  _2175 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `clsx` connect `Community 35` to `Community 79`?**
+  _High betweenness centrality (0.002) - this node is a cross-community bridge._
+- **What connects `$schema`, `plugin`, `*` to the rest of the system?**
+  _2180 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.11462450592885376 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.09686609686609686 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.07394957983193277 - nodes in this community are weakly interconnected._

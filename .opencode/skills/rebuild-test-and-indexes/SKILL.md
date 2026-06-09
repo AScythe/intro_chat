@@ -141,15 +141,27 @@ or if no LLM available:
 graphify update .
 ```
 
-- Success → continue
+- Success → continue to dedup step
 - Command not found → WARNING: "graphify not found — Graphify rebuild skipped"
 - Timeout/failure → WARNING: "Graphify rebuild failed/timed out — graph queries may return stale data"
+
+#### Step 2.5: Deduplicate Graph Nodes
+
+Run only if Step 2 succeeded:
+
+```
+uv run python utility/dedup_graph_nodes.py
+```
+
+- Success → continue
+- Script not found → WARNING: "dedup_graph_nodes.py not found — dedup skipped"
+- Failure → WARNING: "Graph deduplication failed — graph may contain ghost nodes"
 
 #### Step 3: Report
 
 | Scenario | Output |
 |----------|--------|
-| Both rebuilt successfully | "Index and graph rebuilt successfully. Data is current." |
+| Both rebuilt successfully, dedup ran | "Index and graph rebuilt successfully. Data is current." |
 | Partial failure | "WARNING: [tool] failed. [Implications]." |
 
 ---

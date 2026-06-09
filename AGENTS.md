@@ -144,6 +144,7 @@ Stage 3: Verify — ast-grep (structural pattern confirmation) → Read (exact l
 | `utility/filter_graph.py` | Graph sub-type filter — generates graph-code.json and graph-document.json | ⚠️ Re-run after every graph rebuild |
 | `utility/cleanup_db.py` | Database cleanup — deduplicates events, rooms, users, matches | ⚠️ Re-run after E2E tests or manual test user creation |
 | `utility/enhance_graph_viewer.py` | Enhanced graph viewer — post-processes graph.json for interactive HTML | ⚠️ Re-run after every graph rebuild |
+| `utility/dedup_graph_nodes.py` | Graph node deduplication — merges ghost nodes that differ only by import path representation | ⚠️ Run after every graphify rebuild (auto-invoked by rebuild-test-and-indexes skill) |
 | `data/introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
 | `data/e2e_test.db` | E2E test temporary data store | ⚠️ Never delete without explicit user confirmation |
 | `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless explicitly asked. Exception: structural validation tests (file-existence checks, export/import references, code-quality scan targets) updated by `review-implementation` Phase 0 to match project structure |
