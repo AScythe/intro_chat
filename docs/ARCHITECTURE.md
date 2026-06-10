@@ -153,8 +153,8 @@ intro_chat/
 ├── graphify-out/                  # Graphify knowledge graph outputs (auto-generated — rebuild via `rebuild-test-and-indexes` skill)
 │   └── graph.json             # Knowledge graph data
 │
-├── utility/                       # Maintenance and utility scripts
-│   └── cleanup_db.py          # Deduplicates database rows, removes User_* test users
+├── agent_utility/                 # Agent maintenance scripts (graph utilities — see Maintenance Scripts section)
+├── utility/                       # Database utility scripts
 │
 ├── data/                         # Data files
 │   ├── introchat.db           # SQLite database (auto-created)
@@ -224,24 +224,23 @@ Central configuration constants module defining the database path (supports `DB_
 - `DEFAULT_TOPICS` — 6 default interest topics (AI Development, DevOps, Swimming, Anime, Job Seeking, Hiring)
 
 ### `app/database.py` (Database Schema)
-Async SQLite database initialization using aiosqlite, creating 7 tables with migration handling for social profile columns. Uses `PRAGMA table_info` for column-existence checks (no silent `except OperationalError: pass`).
+Async SQLite database initialization using aiosqlite, creating 6 tables with migration handling for social profile columns. Uses `PRAGMA table_info` for column-existence checks (no silent `except OperationalError: pass`).
 
-- `init_db()` — async, creates 7 tables: `events`, `rooms`, `event_topics`, `users`, `matches`, `user_interests`, `room_sample_users`
+- `init_db()` — async, creates 6 tables: `events`, `rooms`, `event_topics`, `users`, `matches`, `user_interests`
 - Uses aiosqlite (`introchat.db` in `data/` folder)
 
 #### Functions
-- `init_db(db_path)` — async function that initializes SQLite database, creates all 7 tables, runs ALTER TABLE migration for social columns (using `PRAGMA table_info` to check column existence)
+- `init_db(db_path)` — async function that initializes SQLite database, creates all 6 tables, runs ALTER TABLE migration for columns (using `PRAGMA table_info` to check column existence), and creates a UNIQUE index on `events(name)`. Drops the legacy `room_sample_users` table if it exists from a previous schema.
 
 #### Tables
 | Table | Columns | Purpose |
 |-------|---------|---------|
-| `events` | `id` (TEXT PK), `name` (TEXT NOT NULL), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `is_active` (BOOLEAN DEFAULT 1) | Event grouping and lifecycle |
+| `events` | `id` (TEXT PK), `name` (TEXT NOT NULL UNIQUE), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `is_active` (BOOLEAN DEFAULT 1) | Event grouping and lifecycle |
 | `rooms` | `id` (TEXT PK), `event_id` (TEXT FK → events), `name` (TEXT NOT NULL), `selected` (BOOLEAN DEFAULT 1) | Per-event rooms/areas |
 | `event_topics` | `id` (TEXT PK), `event_id` (TEXT FK → events), `name` (TEXT NOT NULL), `selected` (BOOLEAN DEFAULT 1) | Per-event interest topics |
-| `users` | `id` (TEXT PK), `event_id` (TEXT FK), `room_id` (TEXT FK), `username` (TEXT), `linkedin_url` (TEXT DEFAULT ''), `slack_handle` (TEXT DEFAULT ''), `is_available` (BOOLEAN DEFAULT 0), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `last_seen` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP) | Event attendees |
+| `users` | `id` (TEXT PK), `event_id` (TEXT FK), `room_id` (TEXT FK), `username` (TEXT), `linkedin_url` (TEXT DEFAULT ''), `slack_handle` (TEXT DEFAULT ''), `is_available` (BOOLEAN DEFAULT 0), `is_sample` (INTEGER DEFAULT 0), `status` (TEXT DEFAULT ''), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `last_seen` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP) | Unified event attendees — both real (`is_sample=0`) and auto-generated sample users (`is_sample=1`) |
 | `matches` | `id` (TEXT PK), `user1_id` (TEXT FK), `user2_id` (TEXT FK), `room_id` (TEXT FK), `status` (TEXT DEFAULT 'active'), `created_at` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `expires_at` (TIMESTAMP) | Chat pairings |
 | `user_interests` | `id` (TEXT PK), `user_id` (TEXT FK → users), `event_id` (TEXT FK), `interest` (TEXT) | Per-user interest tags |
-| `room_sample_users` | `id` (TEXT PK), `room_id` (TEXT FK → rooms), `user_name` (TEXT), `available` (BOOLEAN), `status` (TEXT), `linkedin_url` (TEXT), `slack_handle` (TEXT) | Pre-populated mock users per room |
 
 ### `app/routes_html.py` (HTML Routes)
 Single route handler for serving the SPA index page at `/`.
@@ -256,7 +255,7 @@ All REST API route handlers for events, users, rooms, matches, QR codes, convers
 - Endpoints: `/api/events`, `/api/events/<id>/join`, `/api/events/<id>/rooms`, etc.
 
 #### Functions
-- `create_event(data)` — `POST /api/events` → creates event + 8 default rooms + 6 default topics, returns event_id
+- `create_event(data)` — `POST /api/events` → cascade-deletes any existing event with the same name (including all child data), creates new event + 8 default rooms + 6 default topics, returns event_id. Race condition (concurrent POST with same name) returns 409.
 - `get_rooms(event_id)` — `GET /api/events/<event_id>/rooms` → lists rooms via `get_rooms_for_event()` helper
 - `get_event_config(event_id)` — `GET /api/events/<event_id>/config` → returns rooms + topics with selection state
 - `save_event_config(event_id, data)` — `PUT /api/events/<event_id>/config` → saves room/topic selections, fills rooms with sample users
@@ -504,7 +503,7 @@ The React SPA is served by the FastAPI backend:
 ### Tests
 
 #### `tests/test_app.py`
-End-to-end integration test suite that tests page rendering, API endpoints, matchmaking flow, profile updates, event configuration, and QR generation.
+End-to-end integration test suite that tests page rendering, API endpoints, matchmaking flow, profile updates, event configuration, and QR generation. Includes `cleanup_event()` helper for cascade-deleting test events by name (idempotent) and a `TEST_EVENT_NAMES` list used for startup teardown to prevent test-data accumulation.
 
 #### Functions
 - `test_imports()` — verifies all modular components import correctly (FastAPI, Uvicorn, aiosqlite, QRCode, SQLite3, all app modules)
@@ -581,12 +580,12 @@ Playwright E2E tests for participant flow — join with auto-generated/custom na
 ### Maintenance Scripts
 
 #### `utility/cleanup_db.py`
-Database maintenance utility that deduplicates rows across all tables and removes auto-generated test users (`User_*` prefix). Operates on both `data/introchat.db` and `data/e2e_test.db`. Run via `uv run python utility/cleanup_db.py`. Idempotent — safe to run multiple times.
+Database maintenance utility that cascade-deduplicates duplicate-named events (keeps earliest by `created_at`, removes all child data), deduplicates rows across all tables, and removes auto-generated test users (`User_*` prefix). Operates on both `data/introchat.db` and `data/e2e_test.db`. Run via `uv run python utility/cleanup_db.py`. Idempotent — safe to run multiple times.
 
-#### `utility/filter_graph.py`
+#### `agent_utility/filter_graph.py`
 Filters graphify-out/graph.json into type-specific sub-graphs — splits the combined JSON into separate code (`graph-code.json`) and document (`graph-document.json`) graphs.
 
-#### `utility/enhance_graph_viewer.py`
+#### `agent_utility/enhance_graph_viewer.py`
 Post-processes graphify-out/graph.html to add an interactive filtering UI — collapsible panels, search highlighting, and community color-coding for large knowledge graphs.
 
 ---

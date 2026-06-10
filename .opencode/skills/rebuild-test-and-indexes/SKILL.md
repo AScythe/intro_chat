@@ -130,16 +130,22 @@ If settings.yml missing → first run `ccc init`, then `ccc index`.
 - Command not found → WARNING: "ccc not found — CocoIndex rebuild skipped"
 - Timeout/failure → WARNING: "CocoIndex rebuild failed/timed out — search may return stale data"
 
-#### Step 2: Rebuild Graphify
+#### Step 2: Clean and Rebuild Graphify
 
-```
+Run a clean rebuild from scratch (removes stale cache and metadata):
+
+```powershell
+Remove-Item -Recurse -Force graphify-out/
 graphify .
 ```
 or if no LLM available:
 
+```powershell
+Remove-Item -Recurse -Force graphify-out/
+$env:PYTHONIOENCODING='utf-8'; graphify update .
 ```
-graphify update .
-```
+
+(POSIX equivalent: `rm -rf graphify-out/ && graphify update .`)
 
 - Success → continue to dedup step
 - Command not found → WARNING: "graphify not found — Graphify rebuild skipped"
@@ -150,7 +156,7 @@ graphify update .
 Run only if Step 2 succeeded:
 
 ```
-uv run python utility/dedup_graph_nodes.py
+uv run python agent_utility/dedup_graph_nodes.py
 ```
 
 - Success → continue
