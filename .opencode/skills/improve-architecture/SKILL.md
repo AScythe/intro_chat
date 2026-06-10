@@ -59,6 +59,10 @@ Present findings and use the `question` tool to ask: **"Shall I apply these chan
 
 Wait for explicit approval before Phase 2. If zero findings, report **"Architecture evaluation complete — no issues found."**
 
+### Phase 1.5: Create Plan Document
+
+Write approved findings to `docs/PLAN_YYYY_MM_DD_XXX.md` (sequential numbering, check-plan-readiness template). For combined execution, write a single unified plan covering both skill findings.
+
 ### Phase 2: Improve (Write)
 
 #### TDD Principles
@@ -117,7 +121,7 @@ When multiple approved items touch the same file or directory, sort by dependenc
 When the user triggers both `improve-architecture` and `modularize-and-clean` together:
 
 1. **Phase 1 runs in parallel** with `modularize-and-clean` Phase 1 — each skill independently scans its defined scope (structure vs code-level quality)
-2. **Merge phase**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan document (see check-plan-readiness template format in AGENTS.md §Agentic Workflow Skills)
+2. **Create Unified Plan Document**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan at `docs/PLAN_YYYY_MM_DD_XXX.md` (sequential numbering, check-plan-readiness template)
 3. **Unified plan** covers all findings from both skills, deduplicated and re-prioritized with P0–P2 labels per skill
 4. **User approval**: Present the unified plan for approval
 5. **Apply batches**: Structural changes carry `[ARCH]` flags, code-quality changes carry `[CLEANUP]` flags — never mix flags in the same batch
@@ -126,6 +130,7 @@ When the user triggers both `improve-architecture` and `modularize-and-clean` to
 ## Hand-off
 - Phase 1: All 8 areas evaluated, findings presented with priorities
 - Gate: User approved (or selected specific items)
+- Phase 1.5: Plan document created at `docs/PLAN_...`
 - Phase 2: All approved items applied or explicitly skipped (with reason)
 - Full test suite passes with same or documented test count change
 - Every changed line carries `[ARCH]` flag — zero non-ARCH flags

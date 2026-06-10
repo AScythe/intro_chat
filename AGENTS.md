@@ -1,6 +1,6 @@
-# AGENTS.md
+﻿# AGENTS.md
 
-> **Last updated:** 2026-05-31 20:15 EDT
+> **Last updated:** 2026-06-10 18:00 EDT
 
 ---
 
@@ -97,7 +97,8 @@ Stage 3: Verify — ast-grep (structural pattern confirmation) → Read (exact l
 ## Process Discipline
 
 **Integrity:** Read-before-write, baseline tests, and failure triage.
-- **Read before write** — planning phases never modify files.
+- **Plan mode = zero file modifications** — no Edit, Write, bash file manipulation, or any system change. Enforced by global config `agent.plan.permission`: edit/write = `"deny"`, bash = `"ask"`.
+- **Read before write** — planning phases never modify files. See plan-mode guard rule above.
 - **Baseline before changes** — run tests before starting; pre-existing failures block proceed.
 - **Failure triage** — classify via the [table](#failure-triage); never auto-revert.
 
@@ -148,7 +149,7 @@ Stage 3: Verify — ast-grep (structural pattern confirmation) → Read (exact l
 | `data/introchat.db` | Persistent data store | ⚠️ Never delete without explicit user confirmation |
 | `data/e2e_test.db` | E2E test temporary data store | ⚠️ Never delete without explicit user confirmation |
 | `tests/test_*.py` | Regression tests | ⚠️ Run only — do not modify unless explicitly asked. Exception: structural validation tests (file-existence checks, export/import references, code-quality scan targets) updated by `review-implementation` Phase 0 to match project structure |
-| `docs/PLAN_*.md` | Active plan (during implementation/review) | ⚠️ Read-only — only `check-plan-readiness` writes these; moved to `archive/plan/` after review |
+| `docs/PLAN_*.md` | Active plan (during implementation/review) | ⚠️ Read-only — only `check-plan-readiness`, `modularize-and-clean`, and `improve-architecture` write these; moved to `archive/plan/` after review |
 | `archive/plan/PLAN_*.md` | Completed/reviewed plan artifacts | ⚠️ Archived — moved here after successful review; in `.ignore` to avoid context waste |
 | `opencode.json` | Plugin and MCP server configuration | ⚠️ Edit only for plugin/MCP config changes — verify JSON validity |
 | `.cocoindex_code/` | CocoIndex code index (auto-generated) | ❌ Never edit manually — rebuild via `ccc index` |

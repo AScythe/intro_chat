@@ -1,6 +1,6 @@
 # Agent Development Environment Setup
 
-> **Last verified:** 2026-05-31
+> **Last verified:** 2026-06-10
 
 This document captures every global and project-level configuration needed to reproduce this project's AI coding assistant environment on any device.
 
@@ -76,12 +76,20 @@ Create `~/.config/opencode/opencode.json`:
         "write": "ask",
         "bash": "ask"
       }
+    },
+    "plan": {
+      "permission": {
+        "edit": "deny",
+        "write": "deny",
+        "bash": "ask"
+      }
     }
   }
 }
 ```
 
-This sets build-mode to ask before editing, writing, or running shell commands.
+- Build-mode: asks before editing, writing, or running shell commands.
+- Plan-mode: edit and write are **denied** (physically blocked); bash prompts for approval.
 
 ### 3. Install MCP Servers
 
@@ -192,7 +200,7 @@ Graphify usage rules are already committed in `AGENTS.md` and the MCP server is 
 
 | File | Purpose |
 |------|---------|
-| `~/.config/opencode/opencode.json` | OpenCode global config: permissions (build mode: edit/write/bash = ask), lsp enabled |
+| `~/.config/opencode/opencode.json` | OpenCode global config: permissions (build: edit/write/bash = ask; plan: edit/write = deny, bash = ask), lsp enabled |
 | `.opencode/commands/scaffold.md` | Custom `/scaffold` command for generating skills and commands (project-level) |
 | `~/.cocoindex_code/global_settings.yml` | Default embedding model for semantic search |
 

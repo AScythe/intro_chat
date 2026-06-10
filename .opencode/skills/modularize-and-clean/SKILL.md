@@ -87,6 +87,10 @@ Present the candidate list and use the `question` tool to ask for approval: **"S
 
 Wait for explicit approval before Phase 2.
 
+### Phase 1.5: Create Plan Document
+
+Write approved findings to `docs/PLAN_YYYY_MM_DD_XXX.md` (sequential numbering, check-plan-readiness template). For combined execution, write a single unified plan covering both skill findings.
+
 ### Phase 2: Apply (batch-by-batch)
 **Purpose:** Apply the approved candidates in dependency-ordered batches, verifying after each one before proceeding.
 
@@ -146,7 +150,7 @@ Both skills run their Phase 1 independently — each scanning their defined scop
 **Step 2: Merge into Plan Doc**
 Combine both Phase 1 outputs into a unified plan document saved to `docs/`:
 
-File: `docs/CLEANUP_ARCH_YYYY_MM_DD.md`
+File: `docs/PLAN_YYYY_MM_DD_XXX.md` (sequential numbering, check-plan-readiness template)
 
 Sections:
 - **Modularize-and-clean findings** — candidates grouped by scope with file:line references
@@ -166,6 +170,7 @@ After all batches pass, route to `review-implementation`.
 ## Hand-off
 - Phase 1: All 11 scopes scanned, candidate list compiled
 - Gate: User approved
+- Phase 1.5: Plan document created at `docs/PLAN_...`
 - Phase 2: Approved batches applied or explicitly skipped
 - All changed lines carry [CLEANUP]
 - Full test suite and lint pass
