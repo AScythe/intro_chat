@@ -1,6 +1,6 @@
 ---
 name: frontend-design
-description: 'Define the visual identity and design direction for a frontend page, view, or component. Produces a design spec (not code) covering aesthetic direction, color system, typography scale, motion principles, and layout philosophy. Use when starting a new page or component, making aesthetic decisions, or establishing visual identity. Triggered when the user says "design the UI", "improve the design", "redesign the app", "overall design", "make it look good", "choose colors", "design spec", "UI design", "visual design", "theme this", "layout design", or similar. For trivial mechanical changes where no design decision is needed, skip to shadcn directly.'
+description: 'Define the visual identity and design direction for a frontend page, view, or component. Produces a design spec (not code) covering aesthetic direction, color system, typography scale, motion principles, and layout philosophy. Use when starting a new page or component, making aesthetic decisions, or establishing visual identity. Triggered when the user says "design the UI", "improve the design", "redesign the app", "overall design", "make it look good", "layout design", or similar. For trivial mechanical changes where no design decision is needed, skip to shadcn directly.'
 ---
 
 ## What I Do
@@ -131,3 +131,16 @@ When both `frontend-design` and `shadcn` are active:
 - Design spec produced with all sections populated
 - No code written
 - Spec ready for `shadcn` implementation phase
+
+---
+
+## Outputs & Triggers
+
+### Output
+Design spec document with all sections populated (aesthetic direction, color system, typography scale, motion principles, layout philosophy, design token mapping).
+
+### Exit Declaration
+State clearly: "**Design spec ready. Say 'design' to trigger shadcn implementation, or re-run to revise the spec.**"
+
+### Next Step
+User invokes `shadcn`.

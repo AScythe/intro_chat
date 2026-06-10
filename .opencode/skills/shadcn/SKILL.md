@@ -1,6 +1,6 @@
 ---
 name: shadcn
-description: 'Select, add, compose, and style shadcn/ui components following a design spec. Handles component imports, composition, accessibility, and CLI operations. Use after frontend-design has produced a spec, or for trivial mechanical changes where no design decision is needed. Triggered when the user says "add component", "build component", "implement UI", "create form", "shadcn", "shadcn/ui", "UI component", or similar.'
+description: 'Select, add, compose, and style shadcn/ui components following a design spec. Handles component imports, composition, accessibility, and CLI operations. Use after frontend-design has produced a spec, or for trivial mechanical changes where no design decision is needed, or triggered when the user says "add component", "build component", "shadcn", "shadcn/ui", "UI component", or similar.'
 ---
 
 ## What I Do
@@ -42,6 +42,13 @@ When both `frontend-design` and `shadcn` are active:
 | Component structure and variant usage | Design tokens (CSS variable values) |
 
 **Rule:** Design spec wins for visual style. shadcn wins for API/composition. Never let shadcn's defaults override an intentional design decision.
+
+## Phase 0: Prerequisites
+
+- [ ] Read the design spec from `frontend-design` — all sections must be available
+- [ ] Verify spec has all required sections: aesthetic direction, color system, typography scale, motion principles, layout philosophy, design token mapping
+- [ ] Verify the Design Token Mapping table is complete — every color, font, radius, shadow, spacing value has an exact hex/value and a target config key
+- [ ] If spec is missing a required section or has an incomplete token mapping, raise early: "Design spec missing required section: [X]. Run frontend-design first." Do not proceed with default shadcn values for skipped sections.
 
 ## Project Context
 
@@ -207,3 +214,16 @@ When updating an existing component from upstream while preserving local changes
    - Has local changes → read the file, analyze the diff, apply upstream updates while preserving modifications
    - User says "just update everything" → use `--overwrite`, but confirm first
 4. **Never use `--overwrite` without the user's explicit approval.**
+
+---
+
+## Outputs & Triggers
+
+### Output
+Components implemented — design code written, Tailwind config updated, CSS variables applied. Visual style follows the design spec; component structure follows shadcn conventions.
+
+### Exit Declaration
+State clearly: "**Implementation complete. Say 'review' to trigger review-implementation, or redsign the app UI/UX.**"
+
+### Next Step
+User invokes `review-implementation`.

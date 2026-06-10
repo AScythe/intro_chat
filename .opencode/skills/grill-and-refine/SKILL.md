@@ -80,17 +80,38 @@ Only act on gaps that survive all four questions.
 - **Test doubles confusion** — mocking when a stub or fake would do?
 
 ### Phase 2: Interactive Walkthrough (with user)
-**Purpose:** To identify and resolve any gaps in the plan through a structured conversation with the user. This is a critical alignment step — do not skip or rush.
+**Purpose:** To identify and resolve any gaps in the plan through a structured conversation with the user. This is a critical alignment step — do not skip or rush. However, not all dimensions require user discussion — non-critical dimensions are decided by the agent using best practices and project logic.
 
 Follow the User Interaction Pattern in AGENTS.md — use the `question` tool with clickable selectable options for every user decision point. Provide `options` with `label` and `description` fields. Never use raw text prompts or unformatted "y/n" questions. Present one decision-point at a time, resolve, then present the next.
 
-1. **Before starting:** flag each dimension by NAME only as "needs discussion" or "skippable" — do not describe contents. Present the skip list to the user for confirmation before proceeding.
-2. Walk through each non-skipped dimension in order. For each:
+1. **Before starting:** classify each dimension as CRITICAL (needs user discussion) or NON-CRITICAL (agent decides based on best practices and project logic) — do not describe contents or items within dimensions. Present the classification list to the user for confirmation before proceeding.
+
+   **Critical dimensions** (always require user discussion):
+   - **Assumptions** — validated against user's intent? Any unstated assumptions
+   - **Risks & Race Conditions** — blast radius, error strategy, concurrency concerns
+   - **Edge Cases** — empty, null, boundary, or unexpected input
+
+   **Non-critical dimensions** (agent decides automatically):
+   - **Alternatives** — simpler or safer approach? Agent evaluates using best practices (simplicity first, surgical changes), picks the least complex option
+   - **Dependencies** — breaks anything? Order-dependent? Agent verifies using graphify/cocoindex/path queries
+   - **Consistency** — conflicts with existing patterns? Agent checks codebase conventions and aligns with established patterns
+   - **Code Discovery** — plan missed related concepts? Agent probes via graphify path queries after walkthrough
+
+   Edge case: if the user explicitly asks about a non-critical dimension, reclassify it as critical and walk through it.
+
+2. Walk through each CRITICAL dimension in order. For each:
    - State ONE finding and recommendation at a time
    - Use the `question` tool with concrete options (e.g., "server-side, client-side, or something else")
    - Rely on the auto-added "Type your own answer" for free-form input beyond offered options
    - Resolve before moving to the next item within this dimension — do not revisit
-3. After all dimensions, summarize confirmed decisions
+
+3. After CRITICAL dimensions are resolved, decide NON-CRITICAL dimensions:
+   - Agent uses best practices (simplicity first, surgical changes), project logic, and codebase findings from Phase 1 to auto-decide each non-critical dimension
+   - Format each decision as a ready-to-copy block (same template as Phase 3)
+
+4. Show ALL dimension decisions (critical + non-critical) to the user for final confirmation in one batch. Use the `question` tool with a single multiple-choice: "All decisions look correct" / "Need to discuss some dimensions" — do not walk through individual dimensions again.
+
+5. After all dimensions confirmed, produce revised plan (Phase 3).
 
 ### Phase 3: Produce the Revised Plan
 **Purpose:** Compile a revised plan that incorporates all confirmed decisions from the walkthrough, formatted as copy-ready blocks for the next stage.
@@ -114,7 +135,7 @@ After all dimensions, produce the full revised plan summary. Must be:
 
 ## Hand-off
 - All seven dimensions probed and resolved (Phase 1)
-- Each dimension walked through interactively (Phase 2)
+- CRITICAL dimensions walked through interactively, NON-CRITICAL dimensions auto-decided by agent (Phase 2)
 - Revised plan compiled with copy-ready blocks, quality criteria met (Phase 3)
 - No file writes occurred
 
