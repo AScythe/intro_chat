@@ -1,0 +1,35 @@
+# .graphifyignore — files and directories to exclude from the knowledge graph
+
+# Auto-generated / Index / Cache
+.cocoindex_code/
+graphify-out/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+**/__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+frontend/playwright-report/
+frontend/test-results/
+
+# External dependencies
+frontend/node_modules/
+.opencode/node_modules/
+.venv/
+
+# Archived / Stale / Locks
+archive/
+docs/sessions/
+uv.lock
+frontend/package-lock.json
+.opencode/package-lock.json
+
+# Optional: Binary / Database files (no parseable code)
+# data/*.db
+# data/e2e_test.db
+# *.sqlite
+# *.bin
+
+# Temporary / Misc
+tmp_check_functions.py
+.git/

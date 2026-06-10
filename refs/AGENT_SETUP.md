@@ -221,6 +221,8 @@ Graphify usage rules are already committed in `AGENTS.md` and the MCP server is 
 | `graphify-out/.graphify_labels.json` | Internal metadata (regenerated on rebuild) | No (gitignored) |
 | `graphify-out/.graphify_root` | Internal metadata (regenerated on rebuild) | No (gitignored) |
 | `.gitignore` | Ignores for tool-generated files | Yes |
+| `.graphifyignore` | Graphify exclusion rules — filters low-signal files (caches, deps, archives) from the knowledge graph | Yes |
+| `agent_utility/` | Agent maintenance scripts — graph utilities (filter, dedup, enhance) | Yes |
 
 ### opencode.json (Project Root)
 
@@ -421,6 +423,8 @@ To reuse this project's agent development environment in a **new project** (not 
 
 7. **Copy project config** — From the source project root, copy `opencode.json` into your new project's root.
 
+   > **Verify MCP format after copy:** Ensure the `"mcp"` key is used (not `"mcpServers"`) and each server has `"type": "local"` with a `"command"` array (not `"command"` + `"args"`). See the [reference config](#opencodejson-project-root) above for the correct shape.
+
 8. **Add gitignore rules** — Append these tool-related rules to your new project's `.gitignore`:
    ```gitignore
    .opencode/node_modules/
@@ -428,9 +432,13 @@ To reuse this project's agent development environment in a **new project** (not 
    graphify-out/manifest.json
    graphify-out/cost.json
    graphify-out/cache/
-   graphify-out/.graphify_labels.json
-   graphify-out/.graphify_root
-   ```
+    graphify-out/.graphify_labels.json
+    graphify-out/.graphify_root
+    ```
+
+9. **Copy `.graphifyignore`** — If `.graphifyignore` exists in the source project, copy it to the new project root. It filters low-signal files (caches, dependencies, archives) from the knowledge graph.
+
+10. **Copy `agent_utility/`** — Copy the entire `agent_utility/` directory from the source project to the new project root. Contains graph maintenance scripts (`filter_graph.py`, `enhance_graph_viewer.py`, `dedup_graph_nodes.py`) that are invoked by the `rebuild-test-and-indexes` skill.
 
 ### Post-Copy Setup
 
