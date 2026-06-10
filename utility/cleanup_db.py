@@ -1,5 +1,4 @@
-# Description: Database maintenance script — deduplicates rows, removes User_* test users, purges orphaned events,
-# and optionally keeps only one event per database.
+# Description: Database maintenance script — cascade-deduplicates duplicate-named events, deduplicates rows, removes User_* test users, purges orphaned events, and optionally keeps only one event per database.
 # Run: uv run python utility/cleanup_db.py
 # Run with keep-event: uv run python utility/cleanup_db.py --keep-event 53aba7a9
 
@@ -9,12 +8,37 @@ DBS = ["data/introchat.db", "data/e2e_test.db"]
 
 
 def dedup_events(cur):
-    for name, ids in cur.execute("SELECT name, GROUP_CONCAT(id) FROM events GROUP BY name HAVING COUNT(id) > 1").fetchall():
-        parts = ids.split(",")
-        keep = parts[0]
-        for eid in parts[1:]:
-            cur.execute("UPDATE rooms SET event_id=? WHERE event_id=?", (keep, eid))
-        cur.execute(f"DELETE FROM events WHERE id IN ({','.join('?' for _ in parts[1:])})", parts[1:])
+    rows = cur.execute("""
+        SELECT name, id, COALESCE(created_at, '1970-01-01') as created_at
+        FROM events
+        ORDER BY name, created_at ASC
+    """).fetchall()
+    groups: dict[str, list[tuple[str, str]]] = {}
+    for name, eid, ts in rows:
+        groups.setdefault(name, []).append((eid, ts))
+
+    total_removed = 0
+    for name, entries in groups.items():
+        if len(entries) <= 1:
+            continue
+        keep = entries[0][0]
+        print(f"  Events \"{name}\": keeping {keep} (earliest), removing {len(entries)-1} duplicate(s)")
+        for eid, _ in entries[1:]:
+            room_ids = [r[0] for r in cur.execute("SELECT id FROM rooms WHERE event_id=?", (eid,)).fetchall()]
+            if room_ids:
+                ph = ','.join('?' for _ in room_ids)
+                cur.execute(f"DELETE FROM users WHERE is_sample = 1 AND room_id IN ({ph})", room_ids)
+            cur.execute("DELETE FROM matches WHERE user1_id IN (SELECT id FROM users WHERE event_id=?) OR user2_id IN (SELECT id FROM users WHERE event_id=?)", (eid, eid))
+            cur.execute("DELETE FROM user_interests WHERE event_id=?", (eid,))
+            cur.execute("DELETE FROM users WHERE event_id=?", (eid,))
+            cur.execute(f"DELETE FROM rooms WHERE event_id=?", (eid,))
+            cur.execute("DELETE FROM event_topics WHERE event_id=?", (eid,))
+            cur.execute("DELETE FROM events WHERE id=?", (eid,))
+            total_removed += 1
+    if total_removed:
+        print(f"  Removed {total_removed} duplicate event(s) via cascade delete")
+    else:
+        print("  No duplicate events found")
 
 
 def dedup_rooms(cur):
@@ -69,7 +93,7 @@ def keep_only_event(cur, keep_id: str):
     room_ids = [r[0] for r in cur.execute(f"SELECT id FROM rooms WHERE event_id IN ({ph})", orphan_ids).fetchall()]
     if room_ids:
         rp = ','.join('?' for _ in room_ids)
-        cur.execute(f"DELETE FROM room_sample_users WHERE room_id IN ({rp})", room_ids)
+        cur.execute(f"DELETE FROM users WHERE is_sample = 1 AND room_id IN ({rp})", room_ids)
     cur.execute(f"DELETE FROM user_interests WHERE event_id IN ({ph})", orphan_ids)
     cur.execute(f"DELETE FROM matches WHERE user1_id IN (SELECT id FROM users WHERE event_id IN ({ph})) OR user2_id IN (SELECT id FROM users WHERE event_id IN ({ph}))", orphan_ids + orphan_ids)
     cur.execute(f"DELETE FROM users WHERE event_id IN ({ph})", orphan_ids)
@@ -79,7 +103,7 @@ def keep_only_event(cur, keep_id: str):
     # Second pass: purge records left orphaned from previous runs (event_id no longer in events)
     cur.execute("DELETE FROM event_topics WHERE event_id NOT IN (SELECT id FROM events)")
     cur.execute("DELETE FROM user_interests WHERE event_id NOT IN (SELECT id FROM events)")
-    cur.execute("DELETE FROM room_sample_users WHERE room_id NOT IN (SELECT id FROM rooms)")
+    cur.execute("DELETE FROM users WHERE is_sample = 1 AND room_id NOT IN (SELECT id FROM rooms)")
     cur.execute("DELETE FROM users WHERE event_id NOT IN (SELECT id FROM events)")
     cur.execute("DELETE FROM rooms WHERE event_id NOT IN (SELECT id FROM events)")
     cur.execute("DELETE FROM matches WHERE user1_id NOT IN (SELECT id FROM users) OR user2_id NOT IN (SELECT id FROM users)")
@@ -101,7 +125,7 @@ def remove_orphaned_events(cur):
     room_ids = [r[0] for r in cur.execute(f"SELECT id FROM rooms WHERE event_id IN ({ph})", orphan_ids).fetchall()]
     if room_ids:
         rp = ','.join('?' for _ in room_ids)
-        cur.execute(f"DELETE FROM room_sample_users WHERE room_id IN ({rp})", room_ids)
+        cur.execute(f"DELETE FROM users WHERE is_sample = 1 AND room_id IN ({rp})", room_ids)
     cur.execute(f"DELETE FROM user_interests WHERE event_id IN ({ph})", orphan_ids)
     cur.execute(f"DELETE FROM matches WHERE user1_id IN (SELECT id FROM users WHERE event_id IN ({ph})) OR user2_id IN (SELECT id FROM users WHERE event_id IN ({ph}))", orphan_ids + orphan_ids)
     cur.execute(f"DELETE FROM users WHERE event_id IN ({ph})", orphan_ids)
@@ -144,8 +168,6 @@ def process(db_path, keep_event_id=None):
             cur.execute("DELETE FROM event_topics WHERE event_id NOT IN (SELECT id FROM events)")
         elif t == "user_interests":
             cur.execute("DELETE FROM user_interests WHERE event_id NOT IN (SELECT id FROM events)")
-        elif t == "room_sample_users":
-            cur.execute("DELETE FROM room_sample_users WHERE room_id NOT IN (SELECT id FROM rooms)")
         elif t == "users":
             cur.execute("DELETE FROM users WHERE event_id NOT IN (SELECT id FROM events)")
         elif t == "rooms":

@@ -6,6 +6,8 @@ import random
 import time
 from urllib.parse import urljoin
 
+import sqlite3
+
 import aiosqlite
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -14,16 +16,17 @@ from .config import DB_PATH, DEFAULT_ROOMS, DEFAULT_TOPICS
 from .connection_manager import manager
 from .database import init_db
 from .helpers import short_id, insert_default_rooms, insert_default_topics, get_rooms_for_event
-from .matchmaking import find_or_enqueue_match
+from .matchmaking import find_or_enqueue_match, persist_match, update_match_state, notify_match_found
 from .connection_service import handle_connection_exchange
 from .qr_utils import generate_qr_data_uri
 from .sample_users import SAMPLE_USERS
 from .schemas import (
     CreateEventRequest, JoinEventRequest, SetUserRoomRequest,
     SetAvailabilityRequest, ExchangeConnectionRequest, SaveEventConfigRequest,
+    RequestChatRequest, AcceptChatRequest, DeclineChatRequest,
 )
 from .prompts import CONVERSATION_PROMPTS
-from .state import store, UserData
+from .state import store, UserData, PendingRequest
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +38,29 @@ async def create_event(data: CreateEventRequest) -> dict:
     event_id = short_id()
     await init_db(DB_PATH)
     async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute('INSERT INTO events (id, name) VALUES (?, ?)',
-                         (event_id, data.name or 'IntroChat Event'))
+        event_name = data.name or 'IntroChat Event'
+        cursor = await db.execute('SELECT id FROM events WHERE name = ?', (event_name,))
+        existing = await cursor.fetchone()
+        if existing:
+            old_eid = existing[0]
+            logger.info('Replacing existing event %s (name="%s")', old_eid, event_name)
+            await db.execute(
+                'DELETE FROM matches WHERE user1_id IN (SELECT id FROM users WHERE event_id = ?) OR user2_id IN (SELECT id FROM users WHERE event_id = ?)',
+                (old_eid, old_eid)
+            )
+            await db.execute('DELETE FROM user_interests WHERE event_id = ?', (old_eid,))
+            await db.execute('DELETE FROM users WHERE event_id = ?', (old_eid,))
+            await db.execute('DELETE FROM rooms WHERE event_id = ?', (old_eid,))
+            await db.execute('DELETE FROM event_topics WHERE event_id = ?', (old_eid,))
+            await db.execute('DELETE FROM events WHERE id = ?', (old_eid,))
+        try:
+            await db.execute('INSERT INTO events (id, name) VALUES (?, ?)',
+                             (event_id, event_name))
+        except sqlite3.IntegrityError:
+            return JSONResponse(
+                status_code=409,
+                content={'error': f'Event with name "{event_name}" already exists (race condition)'}
+            )
         await insert_default_rooms(db, event_id)
         await insert_default_topics(db, event_id)
         await db.commit()
@@ -107,9 +131,9 @@ async def save_event_config(event_id: str, data: SaveEventConfigRequest) -> dict
                 selected = 1 if name in data.rooms else 0
                 await db.execute('UPDATE rooms SET selected = ? WHERE id = ?', (selected, rid))
                 if name not in data.rooms:
-                    await db.execute('DELETE FROM room_sample_users WHERE room_id = ?', (rid,))
+                    await db.execute('DELETE FROM users WHERE room_id = ? AND is_sample = 1', (rid,))
             elif name not in data.rooms:
-                await db.execute('DELETE FROM room_sample_users WHERE room_id = ?', (rid,))
+                await db.execute('DELETE FROM users WHERE room_id = ? AND is_sample = 1', (rid,))
                 await db.execute('DELETE FROM rooms WHERE id = ?', (rid,))
         for name in data.rooms:
             if name not in existing_rooms and name not in DEFAULT_ROOMS:
@@ -136,7 +160,7 @@ async def save_event_config(event_id: str, data: SaveEventConfigRequest) -> dict
             ','.join('?' * len(data.rooms))), [event_id] + list(data.rooms))
         selected_rooms = [(row[0], row[1]) for row in await cursor.fetchall()]
         for rid, rname in selected_rooms:
-            cursor = await db.execute('SELECT COUNT(*) FROM room_sample_users WHERE room_id = ?', (rid,))
+            cursor = await db.execute('SELECT COUNT(*) FROM users WHERE room_id = ? AND is_sample = 1', (rid,))
             count = (await cursor.fetchone())[0]
             if count > 0:
                 continue
@@ -156,9 +180,20 @@ async def save_event_config(event_id: str, data: SaveEventConfigRequest) -> dict
             for user in chosen:
                 sid = short_id()
                 await db.execute(
-                    'INSERT INTO room_sample_users (id, room_id, user_name, available, status, linkedin_url, slack_handle) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    (sid, rid, user['name'], 1 if user.get('available') else 0, user.get('status', ''), user.get('linkedin_url', ''), user.get('slack_handle', ''))
+                    'INSERT INTO users (id, event_id, room_id, username, linkedin_url, slack_handle, is_available, status, is_sample) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)',
+                    (sid, event_id, rid, user['name'], user.get('linkedin_url', ''), user.get('slack_handle', ''), 1 if user.get('available') else 0, user.get('status', ''))
                 )
+                store.add_user(sid, UserData(
+                    event_id=event_id,
+                    username=user['name'],
+                    room_id=rid,
+                    linkedin_url=user.get('linkedin_url', ''),
+                    slack_handle=user.get('slack_handle', ''),
+                    is_available=bool(user.get('available', False)),
+                    last_seen=str(time.time()),
+                    is_sample=1,
+                    status=user.get('status', '')
+                ))
             rooms_filled.append(rname)
         await db.commit()
     return {'success': True, 'rooms_filled': rooms_filled}
@@ -168,21 +203,23 @@ async def save_event_config(event_id: str, data: SaveEventConfigRequest) -> dict
 async def get_room_users(event_id: str, room_id: str) -> dict:
     async with aiosqlite.connect(DB_PATH) as db:
         cursor = await db.execute(
-            'SELECT user_name, available, status, linkedin_url, slack_handle FROM room_sample_users WHERE room_id = ?',
+            'SELECT id, username, is_available, status, linkedin_url, slack_handle, is_sample FROM users WHERE room_id = ?',
             (room_id,)
         )
         rows = await cursor.fetchall()
-        sample_users = [
+        users = [
             {
-                'name': row[0],
-                'available': bool(row[1]),
-                'status': row[2],
-                'linkedin_url': row[3] or '',
-                'slack_handle': row[4] or '',
+                'id': row[0],
+                'name': row[1],
+                'available': bool(row[2]),
+                'status': row[3],
+                'linkedin_url': row[4] or '',
+                'slack_handle': row[5] or '',
+                'is_sample': bool(row[6]),
             }
             for row in rows
         ]
-    return {'sample_users': sample_users}
+    return {'users': users}
 
 
 @router_api.get('/api/events/{event_id}/topics')
@@ -207,14 +244,16 @@ async def join_event(event_id: str, data: JoinEventRequest) -> dict:
             await db.execute('INSERT OR IGNORE INTO user_interests (user_id, event_id, interest) VALUES (?, ?, ?)',
                              (user_id, event_id, interest))
         await db.commit()
-    store.add_user(user_id, UserData(
+        store.add_user(user_id, UserData(
         event_id=event_id,
         username=username,
         room_id=None,
         linkedin_url=linkedin_url,
         slack_handle=slack_handle,
         is_available=False,
-        last_seen=str(time.time())
+        last_seen=str(time.time()),
+        is_sample=0,
+        status=''
     ))
     return {'user_id': user_id, 'username': username}
 
@@ -235,7 +274,9 @@ async def set_user_room(user_id: str, data: SetUserRoomRequest) -> dict:
                 linkedin_url=str(user_data[3] or ''),
                 slack_handle=str(user_data[4] or ''),
                 is_available=False,
-                last_seen=str(time.time())
+                last_seen=str(time.time()),
+                is_sample=0,
+                status=''
             ))
         store.update_user(user_id, room_id=data.room_id)
         await db.execute('UPDATE users SET room_id = ? WHERE id = ?', (data.room_id, user_id))
@@ -272,10 +313,12 @@ async def get_match(match_id: str) -> dict:
         match = store.active_matches[match_id]
     user1 = store.active_users.get(match['user1_id']) or UserData(
         event_id='', username='Unknown', room_id=None,
-        linkedin_url='', slack_handle='', is_available=False, last_seen=None)
+        linkedin_url='', slack_handle='', is_available=False, last_seen=None,
+        is_sample=0, status='')
     user2 = store.active_users.get(match['user2_id']) or UserData(
         event_id='', username='Unknown', room_id=None,
-        linkedin_url='', slack_handle='', is_available=False, last_seen=None)
+        linkedin_url='', slack_handle='', is_available=False, last_seen=None,
+        is_sample=0, status='')
     return {
         'match_id': match_id,
         'user1_username': user1['username'],
@@ -286,7 +329,104 @@ async def get_match(match_id: str) -> dict:
 
 @router_api.post('/api/matches/{match_id}/connect')
 async def exchange_connection(match_id: str, data: ExchangeConnectionRequest) -> dict:
-    return await handle_connection_exchange(match_id, data.user_id, data.wants_to_connect, store, manager)
+    return await handle_connection_exchange(match_id, data.user_id, data.wants_to_connect, store, manager, force_sample_vote=data.force_sample_vote)
+
+
+@router_api.post('/api/users/{user_id}/request-chat')
+async def request_chat(user_id: str, data: RequestChatRequest) -> dict:
+    target_id = data.target_user_id
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute('SELECT id, event_id, room_id, username, is_sample FROM users WHERE id = ?', (user_id,))
+        requester = await cursor.fetchone()
+        if not requester:
+            raise HTTPException(status_code=404, detail='Requester not found')
+
+        cursor = await db.execute('SELECT id, event_id, room_id, username, is_sample FROM users WHERE id = ?', (target_id,))
+        target = await cursor.fetchone()
+        if not target:
+            raise HTTPException(status_code=404, detail='Target not found')
+
+        if requester[1] != target[1]:
+            return {'accepted': False, 'message': 'Users are in different events'}
+
+        if requester[2] != target[2]:
+            return {'accepted': False, 'message': 'Users are not in the same room'}
+
+        with store.lock:
+            for m in store.active_matches.values():
+                if user_id in (m['user1_id'], m['user2_id']):
+                    return {'accepted': False, 'message': 'You are already in a chat'}
+                if target_id in (m['user1_id'], m['user2_id']):
+                    return {'accepted': False, 'message': 'This person is currently in a chat'}
+
+        target_is_sample = bool(target[4])
+
+        if target_is_sample:
+            import random
+            accepted = data.force_accept if data.force_accept is not None else random.random() < 0.6
+            if not accepted:
+                return {'accepted': False, 'message': 'declined'}
+
+            match_id = await persist_match(user_id, target_id, str(target[2]))
+            update_match_state(match_id, user_id, target_id, str(target[2]))
+
+            cursor = await db.execute('SELECT name FROM rooms WHERE id = ?', (target[2],))
+            room_name = (await cursor.fetchone())[0]
+            new_status = f'Currently in a chat, find directly in {room_name}'
+            await db.execute('UPDATE users SET is_available = 0, status = ? WHERE id = ?', (new_status, target_id))
+            await db.commit()
+            store.update_user(target_id, is_available=False, status=new_status)
+
+            await notify_match_found(match_id, user_id, target_id, str(target[2]))
+            return {'accepted': True, 'match_id': match_id}
+        else:
+            requester_name = str(requester[3])
+            target_name = str(target[3])
+
+            store.add_pending_request(
+                requester_id=user_id,
+                target_id=target_id,
+                room_id=str(target[2]),
+                requester_name=requester_name,
+                target_name=target_name
+            )
+
+            await manager.broadcast_to_users(
+                [target_id],
+                {'type': 'chat_request', 'requester_id': user_id, 'requester_name': requester_name, 'room_id': target[2]}
+            )
+            return {'accepted': None, 'status': 'pending', 'message': 'Chat request sent'}
+
+
+@router_api.post('/api/users/{user_id}/accept-request')
+async def accept_chat_request(user_id: str, data: AcceptChatRequest) -> dict:
+    pending = store.get_pending_request(data.requester_id)
+    if not pending or pending['target_id'] != user_id:
+        raise HTTPException(status_code=404, detail='No pending request found')
+
+    store.remove_pending_request(data.requester_id)
+
+    match_id = await persist_match(data.requester_id, user_id, pending['room_id'])
+    update_match_state(match_id, data.requester_id, user_id, pending['room_id'])
+    await notify_match_found(match_id, data.requester_id, user_id, pending['room_id'])
+
+    return {'accepted': True, 'match_id': match_id}
+
+
+@router_api.post('/api/users/{user_id}/decline-request')
+async def decline_chat_request(user_id: str, data: DeclineChatRequest) -> dict:
+    pending = store.get_pending_request(data.requester_id)
+    if not pending or pending['target_id'] != user_id:
+        raise HTTPException(status_code=404, detail='No pending request found')
+
+    store.remove_pending_request(data.requester_id)
+
+    await manager.broadcast_to_users(
+        [data.requester_id],
+        {'type': 'chat_request_declined', 'message': 'Your chat request was declined'}
+    )
+    return {'accepted': False}
 
 
 @router_api.get('/api/qr/{event_id}')

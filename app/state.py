@@ -3,6 +3,7 @@
 # ====
 
 import threading
+import time
 from typing import TypedDict
 
 class UserData(TypedDict):
@@ -13,12 +14,23 @@ class UserData(TypedDict):
     slack_handle: str
     is_available: bool
     last_seen: str | None
+    is_sample: int
+    status: str
+
+class PendingRequest(TypedDict):
+    requester_id: str
+    target_id: str
+    room_id: str
+    timestamp: float
+    requester_name: str
+    target_name: str
 
 class MatchData(TypedDict):
     user1_id: str
     user2_id: str
     room_id: str
     created_at: float
+    original_user_status: dict[str, dict[str, bool | str]]
 
 class QueueEntry(TypedDict):
     room_id: str
@@ -30,6 +42,7 @@ class StateStore:
         self.active_matches: dict[str, MatchData] = {}
         self.waiting_queue: dict[str, QueueEntry] = {}
         self.connection_statuses: dict[str, dict[str, bool]] = {}
+        self.pending_requests: dict[str, PendingRequest] = {}
         self._lock = threading.Lock()
 
     @property
@@ -92,6 +105,33 @@ class StateStore:
         with self._lock:
             votes = self.connection_statuses.get(match_id, {})
             return len(votes) == 2 and all(votes.values())
+
+    def add_pending_request(self, requester_id: str, target_id: str, room_id: str, requester_name: str, target_name: str) -> None:
+        with self._lock:
+            self.pending_requests[requester_id] = PendingRequest(
+                requester_id=requester_id,
+                target_id=target_id,
+                room_id=room_id,
+                timestamp=time.time(),
+                requester_name=requester_name,
+                target_name=target_name,
+            )
+
+    def get_pending_request(self, requester_id: str) -> PendingRequest | None:
+        with self._lock:
+            return self.pending_requests.get(requester_id)
+
+    def remove_pending_request(self, requester_id: str) -> None:
+        with self._lock:
+            self.pending_requests.pop(requester_id, None)
+
+    def get_all_pending_requests(self) -> list[PendingRequest]:
+        with self._lock:
+            return list(self.pending_requests.values())
+
+    def get_pending_requests_for_user(self, user_id: str) -> list[PendingRequest]:
+        with self._lock:
+            return [pr for pr in self.pending_requests.values() if pr['target_id'] == user_id]
 
 
 store = StateStore()

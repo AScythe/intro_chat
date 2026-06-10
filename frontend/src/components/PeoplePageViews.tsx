@@ -4,7 +4,7 @@
 import { PersonCard } from '@/components/PersonCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { SampleUserData } from '@/types/api';
+import type { UserData } from '@/types/api';
 
 export interface PersonResponse {
   accepted: boolean;
@@ -13,9 +13,9 @@ export interface PersonResponse {
 
 interface NearbyUsersViewProps {
   roomName: string;
-  nearbyUsers: SampleUserData[];
-  selectedPerson: SampleUserData | null;
-  onPersonClick: (person: SampleUserData) => void;
+  nearbyUsers: UserData[];
+  selectedPerson: UserData | null;
+  onPersonClick: (person: UserData) => void;
   onRequestChat: () => void;
   onChangeRoom: () => void;
 }
@@ -64,7 +64,7 @@ export function NearbyUsersView({ roomName, nearbyUsers, selectedPerson, onPerso
 }
 
 interface WaitingResponseViewProps {
-  requestedPerson: SampleUserData;
+  requestedPerson: UserData;
   onCancel: () => void;
 }
 
@@ -88,7 +88,7 @@ export function WaitingResponseView({ requestedPerson, onCancel }: WaitingRespon
 }
 
 interface AcceptedViewProps {
-  requestedPerson: SampleUserData;
+  requestedPerson: UserData;
   personResponse: PersonResponse;
   yourReady: boolean;
   theirReady: boolean;
@@ -140,6 +140,28 @@ export function AcceptedView({ requestedPerson, personResponse, yourReady, their
           >
             {yourReady && theirReady ? 'Start Chat - Both Ready!' : 'Start Chat'}
           </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface IncomingRequestViewProps {
+  requesterName: string;
+  requesterId: string;
+  onAccept: () => void;
+  onDecline: () => void;
+}
+
+export function IncomingRequestView({ requesterName, requesterId: _requesterId, onAccept, onDecline }: IncomingRequestViewProps) {
+  return (
+    <Card>
+      <CardContent className="space-y-4 pt-6 text-center">
+        <h2 className="font-heading text-xl">Chat Request</h2>
+        <p className="text-muted-foreground">{requesterName} wants to chat with you!</p>
+        <div className="flex justify-center gap-4">
+          <Button onClick={onAccept}>Accept</Button>
+          <Button variant="outline" onClick={onDecline}>Decline</Button>
         </div>
       </CardContent>
     </Card>

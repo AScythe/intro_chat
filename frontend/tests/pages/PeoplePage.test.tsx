@@ -7,6 +7,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { UserProvider } from '@/context/UserContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { PeoplePage } from '@/pages/PeoplePage';
+import type { RoomUsersResponse } from '@/types/api';
 
 const mockEventConfig = {
   rooms: [
@@ -16,10 +17,10 @@ const mockEventConfig = {
   topics: [],
 };
 
-const mockRoomUsers = {
-  sample_users: [
-    { name: 'Alex_Coder', available: false, status: 'Busy coding' },
-    { name: 'Sarah_Dev', available: true, status: 'Looking to chat' },
+const mockRoomUsers: RoomUsersResponse = {
+  users: [
+    { name: 'Alex_Coder', available: false, status: 'Busy coding', is_sample: true },
+    { name: 'Sarah_Dev', available: true, status: 'Looking to chat', is_sample: true },
   ],
 };
 

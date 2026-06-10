@@ -27,3 +27,14 @@ class SetAvailabilityRequest(BaseModel):
 class ExchangeConnectionRequest(BaseModel):
     user_id: str
     wants_to_connect: bool
+    force_sample_vote: bool | None = None
+
+class RequestChatRequest(BaseModel):
+    target_user_id: str
+    force_accept: bool | None = None
+
+class AcceptChatRequest(BaseModel):
+    requester_id: str
+
+class DeclineChatRequest(BaseModel):
+    requester_id: str

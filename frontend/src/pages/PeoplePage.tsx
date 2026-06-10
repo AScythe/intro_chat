@@ -4,33 +4,40 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSocket } from '@/hooks/useSocket';
-import { useDemoSimulation } from '@/hooks/useDemoSimulation';
 import { fetchJSON } from '@/api/client';
 import { useChatRequest } from '@/hooks/useChatRequest';
+import { useUser } from '@/hooks/useUser';
 import { MatchCountdown } from '@/components/MatchCountdown';
 import { Button } from '@/components/ui/button';
 import { CONFIG } from '@/config/constants';
-import { NearbyUsersView, WaitingResponseView, AcceptedView } from '@/components/PeoplePageViews';
-import type { SampleUserData } from '@/types/api';
+import { NearbyUsersView, WaitingResponseView, AcceptedView, IncomingRequestView } from '@/components/PeoplePageViews';
+import type { UserData } from '@/types/api';
 import type { RoomUsersResponse, EventConfigResponse } from '@/types/api';
+import { SAMPLE_USERS } from '@/utils/demoData';
 
 export function PeoplePage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const socket = useSocket();
-  const demo = useDemoSimulation(true);
-  const { requestedPerson, personResponse, yourReady, theirReady, requestChat, imReady, cancelRequest } = useChatRequest();
+  const { user } = useUser();
+  const userId = user?.userId || '';
+  const { requestedPerson, personResponse, yourReady, theirReady, requestChat, imReady, cancelRequest } = useChatRequest({
+    userId,
+    eventId: eventId || '',
+    socket,
+  });
 
   const locationState = location.state as { roomName?: string } | null;
   const roomName = locationState?.roomName;
 
-  const [nearbyUsers, setNearbyUsers] = useState<SampleUserData[]>([]);
-  const [selectedPerson, setSelectedPerson] = useState<SampleUserData | null>(null);
+  const [nearbyUsers, setNearbyUsers] = useState<UserData[]>([]);
+  const [selectedPerson, setSelectedPerson] = useState<UserData | null>(null);
   const [viewState, setViewState] = useState<'showing' | 'waitingResponse' | 'accepted' | 'matchFound'>('showing');
   const [matchUsername, setMatchUsername] = useState('');
   const [matchId, setMatchId] = useState('');
   const [countdown, setCountdown] = useState<number>(CONFIG.MATCH_FOUND_COUNTDOWN);
+  const [incomingRequest, setIncomingRequest] = useState<{ requester_id: string; requester_name: string; room_id: string } | null>(null);
 
   useEffect(() => {
     if (!roomName && eventId) {
@@ -48,19 +55,19 @@ export function PeoplePage() {
         if (!room) throw new Error('Room not found in config');
         const res = await fetchJSON<RoomUsersResponse>(`/api/events/${eventId}/rooms/${room.id}/users`);
         if (!cancelled) {
-          setNearbyUsers(res.sample_users);
+          setNearbyUsers(res.users);
         }
       } catch {
         if (!cancelled) {
-          const users = demo.addSampleUsers(roomName);
-          setNearbyUsers(users);
+          const fallback = (SAMPLE_USERS[roomName || ''] ?? []).map((u) => ({ ...u, id: u.id || '' }));
+          setNearbyUsers(fallback);
         }
       }
     })();
     return () => { cancelled = true; };
-  }, [roomName, eventId, demo]);
+  }, [roomName, eventId]);
 
-  function handlePersonClick(person: SampleUserData) {
+  function handlePersonClick(person: UserData) {
     if (!person.available) return;
     setSelectedPerson(person);
   }
@@ -76,8 +83,8 @@ export function PeoplePage() {
   }
 
   function handleGoToChat() {
-    const mid = demo.createDemoMatchId();
-    navigate(`/chat/${mid}?event_id=${eventId}&partner=${encodeURIComponent(requestedPerson?.name ?? '')}`);
+    const mid = personResponse?.match_id || requestedPerson?.id || '';
+    navigate(`/chat/${mid}?event_id=${eventId}`);
   }
 
   function handleCancelRequest() {
@@ -87,8 +94,11 @@ export function PeoplePage() {
   }
 
   useEffect(() => {
-    if (personResponse) {
+    if (personResponse?.accepted) {
       setViewState('accepted');
+    } else if (personResponse && !personResponse.accepted) {
+      setViewState('showing');
+      setSelectedPerson(null);
     }
   }, [personResponse]);
 
@@ -125,6 +135,56 @@ export function PeoplePage() {
     return unsub;
   }, [socket]);
 
+  useEffect(() => {
+    const unsub = socket.subscribe<{ type: string; requester_id: string; requester_name: string; room_id: string }>(
+      'chat_request',
+      (data) => {
+        setIncomingRequest(data);
+      },
+    );
+    return unsub;
+  }, [socket]);
+
+  useEffect(() => {
+    const unsub = socket.subscribe<Record<string, unknown>>(
+      'chat_request_declined',
+      () => {
+        setViewState('showing');
+        setSelectedPerson(null);
+        cancelRequest();
+      },
+    );
+    return unsub;
+  }, [socket, cancelRequest]);
+
+  async function handleAcceptIncomingRequest() {
+    if (!incomingRequest || !userId) return;
+    try {
+      await fetchJSON<{ accepted: boolean; match_id: string }>(`/api/users/${userId}/accept-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requester_id: incomingRequest.requester_id }),
+      });
+    } catch {
+      // Error handled by WS event
+    }
+    setIncomingRequest(null);
+  }
+
+  async function handleDeclineIncomingRequest() {
+    if (!incomingRequest || !userId) return;
+    try {
+      await fetchJSON<{ accepted: boolean }>(`/api/users/${userId}/decline-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requester_id: incomingRequest.requester_id }),
+      });
+    } catch {
+      // Error handled by WS event
+    }
+    setIncomingRequest(null);
+  }
+
   if (!roomName) {
     return null;
   }
@@ -144,7 +204,16 @@ export function PeoplePage() {
       </header>
 
       <main className="flex-1 space-y-5">
-        {viewState === 'showing' && (
+        {incomingRequest && (
+          <IncomingRequestView
+            requesterName={incomingRequest.requester_name}
+            requesterId={incomingRequest.requester_id}
+            onAccept={handleAcceptIncomingRequest}
+            onDecline={handleDeclineIncomingRequest}
+          />
+        )}
+
+        {viewState === 'showing' && !incomingRequest && (
           <NearbyUsersView
             roomName={roomName}
             nearbyUsers={nearbyUsers}

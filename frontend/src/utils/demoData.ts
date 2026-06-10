@@ -1,7 +1,7 @@
 // demoData.ts [CLEANUP]
 // Description: Demo/simulation data — sample users, fallback prompts, and mock responses
 
-import type { SampleUserData } from '@/types/api';
+import type { UserData } from '@/types/api';
 
 function freezeDeep<T>(obj: T): T {
   if (obj && typeof obj === 'object') {
@@ -11,41 +11,41 @@ function freezeDeep<T>(obj: T): T {
   return obj;
 }
 
-export const SAMPLE_USERS: Record<string, SampleUserData[]> = freezeDeep({
+export const SAMPLE_USERS: Record<string, UserData[]> = freezeDeep({
   'Main Hall': [
-    { name: 'Alex_Coder', available: false, status: 'Busy coding' },
-    { name: 'Sarah_Dev', available: true, status: 'Looking to chat' },
-    { name: 'Mike_Hacker', available: false, status: 'In deep focus' },
-    { name: 'Emma_Tech', available: true, status: 'Open to talk' },
+    { name: 'Alex_Coder', available: false, status: 'Busy coding', is_sample: true, id: '' },
+    { name: 'Sarah_Dev', available: true, status: 'Looking to chat', is_sample: true, id: '' },
+    { name: 'Mike_Hacker', available: false, status: 'In deep focus', is_sample: true, id: '' },
+    { name: 'Emma_Tech', available: true, status: 'Open to talk', is_sample: true, id: '' },
   ],
   'Table 1': [
-    { name: 'Jake_Python', available: true, status: 'Ready to chat' },
-    { name: 'Lisa_JS', available: false, status: 'Taking notes' },
+    { name: 'Jake_Python', available: true, status: 'Ready to chat', is_sample: true, id: '' },
+    { name: 'Lisa_JS', available: false, status: 'Taking notes', is_sample: true, id: '' },
   ],
   'Table 2': [
-    { name: 'Olga_Rust', available: true, status: 'Happy to meet' },
-    { name: 'Tom_Swift', available: false, status: 'On a call' },
+    { name: 'Olga_Rust', available: true, status: 'Happy to meet', is_sample: true, id: '' },
+    { name: 'Tom_Swift', available: false, status: 'On a call', is_sample: true, id: '' },
   ],
   'Table 3': [
-    { name: 'Diana_Go', available: true, status: 'Just arrived' },
+    { name: 'Diana_Go', available: true, status: 'Just arrived', is_sample: true, id: '' },
   ],
   'Table 4': [
-    { name: 'Raj_Java', available: false, status: 'Debugging' },
-    { name: 'Ella_Ruby', available: true, status: 'Excited to chat' },
-    { name: 'Finn_Web3', available: true, status: 'Browsing' },
+    { name: 'Raj_Java', available: false, status: 'Debugging', is_sample: true, id: '' },
+    { name: 'Ella_Ruby', available: true, status: 'Excited to chat', is_sample: true, id: '' },
+    { name: 'Finn_Web3', available: true, status: 'Browsing', is_sample: true, id: '' },
   ],
   'Table 5': [
-    { name: 'Nina_ML', available: false, status: 'Training model' },
-    { name: 'Omar_Scala', available: true, status: 'Open for chat' },
+    { name: 'Nina_ML', available: false, status: 'Training model', is_sample: true, id: '' },
+    { name: 'Omar_Scala', available: true, status: 'Open for chat', is_sample: true, id: '' },
   ],
   'Quiet Corner': [
-    { name: 'Zara_Read', available: false, status: 'Reading docs' },
-    { name: 'Kai_Write', available: true, status: 'Taking a break' },
+    { name: 'Zara_Read', available: false, status: 'Reading docs', is_sample: true, id: '' },
+    { name: 'Kai_Write', available: true, status: 'Taking a break', is_sample: true, id: '' },
   ],
   'Coffee Area': [
-    { name: 'Liam_Chat', available: true, status: 'Grabbing coffee' },
-    { name: 'Sara_Design', available: false, status: 'Sketching UI' },
-    { name: 'Noah_Ops', available: true, status: 'Ready to connect' },
+    { name: 'Liam_Chat', available: true, status: 'Grabbing coffee', is_sample: true, id: '' },
+    { name: 'Sara_Design', available: false, status: 'Sketching UI', is_sample: true, id: '' },
+    { name: 'Noah_Ops', available: true, status: 'Ready to connect', is_sample: true, id: '' },
   ],
 });
 

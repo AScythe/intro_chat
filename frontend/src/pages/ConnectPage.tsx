@@ -9,7 +9,6 @@ import { useUser } from '@/hooks/useUser';
 import { ConnectionCard } from '@/components/ConnectionCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { CONFIG } from '@/config/constants';
 
 interface ResultViewProps {
   connectionResult: 'exchanged' | 'declined' | null;
@@ -53,7 +52,6 @@ export function ConnectPage() {
   const { user } = useUser();
   const socket = useSocket();
 
-  const isDemo = matchId?.startsWith('demo_');
   const eventId = searchParams.get('event_id') || user?.eventId || '';
   const [state, setState] = useState<'connecting' | 'result'>('connecting');
   const [connectionResult, setConnectionResult] = useState<'exchanged' | 'declined' | null>(null);
@@ -82,17 +80,6 @@ export function ConnectPage() {
   }, [socket]);
 
   function handleConnectionPref(pref: boolean) {
-    if (isDemo) {
-      setTimeout(() => {
-        if (pref) {
-          setConnectionResult('exchanged');
-        } else {
-          setConnectionResult('declined');
-        }
-        setState('result');
-      }, CONFIG.DEMO_CONNECTION_DELAY_MS);
-      return;
-    }
     if (!user || !matchId) return;
     fetchJSON<{ success: boolean }>(`/api/matches/${matchId}/connect`, {
       method: 'POST',

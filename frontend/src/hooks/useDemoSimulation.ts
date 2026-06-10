@@ -5,7 +5,7 @@
 import { useMemo } from 'react';
 import { generateRandomString } from '@/utils/random';
 import { CONFIG } from '@/config/constants';
-import type { SampleUserData } from '@/types/api';
+import type { UserData } from '@/types/api';
 import { SAMPLE_USERS, RESPONSES } from '@/utils/demoData';
 
 export function useDemoSimulation(enabled?: boolean) {
@@ -15,7 +15,7 @@ export function useDemoSimulation(enabled?: boolean) {
     return {
       isDemo: isEnabled,
 
-      addSampleUsers(roomName: string): SampleUserData[] {
+      addSampleUsers(roomName: string): UserData[] {
         if (!isEnabled) return [];
         return SAMPLE_USERS[roomName] ?? [];
       },

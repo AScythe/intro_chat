@@ -16,6 +16,28 @@ import asyncio
 import time
 from fastapi.testclient import TestClient
 from app import app
+from app.config import DB_PATH
+
+
+def cleanup_event(event_name: str) -> None:
+    """Cascade-delete a test event by name. Idempotent — safe to call multiple times."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("PRAGMA foreign_keys = OFF")
+    cur = conn.cursor()
+    eid_row = cur.execute("SELECT id FROM events WHERE name = ?", (event_name,)).fetchone()
+    if not eid_row:
+        conn.close()
+        return
+    eid = eid_row[0]
+    room_ids = [r[0] for r in cur.execute("SELECT id FROM rooms WHERE event_id = ?", (eid,)).fetchall()]
+    cur.execute("DELETE FROM matches WHERE user1_id IN (SELECT id FROM users WHERE event_id = ?) OR user2_id IN (SELECT id FROM users WHERE event_id = ?)", (eid, eid))
+    cur.execute("DELETE FROM user_interests WHERE event_id = ?", (eid,))
+    cur.execute("DELETE FROM users WHERE event_id = ?", (eid,))
+    cur.execute("DELETE FROM rooms WHERE event_id = ?", (eid,))
+    cur.execute("DELETE FROM event_topics WHERE event_id = ?", (eid,))
+    cur.execute("DELETE FROM events WHERE id = ?", (eid,))
+    conn.commit()
+    conn.close()
 
 
 def test_imports():
@@ -319,6 +341,7 @@ def test_api_endpoints():
     assert len(prompts) == 10
     print(f"✅ GET /api/prompts → {len(prompts)} prompts")
 
+    cleanup_event("API Test Event")
     print("✅ API endpoint test completed\n")
 
 
@@ -344,6 +367,7 @@ def test_social_info():
     assert user.get('linkedin_url') == 'https://linkedin.com/in/testuser'
     assert user.get('slack_handle') == '@testuser'
 
+    cleanup_event("Social Test")
     print("✅ Social info saved correctly\n")
 
 
@@ -461,7 +485,7 @@ def test_matchmaking_lifecycle():
     # Cleanup state
     if match_id in store.active_matches:
         del store.active_matches[match_id]
-
+    cleanup_event("Match Test")
     print("✅ Matchmaking lifecycle test completed\n")
 
 
@@ -521,7 +545,7 @@ def test_find_match_end_to_end():
     # Cleanup
     if match_id in store.active_matches:
         del store.active_matches[match_id]
-
+    cleanup_event("FindMatch Test")
     print("✅ find_match end-to-end test completed\n")
 
 
@@ -696,11 +720,12 @@ def test_sample_users_fill():
         if room['name'] in selected_names:
             rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
             assert rresp.status_code == 200
-            users = rresp.json()['sample_users']
+            users = rresp.json()['users']
             assert 3 <= len(users) <= 5
             assert any(u['available'] for u in users)
             print(f"✅ Room '{room['name']}' has {len(users)} sample users (≥1 available)")
 
+    cleanup_event("Sample Fill Test")
     print("✅ Sample user fill test completed\n")
 
 
@@ -729,7 +754,7 @@ def test_sample_users_idempotent():
     resp = client.get(f'/api/events/{event_id}/config')
     room_id = resp.json()['rooms'][0]['id']
     rresp = client.get(f'/api/events/{event_id}/rooms/{room_id}/users')
-    first_count = len(rresp.json()['sample_users'])
+    first_count = len(rresp.json()['users'])
 
     # Second save — should NOT fill any rooms (idempotent)
     resp = client.put(f'/api/events/{event_id}/config', json={
@@ -741,10 +766,11 @@ def test_sample_users_idempotent():
 
     # Verify count unchanged
     rresp = client.get(f'/api/events/{event_id}/rooms/{room_id}/users')
-    second_count = len(rresp.json()['sample_users'])
+    second_count = len(rresp.json()['users'])
     assert first_count == second_count
     print("✅ Sample user count unchanged after re-save")
 
+    cleanup_event("Idempotent Test")
     print("✅ Sample user fill idempotency test completed\n")
 
 
@@ -775,22 +801,25 @@ def test_room_users_api():
     rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
     assert rresp.status_code == 200
     data = rresp.json()
-    assert 'sample_users' in data
-    assert len(data['sample_users']) >= 1
-    for user in data['sample_users']:
+    assert 'users' in data
+    assert len(data['users']) >= 1
+    for user in data['users']:
         assert 'name' in user
         assert 'available' in user
         assert 'status' in user
         assert 'linkedin_url' in user
         assert 'slack_handle' in user
-    print(f"✅ GET /users returned {len(data['sample_users'])} users with correct shape")
+        assert 'id' in user
+        assert 'is_sample' in user
+    print(f"✅ GET /users returned {len(data['users'])} users with correct shape")
 
     # GET users for non-existent room — returns empty list
     rresp = client.get(f'/api/events/{event_id}/rooms/nonexistent/users')
     assert rresp.status_code == 200
-    assert rresp.json()['sample_users'] == []
+    assert rresp.json()['users'] == []
     print("✅ GET /users for non-existent room returns empty list")
 
+    cleanup_event("Room Users API Test")
     print("✅ Room users API test completed\n")
 
 
@@ -818,10 +847,431 @@ def test_qr_utils():
     print()
 
 
+def test_event_replacement():
+    """Test that creating an event with an existing name cascade-replaces the old one"""
+    print("🧪 Testing event replacement on duplicate name...")
+    client = TestClient(app)
+    name = "Replacement Test"
+
+    # Create first event
+    resp1 = client.post("/api/events", json={"name": name})
+    assert resp1.status_code == 200, f"First create failed: {resp1.json()}"
+    data1 = resp1.json()
+    event_id_1 = data1["event_id"]
+    assert "rooms" in data1
+
+    # Create second event with same name (should replace, not conflict)
+    resp2 = client.post("/api/events", json={"name": name})
+    assert resp2.status_code == 200, f"Second create failed: {resp2.json()}"
+    data2 = resp2.json()
+    event_id_2 = data2["event_id"]
+    assert "rooms" in data2
+
+    # Verify event IDs differ (old was replaced)
+    assert event_id_2 != event_id_1, "New event should have a different ID"
+
+    # Verify old event is gone (404)
+    config_resp = client.get(f"/api/events/{event_id_1}/config")
+    assert config_resp.status_code == 404, f"Old event should be gone, got {config_resp.status_code}"
+
+    # Verify new event has 8 default rooms
+    rooms_resp = client.get(f"/api/events/{event_id_2}/rooms")
+    assert rooms_resp.status_code == 200
+    rooms = rooms_resp.json()
+    assert len(rooms) == 8, f"New event should have 8 rooms, got {len(rooms)}"
+
+    print(f"✅ Event replacement verified: {event_id_1} → {event_id_2}, old event 404, new event has {len(rooms)} rooms")
+    print()
+
+
+def test_request_chat_sample_accept():
+    """Test requesting chat with a sample user (accepted path with force_accept=True)"""
+    print("🧪 Testing request-chat with sample user (accept)...")
+
+    from app.state import store
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'RequestChatAccept Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    rooms = resp.json()
+    selected_names = [rooms[0]['name']]
+
+    client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names, 'topics': ['Tech']
+    })
+
+    resp = client.get(f'/api/events/{event_id}/config')
+    room = resp.json()['rooms'][0]
+
+    rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
+    sample = rresp.json()['users'][0]
+    sample_id = sample['id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Requester'})
+    user_id = resp.json()['user_id']
+    client.post(f'/api/users/{user_id}/room', json={'room_id': room['id']})
+
+    resp = client.post(f'/api/users/{user_id}/request-chat', json={
+        'target_user_id': sample_id,
+        'force_accept': True
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['accepted'] is True
+    assert 'match_id' in data
+    match_id = data['match_id']
+    print(f"✅ Request-chat accepted, match_id={match_id}")
+
+    assert match_id in store.active_matches
+    print("✅ Match created in store")
+
+    sample_user = store.get_user(sample_id)
+    assert sample_user is not None
+    assert sample_user['is_available'] == False
+    assert 'Currently in a chat' in sample_user['status']
+    print("✅ Sample user marked unavailable with status message")
+
+    if match_id in store.active_matches:
+        del store.active_matches[match_id]
+    cleanup_event("RequestChatAccept Test")
+    print("✅ Request-chat sample accept test completed\n")
+
+
+def test_request_chat_sample_decline():
+    """Test requesting chat with a sample user (declined path with force_accept=False)"""
+    print("🧪 Testing request-chat with sample user (decline)...")
+
+    from app.state import store
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'RequestChatDecline Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    rooms = resp.json()
+    selected_names = [rooms[0]['name']]
+
+    client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names, 'topics': ['Tech']
+    })
+
+    resp = client.get(f'/api/events/{event_id}/config')
+    room = resp.json()['rooms'][0]
+
+    rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
+    sample = rresp.json()['users'][0]
+    sample_id = sample['id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Requester'})
+    user_id = resp.json()['user_id']
+    client.post(f'/api/users/{user_id}/room', json={'room_id': room['id']})
+
+    resp = client.post(f'/api/users/{user_id}/request-chat', json={
+        'target_user_id': sample_id,
+        'force_accept': False
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['accepted'] is False
+    print("✅ Request-chat declined as expected")
+
+    # Verify no match was created
+    for mid, m in store.active_matches.items():
+        assert m['user1_id'] != user_id and m['user2_id'] != user_id, "No match should exist for declined request"
+    print("✅ No match created for declined request")
+
+    cleanup_event("RequestChatDecline Test")
+    print("✅ Request-chat sample decline test completed\n")
+
+
+def test_request_chat_real_user_pending():
+    """Test requesting chat with a real user (returns pending)"""
+    print("🧪 Testing request-chat with real user (pending)...")
+
+    from app.state import store
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'RequestChatPending Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    room_id = resp.json()[0]['id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'UserA'})
+    user_a = resp.json()['user_id']
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'UserB'})
+    user_b = resp.json()['user_id']
+
+    client.post(f'/api/users/{user_a}/room', json={'room_id': room_id})
+    client.post(f'/api/users/{user_b}/room', json={'room_id': room_id})
+
+    resp = client.post(f'/api/users/{user_a}/request-chat', json={
+        'target_user_id': user_b
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['accepted'] is None
+    assert data['status'] == 'pending'
+    print("✅ Request-chat returned pending")
+
+    pending = store.get_pending_request(user_a)
+    assert pending is not None
+    assert pending['target_id'] == user_b
+    print("✅ Pending request stored correctly")
+
+    store.remove_pending_request(user_a)
+    cleanup_event("RequestChatPending Test")
+    print("✅ Request-chat real user pending test completed\n")
+
+
+def test_accept_chat_request_real():
+    """Test accepting a chat request from a real user"""
+    print("🧪 Testing accept-chat-request (real user)...")
+
+    from app.state import store
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'AcceptChatRequest Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    room_id = resp.json()[0]['id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Alice'})
+    alice = resp.json()['user_id']
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Bob'})
+    bob = resp.json()['user_id']
+
+    client.post(f'/api/users/{alice}/room', json={'room_id': room_id})
+    client.post(f'/api/users/{bob}/room', json={'room_id': room_id})
+
+    # Alice requests Bob
+    client.post(f'/api/users/{alice}/request-chat', json={
+        'target_user_id': bob
+    })
+
+    # Bob accepts
+    resp = client.post(f'/api/users/{bob}/accept-request', json={
+        'requester_id': alice
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['accepted'] is True
+    assert 'match_id' in data
+    match_id = data['match_id']
+    print(f"✅ Accept-chat success, match_id={match_id}")
+
+    assert match_id in store.active_matches
+    print("✅ Match created in store")
+
+    if match_id in store.active_matches:
+        del store.active_matches[match_id]
+    cleanup_event("AcceptChatRequest Test")
+    print("✅ Accept chat request test completed\n")
+
+
+def test_decline_chat_request_real():
+    """Test declining a chat request from a real user"""
+    print("🧪 Testing decline-chat-request (real user)...")
+
+    from app.state import store
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'DeclineChatRequest Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    room_id = resp.json()[0]['id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Charlie'})
+    charlie = resp.json()['user_id']
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'Diana'})
+    diana = resp.json()['user_id']
+
+    client.post(f'/api/users/{charlie}/room', json={'room_id': room_id})
+    client.post(f'/api/users/{diana}/room', json={'room_id': room_id})
+
+    # Charlie requests Diana
+    client.post(f'/api/users/{charlie}/request-chat', json={
+        'target_user_id': diana
+    })
+
+    # Diana declines
+    resp = client.post(f'/api/users/{diana}/decline-request', json={
+        'requester_id': charlie
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data['accepted'] is False
+    print("✅ Decline-chat returned accepted=False")
+
+    # Verify no match created
+    for mid, m in store.active_matches.items():
+        assert m['user1_id'] != charlie and m['user2_id'] != charlie, "No match should exist for declined request"
+    print("✅ No match created for declined request")
+
+    # Verify pending request cleaned up
+    assert store.get_pending_request(charlie) is None
+    print("✅ Pending request cleaned up")
+
+    for mid in list(store.active_matches.keys()):
+        del store.active_matches[mid]
+    cleanup_event("DeclineChatRequest Test")
+    print("✅ Decline chat request test completed\n")
+
+
+def test_connection_sample_user_auto():
+    """Test connection exchange auto-votes for sample user"""
+    print("🧪 Testing connection exchange with sample user (auto-vote)...")
+
+    from app.state import store
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'ConnSampleAuto Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    selected_names = [resp.json()[0]['name']]
+
+    client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names, 'topics': ['Tech']
+    })
+
+    resp = client.get(f'/api/events/{event_id}/config')
+    room = resp.json()['rooms'][0]
+
+    rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
+    sample = rresp.json()['users'][0]
+    sample_id = sample['id']
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'ConnUser'})
+    user_id = resp.json()['user_id']
+    client.post(f'/api/users/{user_id}/room', json={'room_id': room['id']})
+
+    # Request chat with force_accept to create match
+    resp = client.post(f'/api/users/{user_id}/request-chat', json={
+        'target_user_id': sample_id,
+        'force_accept': True
+    })
+    match_id = resp.json()['match_id']
+
+    # Real user votes Yes, force_sample_vote=True means sample also votes Yes
+    resp = client.post(f'/api/matches/{match_id}/connect', json={
+        'user_id': user_id,
+        'wants_to_connect': True,
+        'force_sample_vote': True
+    })
+    assert resp.status_code == 200
+    assert resp.json()['success'] is True
+    print("✅ Connection exchange succeeded with auto-vote")
+
+    assert store.connection_vote_count(match_id) == 2
+    print("✅ Both votes recorded (sample auto-voted)")
+
+    if match_id in store.active_matches:
+        del store.active_matches[match_id]
+    cleanup_event("ConnSampleAuto Test")
+    print("✅ Connection sample user auto-vote test completed\n")
+
+
+def test_sample_user_status_restore():
+    """Test that sample user's original is_available and status are restored after match ends"""
+    print("🧪 Testing sample user status restore...")
+
+    from app.state import store
+
+    client = TestClient(app)
+
+    resp = client.post('/api/events', json={'name': 'SampleStatusRestore Test'})
+    event_id = resp.json()['event_id']
+
+    resp = client.get(f'/api/events/{event_id}/rooms')
+    selected_names = [resp.json()[0]['name']]
+
+    client.put(f'/api/events/{event_id}/config', json={
+        'rooms': selected_names, 'topics': ['Tech']
+    })
+
+    resp = client.get(f'/api/events/{event_id}/config')
+    room = resp.json()['rooms'][0]
+
+    rresp = client.get(f'/api/events/{event_id}/rooms/{room["id"]}/users')
+    sample = rresp.json()['users'][0]
+    sample_id = sample['id']
+
+    # Capture original values BEFORE any match modifications
+    sample_user_before = store.get_user(sample_id)
+    assert sample_user_before is not None, "Sample user should be in store after config save"
+    orig_available = sample_user_before['is_available']
+    orig_status = sample_user_before['status']
+    print(f"✅ Captured original state: available={orig_available}, status='{orig_status}'")
+
+    resp = client.post(f'/api/events/{event_id}/join', json={'username': 'StatusUser'})
+    user_id = resp.json()['user_id']
+    client.post(f'/api/users/{user_id}/room', json={'room_id': room['id']})
+
+    # Request chat (force_accept) — changes sample user's is_available and status
+    resp = client.post(f'/api/users/{user_id}/request-chat', json={
+        'target_user_id': sample_id,
+        'force_accept': True
+    })
+    match_id = resp.json()['match_id']
+
+    # Verify sample user was modified
+    modified_user = store.get_user(sample_id)
+    assert modified_user['is_available'] == False
+    assert 'Currently in a chat' in modified_user['status']
+    print("✅ Sample user modified after match: available=False, status set to chat message")
+
+    # Complete connection exchange — should restore original values
+    resp = client.post(f'/api/matches/{match_id}/connect', json={
+        'user_id': user_id,
+        'wants_to_connect': True,
+        'force_sample_vote': True
+    })
+    assert resp.status_code == 200
+
+    # Verify sample user restored to original values
+    restored_user = store.get_user(sample_id)
+    assert restored_user is not None
+    assert restored_user['is_available'] == orig_available, \
+        f"Expected is_available={orig_available}, got {restored_user['is_available']}"
+    assert restored_user['status'] == orig_status, \
+        f"Expected status='{orig_status}', got '{restored_user['status']}'"
+    print("✅ Sample user restored to original values after match end")
+
+    if match_id in store.active_matches:
+        del store.active_matches[match_id]
+    cleanup_event("SampleStatusRestore Test")
+    print("✅ Sample user status restore test completed\n")
+
+
+TEST_EVENT_NAMES = [
+    "API Test Event", "Social Test", "Match Test", "FindMatch Test",
+    "Sample Fill Test", "Idempotent Test", "Room Users API Test",
+    "Replacement Test", "RequestChatAccept Test", "RequestChatDecline Test",
+    "RequestChatPending Test", "AcceptChatRequest Test",
+    "DeclineChatRequest Test", "ConnSampleAuto Test",
+    "SampleStatusRestore Test"
+]
+
+
 def main():
     """Run all tests"""
     print("🌟 IntroChat Application Test Suite")
     print("=" * 50)
+
+    # Clean up stale test events from previous runs
+    for name in TEST_EVENT_NAMES:
+        cleanup_event(name)
 
     test_imports()
     test_file_structure()
@@ -840,8 +1290,16 @@ def main():
     test_sample_users_fill()
     test_sample_users_idempotent()
     test_room_users_api()
+    test_request_chat_sample_accept()
+    test_request_chat_sample_decline()
+    test_request_chat_real_user_pending()
+    test_accept_chat_request_real()
+    test_decline_chat_request_real()
+    test_connection_sample_user_auto()
+    test_sample_user_status_restore()
     test_helpers_short_id()
     test_qr_utils()
+    test_event_replacement()
 
     print("🎉 All tests completed!")
 

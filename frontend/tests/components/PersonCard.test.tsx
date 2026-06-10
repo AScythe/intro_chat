@@ -10,6 +10,7 @@ describe('PersonCard', () => {
     name: 'Alice_Dev',
     available: true,
     status: 'Ready to chat',
+    is_sample: false,
   };
 
   it('renders person name', () => {

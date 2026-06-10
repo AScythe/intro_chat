@@ -22,7 +22,6 @@ export function ChatPage() {
   const { user } = useUser();
   const socket = useSocket();
 
-  const isDemo = matchId?.startsWith('demo_');
   const eventId = searchParams.get('event_id') || user?.eventId || '';
   const [state, setState] = useState<ChatState>('loading');
   const [partnerName, setPartnerName] = useState('');
@@ -42,17 +41,9 @@ export function ChatPage() {
   }, [matchId]);
 
   function loadMatchInfo() {
-    if (isDemo) {
-      setTimeout(() => {
-        setPartnerName(searchParams.get('partner') || 'Dan_DevOps');
-        setState('chatting');
-        timer.start();
-      }, CONFIG.DEMO_LOADING_DELAY_MS);
-      return;
-    }
-    fetchJSON<{ match_id: string; user2_username: string }>(`/api/matches/${matchId}`)
+    fetchJSON<{ match_id: string; user1_username: string; user2_username: string }>(`/api/matches/${matchId}`)
       .then((data) => {
-        setPartnerName(data.user2_username);
+        setPartnerName(data.user1_username === user?.username ? data.user2_username : data.user1_username);
         setState('chatting');
         timer.start();
       })

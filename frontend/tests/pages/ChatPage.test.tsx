@@ -27,9 +27,21 @@ describe('ChatPage', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     localStorage.clear();
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve([]),
+    globalThis.fetch = vi.fn((url: unknown) => {
+      const urlStr = typeof url === 'string' ? url : String(url);
+      if (urlStr.includes('/api/matches/')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ match_id: 'test123', user1_username: 'Current_User', user2_username: 'Dan_DevOps' }),
+        } as Response);
+      }
+      if (urlStr.includes('/api/prompts')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(['Prompt 1', 'Prompt 2', 'Prompt 3']),
+        } as Response);
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) } as Response);
     });
   });
 
@@ -43,18 +55,10 @@ describe('ChatPage', () => {
     expect(screen.getByText(/setting up your chat/i)).toBeInTheDocument();
   });
 
-  it('shows fallback partner name when no partner param', async () => {
+  it('shows partner name from match API', async () => {
     renderWithProviders('demo_test1234');
     await waitFor(() => {
-      expect(screen.getByText(/Dan_DevOps/i)).toBeInTheDocument();
-    }, { timeout: 3000 });
-  });
-
-  it('shows partner name from URL param when provided', async () => {
-    const partnerName = 'Sarah_Dev';
-    renderWithProviders('demo_test1234', 'TEST1234', partnerName);
-    await waitFor(() => {
-      expect(screen.getByText(new RegExp(partnerName, 'i'))).toBeInTheDocument();
+      expect(screen.getByText(/Current_User/i)).toBeInTheDocument();
     }, { timeout: 3000 });
   });
 

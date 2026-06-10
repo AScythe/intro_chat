@@ -47,6 +47,10 @@ async def init_db(db_path: str) -> None:
             await db.execute('ALTER TABLE users ADD COLUMN linkedin_url TEXT DEFAULT ""')
         if 'slack_handle' not in user_cols:
             await db.execute('ALTER TABLE users ADD COLUMN slack_handle TEXT DEFAULT ""')
+        if 'is_sample' not in user_cols:
+            await db.execute('ALTER TABLE users ADD COLUMN is_sample INTEGER DEFAULT 0')
+        if 'status' not in user_cols:
+            await db.execute('ALTER TABLE users ADD COLUMN status TEXT DEFAULT ""')
         await db.execute('''
             CREATE TABLE IF NOT EXISTS matches (
                 id TEXT PRIMARY KEY,
@@ -93,16 +97,6 @@ async def init_db(db_path: str) -> None:
             await db.execute('UPDATE event_topics SET selected = 0')
             placeholders = ','.join('?' for _ in DEFAULT_TOPICS)
             await db.execute(f'UPDATE event_topics SET selected = 1 WHERE name IN ({placeholders})', DEFAULT_TOPICS)
-        await db.execute('''
-            CREATE TABLE IF NOT EXISTS room_sample_users (
-                id TEXT PRIMARY KEY,
-                room_id TEXT NOT NULL,
-                user_name TEXT NOT NULL,
-                available INTEGER DEFAULT 0,
-                status TEXT DEFAULT '',
-                linkedin_url TEXT DEFAULT '',
-                slack_handle TEXT DEFAULT '',
-                FOREIGN KEY (room_id) REFERENCES rooms (id)
-            )
-        ''')
+        await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_events_name ON events(name)')
+        await db.execute('DROP TABLE IF EXISTS room_sample_users')
         await db.commit()

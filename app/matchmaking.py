@@ -27,7 +27,8 @@ async def find_or_enqueue_match(user_id: str) -> None:
                 u['room_id'] == room_id and
                 u['is_available'] and
                 uid in store.waiting_queue and
-                uid not in store.active_matches):
+                uid not in store.active_matches and
+                not u.get('is_sample', 0)):
                 available_users.append(uid)
     if available_users:
         match_user_id = available_users[0]
@@ -53,11 +54,20 @@ async def persist_match(user1_id: str, user2_id: str, room_id: str) -> str:
 
 def update_match_state(match_id: str, user1_id: str, user2_id: str, room_id: str) -> None:
     """[ARCH] In-memory state update — active_matches, waiting_queue, availability."""
+    original_user_status = {}
+    for uid in [user1_id, user2_id]:
+        user = store.active_users.get(uid)
+        if user and user.get('is_sample', 0):
+            original_user_status[uid] = {
+                'is_available': user.get('is_available', False),
+                'status': user.get('status', '')
+            }
     store.add_match(match_id, MatchData(
         user1_id=user1_id,
         user2_id=user2_id,
         room_id=room_id,
-        created_at=time.time()
+        created_at=time.time(),
+        original_user_status=original_user_status,
     ))
     store.remove_from_waiting_queue(user1_id)
     store.remove_from_waiting_queue(user2_id)

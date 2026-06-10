@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NearbyUsersView, WaitingResponseView, AcceptedView } from '@/components/PeoplePageViews';
-import type { SampleUserData } from '@/types/api';
+import type { UserData } from '@/types/api';
 
-const samplePerson: SampleUserData = { name: 'Alice', available: true, status: 'Ready' };
-const anotherPerson: SampleUserData = { name: 'Bob', available: false, status: 'Busy' };
+const samplePerson: UserData = { name: 'Alice', available: true, status: 'Ready', is_sample: false };
+const anotherPerson: UserData = { name: 'Bob', available: false, status: 'Busy', is_sample: false };
 
 describe('NearbyUsersView', () => {
   it('renders room name and nearby users', () => {

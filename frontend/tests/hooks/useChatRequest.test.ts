@@ -1,15 +1,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useChatRequest } from '@/hooks/useChatRequest';
-import { CONFIG } from '@/config/constants';
-import type { SampleUserData } from '@/types/api';
+import { fetchJSON } from '@/api/client';
+import type { UserData } from '@/types/api';
 
-const alice: SampleUserData = { name: 'Alice', available: true, status: 'Ready' };
-const bob: SampleUserData = { name: 'Bob', available: false, status: 'Busy' };
+vi.mock('@/api/client', () => ({
+  fetchJSON: vi.fn(),
+}));
+
+const alice: UserData = { name: 'Alice', available: true, status: 'Ready', is_sample: true, id: 'user_alice' };
+const bob: UserData = { name: 'Bob', available: false, status: 'Busy', is_sample: false, id: 'user_bob' };
+const defaultOptions = { userId: 'test_user', eventId: 'test_event' };
 
 describe('useChatRequest', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.mocked(fetchJSON).mockReset();
   });
 
   afterEach(() => {
@@ -17,7 +23,7 @@ describe('useChatRequest', () => {
   });
 
   it('initializes with default state', () => {
-    const { result } = renderHook(() => useChatRequest());
+    const { result } = renderHook(() => useChatRequest(defaultOptions));
     expect(result.current.requestedPerson).toBeNull();
     expect(result.current.personResponse).toBeNull();
     expect(result.current.yourReady).toBe(false);
@@ -25,7 +31,8 @@ describe('useChatRequest', () => {
   });
 
   it('sets requested person on requestChat', () => {
-    const { result } = renderHook(() => useChatRequest());
+    vi.mocked(fetchJSON).mockResolvedValue({ accepted: true, match_id: 'match1' });
+    const { result } = renderHook(() => useChatRequest(defaultOptions));
     act(() => {
       result.current.requestChat(alice);
     });
@@ -33,7 +40,8 @@ describe('useChatRequest', () => {
   });
 
   it('resets state when requesting a different person', () => {
-    const { result } = renderHook(() => useChatRequest());
+    vi.mocked(fetchJSON).mockResolvedValue({ accepted: true, match_id: 'match1' });
+    const { result } = renderHook(() => useChatRequest(defaultOptions));
     act(() => {
       result.current.requestChat(alice);
     });
@@ -45,7 +53,7 @@ describe('useChatRequest', () => {
   });
 
   it('marks yourReady on imReady', () => {
-    const { result } = renderHook(() => useChatRequest());
+    const { result } = renderHook(() => useChatRequest(defaultOptions));
     act(() => {
       result.current.imReady();
     });
@@ -53,11 +61,7 @@ describe('useChatRequest', () => {
   });
 
   it('resets state on cancelRequest', () => {
-    const { result } = renderHook(() => useChatRequest());
-    act(() => {
-      result.current.requestChat(alice);
-    });
-    expect(result.current.requestedPerson).toEqual(alice);
+    const { result } = renderHook(() => useChatRequest(defaultOptions));
     act(() => {
       result.current.cancelRequest();
     });
@@ -65,41 +69,5 @@ describe('useChatRequest', () => {
     expect(result.current.personResponse).toBeNull();
     expect(result.current.yourReady).toBe(false);
     expect(result.current.theirReady).toBe(false);
-  });
-
-  it('receives person response after delay', async () => {
-    const { result } = renderHook(() => useChatRequest());
-    act(() => {
-      result.current.requestChat(alice);
-    });
-    expect(result.current.personResponse).toBeNull();
-    await act(async () => {
-      vi.advanceTimersByTime(100);
-    });
-    await act(async () => {
-      vi.advanceTimersByTime(CONFIG.SIMULATE_RESPONSE_DELAY_MS);
-    });
-    expect(result.current.personResponse).not.toBeNull();
-    expect(result.current.personResponse?.accepted).toBe(true);
-  });
-
-  it('sets theirReady after simulate ready delay', async () => {
-    const { result } = renderHook(() => useChatRequest());
-    act(() => {
-      result.current.requestChat(alice);
-    });
-    // Outer setTimeout (100ms) → simulateDelay starts
-    await act(async () => {
-      vi.advanceTimersByTime(100);
-    });
-    // simulateDelay resolves → personResponse set, theirReady setTimeout starts
-    await act(async () => {
-      vi.advanceTimersByTime(CONFIG.SIMULATE_RESPONSE_DELAY_MS);
-    });
-    // theirReady setTimeout fires
-    await act(async () => {
-      vi.advanceTimersByTime(CONFIG.SIMULATE_READY_DELAY_MS);
-    });
-    expect(result.current.theirReady).toBe(true);
   });
 });

@@ -26,6 +26,9 @@ describe('ConnectPage', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     localStorage.clear();
+    localStorage.setItem('introchat_user_id', 'test-user');
+    localStorage.setItem('introchat_event_id', 'TEST1234');
+    localStorage.setItem('introchat_username', 'Test_User');
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: () => Promise.resolve([]),
@@ -47,19 +50,16 @@ describe('ConnectPage', () => {
     expect(screen.getByText(/Back to Home/i)).toBeInTheDocument();
   });
 
-  it('shows connection exchanged result after yes in demo mode', async () => {
+  it('calls connect API when yes is clicked', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ success: true }) });
+    globalThis.fetch = mockFetch;
     renderWithProviders('demo_test1234');
     fireEvent.click(screen.getByRole('button', { name: /yes.*connect/i }));
     await waitFor(() => {
-      expect(screen.getByText(/Connection Exchanged/i)).toBeInTheDocument();
-    }, { timeout: 4000 });
-  });
-
-  it('shows chat complete result after no in demo mode', async () => {
-    renderWithProviders('demo_test1234');
-    fireEvent.click(screen.getByRole('button', { name: /no thanks/i }));
-    await waitFor(() => {
-      expect(screen.getByText(/Chat Complete/i)).toBeInTheDocument();
-    }, { timeout: 4000 });
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('/api/matches/'),
+        expect.objectContaining({ method: 'POST' }),
+      );
+    });
   });
 });
