@@ -1,16 +1,16 @@
 # Graph Report - intro_chat  (2026-06-11)
 
 ## Corpus Check
-- 146 files · ~108,388 words
+- 146 files · ~107,511 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1739 nodes · 2283 edges · 132 communities (96 shown, 36 thin omitted)
+- 1801 nodes · 2390 edges · 132 communities (104 shown, 28 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 6 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fd971cb0`
+- Built from commit: `2afc6e08`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -109,12 +109,11 @@
 - [[_COMMUNITY_Community 91|Community 91]]
 - [[_COMMUNITY_Community 92|Community 92]]
 - [[_COMMUNITY_Community 93|Community 93]]
+- [[_COMMUNITY_Community 94|Community 94]]
 - [[_COMMUNITY_Community 95|Community 95]]
 - [[_COMMUNITY_Community 96|Community 96]]
-- [[_COMMUNITY_Community 97|Community 97]]
 - [[_COMMUNITY_Community 98|Community 98]]
 - [[_COMMUNITY_Community 99|Community 99]]
-- [[_COMMUNITY_Community 100|Community 100]]
 - [[_COMMUNITY_Community 101|Community 101]]
 - [[_COMMUNITY_Community 102|Community 102]]
 - [[_COMMUNITY_Community 103|Community 103]]
@@ -126,7 +125,6 @@
 - [[_COMMUNITY_Community 109|Community 109]]
 - [[_COMMUNITY_Community 110|Community 110]]
 - [[_COMMUNITY_Community 111|Community 111]]
-- [[_COMMUNITY_Community 112|Community 112]]
 - [[_COMMUNITY_Community 113|Community 113]]
 - [[_COMMUNITY_Community 114|Community 114]]
 - [[_COMMUNITY_Community 115|Community 115]]
@@ -144,40 +142,42 @@
 - [[_COMMUNITY_Community 127|Community 127]]
 - [[_COMMUNITY_Community 128|Community 128]]
 - [[_COMMUNITY_Community 129|Community 129]]
+- [[_COMMUNITY_Community 133|Community 133]]
+- [[_COMMUNITY_Community 134|Community 134]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `7. Session Lessons Learned` - 33 edges
-2. `main()` - 29 edges
+2. `main()` - 30 edges
 3. `cn()` - 25 edges
 4. `Module Descriptions` - 24 edges
 5. `StateStore` - 20 edges
-6. `compilerOptions` - 19 edges
-7. `Frontend Modules (React SPA)` - 19 edges
-8. `cleanup_event()` - 17 edges
-9. `🌟 IntroChat - The Secret Icebreaker for Introverts` - 17 edges
+6. `Frontend Modules (React SPA)` - 19 edges
+7. `compilerOptions` - 19 edges
+8. `Tests` - 18 edges
+9. `cleanup_event()` - 18 edges
 10. `🌟 IntroChat - The Secret Icebreaker for Introverts` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `test_database()` --calls--> `init_db()`  [INFERRED]
-  tests/test_app.py → app/database.py
+  test_app.py → app/database.py
+- `test_matchmaking_lifecycle()` --calls--> `create_match()`  [INFERRED]
+  test_app.py → app/matchmaking.py
+- `test_helpers_short_id()` --calls--> `short_id()`  [INFERRED]
+  test_app.py → app/helpers.py
+- `test_qr_utils()` --calls--> `generate_qr_data_uri()`  [INFERRED]
+  test_app.py → app/qr_utils.py
 - `reset_database()` --calls--> `init_db()`  [INFERRED]
   tests/test_db.py → app/database.py
-- `test_helpers_short_id()` --calls--> `short_id()`  [INFERRED]
-  tests/test_app.py → app/helpers.py
-- `test_matchmaking_lifecycle()` --calls--> `create_match()`  [INFERRED]
-  tests/test_app.py → app/matchmaking.py
-- `test_qr_utils()` --calls--> `generate_qr_data_uri()`  [INFERRED]
-  tests/test_app.py → app/qr_utils.py
 
-## Communities (132 total, 36 thin omitted)
+## Communities (132 total, 28 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
+Cohesion: 0.07
 Nodes (57): cleanup_event(), main(), Test accepting a chat request from a real user, Test declining a chat request from a real user, Test connection exchange auto-votes for sample user, Test that sample user's original is_available and status are restored after matc, Test that all required files exist, Test database initialization and basic operations (+49 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.10
-Nodes (27): PromptCard(), PromptCardProps, { container }, cn(), Badge(), BadgeProps, badgeVariants, Checkbox (+19 more)
+Cohesion: 0.09
+Nodes (28): PromptCard(), PromptCardProps, { container }, cn(), JoinEventResponse, Badge(), BadgeProps, badgeVariants (+20 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
@@ -185,15 +185,15 @@ Nodes (42): dependencies, class-variance-authority, clsx, cmdk, lucide-react, mo
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
-Nodes (38): Boundaries, code:block1 (ccc index), code:powershell (Remove-Item -Recurse -Force graphify-out/), code:powershell (Remove-Item -Recurse -Force graphify-out/), code:block4 (uv run python agent_utility/dedup_graph_nodes.py), code:bash (git diff --name-only "$(git merge-base HEAD main)" HEAD), code:powershell (git diff --name-only $(git merge-base HEAD main) HEAD), code:block7 (.py, .ts, .tsx, .js, .jsx, .css, .json, .html, .toml) (+30 more)
+Nodes (40): Boundaries, code:block1 (ccc index), code:powershell (Remove-Item -Recurse -Force graphify-out/), code:powershell (Remove-Item -Recurse -Force graphify-out/), code:block4 (uv run python agent_utility/dedup_graph_nodes.py), code:bash (git diff --name-only "$(git merge-base HEAD main)" HEAD), code:powershell (git diff --name-only $(git merge-base HEAD main) HEAD), code:block7 (.py, .ts, .tsx, .js, .jsx, .css, .json, .html, .toml) (+32 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.10
-Nodes (20): fetchJSON(), fetchWithTimeout(), parseJSON(), data, promise, PersonResponse, alice, bob (+12 more)
+Cohesion: 0.17
+Nodes (13): fetchJSON(), fetchWithTimeout(), parseJSON(), data, promise, PersonResponse, alice, bob (+5 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.06
-Nodes (34): Abort Paths, Archive Plan (on success), Boundaries, code:bash (python -m pytest tests/ -v), code:bash (cd frontend && npm run build), code:bash (python -m py_compile <changed_file>.py), Exit Declaration, Hand-off (+26 more)
+Nodes (35): Abort Paths, Archive Plan (on success), Boundaries, code:bash (python -m pytest tests/ -v), code:bash (cd frontend && npm run build), code:bash (python -m py_compile <changed_file>.py), Exit Declaration, Hand-off (+27 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.06
@@ -224,8 +224,8 @@ Cohesion: 0.10
 Nodes (21): 8.10 Batch by Logical Concern, Not Line Count, 8.16 Independent Re-Verification, 8.1 Permission Control, 8.2 Executable Sources of Truth, 8.3 Filename as Stable Key, 8.4 Preserve Manual, Regenerate Auto, 8.5 Diff Logging for Automation, 8.6 Cross-Language Extraction Pattern (+13 more)
 
 ### Community 13 - "Community 13"
-Cohesion: 0.09
-Nodes (26): AcceptedView(), AcceptedViewProps, IncomingRequestView(), IncomingRequestViewProps, NearbyUsersView(), NearbyUsersViewProps, PersonResponse, anotherPerson (+18 more)
+Cohesion: 0.11
+Nodes (22): AcceptedView(), AcceptedViewProps, IncomingRequestView(), IncomingRequestViewProps, NearbyUsersView(), NearbyUsersViewProps, PersonResponse, anotherPerson (+14 more)
 
 ### Community 14 - "Community 14"
 Cohesion: 0.07
@@ -244,16 +244,16 @@ Cohesion: 0.07
 Nodes (26): Audience, code:markdown (### X.Y Practice Name), code:markdown (# Universal Project Best Practices), Content Rules, Entry Format, Exit Declaration, Gate: User Confirmation, Hand-off (+18 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.08
+Cohesion: 0.07
 Nodes (25): Adding a New Documentation File, Adding a New REST API Route, Adding a New WebSocket Message Type, Architecture - IntroChat, Changing Timer Durations, code:block1 (intro_chat/), code:block2 (app/), code:bash (# Install Python dependencies) (+17 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.10
-Nodes (25): Abort Paths, Boundaries, Content Rules, Exit Declaration, Explicit Path (standalone "sync docs"), Hand-off, Implicit Path (Phase 3 of review-implementation), Next Step (+17 more)
+Cohesion: 0.07
+Nodes (32): Abort Paths, Boundaries, code:block1 (git diff --name-only $(git merge-base HEAD main) HEAD), code:powershell (git diff --name-only $(git merge-base HEAD main) HEAD), Content Rules, Exit Declaration, Explicit Path (standalone "sync docs"), Hand-off (+24 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.20
-Nodes (25): check(), extract_frontmatter(), main(), Verify that each loadable skill's description contains trigger keywords     that, Verify that for each Phase 0 Hard Gate classification, the documented     primar, Verify messages that should NOT match any skill (fall through to default)., Extract name and description from YAML frontmatter., Verify that mixed tasks correctly combine layers (not a single tool). (+17 more)
+Cohesion: 0.18
+Nodes (30): check(), extract_frontmatter(), main(), Verify that each loadable skill's description contains trigger keywords     that, Verify that each loadable skill's description contains trigger keywords     that, Verify that for each Phase 0 Hard Gate classification, the documented     primar, Verify that for each Phase 0 Hard Gate classification, the documented     primar, Verify messages that should NOT match any skill (fall through to default). (+22 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.15
@@ -304,12 +304,12 @@ Cohesion: 0.10
 Nodes (19): Boundaries (gate-driven phase), code:markdown (# PLAN_YYYY_MM_DD_XXX), code:markdown (## Readiness Gate Results), Exit Declaration (fail), Exit Declaration (pass), Hand-off, Next Step (fail), Next Step (pass) (+11 more)
 
 ### Community 33 - "Community 33"
-Cohesion: 0.12
-Nodes (12): Theme, ThemeContext, ThemeContextValue, ThemeProvider(), useTheme(), getCurrentStep(), pageTransition, pageVariants (+4 more)
+Cohesion: 0.11
+Nodes (17): Theme, ThemeContext, ThemeContextValue, ThemeProvider(), useTheme(), useSocket(), useUser(), ChatPage() (+9 more)
 
 ### Community 34 - "Community 34"
-Cohesion: 0.11
-Nodes (16): SocketProvider(), Subscription, SocketContext, SocketContextValue, handler, mock, msg, { result } (+8 more)
+Cohesion: 0.05
+Nodes (39): SocketProvider(), Subscription, loadUserFromStorage(), saveUserToStorage(), { result }, UserProvider(), SocketContext, SocketContextValue (+31 more)
 
 ### Community 35 - "Community 35"
 Cohesion: 0.10
@@ -328,12 +328,12 @@ Cohesion: 0.11
 Nodes (17): Boundaries (read-only phase), Exit Declaration, Guidelines, Hand-off, Next Step, Output, Outputs & Triggers, Phase 0: Prerequisites (+9 more)
 
 ### Community 40 - "Community 40"
-Cohesion: 0.20
-Nodes (9): ChipItem, added, defaultItems, { result }, { result, rerender }, selectedState1, selectedState2, useChipSelection() (+1 more)
+Cohesion: 0.10
+Nodes (16): ChipItem, added, defaultItems, { result }, { result, rerender }, selectedState1, selectedState2, useChipSelection() (+8 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.12
-Nodes (17): 1. Skills & Commands (`.opencode/`), 2. Agent Guidelines (`AGENTS.md`), 3. Reference Documents (`refs/`), 4. Agent Utilities (`agent_utility/`), 5. Agent Guideline Tests, 6. Project Config Files, code:block19 (.opencode/skills/<name>/SKILL.md   — all skill definitions), code:block20 (refs/AGENT_SETUP.md) (+9 more)
+Cohesion: 0.17
+Nodes (12): 1. Skills & Commands (`.opencode/`), 2. Agent Guidelines (`AGENTS.md`), 3. Reference Documents (`refs/`), 4. Agent Utilities (`agent_utility/`), 5. Agent Guideline Tests, 6. Project Config Files, code:block19 (.opencode/skills/<name>/SKILL.md   — all skill definitions), code:block20 (refs/AGENT_SETUP.md) (+4 more)
 
 ### Community 42 - "Community 42"
 Cohesion: 0.18
@@ -360,12 +360,12 @@ Cohesion: 0.15
 Nodes (3): generate_qr_data_uri(), Generate a base64-encoded PNG data URI from a string., generate_qr()
 
 ### Community 48 - "Community 48"
-Cohesion: 0.14
-Nodes (14): `app/connection_service.py` (Connection Exchange), `app/handlers.py` (Error Handlers), `app/__init__.py` (Orchestrator), `app/__main__.py` (Entry Point), `app/prompts.py` (Conversation Prompts), `app/qr_utils.py` (QR Code Generator), `app/routes_html.py` (HTML Routes), `app/routes_ws.py` (WebSocket Route) (+6 more)
+Cohesion: 0.12
+Nodes (16): `app/config.py` (Configuration), `app/connection_manager.py` (WebSocket Manager), `app/connection_service.py` (Connection Exchange), `app/handlers.py` (Error Handlers), `app/__init__.py` (Orchestrator), `app/__main__.py` (Entry Point), `app/routes_html.py` (HTML Routes), `app/routes_ws.py` (WebSocket Route) (+8 more)
 
 ### Community 49 - "Community 49"
-Cohesion: 0.14
-Nodes (14): `frontend/tests/api/client.test.ts` (API Client), `frontend/tests/e2e/organizerFlow.spec.ts` (E2E — Organizer Flow), `frontend/tests/e2e/participantFlow.spec.ts` (E2E — Participant Flow), `frontend/tests/hooks/useChipSelection.test.ts` (Chip Selection Hook), `frontend/tests/utils/random.test.ts` (Random Utilities), Functions, Functions, Functions (+6 more)
+Cohesion: 0.11
+Nodes (18): `frontend/tests/api/client.test.ts` (API Client), `frontend/tests/e2e/organizerFlow.spec.ts` (E2E — Organizer Flow), `frontend/tests/e2e/participantFlow.spec.ts` (E2E — Participant Flow), `frontend/tests/hooks/useChipSelection.test.ts` (Chip Selection Hook), `frontend/tests/utils/random.test.ts` (Random Utilities), Functions, Functions, Functions (+10 more)
 
 ### Community 50 - "Community 50"
 Cohesion: 0.14
@@ -408,8 +408,8 @@ Cohesion: 0.33
 Nodes (10): AcceptChatRequest, CreateEventRequest, DeclineChatRequest, ExchangeConnectionRequest, JoinEventRequest, RequestChatRequest, SaveEventConfigRequest, SetAvailabilityRequest (+2 more)
 
 ### Community 60 - "Community 60"
-Cohesion: 0.22
-Nodes (9): ChatTimerControls, onComplete, onTick, { result }, TimerBaseState, TimerCallbacks, TimerControls, useChatTimer() (+1 more)
+Cohesion: 0.40
+Nodes (5): code:block24 ([ ] .opencode/skills/ — all source skill folders present), code:powershell (uv run python tests/test_agent_guidelines.py), Post-Copy Setup, Post-Copy Verification Gate, Replicating to Another Project
 
 ### Community 61 - "Community 61"
 Cohesion: 0.18
@@ -424,12 +424,12 @@ Cohesion: 0.18
 Nodes (10): 2.1 Server Binding for Browser Access, 2.2 Portable Config Paths, 2. Configuration, 3. Error Handling, 4. State Management, code:python (if not input: return {'error': 'No data'}, 400), code:python (if user_id not in active_users:), code:python (# ❌ Bad) (+2 more)
 
 ### Community 64 - "Community 64"
-Cohesion: 0.13
-Nodes (12): { result }, UserProvider(), { result }, UserContext, UserContextValue, UserData, useUser(), btn (+4 more)
+Cohesion: 0.67
+Nodes (3): `app/prompts.py` (Conversation Prompts), Data, Data
 
 ### Community 65 - "Community 65"
-Cohesion: 0.51
-Nodes (7): loadUserFromStorage(), saveUserToStorage(), clearUserId(), getData(), getUserId(), storeData(), storeUserId()
+Cohesion: 0.67
+Nodes (3): `app/qr_utils.py` (QR Code Generator), Functions, Functions
 
 ### Community 66 - "Community 66"
 Cohesion: 0.20
@@ -440,8 +440,8 @@ Cohesion: 0.31
 Nodes (6): lock(), MatchData, PendingRequest, QueueEntry, UserData, TypedDict
 
 ### Community 68 - "Community 68"
-Cohesion: 0.31
-Nodes (7): generateRandomString(), generateUsername(), a, b, result, result12, result4
+Cohesion: 0.20
+Nodes (9): code:bash (cd frontend && npx playwright test), Custom Setup, E2E Testing — IntroChat, Known Issues, Manual, Project Info, Run Command, Test Scenarios (+1 more)
 
 ### Community 69 - "Community 69"
 Cohesion: 0.22
@@ -460,12 +460,12 @@ Cohesion: 0.57
 Nodes (7): main(), phase2_basename_match(), phase2_prefix_match(), phase2_suffix_match(), phase3_true_duplicates(), pick_file_level_node(), resolve_real_path()
 
 ### Community 73 - "Community 73"
-Cohesion: 0.25
-Nodes (6): HomePage(), buttons, input, joinEventHeaders, mockResponse, nameInput
+Cohesion: 0.33
+Nodes (5): id, response, { result }, users, useDemoSimulation()
 
 ### Community 74 - "Community 74"
-Cohesion: 0.13
-Nodes (15): mockEventConfig, mockRoomUsers, RoomSelectorProps, CreateEventResponse, EventConfigResponse, JoinEventResponse, QRResponse, Room (+7 more)
+Cohesion: 0.20
+Nodes (11): RoomSelectorProps, CreateEventResponse, EventConfigResponse, QRResponse, Room, SaveEventConfigResponse, Topic, SelectContent (+3 more)
 
 ### Community 75 - "Community 75"
 Cohesion: 0.25
@@ -476,8 +476,8 @@ Cohesion: 0.25
 Nodes (8): Appendix: Archived Documents, Audience, Content Boundaries, DEMO_GUIDE.md (Archived), Key Differentiator, Scope, What NOT to Include, What to Include
 
 ### Community 77 - "Community 77"
-Cohesion: 0.20
-Nodes (10): 8.11 Persistent Decision Artifacts, code:block61 (docs/), code:block62, code:block63, code:block64, code:block65, code:block66, code:block67 (+2 more)
+Cohesion: 0.09
+Nodes (22): 1. Discover Project State, 2. Compute Content Hash, 3. Generate or Regenerate docs/E2E_TESTING.md, 4. Install Playwright (if missing), 5. Build (if build command exists), 6. Run E2E Tests, 7. Report Results, Auto-Generated (top) (+14 more)
 
 ### Community 78 - "Community 78"
 Cohesion: 0.29
@@ -539,29 +539,61 @@ Nodes (4): `agent_utility/enhance_graph_viewer.py`, `agent_utility/filter_graph.
 Cohesion: 0.50
 Nodes (3): dependencies, @opencode-ai/plugin, opencode-ast-grep
 
+### Community 94 - "Community 94"
+Cohesion: 0.67
+Nodes (3): `app/helpers.py` (Shared Helpers), Functions, Functions
+
 ### Community 95 - "Community 95"
 Cohesion: 0.67
 Nodes (3): `app/database.py` (Database Schema), Functions, Tables
 
+### Community 98 - "Community 98"
+Cohesion: 0.22
+Nodes (9): ChatTimerControls, onComplete, onTick, { result }, TimerBaseState, TimerCallbacks, TimerControls, useChatTimer() (+1 more)
+
+### Community 99 - "Community 99"
+Cohesion: 0.67
+Nodes (3): `app/routes_api.py` (REST API Routes), Functions, Functions
+
+### Community 101 - "Community 101"
+Cohesion: 0.20
+Nodes (10): 8.11 Persistent Decision Artifacts, code:block61 (docs/), code:block62, code:block63, code:block64, code:block65, code:block66, code:block67 (+2 more)
+
+### Community 102 - "Community 102"
+Cohesion: 0.67
+Nodes (3): `app/websocket_handler.py` (WebSocket Handler), Functions, Functions
+
+### Community 103 - "Community 103"
+Cohesion: 0.67
+Nodes (3): `app/matchmaking.py` (Match Logic), Functions, Functions
+
+### Community 104 - "Community 104"
+Cohesion: 0.67
+Nodes (3): `app/tasks.py` (Background Tasks), Functions, Functions
+
+### Community 109 - "Community 109"
+Cohesion: 0.25
+Nodes (6): HomePage(), buttons, input, joinEventHeaders, mockResponse, nameInput
+
 ## Knowledge Gaps
-- **915 isolated node(s):** `Step 1: Read Docs`, `Step 2: Read Plan Fully`, `Step 3: Codebase Exploration`, `Step 4: Map Batches`, `Simplicity First` (+910 more)
+- **954 isolated node(s):** `code:block1 (intro_chat/)`, ``app/__init__.py` (Orchestrator)`, `TypedDicts`, `Data Structures (internal)`, `Data re-export` (+949 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **36 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 1` to `Community 2`, `Community 7`, `Community 9`, `Community 74`, `Community 13`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
-- **Why does `clsx` connect `Community 2` to `Community 1`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **What connects `Step 1: Read Docs`, `Step 2: Read Plan Fully`, `Step 3: Codebase Exploration` to the rest of the system?**
-  _975 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `Universal Project Best Practices` connect `Community 63` to `Community 44`, `Community 12`, `Community 58`, `Community 27`, `Community 62`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `Module Descriptions` connect `Community 48` to `Community 64`, `Community 65`, `Community 99`, `Community 102`, `Community 103`, `Community 104`, `Community 6`, `Community 49`, `Community 18`, `Community 91`, `Community 92`, `Community 94`, `Community 95`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **Why does `test_matchmaking_lifecycle()` connect `Community 0` to `Community 55`?**
+  _High betweenness centrality (0.004) - this node is a cross-community bridge._
+- **What connects `code:block1 (intro_chat/)`, ``app/__init__.py` (Orchestrator)`, `TypedDicts` to the rest of the system?**
+  _1019 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05989110707803993 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07481005260081823 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.09581646423751687 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09230769230769231 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.046511627906976744 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.05128205128205128 - nodes in this community are weakly interconnected._
