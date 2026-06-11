@@ -2,12 +2,11 @@
 """
 test_agent_guidelines.py
 Description: Validates AGENTS.md specification-routing logic and structural integrity.
-Section 1 (routing): given hypothetical user messages, verifies that documented rules
-select the correct skill (via description keyword matching) and correct tool (via
-Three-Tier Classification). No messages are executed — pure static routing
-verification. Section 2 (integrity): verifies all verifiable claims in AGENTS.md
-against the actual filesystem — file paths, command targets, docs, naming conventions,
-description headers, and tool availability.
+Covers 12 test groups: skill routing (hypothetical messages → skill descriptions),
+tool selection (query types → Three-Tier Classification), no-match fallthrough,
+mixed-task layering, priority chain, file ownership paths, commands reference,
+documentation structure, test suite naming, utility skills, documentation discipline
+(description headers), and tooling availability (uv, npm).
 """
 
 import sys
@@ -77,8 +76,8 @@ def scan_description_headers(directory: str, extensions: tuple, pattern: str) ->
                         content = fh.read()
                     if not re.search(pattern, content):
                         missing.append(path)
-                except (OSError, UnicodeDecodeError):
-                    pass
+                except (OSError, UnicodeDecodeError) as e:
+                    warn(f"Cannot read {path} — {e}")
     return missing
 
 SOURCE_PATHS = {
@@ -103,7 +102,7 @@ AUTO_GENERATED_PATHS = {
 DIR_PATTERNS = {
     "tests/test_*.py": "Backend test file pattern",
     "docs/PLAN_*.md": "Active plan file pattern",
-    "archive": "Archived plan directory",
+    "archive/plan/": "Archived plan directory (completed plans)",
     ".opencode/skills/*/SKILL.md": "All skill definition files",
     "refs/*.md": "Reference doc files",
 }
@@ -111,10 +110,11 @@ COMMAND_TARGET_GROUPS = {
     "package.json scripts": [("frontend/package.json", "file")],
     "app entry point": [("app/__init__.py", "file"), ("app/__main__.py", "file")],
     "type-check config": [("frontend/tsconfig.json", "file")],
+    "backend tests": [("tests/test_app.py", "file")],
     "utilities": [("utility/cleanup_db.py", "file")],
 }
 DOC_PATHS = [
-    "docs/README.md", "docs/ARCHITECTURE.md", "docs/SPECIFICATIONS.md",
+    "README.md", "docs/ARCHITECTURE.md", "docs/SPECIFICATIONS.md",
     "docs/DESIGN_SPEC.md", "AGENTS.md", "refs/AGENT_SETUP.md",
     "refs/PROJECT_BEST_PRACTICES.md", "refs/DOCUMENT_GUIDELINES.md",
 ]
@@ -494,8 +494,8 @@ def test_file_ownership_paths():
         if "*" in pattern:
             parent = resolve(os.path.dirname(pattern))
             check(os.path.isdir(parent), f"Parent dir exists for `{pattern}` ({label})")
-        elif pattern == "archive":
-            check(os.path.isdir(resolve("archive")), f"`archive/` directory exists ({label})")
+        elif pattern == "archive/plan/":
+            check(os.path.isdir(resolve("archive/plan")), f"`archive/plan/` directory exists ({label})")
         else:
             full = resolve(pattern)
             check(os.path.isfile(full), f"`{pattern}` ({label})")
@@ -506,7 +506,7 @@ def test_file_ownership_paths():
             skill_md = os.path.join(entry.path, "SKILL.md")
             if os.path.isfile(skill_md):
                 skill_count += 1
-    check(skill_count == 20, f"All 20 skills have SKILL.md (found {skill_count})")
+    check(skill_count == 21, f"All 21 skills have SKILL.md (found {skill_count})")
 
     ref_dir = resolve("refs")
     ref_count = 0

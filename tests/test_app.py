@@ -151,7 +151,7 @@ def test_file_structure():
         'app/qr_utils.py',
         'app/sample_users.py',
         'pyproject.toml',
-        'docs/README.md',
+        'README.md',
         'frontend/package.json',
         'frontend/index.html',
         'frontend/src/main.tsx',
