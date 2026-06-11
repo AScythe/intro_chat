@@ -118,7 +118,7 @@ DOC_PATHS = [
     "docs/DESIGN_SPEC.md", "AGENTS.md", "refs/AGENT_SETUP.md",
     "refs/PROJECT_BEST_PRACTICES.md", "refs/DOCUMENT_GUIDELINES.md",
 ]
-UTILITY_SKILLS = ["rebuild-test-and-indexes", "frontend-design", "shadcn", "run-e2e-tests", "save-session"]
+UTILITY_SKILLS = ["rebuild-test-and-indexes", "frontend-design", "shadcn", "generate-and-run-e2e-tests", "save-session"]
 
 EXECUTE_MESSAGE = (
     "THIS IS A HYPOTHETICAL TEST MESSAGE — "
@@ -202,10 +202,11 @@ SKILL_ROUTING_CASES = [
         "update indexes for the new modules",
         "reindex the codebase before review",
     ]),
-    ("run-e2e-tests", [
+    ("generate-and-run-e2e-tests", [
         "run e2e tests for the chat flow",
         "end to end test the app after connections change",
         "playwright tests for the new page",
+        "generate e2e doc for the new page",
     ]),
     ("save-session", [
         "save session after the implementation",

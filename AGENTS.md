@@ -19,7 +19,7 @@
 | 7 | Refactoring and Code Cleaning | `modularize-and-clean` | "modularize", "clean up", "refactor" |
 | 8 | Improving Security | `improve-security` | "security review", "audit security", "improve security posture" |
 | 9 | Syncing Documentation | `update-docs` | "sync docs", "update docs", "docs are outdated" |
-| 10 | Rebuilding Indexes and Tests | `rebuild-test-and-indexes` | "rebuild test and indexes", "rebuild indexes", "update indexes", "reindex" |
+| 10 | Rebuilding Indexes and Tests | `rebuild-test-and-indexes` | "rebuild test and indexes", "rebuild indexes", "update tests", "reindex" |
 | 11 | Committing and Pushing | `push-to-git` | "push", "commit and push", "push to github" |
 
 **Key ordering rules:**
@@ -222,7 +222,7 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 
 - **Rebuild tests and indexes:** Before review verification (Phase 0 of `review-implementation`), or standalone request — see `rebuild-test-and-indexes` skill.
 - **Frontend/UIUX work:** For UI/UX frontend tasks, use `frontend-design` (design spec) then `shadcn` (implementation) sequentially — see each skill for full behavioral rules.
-- **End-to-end tests:** Run Playwright E2E tests standalone — auto-installs Chromium, builds SPA, starts app with temp DB — see `run-e2e-tests` skill.
+- **End-to-end tests:** Run Playwright E2E tests standalone — auto-installs Chromium, builds SPA, starts app with temp DB — see `generate-and-run-e2e-tests` skill.
 - **Save session:** Save conversation timeline to `docs/sessions/` at workflow transitions — see `save-session` skill. Session files include a YAML frontmatter header (~200 tokens) and are re-readable via Session Continuity Check.
 - **Update docs:** Sync documentation after code changes — delegates to `update-architecture-md`, `update-readme-md`, `update-agent-setup-md`, `update-specifications-md`, `update-agents-md`, and `update-best-practices-md` skills. **Dual mode:** explicit (standalone) performs full codebase + session scan; implicit (auto-called by `review-implementation` Phase 3) uses git diff delta for lightweight sync.
 

@@ -9,21 +9,21 @@ description: 'Analyze session changes and sync all project documentation by dele
 - Update each doc in dependency order
 - Verify cross-reference integrity across all project docs
 - Route to push-to-git
-- **Auto-execute update-docs (implicit) on success** — when invoked from review-implementation Phase 3
+- **Auto-execute update-docs (implicit) on success** — when invoked from review-implementation Phase 0a
 
 ## Purpose
 
 Two invocation modes with fundamentally different detection strategies:
 
-| Aspect | Explicit (standalone) | Implicit (Phase 3 of review-implementation) |
+| Aspect | Explicit (standalone) | Implicit (Phase 0a of review-implementation) |
 |--------|----------------------|----------------------------------------------|
 | Detection | Full codebase + session history | git diff delta |
 | Scope | ALL docs — full analysis | Only docs matching changed files |
 | Investigation | Full: graphify + codebase walk + session | Light: graphify for context, skip full codebase walk |
-| Proposal | Full per-doc proposals | Delta-only proposals |
-| Approval | Serial per-doc review (full diff display) | Quick summary per doc (question tool) |
-| Apply | After approval per doc | After quick approval per doc |
-| Verify | Cross-reference integrity | Cross-reference integrity (always runs) |
+| Proposal | Full per-doc proposals | Delta-only proposals via parallel sub-agents |
+| Approval | Serial per-doc review (full diff display) | No approval — auto-apply from proposals |
+| Apply | After approval per doc | Sequential apply by main agent (no user gate) |
+| Verify | Cross-reference integrity | Moved to review-implementation Phase 5 (read-only) |
 | Blocking | Yes — user must complete review | Non-blocking — failures warn but don't halt caller |
 
 ## Boundaries
@@ -49,7 +49,7 @@ Two invocation modes with fundamentally different detection strategies:
 
 ## Phase 0: Prerequisites
 
-- [ ] Determine invocation mode — explicit (standalone "sync docs") or implicit (Phase 3 of review-implementation)
+- [ ] Determine invocation mode — explicit (standalone "sync docs") or implicit (Phase 0a of review-implementation)
 - [ ] If explicit: review session changes — git diff, [FLAG] annotations, conversation history
 - [ ] Match changes against Doc Sync Triggers table
 - [ ] Read AGENTS.md doc sync triggers table
@@ -123,25 +123,32 @@ If a user rejected or modified a proposal, skip or adjust accordingly.
 
 ---
 
-## Implicit Path (Phase 3 of review-implementation)
+## Implicit Path (Phase 0a of review-implementation)
 
-**Detection method:** git diff delta — only files that changed. Determine which docs need updating by matching change types against Doc Sync Triggers. No full codebase scan. Used when auto-invoked by `review-implementation` Phase 3 after successful sign-off.
+**Detection method:** git diff delta — only files that changed. Determine which docs need updating by matching change types against Doc Sync Triggers. No full codebase scan. Used when auto-invoked by `review-implementation` Phase 0a.
 
-### Phase 1: Scope (git diff)
+**Trust boundary:** Caller ran baseline tests before invoking. Doc deltas are derived from the same git diff the implementer already tested — auto-apply is safe.
 
-1. Run `git diff HEAD --name-only` to list changed files
-2. Match changed files against the Doc Sync Triggers table
-3. If no triggers match → skip to Phase 3 (Verify cross-references only)
-4. Build update list: only docs whose trigger patterns match changed files
+### Step 1: Detect Changed Files
 
-### Phase 2: Propose (Delta Analysis)
+```
+git diff --name-only $(git merge-base HEAD main) HEAD
+```
 
-For each doc in the update list, launch a Task sub-agent to analyze and propose delta diffs. Each sub-agent is **read-only** — investigates the diff context and returns proposals, but does NOT apply any edits.
+PowerShell fallback:
+```powershell
+git diff --name-only $(git merge-base HEAD main) HEAD
+```
 
-Sub-agents in implicit mode:
-- Run `graphify query_graph` for context on changed modules
-- Skip the full codebase walk (only analyze files from git diff)
-- Return ONLY proposals related to diff files (delta), not full doc rewrites
+### Step 2: Match Against Doc Sync Triggers
+
+Match changed files against the Doc Sync Triggers table (same as explicit path).
+
+If no triggers match → Step 4 (Report: "No doc updates needed").
+
+### Step 3: Propose and Apply (Parallel Sub-Agents, Sequential Apply)
+
+For each triggered doc, launch a Task sub-agent (read-only, returns `{filePath, oldString, newString, reason}` proposals). Each sub-agent loads the doc-specific skill with `mode="implicit"` and diff context. Run all sub-agents in parallel.
 
 Launch all sub-agents in parallel:
 
@@ -153,36 +160,20 @@ Launch all sub-agents in parallel:
 6. `refs/AGENT_SETUP.md` → instruct sub-agent to load `skill(name: "update-agent-setup-md")` with `mode="implicit"` and diff context
 7. `refs/DOCUMENT_GUIDELINES.md` — inline analysis with diff context (no dedicated skill)
 
-Each sub-agent returns: a list of `{filePath, oldString, newString, reason}` objects. No edits are applied.
+Collect all proposals. Main agent applies edits sequentially via `edit` tool. **No Quick Approval gate.**
 
-### Phase 3: Quick Approval
+### Step 4: Report
 
-Collect all proposals from Phase 2. Present a summary of each document's proposed changes to the user **one doc at a time** using the `question` tool.
-
-For each doc that has proposals:
-1. Show a brief summary (e.g., "Architecture: 3 entries updated — new connection_service.py, renamed handlers")
-2. Ask user: approve or reject (yes/no) per doc
-3. Lighter than full review — no full diff display per edit
-
-### Phase 4: Apply
-
-Apply approved proposals from Phase 3 using the `edit` tool. Apply one doc at a time — run full test suite before moving to the next doc.
-
-If a user rejected a proposal, skip accordingly.
-
-### Phase 5: Verify (Cross-Reference Audit)
-
-- [ ] All `See <DOC>.md` links between documents resolve to existing headings
-- [ ] No dead anchor references — every `#section-name` target exists in the target doc
-- [ ] No orphaned sections — every section in each doc is reachable from another doc or from the doc's own TOC
-- [ ] No stale redirects — `→ Redirect to <filename>` markers are removed if the target document no longer exists
+| Scenario | Output |
+|----------|--------|
+| N docs updated | "Implicit doc sync complete. [N] doc(s) updated: [list]." |
+| No triggers matched | "Implicit doc sync complete. No doc updates needed." |
+| Sub-agent or edit failure | "WARNING: [detail]. Non-blocking." |
 
 ## Hand-off
-- Phase 1: Session changes inventoried and matched against Doc Sync Triggers
-- Phase 2: All applicable docs have proposals generated (parallel analysis, no writes)
-- Phase 3: User reviewed and approved/rejected each proposal
-- Phase 4: Approved edits applied (one doc at a time, tests pass between each)
-- Phase 5: Cross-references verified — no dead links, orphaned sections, or stale redirects
+- Explicit mode: Phase 1 (Inventory) → Phase 2 (Propose via sub-agents) → Phase 3 (Review & Approve) → Phase 4 (Apply) → Phase 5 (Verify cross-references)
+- Implicit mode: Step 1 (Detect) → Step 2 (Match) → Step 3 (Propose & Apply — auto, no user gate) → Step 4 (Report)
+- Cross-reference verification moved to review-implementation Phase 5 (read-only)
 
 ### Abort Paths
 If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
@@ -192,12 +183,12 @@ If interrupted mid-phase: record current state in a TODO or pending list, offer 
 ## Outputs & Triggers
 
 ### Output
-All applicable docs updated via propose-review-apply pipeline. Cross-references verified across all project docs. No dead links, orphaned sections, or stale redirects.
+All applicable docs updated. Cross-references verified in explicit mode only (implicit mode cross-ref check handled by review-implementation Phase 5).
 
 ### Exit Declaration
 - **Explicit mode:** State clearly: "**Documentation sync complete. All applicable syncs run, cross-references verified. Proceed to push-to-git? Say 'push' to trigger pushing the changes to git.**"
-- **Implicit mode:** State clearly: "**Documentation sync complete (implicit). Delta updates applied, cross-references verified.**"
+- **Implicit mode:** State clearly: "**Implicit doc sync complete. [N] doc(s) updated.**" (or "No doc updates needed.")
 
 ### Next Step
 - **Explicit mode:** User invokes `push-to-git` (Build mode — same mode, no switch needed).
-- **Implicit mode:** Control returns to `review-implementation` Hand-off (no user action needed).
+- **Implicit mode:** Control returns to `review-implementation` Phase 0 (proceeds to rebuild-test-and-indexes).

@@ -1,6 +1,6 @@
 ---
 name: rebuild-test-and-indexes
-description: 'Rebuild CocoIndex code index and Graphify knowledge graph. On explicit invocation does a full direct codebase scan to find and fix all stale/outdated/broken tests before rebuilding; when invoked as Phase 0 of review-implementation, uses git diff for delta updates. Use after any code change, or when the user says "rebuild test and indexes", "rebuild indexes", "update indexes", "reindex", or similar.'
+description: 'Rebuild CocoIndex code index and Graphify knowledge graph. On explicit invocation does a full direct codebase scan to find and fix all stale/outdated/broken tests before rebuilding; when invoked as Phase 0 of review-implementation, uses git diff for delta updates. Use after any code change, or when the user says "rebuild test and indexes", "update tests", "reindex", or similar.'
 ---
 
 ## Purpose
@@ -205,9 +205,17 @@ For each changed file:
 
 Skip test files unrelated to the diff. Do not touch business-logic tests.
 
-### Step 3: Run All Test Suites
+### Step 3: Run All Test Suites (Parallel)
 
-Same as Explicit Phase 2 Step 1. Run full suite to confirm delta updates didn't break anything.
+Run test suites concurrently:
+
+| Parallel call | Command |
+|---------------|---------|
+| 1 | `uv run python tests/test_app.py` |
+| 2 | `cd frontend ; npm test` (skip if node_modules/ not found) |
+
+Wait for both to complete. Then run agent guidelines test (depends on structural changes from backend test):
+- `uv run python tests/test_agent_guidelines.py`
 
 If all pass → proceed to Step 5 (Conditional Rebuild).
 If any fail → proceed to Step 4 (Triage).
@@ -229,7 +237,7 @@ Apply the same Failure Triage table as Explicit Phase 2 Step 2. The key differen
 
 **Implicit mode is non-blocking** — failures produce warnings but do not halt the caller. The caller (review-implementation) will independently verify test health in later phases.
 
-### Step 5: Conditional Rebuild
+### Step 5: Conditional Rebuild (Parallel)
 
 Filter changed files against indexed file types:
 
@@ -237,7 +245,16 @@ Filter changed files against indexed file types:
 .py, .ts, .tsx, .js, .jsx, .css, .json, .html, .toml
 ```
 
-**If any changed file matches** → rebuild CocoIndex (same as Explicit Phase 3 Step 1) and Graphify (same as Explicit Phase 3 Step 2).
+**If any changed file matches** → rebuild CocoIndex and Graphify concurrently:
+
+| Parallel call | Command |
+|---------------|---------|
+| 1 | `ccc index` (same as Explicit Phase 3 Step 1) |
+| 2 | `graphify update .` (same as Explicit Phase 3 Step 2; PowerShell: `$env:PYTHONIOENCODING='utf-8'; graphify update .`) |
+
+Wait for both. Then run dedup sequentially (depends on graphify output):
+- `uv run python agent_utility/dedup_graph_nodes.py`
+
 **If none match** (only .md, lock files, .gitignore, etc.) → skip. Report: "No source files changed — index/graph is current. Skipping rebuild."
 
 ### Step 6: Report

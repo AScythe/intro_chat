@@ -42,7 +42,7 @@ This skill supports two invocation modes. **Explicit** (default, standalone): fo
 - **Failure Triage** — classification table with symptom, cause, action (import path, brittle test, behavioral regression, baseline failure, flaky)
 - **Commands Reference** — exact CLI commands for common operations (build, run, test, lint, cleanup)
 - **Test Suite Structure** — if the project has a `tests/` directory, document: naming convention, file-table with run commands, and policies
-- **Utility Skills** — non-phase skills (rebuild-test-and-indexes, frontend-design+shadcn, run-e2e-tests) as prose descriptions
+- **Utility Skills** — non-phase skills (rebuild-test-and-indexes, frontend-design+shadcn, generate-and-run-e2e-tests) as prose descriptions
 - **Session Continuity Check** — trigger conditions (automatic heuristic, user "continue"), policy (header only, archived sessions, sub-agent context)
 - **Documentation Structure table** — file-to-location map so agents know where each doc lives
 - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
@@ -109,7 +109,7 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 <!-- FILL: test-suite-section -->
 
 ## Utility Skills
-[Non-phase skill references — rebuild-test-and-indexes, frontend-design+shadcn, run-e2e-tests]
+[Non-phase skill references — rebuild-test-and-indexes, frontend-design+shadcn, generate-and-run-e2e-tests]
 
 ## Session Continuity Check
 [Trigger conditions: automatic heuristic (session files exist + <3 user messages), user "continue" after compaction. Policy: header only (~200 tokens), archived sessions never auto-read, sub-agent extracts 1-3 relevant lines]

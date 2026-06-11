@@ -12,7 +12,7 @@ description: 'Verify the completed implementation meets all success criteria —
 - Verify against plan or evaluation list — every criterion met
 - Sign off or route back to the appropriate prior skill
 - Archive plan on success
-- Auto-execute update-docs (implicit) on success — documentation sync runs automatically after sign-off
+- Auto-sync docs before running tests (Phase 0a) — docs updated before test suite verifies them
 
 ## Boundaries
 - **Find and fix** — inspect the codebase for issues; fix broken structural references, stale test assertions, and index staleness inline. Do not route backward for fixable issues found during review.
@@ -25,7 +25,8 @@ description: 'Verify the completed implementation meets all success criteria —
 - [ ] Confirm which prior skill produced the diff (implement-plan, improve-architecture, or modularize-and-clean)
 - [ ] Read the prior plan or evaluation list
 - [ ] Run baseline tests — all must pass before proceeding
-- [ ] Load and execute `rebuild-test-and-indexes` skill in **implicit mode** — handles: delta structural sync (via git diff) → test re-run → triage (max 3 cycles) → conditional index rebuild. Everything test+index related is delegated here.
+- [ ] Load and execute `update-docs` skill in **implicit mode** — auto-syncs docs from git diff delta (no user interaction)
+- [ ] Load and execute `rebuild-test-and-indexes` skill in **implicit mode** — delta structural sync → parallel test run → triage (max 3 cycles) → parallel conditional index rebuild
 
 ## Review Workflow
 
@@ -226,22 +227,24 @@ Only reached on successful sign-off.
 2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
 3. After save completes, proceed to the update-docs step below
 
-### Phase 5: Update Docs
-**Purpose:** Sync documentation to reflect the verified implementation — closes the review loop.
+### Phase 5: Cross-Reference Verification
+**Purpose:** Verify document link integrity — read-only, no edits.
 
 Only reached after Phase 4 Save Session completes.
 
-**Steps:**
-1. Load the skill: `skill(name: "update-docs")`
-2. Follow the implicit path: Phase 1 (Scope) → Phase 2 (Delta Analysis) → Phase 3 (Quick Approval) → Phase 4 (Apply) → Phase 5 (Verify)
-3. After update-docs completes, proceed to Hand-off below
+- [ ] All `See <DOC>.md` links between documents resolve to existing headings
+- [ ] No dead anchor references — every `#section-name` target exists in the target doc
+- [ ] No orphaned sections — every section in each doc is reachable from another doc or from the doc's own TOC
+- [ ] No stale redirects — `→ Redirect to <filename>` markers removed if target file no longer exists
 
 ## Hand-off
+- Phase 0a: Update-docs (implicit) — auto-synced docs via git diff delta
+- Phase 0b: Rebuild-test-and-indexes (implicit) — structural sync, parallel tests, parallel index rebuild
 - Phase 1: Diff reviewed, git status clean — only expected files touched
 - Phase 2: All tests pass (count compared), build succeeds, lint clean
 - Phase 3: Test quality verified, plan/evaluation criteria met, archive moved
 - Phase 4: Review session saved
-- Phase 5: Update-docs (implicit) executed — delta updates applied, cross-references verified
+- Phase 5: Cross-reference verification passed — no dead links, no orphaned sections
 - Pass → route to modularize-and-clean (first pass) or improve-architecture (first pass) or improve-security (first pass). Fail → route back to the prior skill that produced the diff.
 
 ### Abort Paths
@@ -257,13 +260,13 @@ Verbal verification report: pass (all items implemented, all criteria met) or fa
 ### Exit Declaration
 
 **Pass** — state clearly:
-- First pass: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (structural cleanup), improve-architecture (architectural improvement), and improve-security (security hardening). Proceed?**"
-- Clean-up/Architecture pass: "**All checks pass. Cleanup and architecture improvements verified. Documentation sync already triggered — no manual update-docs needed.**"
+- First pass: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (code cleanup), improve-architecture (architectural improvement), and improve-security (security hardening). Proceed?**"
+- Clean-up/Architecture/Security pass: "**All checks pass. Cleanup and architecture improvements verified.**"
 
 **Fail** — state clearly: "**Review failed. [List items not met.] Route back to [prior skill: implement-plan / modularize-and-clean / improve-architecture] to resolve.**"
 
 ### Next Step
 
-- **First pass — pass:** User invokes `modularize-and-clean` (Build mode) and `improve-architecture` (Plan mode). Update-docs was already auto-executed.
-- **Clean-up/Architecture pass — pass:** No further action needed. Update-docs was already auto-executed.
+- **First pass — pass:** User invokes `modularize-and-clean`, `improve-architecture`, and `improve-security`. Phase 0 auto-steps (update-docs + rebuild-test-and-indexes) already completed.
+- **Clean-up/Architecture/Security pass — pass:** No further action needed. Phase 0 auto-steps already completed.
 - **Any fail:** User invokes the prior skill that produced the diff.

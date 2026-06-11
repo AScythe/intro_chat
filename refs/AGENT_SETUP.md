@@ -275,7 +275,7 @@ The `.opencode/skills/` directory contains 21 skills implementing an Agentic Dev
 | 9 | `update-docs` | Build |
 | 10 | `rebuild-test-and-indexes` | Build |
 | 11 | `push-to-git` | Build |
-| — | `run-e2e-tests` | Build |
+| — | `generate-and-run-e2e-tests` | Build |
 | — | `update-agent-setup-md` | Build |
 | — | `update-agents-md` | Build |
 | — | `update-architecture-md` | Build |
