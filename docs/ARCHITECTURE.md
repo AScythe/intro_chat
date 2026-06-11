@@ -141,7 +141,6 @@ intro_chat/
     │   └── skills/                 # 20 agentic workflow and utility skills
 │
 ├── docs/                         # Documentation
-│   ├── README.md              # (moved to root — see /README.md)
 │   ├── ARCHITECTURE.md        # This file (project structure reference)
 │   ├── DESIGN_SPEC.md         # Visual design specification — color system, typography, motion
 │   ├── SPECIFICATIONS.md       # Product specification (problem, solution, user flow, out of scope, privacy)
@@ -580,7 +579,7 @@ Dual-section validation suite. Section 1 (routing): verifies AGENTS.md skill-rou
 - `test_commands_reference()` — verifies command target files exist and package.json has build/dev/test/test:e2e scripts
 - `test_documentation_structure()` — verifies all 8 documented doc paths exist
 - `test_test_suite_structure()` — verifies backend `test_*.py`, frontend `*.test.{ts,tsx}`, E2E `*.spec.ts` naming conventions
-- `test_utility_skills()` — verifies 4 utility skill files exist (rebuild-test-and-indexes, frontend-design, shadcn, run-e2e-tests)
+- `test_utility_skills()` — verifies 5 utility skill files exist (rebuild-test-and-indexes, frontend-design, shadcn, generate-and-run-e2e-tests, save-session)
 - `test_documentation_discipline()` — verifies all Python files in app/ have `# Description:` header and all TS/TSX files in frontend/src/ have description header
 - `test_tooling_rules()` — verifies `uv` and `npm` tools available on PATH
 - `main()` — runs all test functions, reports PASS/FAIL count
