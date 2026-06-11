@@ -1,7 +1,7 @@
 # Architecture - IntroChat
 ===================================================
 
-> **Last verified:** 2026-05-31 20:15 EDT
+> **Last verified:** 2026-06-11 06:00 EDT
 
 ## Project Structure
 
@@ -93,14 +93,18 @@ intro_chat/
 │   │   │   └── participantFlow.spec.ts # Playwright E2E — join, match, chat, connection exchange, decline
 │   │   ├── setup.ts           # Vitest test setup — imports jest-dom DOM matchers
 │   │   ├── App.test.tsx       # Tests for App root — route rendering and provider integration
+│   │   ├── api/
+│   │   │   └── client.test.ts # Tests for fetchJSON wrapper — timeout, HTTP errors, successful fetch
 │   │   ├── utils/
 │   │   │   ├── format.test.ts # Tests for format utilities — formatTime edge cases
-│   │   │   └── storage.test.ts # Tests for storage utilities — localStorage read/write/clear
+│   │   │   ├── storage.test.ts # Tests for storage utilities — localStorage read/write/clear
+│   │   │   └── random.test.ts # Tests for random string and username generation utilities
 │   │   ├── hooks/
 │   │   │   ├── useSocket.test.ts        # Tests for useSocket hook — connect, disconnect, auto-reconnect
 │   │   │   ├── useTimer.test.ts         # Tests for useChatTimer hook — tick, extend, clear, onComplete
 │   │   │   ├── useDemoSimulation.test.ts # Tests for useDemoSimulation hook — demo simulation behavior
 │   │   │   ├── useChatRequest.test.ts   # Tests for useChatRequest hook — chat request lifecycle
+│   │   │   ├── useChipSelection.test.ts # Tests for useChipSelection hook — toggle, add, handleClick, state stability
 │   │   │   └── useUser.test.tsx         # Tests for useUser hook — session data
 │   │   ├── context/
 │   │   │   └── UserContext.test.tsx # Tests for UserContext — session hydration and state updates
@@ -137,13 +141,18 @@ intro_chat/
     │   └── skills/                 # 20 agentic workflow and utility skills
 │
 ├── docs/                         # Documentation
-│   ├── README.md              # Main project README (features, setup, deployment)
+│   ├── README.md              # (moved to root — see /README.md)
 │   ├── ARCHITECTURE.md        # This file (project structure reference)
+│   ├── DESIGN_SPEC.md         # Visual design specification — color system, typography, motion
 │   ├── SPECIFICATIONS.md       # Product specification (problem, solution, user flow, out of scope, privacy)
+│   ├── sessions/              # Session transcripts (auto-saved via save-session skill)
 │   └── PLAN_*.md              # Active plan documents (created by check-plan-readiness, moved to archive/ after review)
 │
-├── archive/                       # Archived plans (completed/reviewed)
-│   └── PLAN_*.md              # Archived decision records (moved from docs/ after review)
+├── archive/                       # Archived plans and sessions
+│   ├── plan/
+│   │   └── PLAN_*.md          # Archived decision records (moved from docs/ after review)
+│   └── sessions/
+│       └── SESSION_*.md       # Archived session transcripts
 │
 ├── refs/                         # Reference documents
 │   ├── AGENT_SETUP.md         # Agent development environment setup (tooling, PATH, MCP)
@@ -191,11 +200,13 @@ FastAPI app factory that initializes the server, mounts static files, registers 
 - `StateStore.add_match()`, `StateStore.get_match()`, `StateStore.remove_match()` — thread-safe match dict access
 - `StateStore.add_to_waiting_queue()`, `StateStore.remove_from_waiting_queue()` — thread-safe queue access
 - `StateStore.init_connection_status()`, `StateStore.set_connection_vote()`, `StateStore.connection_vote_count()`, `StateStore.connection_all_voted_yes()` — connection exchange helpers
+- `StateStore.add_pending_request()`, `StateStore.get_pending_request()`, `StateStore.remove_pending_request()`, `StateStore.get_all_pending_requests()`, `StateStore.get_pending_requests_for_user()` — pending chat request management
 - `StateStore.lock` — `threading.Lock` property exposed for compound operations (e.g., iterating + mutating under one acquisition)
 
 #### TypedDicts
-- `UserData` — `{event_id: str, username: str, room_id: str | None, linkedin_url: str, slack_handle: str, is_available: bool, last_seen: str | None}`
-- `MatchData` — `{user1_id: str, user2_id: str, room_id: str, created_at: float}`
+- `UserData` — `{event_id: str, username: str, room_id: str | None, linkedin_url: str, slack_handle: str, is_available: bool, last_seen: str | None, is_sample: int, status: str}`
+- `PendingRequest` — `{requester_id: str, target_id: str, room_id: str, timestamp: float, requester_name: str, target_name: str}`
+- `MatchData` — `{user1_id: str, user2_id: str, room_id: str, created_at: float, original_user_status: dict}`
 - `QueueEntry` — `{room_id: str, timestamp: float}`
 
 #### Data Structures (internal)
@@ -203,6 +214,7 @@ FastAPI app factory that initializes the server, mounts static files, registers 
 - `active_matches: dict[str, MatchData]` — `{match_id: MatchData}`
 - `waiting_queue: dict[str, QueueEntry]` — `{user_id: QueueEntry}`
 - `connection_statuses: dict[str, dict[str, bool]]` — `{match_id: {user_id: wants_to_connect}}`
+- `pending_requests: dict[str, PendingRequest]` — `{requester_id: PendingRequest}`
 - `_lock: threading.Lock` — protects all dict mutations (acquired by all mutator methods)
 
 #### Data re-export
@@ -326,10 +338,14 @@ Pydantic request models for API endpoint validation — event creation, user joi
 
 #### Models
 - `CreateEventRequest` — `name: str`
-- `JoinEventRequest` — `username: str | None`, `linkedin_url: str | None`, `slack_handle: str | None`
+- `JoinEventRequest` — `username: str | None`, `linkedin_url: str | None`, `slack_handle: str | None`, `interests: list[str] | None`
+- `SaveEventConfigRequest` — `rooms: list[str]`, `topics: list[str]`
 - `SetUserRoomRequest` — `room_id: str`
 - `SetAvailabilityRequest` — `available: bool`
-- `ExchangeConnectionRequest` — `user_id: str`, `wants_to_connect: bool`
+- `ExchangeConnectionRequest` — `user_id: str`, `wants_to_connect: bool`, `force_sample_vote: bool | None`
+- `RequestChatRequest` — `target_user_id: str`, `force_accept: bool | None`
+- `AcceptChatRequest` — `requester_id: str`
+- `DeclineChatRequest` — `requester_id: str`
 
 ### `app/connection_manager.py` (WebSocket Manager)
 `ConnectionManager` class that tracks WebSocket connections keyed by user ID, manages room memberships, and provides per-user and per-room message broadcasting. All dict mutations protected by `threading.Lock` for thread safety.
@@ -575,6 +591,15 @@ Playwright E2E tests for organizer flow — event creation, room/topic configura
 #### `frontend/tests/e2e/participantFlow.spec.ts` (E2E — Participant Flow)
 Playwright E2E tests for participant flow — join with auto-generated/custom name, room selection, matchmaking via availability toggle, chat page rendering with conversation prompts, and post-chat connection exchange (both users connect and one declines). Uses localStorage hydration for user context and random room selection from default rooms. Run via `npm run test:e2e`. Per-test timeout: 90s.
 
+#### `frontend/tests/api/client.test.ts` (API Client)
+Tests for `fetchJSON` wrapper — timeout handling, HTTP error responses, and successful fetch. Uses `vi.mock` to intercept `global.fetch`.
+
+#### `frontend/tests/hooks/useChipSelection.test.ts` (Chip Selection Hook)
+Tests for `useChipSelection` hook — toggle, add item, handleClick behavior, and state stability across re-renders.
+
+#### `frontend/tests/utils/random.test.ts` (Random Utilities)
+Tests for `generateRandomString` and `generateUsername` — default/custom length, character set, uniqueness properties.
+
 ---
 
 ### Maintenance Scripts
@@ -644,6 +669,9 @@ Constant `CONVERSATION_PROMPTS` defined in `app/prompts.py` — safe to edit.
 | `POST` | `/api/users/<id>/room` | Select room |
 | `POST` | `/api/users/<id>/available` | Toggle availability + trigger `find_or_enqueue_match()` |
 | `GET` | `/api/users/<id>/match` | Get current match for user |
+| `POST` | `/api/users/<id>/request-chat` | Request a chat with a specific user in the same room |
+| `POST` | `/api/users/<id>/accept-request` | Accept a pending chat request |
+| `POST` | `/api/users/<id>/decline-request` | Decline a pending chat request |
 | `GET` | `/api/matches/<id>` | Get match details with usernames |
 | `POST` | `/api/matches/<id>/connect` | Submit connection preference (delegates to `connection_service.py`) |
 | `GET` | `/api/prompts` | Get 10 conversation prompts |
@@ -654,6 +682,8 @@ Constant `CONVERSATION_PROMPTS` defined in `app/prompts.py` — safe to edit.
 |-------|-----------|---------|
 | `join_room` | Client → Server | `{room_id}` |
 | `match_found` | Server → Client | `{match_id, room_id, user1_username, user2_username}` |
+| `chat_request` | Server → Client | `{requester_id, requester_name, room_id}` |
+| `chat_request_declined` | Server → Client | `{message}` |
 | `connection_exchanged` | Server → Client | `{user1_username, user2_username}` |
 | `connection_declined` | Server → Client | — |
 

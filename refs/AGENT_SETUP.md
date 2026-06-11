@@ -1,6 +1,6 @@
 # Agent Development Environment Setup
 
-> **Last verified:** 2026-06-10
+> **Last verified:** 2026-06-11
 
 This document captures every global and project-level configuration needed to reproduce this project's AI coding assistant environment on any device.
 
@@ -260,7 +260,7 @@ Graphify usage rules are already committed in `AGENTS.md` and the MCP server is 
 
 ### Agentic Workflow Skills
 
-The `.opencode/skills/` directory contains 20 skills implementing a Agentic Development pipeline (21 with the auto-generated `graphify` skill in `AGENTS.md`):
+The `.opencode/skills/` directory contains 21 skills implementing an Agentic Development pipeline:
 
 | Phase | Skill | Mode |
 |-------|-------|------|
@@ -271,8 +271,10 @@ The `.opencode/skills/` directory contains 20 skills implementing a Agentic Deve
 | 5 | `review-implementation` | Build |
 | 6 | `improve-architecture` | Build |
 | 7 | `modularize-and-clean` | Build |
-| 8 | `update-docs` | Build |
-| 9 | `push-to-git` | Build |
+| 8 | `improve-security` | Build |
+| 9 | `update-docs` | Build |
+| 10 | `rebuild-test-and-indexes` | Build |
+| 11 | `push-to-git` | Build |
 | — | `run-e2e-tests` | Build |
 | — | `update-agent-setup-md` | Build |
 | — | `update-agents-md` | Build |
@@ -280,7 +282,6 @@ The `.opencode/skills/` directory contains 20 skills implementing a Agentic Deve
 | — | `update-best-practices-md` | Build |
 | — | `update-readme-md` | Build |
 | — | `update-specifications-md` | Build |
-| — | `rebuild-test-and-indexes` | Build |
 | — | `save-session` | Build |
 | — | `frontend-design` | Plan |
 | — | `shadcn` | Build |
@@ -407,50 +408,104 @@ Restart your OpenCode session. Both MCP servers should connect automatically.
 
 ## Replicating to Another Project
 
-To reuse this project's agent development environment in a **new project** (not a clone of a repo that already has it), manually copy the following files from a source project that already has them set up.
+To reuse this project's agent development environment in a **new project**, manually copy the following files and folders from a source project that already has them set up.
 
-### Instructions
+### Files to Copy
 
-1. **Create the directory structure** in your new project:
-   ```
-    .opencode/skills/
-    .opencode/commands/
-    tests/
-    refs/
-    ```
+#### 1. Skills & Commands (`.opencode/`)
 
-2. **Copy skills** — From the source project's `.opencode/skills/`, copy every `<skill-name>/SKILL.md` folder into your new project's `.opencode/skills/`. Keep the same folder structure.
+```
+.opencode/skills/<name>/SKILL.md   — all skill definitions
+.opencode/commands/<name>.md       — all command definitions
+.opencode/package.json             — plugin dependency manifest
+.opencode/package-lock.json        — locked plugin versions
+```
 
-3. **Copy commands** — From the source project's `.opencode/commands/`, copy every `.md` file into your new project's `.opencode/commands/`.
+#### 2. Agent Guidelines (`AGENTS.md`)
 
-4. **Copy OpenCode plugin manifests** — From the source project's `.opencode/`, copy `package.json` and `package-lock.json` into your new project's `.opencode/`.
+Copy `AGENTS.md` to the new project root.
 
-5. **Copy agent guidelines test** — From the source project's `tests/`, copy `test_agent_guidelines.py` into your new project's `tests/`.
+> ⚠️ **Must edit:** Update file paths, command targets, doc references, skill list, and test references to match the new project. Every path in the File Ownership table, Commands Reference, Documentation Structure, and Test Suite Structure sections should point to real files in the new project.
 
-6. **Copy reference documents** — From the source project's `refs/`, copy all `.md` files (`AGENT_SETUP.md`, `PROJECT_BEST_PRACTICES.md`, `DOCUMENT_GUIDELINES.md`) into your new project's `refs/`.
+#### 3. Reference Documents (`refs/`)
 
-7. **Copy project config** — From the source project root, copy `opencode.json` into your new project's root.
+```
+refs/AGENT_SETUP.md
+refs/PROJECT_BEST_PRACTICES.md
+refs/DOCUMENT_GUIDELINES.md
+```
 
-   > **Verify MCP format after copy:** Ensure the `"mcp"` key is used (not `"mcpServers"`) and each server has `"type": "local"` with a `"command"` array (not `"command"` + `"args"`). See the [reference config](#opencodejson-project-root) above for the correct shape.
+#### 4. Agent Utilities (`agent_utility/`)
 
-8. **Add gitignore rules** — Append these tool-related rules to your new project's `.gitignore`:
-   ```gitignore
-   .opencode/node_modules/
-   /.cocoindex_code/
-   graphify-out/manifest.json
-   graphify-out/cost.json
-   graphify-out/cache/
-    graphify-out/.graphify_labels.json
-    graphify-out/.graphify_root
-    ```
+Copy the entire `agent_utility/` directory:
 
-9. **Copy `.graphifyignore`** — If `.graphifyignore` exists in the source project, copy it to the new project root. It filters low-signal files (caches, dependencies, archives) from the knowledge graph.
+```
+agent_utility/filter_graph.py
+agent_utility/enhance_graph_viewer.py
+agent_utility/dedup_graph_nodes.py
+```
 
-10. **Copy `agent_utility/`** — Copy the entire `agent_utility/` directory from the source project to the new project root. Contains graph maintenance scripts (`filter_graph.py`, `enhance_graph_viewer.py`, `dedup_graph_nodes.py`) that are invoked by the `rebuild-test-and-indexes` skill.
+These graph maintenance scripts are invoked by the `rebuild-test-and-indexes` skill.
+
+#### 5. Agent Guideline Tests
+
+```
+tests/test_agent_guidelines.py
+```
+
+> ⚠️ After copying, update the `SOURCE_PATHS` dict and `COMMAND_TARGET_GROUPS` at the top of the file to match the new project's layout.
+
+#### 6. Project Config Files
+
+| File | Purpose |
+|------|---------|
+| `opencode.json` | MCP servers, plugins, skill permissions — verify MCP format after copy |
+| `.graphifyignore` | Low-signal file filters for knowledge graph |
+| `.gitignore` (append) | Add tool-related rules below |
+
+Gitignore rules to append:
+
+```gitignore
+.opencode/node_modules/
+/.cocoindex_code/
+graphify-out/manifest.json
+graphify-out/cost.json
+graphify-out/cache/
+graphify-out/.graphify_labels.json
+graphify-out/.graphify_root
+```
+
+---
+
+### Post-Copy Verification Gate
+
+After copying all files, run this checklist to confirm nothing was missed:
+
+```
+[ ] .opencode/skills/ — all source skill folders present
+[ ] .opencode/commands/ — all command .md files present
+[ ] AGENTS.md — present and edited for new project
+[ ] refs/ — all reference .md files present
+[ ] agent_utility/ — all graph scripts present
+[ ] tests/test_agent_guidelines.py — present and paths updated
+[ ] opencode.json — present, MCP format verified
+[ ] .graphifyignore — present
+[ ] .gitignore — tool-related rules added
+```
+
+Then run the guideline test as a final check:
+
+```powershell
+uv run python tests/test_agent_guidelines.py
+```
+
+Expected: failing tests for any file paths that still reference the old project. Each ❌ points to exactly what needs updating in `AGENTS.md`. Iterate until all pass.
+
+---
 
 ### Post-Copy Setup
 
-After copying the files, run the standard [Project Setup](#project-setup-per-repository-clone) steps (install dependencies, init CocoIndex, build Graphify).
+After all files are copied and verified, **let the agent read and execute `refs/AGENT_SETUP.md`** — it will walk through the full tool initialization (install dependencies, init CocoIndex, build Graphify). Alternatively, follow the [Project Setup](#project-setup-per-repository-clone) steps manually.
 
 ---
 

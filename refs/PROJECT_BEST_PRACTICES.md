@@ -1,6 +1,6 @@
 # Universal Project Best Practices
 
-> **Last verified:** 2026-05-31 20:15 EDT
+> **Last verified:** 2026-06-11 10:30 EDT
 
 > Derived from real-world debugging - applies to ALL projects
 
@@ -833,7 +833,7 @@ Root:     "Always derive cryptographic nonces from a deterministic counter or a
 
 **Why it matters**: Symptom-level lessons only fix this one case. Root-level lessons prevent entire categories of bugs.
 
-### 7.17 Sequential Numbering for Plan Files
+### 7.25 Sequential Numbering for Plan Files
 **Context**: Numbering collision when migrating plan files between directories — `.opencode/plans/PLAN_001` and `archive/plan/PLAN_001` both existed
 
 **Principle**: When artifacts use sequential numbering, the number must be globally unique across ALL locations. Before assigning a new number, scan the canonical directory for existing files and pick the next available. Never reuse a number from an alternative directory that was later merged.
@@ -846,7 +846,7 @@ Root:     "Always derive cryptographic nonces from a deterministic counter or a
 
 **Why it matters**: Duplicate numbers create ambiguity about which artifact is the real one — the chain of decision history breaks.
 
-### 7.18 Skill Rename Protocol
+### 7.26 Skill Rename Protocol
 **Context**: Renaming `grill-plan-and-refine` → `grill-and-refine` and `plan-readiness` → `check-plan-readiness`
 
 **Principle**: Renaming any component with cross-references follows this protocol: (1) create new directory, (2) copy file contents, (3) delete old directory, (4) update the component's internal name field, (5) update every cross-reference across all files that reference the old name. Use `replaceAll` for bulk updates. Verify zero stale refs survive.
@@ -931,17 +931,63 @@ All fixed in one pass.
 
 **Why it matters**: Individual correctness ≠ collective consistency. The consistency pass catches structural drift that individual edits miss.
 
-### 7.26 Surgical Edits Over File Rewrites
+### 7.27 Surgical Edits Over File Rewrites
 **Context**: 23 targeted edits across 3 skill files preserved all existing context while fixing every gap identified by exhaustive mapping
 **Principle**: When updating instruction files (skills, workflows, rulesets), prefer oldString→newString replacements over file rewrites. Instruction files contain branching workflows, nuanced edge case handling, and manually maintained rules — rewriting them risks silently dropping context that wasn't explicitly identified as problematic. Each edit is independently verifiable by oldString uniqueness.
 **Example**: Instead of rewriting `update-architecture-md/SKILL.md` (386 lines), 12 targeted replacements were applied — each verifiable by selecting for the old text.
 **Why it matters**: A rewrite that drops a single behavioral rule changes agent behavior permanently. Surgical edits preserve everything not explicitly changed.
 
-### 7.25 Three-Layer Verification After Bulk Edits
+### 7.28 Three-Layer Verification After Bulk Edits
 **Context**: After 23 edits across 3 skill files, three separate verification layers each caught a different class of issue
 **Principle**: After a batch of surgical edits, verify at three layers: (1) grep for stale patterns that should have been removed, (2) grep for additions that should have been added, (3) read the critical sections of each file for structural correctness. Layer 1 catches what you missed removing, Layer 2 catches what you missed adding, Layer 3 catches structural breakage (empty subsections, orphaned references, broken formatting). Never skip layer 3.
 **Example**: Layer 1 caught `@socketio.on()` still surviving after SocketIO→WebSocket rename; Layer 2 confirmed `ENV=production` was present in both skills; Layer 3 would catch an empty "Where to place the subsection" section.
 **Why it matters**: Each layer catches what the others miss. Layer 1 and 2 are grep-fast; Layer 3 requires reading but catches silent structural breaks that no regex can find.
+
+### 7.29 Edge Case First Testing
+**Context**: Tests only covered happy paths; edge cases discovered post-deployment
+**Principle**: Before implementing body logic, enumerate boundary conditions. Write one edge-case test per new feature. Edge cases include: empty/null inputs, max boundaries, type mismatches, concurrent access, and failure modes.
+**Example**:
+```python
+def test_matchmaking_empty_queue():
+    result = find_match(waiting_queue=[])
+    assert result is None
+```
+**Why it matters**: Catches design flaws before they're baked into the implementation. Edge cases first forces thinking about contracts before code.
+
+### 7.30 Structured Audit Over Vague Assessment
+**Context**: "Performance audit" was too vague to produce actionable results
+**Principle**: When a review asks for an audit (performance, security, dependency), replace the subjective request with concrete, enumerable checks. Each check must be answerable with a yes/no and have a pass/fail criterion.
+**Example**:
+```
+❌ Vague: "Audit performance"
+✅ Concrete: (1) Check stale closures in useEffect deps, (2) Check unnecessary memoization, (3) Check bundle impact >10KB gzipped, (4) Check sync I/O in async handlers, (5) Check N+1 queries, (6) Check memory leaks in cleanup functions
+```
+**Why it matters**: Vague audit requests produce shallow, inconsistent results. Concrete checks produce the same thorough answer every time.
+
+### 7.31 Happy-Path-Only Coverage as Anti-Pattern
+**Context**: Test suites consistently lacked edge case coverage
+**Principle**: Flag when a test suite only covers the happy path without any edge-case tests. Require at least one edge-case test per new feature (empty state, error state, boundary value, or failure mode). A test suite without edge cases gives false confidence.
+**Example**:
+```
+✅ Pass review if: function has 1 happy-path test + 1 edge-case test
+❌ Flag if: function has 5 happy-path tests but 0 edge-case tests
+```
+**Why it matters**: Happy-path-only testing is the most common testing gap. Explicitly requiring edge-case coverage prevents the "all green, shipped broken" pattern.
+
+### 7.32 Dependency Audit Protocol
+**Context**: Dependencies were added without structured evaluation
+**Principle**: Before adding a dependency, run a structured audit: (1) Justification — what specific problem does it solve that existing code doesn't? (2) Size — what's the bundle/install size impact? (3) Transitive damage — how many sub-dependencies does it pull in? (4) Version pinning — is the version pinned to a specific release? (5) Duplicate risk — does another dependency already solve this need?
+**Example**:
+```
+Dependency audit: lodash@4.17.21
+- Justification: deepMerge utility — stdlib has no equivalent ✓
+- Size: 24KB min (7KB gzipped) ✓
+- Transitive: 0 sub-deps ✓
+- Pinned: yes ✓
+- Duplicate: no existing solution ✓
+→ Approved
+```
+**Why it matters**: Dependencies are permanent liabilities — each must be scrutinized with a repeatable evaluation, not gut feel.
 
 ---
 
@@ -1060,7 +1106,7 @@ Each step has exactly one verb.
 
 **Why it matters**: No ambiguity about what each component owns. No overlap between adjacent stages. Clear routing on failure — you always know which door to knock on.
 
-### 8.8 Independent Re-Verification
+### 8.16 Independent Re-Verification
 **Context**: From designing review-implementation to run tests/lint independently instead of trusting implement-plan's self-check
 
 **Principle**: The reviewer runs the same checks independently and does NOT trust the implementer's "I already tested this." Run the full test suite, run lint, read every diff line, check every flag — from scratch. During review, only find problems — never fix them. Fixing belongs to the implementer.
@@ -1315,6 +1361,13 @@ question(
 
 **Why it matters**: The `question` tool provides structured, clickable options that eliminate ambiguity. By mandating `label` + `description` fields and a free-form "Type your own answer" fallback, every user choice is clearly framed while remaining open to unexpected input. Walking through decisions one at a time prevents cognitive overload.
 
+**CRITICAL LIMITATION — Never `question` for mode transitions:** The `question` tool creates a modal widget that prevents the user from toggling Plan↔Build mode. While `question` is active, the user physically cannot switch modes. This produces a dead end: they click "proceed" but edits are denied (plan mode). Therefore, mode transition prompts must **never** use `question` — only plain text:
+- End of plan: "Plan ready. Switch to build mode and I'll execute."
+- End of build: "Build complete. Switch to plan mode for review."
+- Mode-switch requests are also forbidden within `question` (e.g., asking "ready for review?" at end of build).
+
+**Why the carve-out exists**: The `question` tool is designed for decisions *within the current mode* where the user can act on the outcome. Mode transitions are a meta-operation the user performs outside the chat UI — they cannot be embedded in a question widget.
+
 ---
 
 ## 9. Version Control
@@ -1503,3 +1556,7 @@ Batch 2: SPECIFICATIONS.md (2 edits) → show diff → user approves → apply �
 66. **Design-Spec-to-Config Bridge** — every design spec token maps explicitly to its implementation target (tailwind.config.js, CSS variables); no ambiguity
 67. **File Existence Checks in Tests** — update hardcoded file lists in the same batch as file changes, or use glob-based discovery instead
 68. **question Tool Mandate** — the built-in `question` tool is the sole mechanism for agent-to-user questions; no raw text prompts, unformatted "y/n", or prose option lists
+69. **Edge Case First Testing** — enumerate boundary conditions before implementing body; write one edge-case test per new feature
+70. **Structured Audit Over Vague Assessment** — replace subjective audit requests with concrete, enumerable checks; each must be yes/no answerable
+71. **Happy-Path-Only Coverage as Anti-Pattern** — flag test suites with zero edge-case tests; require at least one per feature
+72. **Dependency Audit Protocol** — evaluate each dependency against 5 checks (justification, size, transitive damage, version pinning, duplicate risk) before adding

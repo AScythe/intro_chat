@@ -1,6 +1,6 @@
 ﻿# AGENTS.md
 
-> **Last updated:** 2026-06-10 18:00 EDT
+> **Last updated:** 2026-06-11 18:00 EDT
 
 ---
 
@@ -17,15 +17,16 @@
 | 5 | Reviewing of Implementation | `review-implementation` | "review the implementation", "verify changes", "review and verify" |
 | 6 | Improving Architecture | `improve-architecture` | "evaluate the architecture", "improve architecture", "review project structure" |
 | 7 | Refactoring and Code Cleaning | `modularize-and-clean` | "modularize", "clean up", "refactor" |
-| 8 | Syncing Documentation | `update-docs` | "sync docs", "update docs", "docs are outdated" |
-| 9 | Committing and Pushing | `push-to-git` | "push", "commit and push", "push to github" |
+| 8 | Improving Security | `improve-security` | "security review", "audit security", "improve security posture" |
+| 9 | Syncing Documentation | `update-docs` | "sync docs", "update docs", "docs are outdated" |
+| 10 | Rebuilding Indexes and Tests | `rebuild-test-and-indexes` | "rebuild test and indexes", "rebuild indexes", "update indexes", "reindex" |
+| 11 | Committing and Pushing | `push-to-git` | "push", "commit and push", "push to github" |
 
 **Key ordering rules:**
 - Phases 1–3 must complete before Phase 4. Never implement without a plan that passed all 7 gates.
-- Phase 5 always follows Phase 4, 6, or 7 — every write phase routes back to review.
-- Phases 6 and 7 are optional branches after a passing Phase 5. Offer both; do not default to one.
-- Phases 6 and 7, when triggered together by the user, execute as follows: both Phase 1 (analysis) run in parallel, then enter a merge-and-synchronize phase that produces a single unified plan document (following check-plan-readiness template format). The unified plan covers all findings from both skills, deduplicated and re-prioritized. After user approval, apply batches with respective [ARCH] and [CLEANUP] flags, then route to review-implementation.
-- Phases 8–9 run at end of session, not after every commit.
+- Phases 6, 7, and 8 are optional branches after a passing Phase 5. By default, offer all three combined (see combined execution sections in each skill). Do not default to only one or two.
+- Phases 9–10 (sync docs and rebuild indexes) run in series after review is complete, before committing.
+- Phase 11 runs at end of session.
 
 ---
 
@@ -120,7 +121,11 @@ Stage 3: Verify — ast-grep (structural pattern confirmation) → Read (exact l
   - Walk through decision-points ONE AT A TIME — never present multiple items in a single message. Resolve before moving to the next.
   - Within each topic, follow the structured sequential walkthrough: (1) state finding concisely, (2) present options via `question` tool, (3) resolve before moving to the next topic.
   - To determine which topics need discussion: present only topic NAMES upfront — do not describe their contents or list items within them. The agent chooses the order and walks through sequentially.
-  - **Exception — exit declarations:** Skill hand-off / transition prompts must use plain text only (`State clearly: "..."`) — never the `question` tool. The user switches agent modes (Plan ↔ Build) and cannot do so while `question` is active.
+- **`question` tool blocks mode transitions — NEVER use for mode switches.** The `question` tool creates a modal widget that prevents the user from toggling Plan↔Build mode. While `question` is active, the user cannot switch modes. This creates a dead end: they select "proceed" but edits are denied (plan mode). Therefore:
+  1. **End of plan phase = plain text only.** Never use `question` to ask "shall I proceed?" or "ready to implement?" — the user must switch modes externally. Last line must be: "Plan ready. Switch to build mode and I'll execute."
+  2. **End of build phase = plain text only.** Never use `question` to ask "switch to review mode?" Last line: "Build complete. Switch to plan mode for review."
+  3. **Skill-to-skill handoffs within the same mode** — may use `question` for intermediate decisions (e.g., "which approach?"), but the final "handing off to skill X" statement must be plain text.
+  4. **During an active build session**, `question` is fine for diff approvals, preference questions, etc. — because no mode switch is needed. The prohibition is specifically on asking the user *to change modes* via `question`.
 
 **Hygiene:** Quality and cross-cutting checks.
 - **Run full test suite after every change** — all suites, not just new tests.
@@ -128,7 +133,7 @@ Stage 3: Verify — ast-grep (structural pattern confirmation) → Read (exact l
 - **Periodic test health audit** — inspect test files for stale file paths, misleading comments, and coverage gaps (files tested for exports but missing from existence checks). A passing test suite can still have stale references.
 - **Audit after restructure/migration** — update owning skills; grep for stale patterns.
 - **Consistency pass** — after multi-file changes, read affected files end-to-end.
-- **Keep index/graph current** — always run `rebuild-test-and-indexes` before review verification (handled by Phase 0 of `review-implementation`). If querying graph/index mid-implementation, rebuild manually.
+- **Keep index/graph current** — always run `rebuild-test-and-indexes` before review verification (handled by Phase 0 of `review-implementation`). If querying graph/index mid-implementation, rebuild manually. Phase 9 (rebuild) and Phase 10 (sync docs) run together after review.
 
 ---
 
@@ -202,7 +207,7 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 |----------|------------------|-------------|
 | `tests/test_*.py` | `test_<topic>.py` — Python unittest | `uv run python tests/<file>.py` |
 | `frontend/tests/**/*.test.{ts,tsx}` | `<Module>.test.{ts,tsx}` — Vitest per-component | `npm test` (from `frontend/`) |
-| `frontend/tests/e2e/userFlow.spec.ts` | `<flow>.spec.ts` — Playwright E2E | `npm run test:e2e` (from `frontend/`) |
+| `frontend/tests/e2e/*.spec.ts` | `<flow>.spec.ts` — Playwright E2E | `npm run test:e2e` (from `frontend/`) |
 
 **Policies:**
 - Backend test files (`tests/test_*.py`) — **run only**, do not modify unless explicitly asked
@@ -215,7 +220,7 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 
 **Rule:** Non-phase skills are invoked as sub-steps within agentic phases or on-demand — never as standalone top-level phases. Load via `skill(name: "<skill-name>")` when their task is needed.
 
-- **Rebuild indexes:** Before review verification (Phase 0 of `review-implementation`), or standalone request — see `rebuild-test-and-indexes` skill.
+- **Rebuild tests and indexes:** Before review verification (Phase 0 of `review-implementation`), or standalone request — see `rebuild-test-and-indexes` skill.
 - **Frontend/UIUX work:** For UI/UX frontend tasks, use `frontend-design` (design spec) then `shadcn` (implementation) sequentially — see each skill for full behavioral rules.
 - **End-to-end tests:** Run Playwright E2E tests standalone — auto-installs Chromium, builds SPA, starts app with temp DB — see `run-e2e-tests` skill.
 - **Save session:** Save conversation timeline to `docs/sessions/` at workflow transitions — see `save-session` skill. Session files include a YAML frontmatter header (~200 tokens) and are re-readable via Session Continuity Check.
@@ -223,7 +228,7 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 
 ## Session Continuity Check
 
-**Rule:** At Phase 0 of every write-phase skill (brainstorm-and-plan, check-plan-readiness, implement-plan, review-implementation, modularize-and-clean, improve-architecture), check for context continuity.
+**Rule:** At Phase 0 of every write-phase skill (brainstorm-and-plan, check-plan-readiness, implement-plan, rebuild-test-and-indexes, review-implementation, modularize-and-clean, improve-architecture, improve-security), check for context continuity.
 
 **Trigger conditions:**
 1. **Automatic (heuristic):** If `docs/sessions/` has `SESSION_*.md` files AND the current context has < 3 user messages, read the most recent session header (offset=1, limit=30) to restore context.
@@ -242,7 +247,7 @@ See [Test Structure in ARCHITECTURE.md](docs/ARCHITECTURE.md#tests) for per-file
 
 | Document | Location | Purpose |
 |----------|----------|---------|
-| README | `docs/README.md` | User-facing setup, features, quick-start |
+| README | `README.md` | User-facing setup, features, quick-start |
 | ARCHITECTURE | `docs/ARCHITECTURE.md` | Technical module reference, data flow |
 | SPECIFICATIONS | `docs/SPECIFICATIONS.md` | Product vision, user journey, privacy |
 | DESIGN_SPEC | `docs/DESIGN_SPEC.md` | Visual design spec, color system, typography, motion |

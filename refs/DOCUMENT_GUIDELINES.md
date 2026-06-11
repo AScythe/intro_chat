@@ -16,6 +16,7 @@
 | **DESIGN_SPEC.md** | Visual design spec, color system, typography, motion | Developers, designers, AI agents | Design or theme change | Visual, aesthetic |
 | **AGENTS.md** | Agentic Workflow Rules by workflow phase, permissions, file ownership, operational constraints | AI agents (opencode) | File or command change | Operational, constraints |
 | **PROJECT_BEST_PRACTICES.md** | Universal coding patterns, best practices, lessons learned | All developers, AI | After each session | Educational, guidelines |
+| **AGENT_SETUP.md** | Tooling setup, env requirements, replicating to other projects | Developers, AI agents | Tooling or setup change | Operational, setup |
 | **DOCUMENT_GUIDELINES.md** | Doc scope, content boundaries, governance | Developers, AI agents | New doc added | Meta, governance |
 
 ---
@@ -189,7 +190,7 @@ Agentic Workflow Rules and operational guidelines. Answers "How should I think, 
 ### What to Include
 - **Scope definition** — what this document covers and how it relates to other guidance (e.g., skill files)
 - **File ownership table** — every location an agent might touch, with explicit policy: ✅ safe to edit, ⚠️ caution required, ❌ forbidden
-- **Agentic Workflow Rules** — organized by 9 workflow phases (Thinking & Analysis → Probing & Refinement → Planning & Readiness → Implementing → Reviewing → Architecture Improvement → Structuring & Cleaning → Documentation Sync → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
+- **Agentic Workflow Rules** — organized by 11 workflow phases (Discovery Analysis & Planning → Probing & Refinement → Checking for Readiness → Implementing → Reviewing Implementation → Improving Architecture → Refactoring & Code Cleaning → Improving Security → Syncing Documentation → Rebuilding Indexes & Tests → Committing & Pushing), each phase mapping to its skill. Rules are imperative — explicit always/never directives, no "consider" or "try to". Verification requirements are embedded within each phase's rules rather than a separate section.
 - **Codebase Exploration** — Three-Tier classification: Tier 1 (Tiny, known exact files) / Tier 2 (Moderate, known area) / Tier 3 (Complex, unknown scope). Each tier has required steps, completeness safeguards, and a tool guidance table with token costs.
 - **Documentation Discipline** — cross-referencing (not duplicating), file-level description comments, executable sources of truth (code > prose)
 - **Process Discipline** — read-before-write, baseline tests before changes, exit declarations, user approval gate (line-level diffs), batch discipline with granular edits, source+tests as one unit, non-interactive execution, periodic test health audit
@@ -197,10 +198,10 @@ Agentic Workflow Rules and operational guidelines. Answers "How should I think, 
 - **Architecture overview** — 3-5 lines so agents can navigate the project structure. Full detail (module descriptions, file tree, data flow) stays in ARCHITECTURE.md.
 - **Cross-references** — to ARCHITECTURE.md, SPECIFICATIONS.md, DOCUMENT_GUIDELINES.md, and skill files
 
-For project context, product description, and key functionalities → [SPECIFICATIONS.md](../docs/SPECIFICATIONS.md) and [README.md](../docs/README.md).  
+For project context, product description, and key functionalities → [SPECIFICATIONS.md](../docs/SPECIFICATIONS.md) and [README.md](../README.md).  
 For architecture summary and tech stack → [ARCHITECTURE.md](../docs/ARCHITECTURE.md).  
-For setup commands and test commands → [README.md §Quick Start](../docs/README.md#quick-start) and [README.md §Testing](../docs/README.md#testing).  
-For agent-specific operational requirements (non-interactive execution, venv setup) → [PROJECT_BEST_PRACTICES.md §8.15](PROJECT_BEST_PRACTICES.md#815-non-interactive-execution) and [README.md §Quick Start](../docs/README.md#quick-start).
+For setup commands and test commands → [README.md §Quick Start](../README.md#quick-start) and [README.md §Testing](../README.md#testing).  
+For agent-specific operational requirements (non-interactive execution, venv setup) → [PROJECT_BEST_PRACTICES.md §8.15](PROJECT_BEST_PRACTICES.md#815-non-interactive-execution) and [README.md §Quick Start](../README.md#quick-start).
 
 ### What NOT to Include
 - ❌ API endpoint tables or WebSocket event tables — these go in ARCHITECTURE.md (Data Flow section)
@@ -286,7 +287,43 @@ Why it matters: [1 line]
 
 ---
 
-## 7. DOCUMENT_GUIDELINES.md (this document)
+## 7. AGENT_SETUP.md
+
+### Scope
+Agent development environment setup guide. Answers "How do I reproduce this project's AI coding assistant environment on any machine?"
+
+### Audience
+- Developers setting up a new machine for this project
+- AI agents needing tooling context to operate correctly
+- Teams wanting consistent, reproducible development environments
+
+### Key Differentiator
+**Setup over behavior.** Describes external tool dependencies, MCP server configuration, and environment requirements — not what the agent should do. AGENTS.md tells the agent how to behave; AGENT_SETUP.md tells the developer how to set up the machine so the agent can work.
+
+### What to Include
+- **Global environment prerequisites** — Python version, Node version, OpenCode/CLI installation, environment variables
+- **Project-level dependencies** — package managers (uv, npm), MCP servers (graphify, cocoindex), project config
+- **MCP server configuration** — opencode.json format, required servers with command arrays, verification steps
+- **Skills and commands setup** — .opencode/skills/ and .opencode/commands/ structure
+- **Code index and knowledge graph setup** — CocoIndex and Graphify initialization
+- **Replication instructions** — step-by-step for copying this environment to another project
+- **Post-copy verification** — checklist and test to confirm the environment works
+
+### What NOT to Include
+- ❌ Agent behavioral rules, workflow phases, or operational constraints — these go in AGENTS.md
+- ❌ Project architecture or module descriptions — these go in ARCHITECTURE.md
+- ❌ Coding best practices or lessons learned — these go in PROJECT_BEST_PRACTICES.md
+- ❌ User-facing instructions — these go in README.md
+
+### Content Boundaries
+- **Environment-only focus.** Describe what must be installed and configured, not how the agent uses the tools.
+- **Replicable steps.** Every instruction must produce the same result on a clean machine.
+- **Cross-reference AGENTS.md** for agent behavioral rules that depend on tooling setup.
+- **Keep opencode.json examples current** — the MCP server format changes with OpenCode versions.
+
+---
+
+## 8. DOCUMENT_GUIDELINES.md (this document)
 
 ### Scope
 Meta-governance for all project documentation. Answers "Where does this content go?", "What belongs in each document?", "How do I add a new document?".
@@ -332,7 +369,7 @@ Meta-governance for all project documentation. Answers "Where does this content 
 
 ---
 
-## 8. Workflow-to-Document Dependency
+## 9. Workflow-to-Document Dependency
 
 This section defines which documents each workflow step should read, and which specific sections (via Grep→Read) to minimize context waste.
 
@@ -345,8 +382,9 @@ The pipeline branches after `review-implementation` (1st pass):
 
 ```
 review-implementation (1st pass)
-    ├──→ modularize-and-clean → review-implementation (clean up pass) → update-docs
     ├──→ improve-architecture → review-implementation (architecture pass) → update-docs
+    ├──→ modularize-and-clean → review-implementation (clean up pass) → update-docs
+    ├──→ improve-security → review-implementation (security pass) → update-docs
     └──→ update-docs
 ```
 
@@ -357,10 +395,12 @@ review-implementation (1st pass)
 | **check-plan-readiness** | *(none — gates 1-4, 6-7 are presence-checks on plan; gate 5 soundness validated by grill)* | — | `docs/PLAN_*.md` |
 | **implement-plan** | `docs/PLAN_*.md`, `AGENTS.md`, `ARCHITECTURE.md`, `SPECIFICATIONS.md` | PLAN: all. AGENTS: "File Ownership", "Failure Triage", "Codebase Exploration". SPECS: "Out of Scope". ARCHITECTURE: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only | Source code, tests |
 | **review-implementation** (1st pass) | `docs/PLAN_*.md`, `ARCHITECTURE.md` | PLAN: all. ARCHITECTURE: "Import Structure", relevant module descriptions (verify diff fits system) | nothing (verbal) |
-| **improve-architecture** | `AGENTS.md`, `ARCHITECTURE.md`, `implement-plan/SKILL.md` | AGENTS: "File Ownership". ARCHITECTURE: "Project Structure", relevant module descriptions. implement-plan: §3, §5, §6, test-adaptation rule | Source code (`[ARCH]`), regression tests |
-| **modularize-and-clean** | `PROJECT_BEST_PRACTICES.md` | Section 1 (Modularization Techniques), Section 5 (Testing), Section 8 (Automation & Process Design) | Source code (`[CLEANUP]`), coverage tests, change-log |
+| **improve-architecture** | `ARCHITECTURE.md`, source files | ARCHITECTURE: "Project Structure", "Import Structure", relevant module descriptions | Source code (`[ARCH]`), regression tests |
+| **improve-security** | `ARCHITECTURE.md`, `SPECIFICATIONS.md`, source files | ARCHITECTURE: "Project Structure", "Module Descriptions", "Import Structure". SPECS: "Out of Scope". Source: key files per security scan area | Source code (`[SECURITY]`), regression tests |
+| **modularize-and-clean** | `ARCHITECTURE.md`, test suite | ARCHITECTURE: "Project Structure", "Import Structure", relevant module descriptions. Test suite: note import paths for adaptation | Source code (`[CLEANUP]`), coverage tests, change-log |
 | **review-implementation** (clean up pass — after modularize-and-clean) | `docs/PLAN_*.md` | PLAN only — change-log from modularize-and-clean suffices | nothing (verbal) |
 | **review-implementation** (architecture pass — after improve-architecture) | `improve-architecture` Phase 1 output (verbal, session context) | — | nothing (verbal) |
+| **review-implementation** (security pass — after improve-security) | `docs/PLAN_*.md` | PLAN only — security findings from improve-security | nothing (verbal) |
 | **update-docs** | `update-docs/SKILL.md` (Doc Sync Triggers), session diff, prior phase output | Doc Sync Triggers table in update-docs SKILL.md | nothing (orchestrates update-* skills) |
 | **push-to-git** | *(none — git status only)* | — | Git commits |
 
@@ -373,6 +413,7 @@ review-implementation (1st pass)
 | **update-agents-md** | `AGENTS.md` (full), `ARCHITECTURE.md`, `SPECIFICATIONS.md`, `README.md` | `AGENTS.md` |
 | **update-specifications-md** | `SPECIFICATIONS.md` (full), `README.md` | `SPECIFICATIONS.md` |
 | **update-readme-md** | `README.md` (full) | `README.md` |
+| **update-agent-setup-md** | `AGENT_SETUP.md` (full), global env state, project config files, `tests/test_agent_guidelines.py` | `AGENT_SETUP.md` |
 | **update-best-practices-md** | `PROJECT_BEST_PRACTICES.md` (full), `.opencode/skills/*/SKILL.md`, `docs/PLAN_*.md`, session history, changed files only (not full codebase) | `PROJECT_BEST_PRACTICES.md` |
 
 ---
