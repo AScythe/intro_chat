@@ -134,7 +134,7 @@ Optional sections (include only if applicable): sub-architecture reference links
 - [ ] Verify source code exists and matches current project state
 - [ ] Read existing ARCHITECTURE.md — understand current documented structure
 - [ ] Run codebase search for new modules added since last sync
-- [ ] Consult docs/README.md for project overview
+- [ ] Consult README.md (project root) for project overview
 - [ ] Determine invocation mode — if implicit, skip full codebase walk and accept scope from caller (diff context)
 
 ## Workflow

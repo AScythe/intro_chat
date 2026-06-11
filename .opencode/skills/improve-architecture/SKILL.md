@@ -5,7 +5,7 @@ description: 'Scan project-level structure — directory layout, package organiz
 
 ## What I do
 - Scan project-level structure — directory layout, import hygiene, config placement, module boundaries, naming conventions
-- Produce a verbal prioritized list (P0–P2) with file:line references
+- Produce a prioritized plan document at `docs/PLAN_*.md` (P0–P2) with file:line references
 - After user approval, apply structural changes in TDD-backed batches with [ARCH] flags
 - Route back to review-implementation
 
@@ -49,7 +49,7 @@ Layer separation (config → state → logic → persistence) and leaf module pa
 | 5 | **Test structure** | Tests mirror source tree? Tests in unexpected locations? Tests for modules that no longer exist? | P0 = orphaned test files, P1 = non-mirroring layout, P2 = missing test dir |
 | 6 | **Naming conventions** | All source files have `# Description:`/`// Description:`/`/* Description: */` headers? Consistent casing? | P0 = missing headers, P1 = inconsistent casing, P2 = minor style |
 | 7 | **Module boundaries** | Feature modules clearly separated? Pages importing from the wrong layer? | P0 = layer violation, P1 = unclear boundary, P2 = minor cross-ref |
-| 8 | **Config vs convention gaps** | Project conventions that the codebase doesn't follow? | P0 = safety issue, P1 = maintainability, P2 = style |
+| 8 | **Config vs convention gaps** | Project conventions that the codebase doesn't follow? Includes security architecture boundaries: untrusted data crossing layers without validation, missing input validation at service boundaries, inconsistent error handling exposing internals | P0 = safety issue / unvalidated data crossing boundary, P1 = maintainability / missing documentation, P2 = style |
 
 Present findings as: `[P0/P1/P2] file:line — finding → Recommend: action`
 
@@ -116,15 +116,17 @@ When multiple approved items touch the same file or directory, sort by dependenc
 - **Partial:** Track done items in-conversation. On resume, pick up at first undone item.
 - **Stale evaluation:** If codebase changed significantly since Phase 1, re-run Phase 1 before continuing.
 
-### Combined execution with modularize-and-clean
+### Combined execution with modularize-and-clean and improve-security (default flow)
 
-When the user triggers both `improve-architecture` and `modularize-and-clean` together:
+The default flow after a successful first-pass review runs `improve-architecture`, `modularize-and-clean`, and `improve-security` together. This is the primary workflow — not an optional sub-path.
 
-1. **Phase 1 runs in parallel** with `modularize-and-clean` Phase 1 — each skill independently scans its defined scope (structure vs code-level quality)
-2. **Create Unified Plan Document**: Both pass findings to a merge-and-synchronize phase that produces a single unified plan at `docs/PLAN_YYYY_MM_DD_XXX.md` (sequential numbering, check-plan-readiness template)
-3. **Unified plan** covers all findings from both skills, deduplicated and re-prioritized with P0–P2 labels per skill
+When the user triggers these skills together:
+
+1. **Phase 1 runs in parallel** with `modularize-and-clean` Phase 1 and `improve-security` Phase 1 — each skill independently scans its defined scope (structure vs code-level quality vs security)
+2. **Create Unified Plan Document**: All pass findings to a merge-and-synchronize phase that produces a single unified plan at `docs/PLAN_YYYY_MM_DD_XXX.md` (sequential numbering, check-plan-readiness template)
+3. **Unified plan** covers all findings from all skills, deduplicated and re-prioritized with P0–P2 labels per skill
 4. **User approval**: Present the unified plan for approval
-5. **Apply batches**: Structural changes carry `[ARCH]` flags, code-quality changes carry `[CLEANUP]` flags — never mix flags in the same batch
+5. **Apply batches**: Structural changes carry `[ARCH]` flags, code-quality changes carry `[CLEANUP]` flags, security changes carry `[SECURITY]` flags — never mix flags in the same batch
 6. **Review**: Route to `review-implementation`
 
 ## Hand-off
@@ -143,7 +145,7 @@ If interrupted mid-phase: record current state in a TODO or pending list, offer 
 ## Outputs & Triggers
 
 ### Output
-Prioritized list (P0–P2) with file:line references. Structural changes with [ARCH] flags, updated test imports, regression tests, summary of applied/skipped items.
+Plan document at `docs/PLAN_*.md` with prioritized findings (P0–P2) and file:line references. Structural changes with [ARCH] flags, updated test imports, regression tests, summary of applied/skipped items.
 
 ### Exit Declaration
 State clearly: "**Architecture improvements complete. Review implementation? Say 'review' to trigger review of the implementation.**"

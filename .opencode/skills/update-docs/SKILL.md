@@ -71,7 +71,7 @@ Two invocation modes with fundamentally different detection strategies:
    | New/deleted/renamed file, module restructure, new endpoint, changed function signature | `docs/ARCHITECTURE.md` |
    | New feature, changed user journey, updated privacy, changed Out of Scope | `docs/SPECIFICATIONS.md` |
    | Design spec created/updated, color system, typography/motion changes, UI theme changes, frontend-design skill output | `docs/DESIGN_SPEC.md` |
-   | Changed setup steps, new CLI command, new env var, new user-visible feature | `docs/README.md` |
+    | Changed setup steps, new CLI command, new env var, new user-visible feature | `README.md` (project root) |
    | Changed behavioral rules, new file ownership entry, updated commands | `AGENTS.md` |
    | Changed tooling setup, new MCP server, changed env requirements | `refs/AGENT_SETUP.md` |
    | Recurring pattern, new debugging lesson, new skill methodology insight | `refs/PROJECT_BEST_PRACTICES.md` |
@@ -90,7 +90,7 @@ Launch all in parallel (no dependency ordering needed — analysis is independen
 1. `docs/ARCHITECTURE.md` → instruct sub-agent to load `skill(name: "update-architecture-md")` and return proposals
 2. `docs/SPECIFICATIONS.md` → instruct sub-agent to load `skill(name: "update-specifications-md")` and return proposals
 3. `AGENTS.md` → instruct sub-agent to load `skill(name: "update-agents-md")` and return proposals
-4. `docs/README.md` → instruct sub-agent to load `skill(name: "update-readme-md")` and return proposals
+4. `README.md` (project root) → instruct sub-agent to load `skill(name: "update-readme-md")` and return proposals
 5. `refs/PROJECT_BEST_PRACTICES.md` → instruct sub-agent to load `skill(name: "update-best-practices-md")` and return proposals
 6. `refs/AGENT_SETUP.md` → instruct sub-agent to load `skill(name: "update-agent-setup-md")` and return proposals
 7. `refs/DOCUMENT_GUIDELINES.md` — inline analysis only (no dedicated skill)
@@ -148,7 +148,7 @@ Launch all sub-agents in parallel:
 1. `docs/ARCHITECTURE.md` → instruct sub-agent to load `skill(name: "update-architecture-md")` with `mode="implicit"` and diff context
 2. `docs/SPECIFICATIONS.md` → instruct sub-agent to load `skill(name: "update-specifications-md")` with `mode="implicit"` and diff context
 3. `AGENTS.md` → instruct sub-agent to load `skill(name: "update-agents-md")` with `mode="implicit"` and diff context
-4. `docs/README.md` → instruct sub-agent to load `skill(name: "update-readme-md")` with `mode="implicit"` and diff context
+4. `README.md` (project root) → instruct sub-agent to load `skill(name: "update-readme-md")` with `mode="implicit"` and diff context
 5. `refs/PROJECT_BEST_PRACTICES.md` → instruct sub-agent to load `skill(name: "update-best-practices-md")` with `mode="implicit"` and diff context
 6. `refs/AGENT_SETUP.md` → instruct sub-agent to load `skill(name: "update-agent-setup-md")` with `mode="implicit"` and diff context
 7. `refs/DOCUMENT_GUIDELINES.md` — inline analysis with diff context (no dedicated skill)

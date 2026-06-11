@@ -116,6 +116,14 @@ Every file requires a file-level `# Description:`/`// Description:`/`/* Descript
 #### Failure Triage
 When a test fails after a change, classify before acting. See "Failure Triage" table in `AGENTS.md`. Never auto-revert on first failure.
 
+#### Edge Case First
+Before implementing any function or component, enumerate its edge cases. Write one test per edge case before writing the happy-path body.
+
+- **Boundaries** — empty input, max values, null/None, type mismatches, concurrent access
+- **Failure modes** — network errors, timeouts, auth failures, rate limits, invalid state transitions
+- **Idempotency** — what happens if the operation runs twice? Same result?
+- **Every new test must cover at least one boundary condition** — a test that only tests the happy path is not sufficient for coverage.
+
 ### Phase 2: Iterate
 **Purpose:** Implement the plan batch by batch using TDD, flagging every change and verifying after each batch before proceeding.
 
@@ -212,9 +220,20 @@ Every batch that adds or modifies logic must include its test file(s) in `tests/
 1. **Run full test suite** — all pass
 2. **Run lint and typecheck** — clean
 3. **Logic clarity** — control flow easy to follow at a glance? If you need a comment to explain it, rewrite until obvious.
-4. **Minimal dependencies** — every new import justified? Benefit outweigh cost?
+4. **Dependency audit** — for each new or removed dependency:
+   - **Justification** — why is this the right dependency? Could a standard library or existing internal utility do the job?
+   - **Size** — Python: check `pip show` for total size. JS: check bundlephobia or `npx cost-of-modules`.
+   - **Transitive damage** — does it pull in heavy transitive deps (e.g., moment.js → 400KB+)?
+   - **Version pinning** — every new dependency has a pinned major version in `requirements.txt` or `package.json`
+   - **Duplicate risk** — does this overlap with an existing dependency's feature set?
 5. **Error strategy audit** — every failure case has a consistent strategy? No ad hoc patches.
-6. **Performance audit** — close enough to optimal that no one will hack workarounds later?
+6. **Performance audit (concrete checks)** — verify each:
+   - **React dependency arrays** — no missing deps in `useEffect`/`useMemo`/`useCallback`
+   - **Unnecessary memoization** — `useMemo`/`useCallback` wrapping trivial computations that don't benefit
+   - **Bundle impact** — new import adds > 10KB gzipped? Flag and justify
+   - **Sync I/O in async context** — no `readFileSync`/`sleep`/blocking calls inside async routes or handlers
+   - **N+1 queries** — no database queries in loops; batch where possible
+   - **Memory leaks** — event listeners cleaned up, intervals cleared, WebSocket unsubscribe on unmount
 7. **Single responsibility** — each module/function does one thing?
 8. **Scope audit** — no features beyond the plan, no speculative abstractions
 9. **Surgical changes audit** — only required files touched. Description comments preserved.

@@ -1,12 +1,12 @@
 ---
 name: update-readme-md
-description: Analyze the current codebase and update `docs/README.md` to be accurate, complete, and within its defined scope. Trigger when the user says "update readme", "sync readme", "readme is outdated", or similar.
+description: Analyze the current codebase and update `README.md` (project root) to be accurate, complete, and within its defined scope. Trigger when the user says "update readme", "sync readme", "readme is outdated", or similar.
 ---
 
 ## Purpose
 User-facing entry point for anyone discovering the project. Answers "What is it?", "How do I use it?", "How do I run it?".
 
-Mine the codebase and session history, then update or create `docs/README.md` so new users and developers can understand, set up, and use the project.
+Mine the codebase and session history, then update or create `README.md` (project root) so new users and developers can understand, set up, and use the project.
 
 ---
 
@@ -158,7 +158,7 @@ Read highest-value sources first:
 4. Existing `docs/ARCHITECTURE.md`
 
 ### Phase 2: Read the Current Document
-- Check if `docs/README.md` exists — create it if not
+- Check if `README.md` exists (project root) — create it if not
 - Flag outdated content
 
 ### Phase 3: Identify Gaps and Issues
@@ -229,7 +229,7 @@ Present proposed oldString→newString diffs to the user for approval before app
 ## Outputs & Triggers
 
 ### Output
-Updated `docs/README.md` at `docs/README.md`.
+Updated `README.md` at project root.
 
 ### Exit Declaration
 State clearly: "**README.md updated. All checks pass.**"

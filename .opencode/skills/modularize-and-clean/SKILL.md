@@ -9,7 +9,7 @@ description: 'Scan code-level quality — DRY violations, mixed concerns, naming
 - Present for user approval — never apply without sign-off
 - Apply changes batch-by-batch with [CLEANUP] flags
 - Write coverage tests for new modules, adapt test references
-- Produce verbal change-log
+- Save approved findings to a plan document at `docs/PLAN_*.md`
 - Route back to review-implementation
 
 ## Boundaries
@@ -140,29 +140,30 @@ For each approved candidate, in order:
 
 After all batches, produce a verbal markdown change-log grouped by scope with `[CLEANUP]` `[file:line]` entries — coverage tests added and unsafe candidates skipped.
 
-### Combined execution with improve-architecture
+### Combined execution with improve-architecture and improve-security (default flow)
 
-When the user triggers both `modularize-and-clean` and `improve-architecture` together:
+The default flow after a successful first-pass review runs `modularize-and-clean`, `improve-architecture`, and `improve-security` together. This is the primary workflow — not an optional sub-path. When the user triggers any combination of these skills:
 
 **Step 1: Parallel Phase 1**
-Both skills run their Phase 1 independently — each scanning their defined scope without waiting for the other.
+All participating skills run their Phase 1 independently — each scanning their defined scope without waiting for the others.
 
 **Step 2: Merge into Plan Doc**
-Combine both Phase 1 outputs into a unified plan document saved to `docs/`:
+Combine all Phase 1 outputs into a unified plan document saved to `docs/`:
 
 File: `docs/PLAN_YYYY_MM_DD_XXX.md` (sequential numbering, check-plan-readiness template)
 
 Sections:
 - **Modularize-and-clean findings** — candidates grouped by scope with file:line references
 - **Improve-architecture findings** — P0/P1/P2 prioritized list with file:line references
-- **Conflicts** — items where both skills affect the same file; resolve before applying
-- **Proposed batch order** — dependency-sorted sequence covering both finding sets
+- **Improve-security findings** — P0/P1/P2 prioritized list with file:line references
+- **Conflicts** — items where multiple skills affect the same file; resolve before applying
+- **Proposed batch order** — dependency-sorted sequence covering all finding sets
 
 **Step 3: User Approval Gate**
 Present the plan doc and use the `question` tool to get explicit approval. Wait for sign-off before applying any changes.
 
 **Step 4: Apply Batches**
-Apply in dependency order. Code-quality changes carry `[CLEANUP]` flags, structural changes carry `[ARCH]` flags — never mix flags in the same batch.
+Apply in dependency order. Code-quality changes carry `[CLEANUP]` flags, structural changes carry `[ARCH]` flags, security changes carry `[SECURITY]` flags — never mix flags in the same batch.
 
 **Step 5: Route to review-implementation**
 After all batches pass, route to `review-implementation`.
@@ -184,10 +185,10 @@ If interrupted mid-phase: record current state in a TODO or pending list, offer 
 ## Outputs & Triggers
 
 ### Output
-Structural changes with [CLEANUP] flags. Updated test imports. Coverage tests for new modules. Verbal change-log.
+Plan document at `docs/PLAN_*.md` with candidates grouped by scope. Structural changes with [CLEANUP] flags. Updated test imports. Coverage tests for new modules.
 
 ### Exit Declaration
 State clearly: "**Cleanup complete. Verbal change-log above. Review the changes? Say 'review' to trigger review of the changes.**"
 
 ### Next Step
-User invokes `review-implementation` (clean-up pass) — switch to Plan mode before proceeding.
+User invokes `review-implementation` (combined clean-up/architecture/security pass) — switch to Plan mode before proceeding.

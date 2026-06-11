@@ -37,13 +37,18 @@ description: 'Verify the completed implementation meets all success criteria —
 
 Check which flags appear in the diff:
 
-| Flag type | Pass | Prior skill |
+| Flag type(s) | Pass | Prior skill(s) |
 |-----------|------|-------------|
 | `[ADDED]` `[MODIFIED]` `[FIXED]` `[REMOVED]` `[MOVED]` | First pass | `implement-plan` |
-| `[CLEANUP]` | Clean-up pass | `modularize-and-clean` |
-| `[ARCH]` | Architecture pass | `improve-architecture` |
+| `[CLEANUP]` only | Clean-up pass | `modularize-and-clean` |
+| `[ARCH]` only | Architecture pass | `improve-architecture` |
+| `[SECURITY]` only | Security pass | `improve-security` |
+| `[CLEANUP]` + `[ARCH]` | Combined CA pass | `modularize-and-clean` + `improve-architecture` |
+| `[CLEANUP]` + `[SECURITY]` | Combined CS pass | `modularize-and-clean` + `improve-security` |
+| `[ARCH]` + `[SECURITY]` | Combined AS pass | `improve-architecture` + `improve-security` |
+| `[CLEANUP]` + `[ARCH]` + `[SECURITY]` | Combined triple pass | All three |
 
-Any non-CLEANUP flag in a clean-up pass → route back to `modularize-and-clean`. Any non-ARCH flag in an architecture pass → route back to `improve-architecture`.
+Any flag not matching the pass type → route back to the offending skill.
 
 #### Step 2: Read Docs
 **Purpose:** Load the reference material for the confirmed pass type — needed to verify the diff against what was planned or approved.
@@ -51,6 +56,8 @@ Any non-CLEANUP flag in a clean-up pass → route back to `modularize-and-clean`
 - **First pass** (after `implement-plan`): `docs/PLAN_*.md` + `docs/ARCHITECTURE.md` ("Import Structure", relevant module descriptions)
 - **Clean-up pass** (after `modularize-and-clean`): `docs/PLAN_*.md` (success criteria) — fall back to `archive/plan/` if already moved. Change-log is the primary target.
 - **Architecture pass** (after `improve-architecture`): `improve-architecture` session output — the evaluation list is the target.
+- **Security pass** (after `improve-security`): `improve-security` session output — the evaluation list is the target.
+- **Combined pass** (after any combination): unified plan doc at `docs/PLAN_*.md` — success criteria from all participating skills.
 
 #### Step 3: Read the Diff
 **Purpose:** Confirm every change is intentional and flagged — no unflagged changes should survive review.
@@ -64,6 +71,13 @@ Run `git status` to list all modified, added, and deleted files. Flag:
 - **Orphaned files** — not referenced anywhere
 - **Accidental modifications** — changed outside plan scope
 - **Missing deletions** — should have been removed but still exist
+
+#### Step 5: PR-Level Heuristics
+**Purpose:** Catch structural issues that don't appear as code bugs — excessive change scope, unclear intent, or missing context in commit messages.
+
+- **PR size check** — total lines changed (additions + deletions) exceeds 400? Flag oversized change. Recommend splitting into smaller PRs.
+- **Commit message scan** — run `git log` on the branch. If any commit message is empty, "wip", "fix", or otherwise non-descriptive, flag it. Commit messages should state WHY, not just WHAT.
+- **File count check** — if more than 15 files changed, flag for review. Large file count often indicates scope creep.
 
 ### Phase 2: Verify Execution
 **Purpose:** Run all automated checks and use codebase exploration to catch anything the implementation may have missed — before the manual audit in Phase 3.
@@ -81,7 +95,18 @@ Apply the tier-based pipeline from AGENTS.md §Codebase Exploration:
 - `grep / read` — fallback for exact-text verification
 
 
-#### Step 2: Run All Tests
+#### Step 2: Verify Config File Changes
+**Purpose:** Confirm configuration files were updated to match any new security, performance, or structural requirements from the pass type.
+
+For first-pass and combined passes, run `git diff --name-only` and check for config file changes:
+- `app/config.py` — did a new config value need adding or removing?
+- `frontend/src/config/constants.ts` — did a frontend constant need updating?
+- `opencode.json` — did a tool or MCP config change?
+- Any `.env`, `.env.example`, or `docker-compose.*` files that should have been touched
+
+Flag missing config changes as: *"Config drift: [file] should have been updated for [reason]. Route back to implement."*
+
+#### Step 3: Run All Tests
 **Purpose:** Confirm all tests pass and track count changes to catch regressions and scope creep.
 
 All must pass. On failure: list what failed and why — do not fix here.
@@ -141,6 +166,8 @@ For each new or modified test:
 - **Mutable outputs (AP8)** — function returns a list/dict the caller can accidentally mutate?
 - **Mock count** — mocking 3+ collaborators for one unit? Signals shallow design. Route back.
 - **Test doubles usage** — mock used where stub/fake suffices? Flag for modularize-and-clean.
+- **Edge case coverage** — do tests cover failure modes (invalid input, empty data, timeouts, network errors, concurrent access)? Or do all tests exercise only the happy path? Flag as: *"Edge case coverage gap: [N] tests all test success — [N] missing failure-mode tests."*
+- **Happy-path-only anti-pattern** — if every test passes on success and zero tests test what happens when something goes wrong, flag as anti-pattern. The implementer must add at least one failure-mode test per new feature.
 
 ### Step 2: Code Property Audit
 
@@ -215,7 +242,7 @@ Only reached after Phase 4 Save Session completes.
 - Phase 3: Test quality verified, plan/evaluation criteria met, archive moved
 - Phase 4: Review session saved
 - Phase 5: Update-docs (implicit) executed — delta updates applied, cross-references verified
-- Pass → route to modularize-and-clean (first pass) or improve-architecture (first pass). Fail → route back to the prior skill that produced the diff.
+- Pass → route to modularize-and-clean (first pass) or improve-architecture (first pass) or improve-security (first pass). Fail → route back to the prior skill that produced the diff.
 
 ### Abort Paths
 If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
@@ -230,7 +257,7 @@ Verbal verification report: pass (all items implemented, all criteria met) or fa
 ### Exit Declaration
 
 **Pass** — state clearly:
-- First pass: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (structural cleanup) with improve-architecture (architectural improvement). Proceed?**"
+- First pass: "**All checks pass. Implementation verified. Recommended: modularize-and-clean (structural cleanup), improve-architecture (architectural improvement), and improve-security (security hardening). Proceed?**"
 - Clean-up/Architecture pass: "**All checks pass. Cleanup and architecture improvements verified. Documentation sync already triggered — no manual update-docs needed.**"
 
 **Fail** — state clearly: "**Review failed. [List items not met.] Route back to [prior skill: implement-plan / modularize-and-clean / improve-architecture] to resolve.**"
