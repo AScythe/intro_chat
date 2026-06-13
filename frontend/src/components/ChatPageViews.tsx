@@ -4,7 +4,7 @@
 import { PromptCard } from '@/components/PromptCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatTime, formatDuration } from '@/utils/format';
+import { formatDuration } from '@/utils/format';
 import { CONFIG } from '@/config/constants';
 
 interface ErrorViewProps {
@@ -43,14 +43,21 @@ export function ChatLoadingView({ durationLabel }: ChatLoadingViewProps) {
   );
 }
 
+type ChatMode = 'initial' | 'timed' | 'indefinite';
+
 interface ChattingViewProps {
   partnerName: string;
   prompts: string[];
   currentPromptIndex: number;
   onNextPrompt: () => void;
+  mode?: ChatMode;
+  onEndChat?: () => void;
 }
 
-export function ChattingView({ partnerName, prompts, currentPromptIndex, onNextPrompt }: ChattingViewProps) {
+export function ChattingView({
+  partnerName, prompts, currentPromptIndex, onNextPrompt,
+  mode = 'initial', onEndChat,
+}: ChattingViewProps) {
   return (
     <Card>
       <CardHeader>
@@ -77,11 +84,30 @@ export function ChattingView({ partnerName, prompts, currentPromptIndex, onNextP
         </div>
 
         <div className="rounded-xl bg-muted p-5 text-center">
-          <p className="text-foreground">
-            <span className="font-semibold">{formatDuration(CONFIG.CHAT_DURATION)}</span> to connect and chat
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">No pressure — just be yourself!</p>
+          {mode === 'indefinite' ? (
+            <>
+              <p className="text-foreground">
+                <span className="font-semibold">indefinite time</span> to connect and chat
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">No pressure — just be yourself!</p>
+            </>
+          ) : (
+            <>
+              <p className="text-foreground">
+                <span className="font-semibold">{formatDuration(CONFIG.CHAT_DURATION)}</span> to connect and chat
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">No pressure — just be yourself!</p>
+            </>
+          )}
         </div>
+
+        {mode === 'indefinite' && onEndChat && (
+          <div className="flex justify-center">
+            <Button variant="outline" onClick={onEndChat}>
+              End chat and connect
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -116,40 +142,4 @@ export function TimeUpView({ onExtend, onEndChat }: TimeUpViewProps) {
   );
 }
 
-interface ExtendedViewProps {
-  partnerName: string;
-  timeLeft: number;
-  isRunning: boolean;
-  onEndChat: () => void;
-}
 
-export function ExtendedView({ partnerName, timeLeft, isRunning, onEndChat }: ExtendedViewProps) {
-  return (
-    <Card className="text-center">
-      <CardHeader>
-        <CardTitle className="font-heading text-2xl">Extended Chat</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        <p className="text-foreground">
-          Enjoy your continued conversation with <span className="font-semibold text-primary">{partnerName}</span>
-        </p>
-        <div className="rounded-xl bg-muted p-5">
-          <p id="extendedTimerText" className="text-foreground">
-            {isRunning ? (
-              <>
-                <span className="font-semibold">{formatTime(timeLeft)}</span> remaining
-              </>
-            ) : (
-              <>
-                <span className="font-semibold">No time limit</span> — chat as long as you want!
-              </>
-            )}
-          </p>
-        </div>
-        <Button variant="outline" onClick={onEndChat}>
-          End chat and connect
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}

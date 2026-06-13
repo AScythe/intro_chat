@@ -40,6 +40,7 @@ export default defineConfig({
     cwd: path.resolve(__dirname, '..'),
     env: {
       DB_PATH: path.resolve(__dirname, '..', 'data', 'e2e_test.db'),
+      UVICORN_RELOAD: 'false',
     },
   },
 });

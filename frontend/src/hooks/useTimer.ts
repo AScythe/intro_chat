@@ -97,8 +97,9 @@ export function useChatTimer(
     } else {
       setTimeLeft(seconds);
       callbacksRef.current?.onTick?.(seconds);
+      if (!intervalRef.current) start();
     }
-  }, [clear, setTimeLeft]);
+  }, [clear, setTimeLeft, start]);
 
   return { timeLeft, isRunning, start, clear, extend, getTimeLeft };
 }

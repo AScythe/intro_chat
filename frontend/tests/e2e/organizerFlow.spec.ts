@@ -115,12 +115,13 @@ test.describe('Organizer Flow', () => {
     await expect(page.getByText(/Available|people/)).toBeVisible({ timeout: 15000 });
     await page.locator('[class*="cursor-pointer"]').first().click();
 
-    // Request chat
-    await page.getByRole('button', { name: /Request 2-min chat/ }).click();
-    await expect(page.getByRole('heading', { name: 'Request Sent' })).toBeVisible({ timeout: 5000 });
+    // Request chat — button enabled when person selected
+    const requestButton = page.getByRole('button', { name: /Request chat with/ });
+    await expect(requestButton).toBeEnabled({ timeout: 10000 });
+    await requestButton.click();
 
-    // Wait for response (demo mode: 3s delay)
-    await expect(page.getByText(/accepted/i)).toBeVisible({ timeout: 10000 });
+    // Wait for acceptance — sample user responds via HTTP, shows {name} accepted! with ready buttons
+    await expect(page.getByRole('heading', { name: /accepted/i })).toBeVisible({ timeout: 15000 });
 
     // Click "I'm Ready to Chat!" button
     await page.getByRole('button', { name: /ready to chat/i }).click();

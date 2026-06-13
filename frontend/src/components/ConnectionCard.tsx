@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 interface ConnectionCardProps {
   onYes: () => void;
   onNo: () => void;
+  disabled?: boolean;
 }
 
-export function ConnectionCard({ onYes, onNo }: ConnectionCardProps) {
+export function ConnectionCard({ onYes, onNo, disabled }: ConnectionCardProps) {
   return (
     <Card className="text-center">
       <CardHeader>
@@ -21,8 +22,8 @@ export function ConnectionCard({ onYes, onNo }: ConnectionCardProps) {
         </div>
         <p className="text-foreground">Would you like to exchange usernames to connect?</p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Button onClick={onYes}>Yes, let's connect!</Button>
-          <Button variant="outline" onClick={onNo}>
+          <Button onClick={onYes} disabled={disabled}>Yes, let's connect!</Button>
+          <Button variant="outline" onClick={onNo} disabled={disabled}>
             No thanks
           </Button>
         </div>

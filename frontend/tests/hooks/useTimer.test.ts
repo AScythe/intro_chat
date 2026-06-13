@@ -110,6 +110,37 @@ describe('useChatTimer', () => {
     expect(result.current.timeLeft).toBe(9);
   });
 
+  it('extend restarts the interval after timer expired', () => {
+    const onComplete = vi.fn();
+    const onTick = vi.fn();
+    const { result } = renderHook(() => useChatTimer(1, { onComplete, onTick }));
+
+    act(() => {
+      result.current.start();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(result.current.timeLeft).toBe(0);
+    expect(result.current.isRunning).toBe(false);
+    expect(onComplete).toHaveBeenCalledOnce();
+
+    act(() => {
+      result.current.extend(5);
+    });
+
+    expect(result.current.timeLeft).toBe(5);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.timeLeft).toBe(3);
+    expect(result.current.isRunning).toBe(true);
+  });
+
   it('extend with -1 stops the timer (indefinite)', () => {
     const onComplete = vi.fn();
     const { result } = renderHook(() => useChatTimer(2, { onComplete }));

@@ -38,7 +38,7 @@ export function useChatRequest(options: UseChatRequestOptions) {
       const resp = await fetchJSON<RequestChatResponse>(`/api/users/${options.userId}/request-chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target_user_id: person.id }),
+        body: JSON.stringify({ target_user_id: person.id, force_accept: true }),
       });
 
       if (resp.accepted) {
@@ -58,6 +58,9 @@ export function useChatRequest(options: UseChatRequestOptions) {
 
         if (resp.status === 'pending') {
           // Will receive match_found or chat_request_declined via WS
+        } else if (resp.accepted === false) {
+          setPersonResponse({ accepted: false, message: resp.message || 'Request declined' });
+          setIsPending(false);
         }
       } catch {
         setError('Failed to send chat request');

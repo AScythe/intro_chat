@@ -1,5 +1,5 @@
 // ConnectPage.test.tsx
-// Description: Tests for ConnectPage — connection card, yes/no flow, result display
+// Description: Tests for ConnectPage — connection card, yes/no flow with submitted state, WS-driven result display
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
@@ -60,6 +60,31 @@ describe('ConnectPage', () => {
         expect.stringContaining('/api/matches/'),
         expect.objectContaining({ method: 'POST' }),
       );
+    });
+  });
+
+  it('shows waiting text after clicking yes', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ success: true }) });
+    globalThis.fetch = mockFetch;
+    renderWithProviders('demo_test1234');
+    fireEvent.click(screen.getByRole('button', { name: /yes.*connect/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/Waiting for partner/i)).toBeInTheDocument();
+    });
+  });
+
+  it('disables buttons after clicking yes', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ success: true }) });
+    globalThis.fetch = mockFetch;
+    renderWithProviders('demo_test1234');
+    fireEvent.click(screen.getByRole('button', { name: /yes.*connect/i }));
+    await waitFor(() => {
+      const buttons = screen.getAllByRole('button');
+      buttons.forEach((btn) => {
+        if (btn.textContent?.match(/yes.*connect|no thanks/i)) {
+          expect(btn).toBeDisabled();
+        }
+      });
     });
   });
 });

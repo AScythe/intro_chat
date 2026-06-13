@@ -52,7 +52,7 @@ export function NearbyUsersView({ roomName, nearbyUsers, selectedPerson, onPerso
             disabled={!selectedPerson}
             onClick={onRequestChat}
           >
-            Request 2-min chat with {selectedPerson?.name || 'selected person'}
+            Request chat with {selectedPerson?.name || 'selected person'}
           </Button>
           <Button variant="outline" onClick={onChangeRoom}>
             Change Room

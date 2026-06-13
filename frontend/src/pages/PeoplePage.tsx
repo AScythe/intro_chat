@@ -1,7 +1,7 @@
 // PeoplePage.tsx
 // Description: Nearby people matching — person cards, request/accept flow, match countdown
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSocket } from '@/hooks/useSocket';
 import { fetchJSON } from '@/api/client';
@@ -38,12 +38,19 @@ export function PeoplePage() {
   const [matchId, setMatchId] = useState('');
   const [countdown, setCountdown] = useState<number>(CONFIG.MATCH_FOUND_COUNTDOWN);
   const [incomingRequest, setIncomingRequest] = useState<{ requester_id: string; requester_name: string; room_id: string } | null>(null);
+  const isSampleRequestRef = useRef(false);
 
   useEffect(() => {
     if (!roomName && eventId) {
       navigate(`/room/${eventId}`, { replace: true });
     }
   }, [roomName, eventId, navigate]);
+
+  useEffect(() => {
+    if (user?.userId) {
+      socket.connect(user.userId);
+    }
+  }, [user?.userId]);
 
   useEffect(() => {
     if (!roomName || !eventId) return;
@@ -74,6 +81,7 @@ export function PeoplePage() {
 
   function handleRequestChat() {
     if (!selectedPerson) return;
+    isSampleRequestRef.current = selectedPerson.is_sample ?? false;
     requestChat(selectedPerson);
     setViewState('waitingResponse');
   }
@@ -88,6 +96,7 @@ export function PeoplePage() {
   }
 
   function handleCancelRequest() {
+    isSampleRequestRef.current = false;
     cancelRequest();
     setViewState('showing');
     setSelectedPerson(null);
@@ -126,6 +135,7 @@ export function PeoplePage() {
     const unsub = socket.subscribe<{ type: string; match_id: string; room_id: string; user2_username: string }>(
       'match_found',
       (data) => {
+        if (isSampleRequestRef.current) return;
         setMatchId(data.match_id);
         setMatchUsername(data.user2_username);
         setViewState('matchFound');

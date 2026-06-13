@@ -48,7 +48,7 @@ describe('NearbyUsersView', () => {
         onChangeRoom={vi.fn()}
       />
     );
-    expect(screen.getByRole('button', { name: /request 2-min chat/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /request chat/i })).toBeDisabled();
   });
 
   it('enables request button when person selected', () => {
@@ -62,7 +62,7 @@ describe('NearbyUsersView', () => {
         onChangeRoom={vi.fn()}
       />
     );
-    expect(screen.getByRole('button', { name: /Request 2-min chat with Alice/i })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /Request chat with Alice/i })).not.toBeDisabled();
   });
 
   it('fires onPersonClick when card clicked', () => {

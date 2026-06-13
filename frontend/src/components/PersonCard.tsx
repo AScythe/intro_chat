@@ -14,7 +14,8 @@ export function PersonCard({ person, selected, onClick }: PersonCardProps) {
   return (
     <div
       className={cn(
-        'group flex items-center gap-3 rounded-xl border-2 bg-card p-4 shadow-soft transition-all duration-300 cursor-pointer',
+        'group flex items-center gap-3 rounded-xl border-2 bg-card p-4 shadow-soft transition-all duration-300',
+        person.available && 'cursor-pointer',
         selected
           ? 'border-primary bg-primary/10 shadow-md'
           : 'border-border hover:border-primary hover:-translate-y-0.5 hover:shadow-md',

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ErrorView, ChatLoadingView, ChattingView, TimeUpView, ExtendedView } from '@/components/ChatPageViews';
+import { ErrorView, ChatLoadingView, ChattingView, TimeUpView } from '@/components/ChatPageViews';
 
 describe('ErrorView', () => {
   it('renders error message and back button', () => {
@@ -83,42 +83,55 @@ describe('TimeUpView', () => {
   });
 });
 
-describe('ExtendedView', () => {
-  it('shows remaining time when timer is running', () => {
+describe('ChattingView with initial mode', () => {
+  it('shows duration text and no end chat button', () => {
     render(
-      <ExtendedView
+      <ChattingView
         partnerName="Alice"
-        timeLeft={120}
-        isRunning={true}
-        onEndChat={vi.fn()}
+        prompts={['Prompt 1']}
+        currentPromptIndex={0}
+        onNextPrompt={vi.fn()}
       />
     );
-    expect(screen.getByText('Extended Chat')).toBeInTheDocument();
-    expect(screen.getByText(/Alice/)).toBeInTheDocument();
+    expect(screen.getByText(/30 seconds/)).toBeInTheDocument();
+    expect(screen.queryByText('End chat and connect')).not.toBeInTheDocument();
   });
+});
 
-  it('shows no time limit message when not running', () => {
-    render(
-      <ExtendedView
-        partnerName="Bob"
-        timeLeft={0}
-        isRunning={false}
-        onEndChat={vi.fn()}
-      />
-    );
-    expect(screen.getByText(/no time limit/i)).toBeInTheDocument();
-  });
-
-  it('fires onEndChat when button clicked', () => {
+describe('ChattingView with timed mode', () => {
+  it('shows same layout as initial chat with no end chat button', () => {
     const onEndChat = vi.fn();
     render(
-      <ExtendedView
+      <ChattingView
         partnerName="Alice"
-        timeLeft={60}
-        isRunning={true}
+        prompts={['Prompt 1']}
+        currentPromptIndex={0}
+        onNextPrompt={vi.fn()}
+        mode="timed"
         onEndChat={onEndChat}
       />
     );
+    expect(screen.getByText(/30 seconds/)).toBeInTheDocument();
+    expect(screen.getByText(/No pressure/)).toBeInTheDocument();
+    expect(screen.queryByText('End chat and connect')).not.toBeInTheDocument();
+  });
+});
+
+describe('ChattingView with indefinite mode', () => {
+  it('shows indefinite message and end chat button', () => {
+    const onEndChat = vi.fn();
+    render(
+      <ChattingView
+        partnerName="Bob"
+        prompts={['Prompt A']}
+        currentPromptIndex={0}
+        onNextPrompt={vi.fn()}
+        mode="indefinite"
+        onEndChat={onEndChat}
+      />
+    );
+    expect(screen.getByText(/indefinite time/i)).toBeInTheDocument();
+    expect(screen.getByText(/No pressure/)).toBeInTheDocument();
     fireEvent.click(screen.getByText('End chat and connect'));
     expect(onEndChat).toHaveBeenCalledOnce();
   });

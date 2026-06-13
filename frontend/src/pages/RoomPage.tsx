@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { fetchJSON } from '@/api/client';
+import { useUser } from '@/hooks/useUser';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -55,6 +56,8 @@ export function RoomPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const navigate = useNavigate();
 
+  const { user } = useUser();
+
   const [rooms, setRooms] = useState<Room[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(true);
   const [selectedRoomId, setSelectedRoomId] = useState('');
@@ -66,10 +69,19 @@ export function RoomPage() {
       .catch(() => { toast.error('Failed to load rooms. Please refresh.'); setRoomsLoading(false); });
   }, [eventId]);
 
-  function handleSelectRoom() {
-    if (!selectedRoomId || !eventId) return;
+  async function handleSelectRoom() {
+    if (!selectedRoomId || !eventId || !user?.userId) return;
     const room = rooms.find((r) => r.id === selectedRoomId);
     if (!room) return;
+    try {
+      await fetchJSON(`/api/users/${user.userId}/room`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room_id: selectedRoomId }),
+      });
+    } catch {
+      toast.error('Failed to set room. You may not be able to request chats.');
+    }
     navigate(`/people/${eventId}`, { state: { roomName: room.name } });
   }
 

@@ -11,9 +11,9 @@ import { Timer } from '@/components/Timer';
 import { Button } from '@/components/ui/button';
 import { CONFIG } from '@/config/constants';
 import { formatDuration } from '@/utils/format';
-import { ErrorView, ChatLoadingView, ChattingView, TimeUpView, ExtendedView } from '@/components/ChatPageViews';
+import { ErrorView, ChatLoadingView, ChattingView, TimeUpView } from '@/components/ChatPageViews';
 
-type ChatState = 'loading' | 'chatting' | 'timeUp' | 'extended';
+type ChatState = 'loading' | 'chatting' | 'timeUp' | 'extended' | 'indefinite';
 
 export function ChatPage() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -70,7 +70,7 @@ export function ChatPage() {
 
   function handleExtend(seconds: number) {
     timer.extend(seconds);
-    setState('extended');
+    setState(seconds === -1 ? 'indefinite' : 'extended');
   }
 
   function handleEndChat() {
@@ -109,11 +109,13 @@ export function ChatPage() {
           />
         )}
 
-        {state === 'extended' && !error && (
-          <ExtendedView
+        {(state === 'extended' || state === 'indefinite') && partnerName && !error && (
+          <ChattingView
             partnerName={partnerName}
-            timeLeft={timer.timeLeft}
-            isRunning={timer.isRunning}
+            prompts={prompts}
+            currentPromptIndex={currentPromptIndex}
+            onNextPrompt={handleNextPrompt}
+            mode={state === 'extended' ? 'timed' : 'indefinite'}
             onEndChat={handleEndChat}
           />
         )}

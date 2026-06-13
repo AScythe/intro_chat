@@ -56,6 +56,13 @@ export function ConnectPage() {
   const [state, setState] = useState<'connecting' | 'result'>('connecting');
   const [connectionResult, setConnectionResult] = useState<'exchanged' | 'declined' | null>(null);
   const [error, setError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (user?.userId) {
+      socket.connect(user.userId);
+    }
+  }, [user?.userId]);
 
   useEffect(() => {
     const unsub = socket.subscribe<{ type: string; user1_username: string; user2_username: string }>(
@@ -80,12 +87,26 @@ export function ConnectPage() {
   }, [socket]);
 
   function handleConnectionPref(pref: boolean) {
-    if (!user || !matchId) return;
-    fetchJSON<{ success: boolean }>(`/api/matches/${matchId}/connect`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.userId, wants_to_connect: pref }),
-    }).catch(() => setError('Failed to process connection preference.'));
+    if (!user || !matchId || submitted) return;
+    setSubmitted(true);
+    fetchJSON<{ success: boolean; both_voted?: boolean; exchanged?: boolean }>(
+      `/api/matches/${matchId}/connect`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.userId, wants_to_connect: pref }),
+      },
+    )
+      .then((data) => {
+        if (data.both_voted) {
+          setConnectionResult(data.exchanged ? 'exchanged' : 'declined');
+          setState('result');
+        }
+      })
+      .catch(() => {
+        setSubmitted(false);
+        setError('Failed to process connection preference.');
+      });
   }
 
   function handleStartNewChat() {
@@ -118,7 +139,12 @@ export function ConnectPage() {
           <ConnectionCard
             onYes={() => handleConnectionPref(true)}
             onNo={() => handleConnectionPref(false)}
+            disabled={submitted}
           />
+        )}
+
+        {!error && state === 'connecting' && submitted && (
+          <p className="text-center text-muted-foreground">Waiting for partner...</p>
         )}
 
         {!error && state === 'result' && (
