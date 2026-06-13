@@ -76,4 +76,7 @@ async def handle_connection_exchange(
                 [match['user1_id'], match['user2_id']],
                 {'type': 'connection_declined'}
             )
-    return {'success': True}
+        store.remove_match(match_id)
+        store.connection_statuses.pop(match_id, None)
+        return {'success': True, 'both_voted': True, 'exchanged': both_want}
+    return {'success': True, 'both_voted': False}

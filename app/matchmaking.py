@@ -77,14 +77,22 @@ def update_match_state(match_id: str, user1_id: str, user2_id: str, room_id: str
 
 async def notify_match_found(match_id: str, user1_id: str, user2_id: str, room_id: str) -> None:
     """[ARCH] WebSocket broadcast only — notify matched users."""
+    user1 = store.active_users.get(user1_id)
+    user2 = store.active_users.get(user2_id)
+    if not user1 or not user2:
+        logger.warning("notify_match_found: users %s %s not in active store (match %s)",
+                       user1_id if not user1 else '',
+                       user2_id if not user2 else '',
+                       match_id)
+        return
     await manager.broadcast_to_users(
         [user1_id, user2_id],
         {
             'type': 'match_found',
             'match_id': match_id,
             'room_id': room_id,
-            'user1_username': store.active_users[user1_id]['username'],
-            'user2_username': store.active_users[user2_id]['username']
+            'user1_username': user1['username'],
+            'user2_username': user2['username']
         }
     )
 

@@ -354,19 +354,40 @@ async def request_chat(user_id: str, data: RequestChatRequest) -> dict:
             return {'accepted': False, 'message': 'Users are not in the same room'}
 
         with store.lock:
-            for m in store.active_matches.values():
+            for mid, m in list(store.active_matches.items()):
                 if user_id in (m['user1_id'], m['user2_id']):
-                    return {'accepted': False, 'message': 'You are already in a chat'}
-                if target_id in (m['user1_id'], m['user2_id']):
-                    return {'accepted': False, 'message': 'This person is currently in a chat'}
+                    votes = store.connection_statuses.get(mid, {})
+                    if len(votes) < 2:
+                        return {'accepted': False, 'message': 'You are already in a chat'}
+                    store.active_matches.pop(mid, None)
+                    store.connection_statuses.pop(mid, None)
+                elif target_id in (m['user1_id'], m['user2_id']):
+                    votes = store.connection_statuses.get(mid, {})
+                    if len(votes) < 2:
+                        return {'accepted': False, 'message': 'This person is currently in a chat'}
+                    store.active_matches.pop(mid, None)
+                    store.connection_statuses.pop(mid, None)
 
         target_is_sample = bool(target[4])
 
         if target_is_sample:
-            import random
             accepted = data.force_accept if data.force_accept is not None else random.random() < 0.6
             if not accepted:
                 return {'accepted': False, 'message': 'declined'}
+
+            if not store.get_user(target_id):
+                cursor2 = await db.execute(
+                    'SELECT id, event_id, room_id, username, linkedin_url, slack_handle, is_available, status FROM users WHERE id = ?',
+                    (target_id,)
+                )
+                su = await cursor2.fetchone()
+                if su:
+                    store.add_user(su[0], UserData(
+                        event_id=su[1], username=su[3], room_id=su[2],
+                        linkedin_url=su[4] or '', slack_handle=su[5] or '',
+                        is_available=bool(su[6]), last_seen=str(time.time()),
+                        is_sample=1, status=su[7] or ''
+                    ))
 
             match_id = await persist_match(user_id, target_id, str(target[2]))
             update_match_state(match_id, user_id, target_id, str(target[2]))
