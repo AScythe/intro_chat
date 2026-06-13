@@ -5,6 +5,10 @@ Description: Frontend source module validation suite using static regex analysis
 """
 import os
 import re
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FRONTEND_SRC = os.path.join(BASE_DIR, 'frontend', 'src')
@@ -15,7 +19,7 @@ def _read(src_path):
 
 def test_frontend_files_exist():
     """Test that all required frontend source files exist"""
-    print("🧪 Testing frontend file structure...")
+    print("-- Testing frontend file structure...")
 
     required_files = [
         'api/client.ts',
@@ -57,14 +61,14 @@ def test_frontend_files_exist():
     for rel in required_files:
         full = os.path.join(FRONTEND_SRC, rel)
         if os.path.exists(full):
-            print(f"✅ {rel} exists")
+            print(f"OK {rel} exists")
         else:
-            print(f"❌ {rel} missing")
+            print(f"? {rel} missing")
     print()
 
 def test_api_exports():
     """Test that api.ts has all expected interfaces"""
-    print("🧪 Testing API types (api.ts)...")
+    print("-- Testing API types (api.ts)...")
     content = _read('types/api.ts')
     expected = [
         'CreateEventResponse', 'Room',
@@ -77,74 +81,74 @@ def test_api_exports():
     ]
     for name in expected:
         if f'export interface {name}' in content or f'export type {name}' in content:
-            print(f"✅ Interface '{name}' found")
+            print(f"OK Interface '{name}' found")
         else:
-            print(f"❌ Interface '{name}' missing")
+            print(f"? Interface '{name}' missing")
     print()
 
 def test_demo_data_exports():
     """Test that demoData.ts exports all expected interfaces and data"""
-    print("🧪 Testing demo data exports (utils/demoData.ts)...")
+    print("-- Testing demo data exports (utils/demoData.ts)...")
     content = _read('utils/demoData.ts')
     expected = [
         'SAMPLE_USERS', 'RESPONSES',
     ]
     for name in expected:
         if f'export interface {name}' in content or f'export const {name}' in content:
-            print(f"✅ demoData.ts exports {name}")
+            print(f"OK demoData.ts exports {name}")
         else:
-            print(f"❌ demoData.ts missing {name}")
+            print(f"? demoData.ts missing {name}")
     print()
 
 def test_config():
     """Test that constants.ts has all expected config properties"""
-    print("🧪 Testing config constants (config/constants.ts)...")
+    print("-- Testing config constants (config/constants.ts)...")
     content = _read('config/constants.ts')
     expected = ['CHAT_DURATION', 'MATCH_FOUND_COUNTDOWN', 'TIMER_WARNING_THRESHOLD',
                  'TIMER_DANGER_THRESHOLD', 'DEMO_LOADING_DELAY_MS', 'DEMO_CONNECTION_DELAY_MS',
                  'SIMULATE_RESPONSE_DELAY_MS', 'SIMULATE_READY_DELAY_MS']
     for prop in expected:
         if prop in content:
-            print(f"✅ CONFIG.{prop} defined")
+            print(f"OK CONFIG.{prop} defined")
         else:
-            print(f"❌ CONFIG.{prop} missing")
+            print(f"? CONFIG.{prop} missing")
     print()
 
 def test_utils_exports():
     """Test that util files export all expected functions"""
-    print("🧪 Testing utility exports...")
+    print("-- Testing utility exports...")
 
     # format.ts
     fmt = _read('utils/format.ts')
     if 'export function formatTime' in fmt:
-        print("✅ format.ts exports formatTime")
+        print("OK format.ts exports formatTime")
     else:
-        print("❌ format.ts missing formatTime")
+        print("? format.ts missing formatTime")
 
     # storage.ts
     store = _read('utils/storage.ts')
     store_funcs = ['storeUserId', 'getUserId', 'clearUserId', 'storeData', 'getData']
     for fn in store_funcs:
         if f'export function {fn}' in store:
-            print(f"✅ storage.ts exports {fn}")
+            print(f"OK storage.ts exports {fn}")
         else:
-            print(f"❌ storage.ts missing {fn}")
+            print(f"? storage.ts missing {fn}")
 
     # random.ts
     rand = _read('utils/random.ts')
     if 'export function generateRandomString' in rand:
-        print(f"✅ random.ts exports generateRandomString")
+        print(f"OK random.ts exports generateRandomString")
     else:
-        print(f"❌ random.ts missing generateRandomString")
+        print(f"? random.ts missing generateRandomString")
     if 'export function generateUsername' in rand:
-        print(f"✅ random.ts exports generateUsername")
+        print(f"OK random.ts exports generateUsername")
     else:
-        print(f"❌ random.ts missing generateUsername")
+        print(f"? random.ts missing generateUsername")
     print()
 
 def test_hook_exports():
     """Test that hooks export all expected functions"""
-    print("🧪 Testing hook exports...")
+    print("-- Testing hook exports...")
 
     hook_files = {
         'useSocket.ts': ['useSocket', 'SocketContext', 'SocketContextValue'],
@@ -159,14 +163,14 @@ def test_hook_exports():
         content = _read(os.path.join('hooks', filename))
         for name in expected:
             if f'export function {name}' in content or f'export const {name}' in content or f'export interface {name}' in content:
-                print(f"✅ {filename} exports {name}")
+                print(f"OK {filename} exports {name}")
             else:
-                print(f"❌ {filename} missing {name}")
+                print(f"? {filename} missing {name}")
     print()
 
 def test_component_exports():
     """Test that all components export their expected React components"""
-    print("🧪 Testing component exports...")
+    print("-- Testing component exports...")
     components = {
         'Timer.tsx': 'Timer',
         'PeoplePageViews.tsx': ['NearbyUsersView', 'WaitingResponseView', 'AcceptedView', 'PersonResponse'],
@@ -183,19 +187,19 @@ def test_component_exports():
             for name in exports:
                 pattern = f'export function {name}' in content or f'export interface {name}' in content or f'export const {name}' in content
                 if pattern:
-                    print(f"✅ {filename} exports {name}")
+                    print(f"OK {filename} exports {name}")
                 else:
-                    print(f"❌ {filename} missing {name}")
+                    print(f"? {filename} missing {name}")
         else:
             if f'export function {exports}' in content:
-                print(f"✅ {filename} exports {exports}")
+                print(f"OK {filename} exports {exports}")
             else:
-                print(f"❌ {filename} missing {exports}")
+                print(f"? {filename} missing {exports}")
     print()
 
 def test_page_exports():
     """Test that page components are exported"""
-    print("🧪 Testing page exports...")
+    print("-- Testing page exports...")
     pages = {
         'HomePage.tsx': 'HomePage',
         'UserInfoPage.tsx': 'UserInfoPage',
@@ -208,14 +212,14 @@ def test_page_exports():
     for filename, page in pages.items():
         content = _read(os.path.join('pages', filename))
         if f'export function {page}' in content:
-            print(f"✅ {filename} exports {page}")
+            print(f"OK {filename} exports {page}")
         else:
-            print(f"❌ {filename} missing {page}")
+            print(f"? {filename} missing {page}")
     print()
 
 def test_import_references():
     """Test that App.tsx references all pages and contexts"""
-    print("🧪 Testing App.tsx import references...")
+    print("-- Testing App.tsx import references...")
     app = _read('App.tsx')
 
     expected_imports = ['HomePage', 'UserInfoPage', 'RoomPage', 'ChatPage',
@@ -223,33 +227,33 @@ def test_import_references():
                         'SocketProvider', 'UserProvider']
     for imp in expected_imports:
         if imp in app:
-            print(f"✅ App.tsx imports '{imp}'")
+            print(f"OK App.tsx imports '{imp}'")
         else:
-            print(f"❌ App.tsx missing '{imp}' import")
+            print(f"? App.tsx missing '{imp}' import")
     print()
 
 def test_client_exports():
     """Test that client.ts exports its public API function"""
-    print("🧪 Testing client exports (api/client.ts)...")
+    print("-- Testing client exports (api/client.ts)...")
     content = _read('api/client.ts')
     if 'export async function fetchJSON' in content:
-        print("✅ client.ts exports fetchJSON")
+        print("OK client.ts exports fetchJSON")
     else:
-        print("❌ client.ts missing fetchJSON")
+        print("? client.ts missing fetchJSON")
     if 'async function fetchWithTimeout' in content:
-        print("✅ client.ts defines fetchWithTimeout (internal)")
+        print("OK client.ts defines fetchWithTimeout (internal)")
     else:
-        print("❌ client.ts missing fetchWithTimeout")
+        print("? client.ts missing fetchWithTimeout")
     if 'async function parseJSON' in content:
-        print("✅ client.ts defines parseJSON (internal)")
+        print("OK client.ts defines parseJSON (internal)")
     else:
-        print("❌ client.ts missing parseJSON")
+        print("? client.ts missing parseJSON")
     print()
 
 
 def test_code_quality():
     """Test code quality — no console.log stmts in production code, strict mode"""
-    print("🧪 Testing code quality...")
+    print("-- Testing code quality...")
 
     ts_files = [
         'api/client.ts', 'config/constants.ts',
@@ -265,7 +269,7 @@ def test_code_quality():
         count = content.count('console.log')
         code_len = len(content.splitlines())
         ratio = count / max(code_len, 1)
-        status = "⚠️" if ratio > 0.05 else "✅"
+        status = "?️" if ratio > 0.05 else "OK"
         print(f"{status} {rel}: {count} console.log in {code_len} lines")
 
     tsx_files = [
@@ -282,12 +286,12 @@ def test_code_quality():
         count = content.count('console.log')
         code_len = len(content.splitlines())
         ratio = count / max(code_len, 1)
-        status = "⚠️" if ratio > 0.05 else "✅"
+        status = "?️" if ratio > 0.05 else "OK"
         print(f"{status} {rel}: {count} console.log in {code_len} lines")
     print()
 
 def main():
-    print("🌟 IntroChat Frontend Source Validation Suite")
+    print("*** IntroChat Frontend Source Validation Suite")
     print("=" * 60)
     print()
 
@@ -303,8 +307,8 @@ def main():
     test_client_exports()
     test_code_quality()
 
-    print("🎉 All frontend source validation tests completed!")
-    print("\n📋 Summary:")
+    print("*** All frontend source validation tests completed!")
+    print("\n-- Summary:")
     print("   - TypeScript types and interfaces validated")
     print("   - Demo data exports validated (demoData.ts)")
     print("   - Utility functions present in format.ts, storage.ts, random.ts")

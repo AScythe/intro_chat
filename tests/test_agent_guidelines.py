@@ -15,6 +15,9 @@ import re
 import json
 import shutil
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,10 +32,10 @@ FAIL = 0
 def check(condition: bool, msg: str):
     global PASS, FAIL
     if condition:
-        print(f"  ✅ {msg}")
+        print(f"  OK {msg}")
         PASS += 1
     else:
-        print(f"  ❌ {msg}")
+        print(f"  ? {msg}")
         FAIL += 1
 
 def read_file(path: str) -> str:
@@ -61,7 +64,7 @@ def resolve(path: str) -> str:
     return os.path.join(REPO_ROOT, path)
 
 def warn(msg: str):
-    print(f"  ⚠️ {msg}")
+    print(f"  ?️ {msg}")
 
 def scan_description_headers(directory: str, extensions: tuple, pattern: str) -> list:
     missing = []
@@ -307,7 +310,7 @@ def test_skill_routing_hypothetical_messages():
     Verify that each loadable skill's description contains trigger keywords
     that would match realistic hypothetical messages.
     """
-    print("\n📋 Skill Routing — hypothetical messages match skill descriptions")
+    print("\n-- Skill Routing — hypothetical messages match skill descriptions")
     for skill_name, messages in SKILL_ROUTING_CASES:
         path = os.path.join(SKILLS_DIR, skill_name, "SKILL.md")
         meta = extract_frontmatter(path)
@@ -372,7 +375,7 @@ def test_tool_selection_hypothetical_queries():
     has_pipeline_stages = "Stage 1: Scope" in content
     check(has_pipeline_stages, "Pipeline stages: Scope → Search → Verify")
 
-    print("\n📋 Tool Selection — hypothetical queries route to correct tool")
+    print("\n-- Tool Selection — hypothetical queries route to correct tool")
     for query, expected_tool, rationale in TOOL_SELECTION_CASES:
         if expected_tool is not None:
             check(True,
@@ -400,7 +403,7 @@ def test_skill_no_match_fallback():
     """
     Verify messages that should NOT match any skill (fall through to default).
     """
-    print("\n📋 Skill Routing — messages with no matching skill")
+    print("\n-- Skill Routing — messages with no matching skill")
     no_match_messages = [
         "what is 2+2?",
         "good morning",
@@ -436,7 +439,7 @@ def test_tool_mixed_combines_layers():
     """
     Verify that mixed tasks correctly combine layers (not a single tool).
     """
-    print("\n📋 Tool Selection — mixed tasks combine layers")
+    print("\n-- Tool Selection — mixed tasks combine layers")
     mixed_tasks = [
         ("find all API routes and update their return types",
          "structural + semantic"),
@@ -454,7 +457,7 @@ def test_skill_loading_priority_chain():
     Verify AGENTS.md defines the priority chain:
     Skill loading > help lookup > Task tool delegation > default
     """
-    print("\n📋 Skill Loading Priority chain defined")
+    print("\n-- Skill Loading Priority chain defined")
     content = read_file(AGENTS_MD)
     check("Skill loading > opencode.ai help lookup > Task tool delegation > default response" in content,
           "Priority chain: Skill loading > help > Task tool > default")
@@ -473,7 +476,7 @@ def test_file_ownership_paths():
     has_ownership_section = "## File Ownership" in content
     check(has_ownership_section, "AGENTS.md has File Ownership section")
 
-    print("\n📋 File Ownership table — all paths exist on disk")
+    print("\n-- File Ownership table — all paths exist on disk")
     for path, path_type in SOURCE_PATHS.items():
         full = resolve(path)
         if path_type == "dir":
@@ -520,7 +523,7 @@ def test_file_ownership_paths():
 # ── 7. Commands Reference ────────────────────────────────────────
 
 def test_commands_reference():
-    print("\n📋 Commands Reference — all command targets exist")
+    print("\n-- Commands Reference — all command targets exist")
 
     for group, entries in COMMAND_TARGET_GROUPS.items():
         for path, path_type in entries:
@@ -546,7 +549,7 @@ def test_commands_reference():
 # ── 8. Documentation Structure ──────────────────────────────────
 
 def test_documentation_structure():
-    print("\n📋 Documentation Structure — all documented docs exist")
+    print("\n-- Documentation Structure — all documented docs exist")
     for doc_rel in DOC_PATHS:
         full = resolve(doc_rel)
         check(os.path.isfile(full), f"`{doc_rel}` exists")
@@ -555,7 +558,7 @@ def test_documentation_structure():
 # ── 9. Test Suite Structure ──────────────────────────────────────
 
 def test_test_suite_structure():
-    print("\n📋 Test Suite Structure — naming conventions match actual files")
+    print("\n-- Test Suite Structure — naming conventions match actual files")
 
     test_dir = TESTS_DIR
     backend_tests = [f for f in os.listdir(test_dir) if f.startswith("test_") and f.endswith(".py")]
@@ -591,7 +594,7 @@ def test_test_suite_structure():
 # ── 10. Utility Skills ──────────────────────────────────────────
 
 def test_utility_skills():
-    print("\n📋 Utility Skills — referenced skill files exist")
+    print("\n-- Utility Skills — referenced skill files exist")
     for skill_name in UTILITY_SKILLS:
         skill_path = os.path.join(SKILLS_DIR, skill_name, "SKILL.md")
         check(os.path.isfile(skill_path), f"`{skill_name}` skill exists with SKILL.md")
@@ -600,7 +603,7 @@ def test_utility_skills():
 # ── 11. Documentation Discipline ─────────────────────────────────
 
 def test_documentation_discipline():
-    print("\n📋 Documentation Discipline — description headers on source files")
+    print("\n-- Documentation Discipline — description headers on source files")
 
     py_missing = scan_description_headers(
         resolve("app"), (".py",), r'# Description:'
@@ -624,7 +627,7 @@ def test_documentation_discipline():
 # ── 12. Tooling Rules ──────────────────────────────────────────
 
 def test_tooling_rules():
-    print("\n📋 Tooling Rules — required tools available on PATH")
+    print("\n-- Tooling Rules — required tools available on PATH")
 
     uv_path = shutil.which("uv")
     check(uv_path is not None, f"`uv` available on PATH (at {uv_path or 'not found'})")
@@ -637,9 +640,9 @@ def test_tooling_rules():
 
 def main():
     global PASS, FAIL
-    print("🤖 IntroChat AGENTS.md Validation Suite")
+    print("* IntroChat AGENTS.md Validation Suite")
     print("=" * 50)
-    print(f"📌 {EXECUTE_MESSAGE}")
+    print(f"-- {EXECUTE_MESSAGE}")
     print()
 
     test_skill_routing_hypothetical_messages()
@@ -656,11 +659,11 @@ def main():
     test_tooling_rules()
 
     print(f"\n{'=' * 50}")
-    print(f"📊 Results: {PASS} passed, {FAIL} failed")
+    print(f"-- Results: {PASS} passed, {FAIL} failed")
     if FAIL == 0:
-        print("🎉 All AGENTS.md validation tests passed!")
+        print("*** All AGENTS.md validation tests passed!")
     else:
-        print(f"❌ {FAIL} test(s) failed — review above for details.")
+        print(f"? {FAIL} test(s) failed — review above for details.")
 
     return 0 if FAIL == 0 else 1
 

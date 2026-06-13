@@ -12,11 +12,11 @@ def test_db_connection():
     db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'introchat.db')
     
     if not os.path.exists(db_path):
-        print(f"❌ Database not found at: {db_path}")
+        print(f"? Database not found at: {db_path}")
         print("   Run: uv run python -m app  (to create database)")
         return False
     
-    print(f"✅ Database found: {db_path}")
+    print(f"OK Database found: {db_path}")
     
     try:
         conn = sqlite3.connect(db_path)
@@ -27,15 +27,15 @@ def test_db_connection():
         tables = [row[0] for row in cursor.fetchall()]
         
         expected_tables = ['events', 'rooms', 'users', 'matches']
-        print(f"\n📊 Found {len(tables)} tables:")
+        print(f"\n-- Found {len(tables)} tables:")
         for table in expected_tables:
             if table in tables:
-                print(f"   ✅ {table}")
+                print(f"   OK {table}")
             else:
-                print(f"   ❌ {table} (missing)")
+                print(f"   ? {table} (missing)")
         
         # Check row counts
-        print(f"\n📈 Row counts:")
+        print(f"\n-- Row counts:")
         for table in expected_tables:
             if table in tables:
                 cursor.execute(f"SELECT COUNT(*) FROM {table}")
@@ -46,7 +46,7 @@ def test_db_connection():
         return True
         
     except Exception as e:
-        print(f"❌ Database error: {e}")
+        print(f"? Database error: {e}")
         return False
 
 def reset_database():
@@ -59,16 +59,19 @@ def reset_database():
     
     if os.path.exists(db_path):
         os.remove(db_path)
-        print(f"🗑️  Deleted: {db_path}")
+        print(f"--️  Deleted: {db_path}")
     
     # Recreate database
     from app.database import init_db
     asyncio.run(init_db(db_path))
-    print(f"✅ Database recreated at: {db_path}")
+    print(f"OK Database recreated at: {db_path}")
 
 if __name__ == '__main__':
     import sys
-    print("🧪 IntroChat Database Utility\n")
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    print("-- IntroChat Database Utility\n")
     
     if len(sys.argv) > 1:
         if sys.argv[1] == 'reset':

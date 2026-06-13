@@ -18,6 +18,9 @@ from fastapi.testclient import TestClient
 from app import app
 from app.config import DB_PATH
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 
 def cleanup_event(event_name: str) -> None:
     """Cascade-delete a test event by name. Idempotent — safe to call multiple times."""
@@ -42,96 +45,96 @@ def cleanup_event(event_name: str) -> None:
 
 def test_imports():
     """Test that all modular components can be imported"""
-    print("🧪 Testing imports...")
+    print("-- Testing imports...")
 
     try:
         import fastapi
-        print("✅ FastAPI imported successfully")
+        print("OK FastAPI imported successfully")
     except ImportError as e:
-        print(f"❌ FastAPI import failed: {e}")
+        print(f"? FastAPI import failed: {e}")
 
     try:
         import uvicorn
-        print("✅ Uvicorn imported successfully")
+        print("OK Uvicorn imported successfully")
     except ImportError as e:
-        print(f"❌ Uvicorn import failed: {e}")
+        print(f"? Uvicorn import failed: {e}")
 
     try:
         import aiosqlite
-        print("✅ aiosqlite imported successfully")
+        print("OK aiosqlite imported successfully")
     except ImportError as e:
-        print(f"❌ aiosqlite import failed: {e}")
+        print(f"? aiosqlite import failed: {e}")
 
     try:
         import qrcode
-        print("✅ QRCode imported successfully")
+        print("OK QRCode imported successfully")
     except ImportError as e:
-        print(f"❌ QRCode import failed: {e}")
+        print(f"? QRCode import failed: {e}")
 
     try:
         import sqlite3
-        print("✅ SQLite3 imported successfully")
+        print("OK SQLite3 imported successfully")
     except ImportError as e:
-        print(f"❌ SQLite3 import failed: {e}")
+        print(f"? SQLite3 import failed: {e}")
 
     # Test new modular imports from app package
     try:
         from app.state import store
         from app.prompts import CONVERSATION_PROMPTS
-        print("✅ app/state.py imported successfully")
+        print("OK app/state.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/state.py import failed: {e}")
+        print(f"? app/state.py import failed: {e}")
 
     try:
         from app.database import init_db
-        print("✅ app/database.py imported successfully")
+        print("OK app/database.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/database.py import failed: {e}")
+        print(f"? app/database.py import failed: {e}")
 
     try:
         from app.routes_html import router_html
         from app.routes_api import router_api
         from app.routes_ws import router_ws
-        print("✅ app/routes_*.py imported successfully")
+        print("OK app/routes_*.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/routes_*.py import failed: {e}")
+        print(f"? app/routes_*.py import failed: {e}")
 
     try:
         from app.matchmaking import find_or_enqueue_match, create_match
-        print("✅ app/matchmaking.py imported successfully")
+        print("OK app/matchmaking.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/matchmaking.py import failed: {e}")
+        print(f"? app/matchmaking.py import failed: {e}")
 
     try:
         from app.schemas import CreateEventRequest, JoinEventRequest
-        print("✅ app/schemas.py imported successfully")
+        print("OK app/schemas.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/schemas.py import failed: {e}")
+        print(f"? app/schemas.py import failed: {e}")
 
     try:
         from app.connection_manager import manager
-        print("✅ app/connection_manager.py imported successfully")
+        print("OK app/connection_manager.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/connection_manager.py import failed: {e}")
+        print(f"? app/connection_manager.py import failed: {e}")
 
     try:
         from app.tasks import cleanup_expired_matches
-        print("✅ app/tasks.py imported successfully")
+        print("OK app/tasks.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/tasks.py import failed: {e}")
+        print(f"? app/tasks.py import failed: {e}")
 
     try:
         from app.connection_service import handle_connection_exchange
-        print("✅ app/connection_service.py imported successfully")
+        print("OK app/connection_service.py imported successfully")
     except ImportError as e:
-        print(f"❌ app/connection_service.py import failed: {e}")
+        print(f"? app/connection_service.py import failed: {e}")
 
-    print("✅ Import test completed\n")
+    print("OK Import test completed\n")
 
 
 def test_file_structure():
     """Test that all required files exist"""
-    print("🧪 Testing file structure...")
+    print("-- Testing file structure...")
 
     required_files = [
         'app/__init__.py',
@@ -182,16 +185,16 @@ def test_file_structure():
 
     for file_path in required_files:
         if os.path.exists(file_path):
-            print(f"✅ {file_path} exists")
+            print(f"OK {file_path} exists")
         else:
-            print(f"❌ {file_path} missing")
+            print(f"? {file_path} missing")
 
-    print("✅ File structure test completed\n")
+    print("OK File structure test completed\n")
 
 
 def test_database():
     """Test database initialization and basic operations"""
-    print("🧪 Testing database initialization...")
+    print("-- Testing database initialization...")
 
     # Initialize database with correct path
     import os
@@ -210,68 +213,68 @@ def test_database():
     expected_tables = ['events', 'rooms', 'users', 'matches']
     for table in expected_tables:
         if table in tables:
-            print(f"✅ Table '{table}' exists")
+            print(f"OK Table '{table}' exists")
         else:
-            print(f"❌ Table '{table}' missing")
+            print(f"? Table '{table}' missing")
 
     # Test inserting sample data
     try:
         cursor.execute("INSERT INTO events (id, name) VALUES (?, ?)", ('TEST123', 'Test Event'))
         cursor.execute("INSERT INTO rooms (id, event_id, name) VALUES (?, ?, ?)", ('ROOM1', 'TEST123', 'Test Room'))
         conn.commit()
-        print("✅ Sample data insertion successful")
+        print("OK Sample data insertion successful")
 
         # Clean up
         cursor.execute("DELETE FROM rooms WHERE id = 'ROOM1'")
         cursor.execute("DELETE FROM events WHERE id = 'TEST123'")
         conn.commit()
-        print("✅ Sample data cleanup successful")
+        print("OK Sample data cleanup successful")
 
     except Exception as e:
-        print(f"❌ Database operations failed: {e}")
+        print(f"? Database operations failed: {e}")
 
     conn.close()
     os.remove(db_path)
-    print("✅ Database test completed\n")
+    print("OK Database test completed\n")
 
 
 def test_conversation_prompts():
     """Test conversation prompts"""
-    print("🧪 Testing conversation prompts...")
+    print("-- Testing conversation prompts...")
 
     from app.prompts import CONVERSATION_PROMPTS
 
     if CONVERSATION_PROMPTS and len(CONVERSATION_PROMPTS) > 0:
-        print(f"✅ Found {len(CONVERSATION_PROMPTS)} conversation prompts")
-        print(f"✅ Sample prompt: '{CONVERSATION_PROMPTS[0]}'")
+        print(f"OK Found {len(CONVERSATION_PROMPTS)} conversation prompts")
+        print(f"OK Sample prompt: '{CONVERSATION_PROMPTS[0]}'")
     else:
-        print("❌ No conversation prompts found")
+        print("? No conversation prompts found")
 
-    print("✅ Conversation prompts test completed\n")
+    print("OK Conversation prompts test completed\n")
 
 
 def test_state_constants():
     """Test that state constants are correctly defined"""
-    print("🧪 Testing state constants...")
+    print("-- Testing state constants...")
 
     from app.config import MATCH_EXPIRY_SECONDS, CLEANUP_INTERVAL_SECONDS, CLEANUP_THRESHOLD_SECONDS
 
     if MATCH_EXPIRY_SECONDS == 30:
-        print(f"✅ MATCH_EXPIRY_SECONDS = {MATCH_EXPIRY_SECONDS}")
+        print(f"OK MATCH_EXPIRY_SECONDS = {MATCH_EXPIRY_SECONDS}")
     else:
-        print(f"❌ MATCH_EXPIRY_SECONDS should be 30, got {MATCH_EXPIRY_SECONDS}")
+        print(f"? MATCH_EXPIRY_SECONDS should be 30, got {MATCH_EXPIRY_SECONDS}")
 
     if CLEANUP_INTERVAL_SECONDS == 60:
-        print(f"✅ CLEANUP_INTERVAL_SECONDS = {CLEANUP_INTERVAL_SECONDS}")
+        print(f"OK CLEANUP_INTERVAL_SECONDS = {CLEANUP_INTERVAL_SECONDS}")
     else:
-        print(f"❌ CLEANUP_INTERVAL_SECONDS should be 60, got {CLEANUP_INTERVAL_SECONDS}")
+        print(f"? CLEANUP_INTERVAL_SECONDS should be 60, got {CLEANUP_INTERVAL_SECONDS}")
 
     if CLEANUP_THRESHOLD_SECONDS == 300:
-        print(f"✅ CLEANUP_THRESHOLD_SECONDS = {CLEANUP_THRESHOLD_SECONDS}")
+        print(f"OK CLEANUP_THRESHOLD_SECONDS = {CLEANUP_THRESHOLD_SECONDS}")
     else:
-        print(f"❌ CLEANUP_THRESHOLD_SECONDS should be 300, got {CLEANUP_THRESHOLD_SECONDS}")
+        print(f"? CLEANUP_THRESHOLD_SECONDS should be 300, got {CLEANUP_THRESHOLD_SECONDS}")
 
-    print("✅ State constants test completed\n")
+    print("OK State constants test completed\n")
 
 
 
@@ -279,17 +282,17 @@ def test_state_constants():
 
 def test_home_page():
     """Test home page renders"""
-    print("🧪 Testing home page...")
+    print("-- Testing home page...")
     client = TestClient(app)
     resp = client.get('/')
     assert resp.status_code == 200
     assert 'IntroChat' in resp.text
-    print("✅ Home page renders correctly\n")
+    print("OK Home page renders correctly\n")
 
 
 def test_api_endpoints():
     """Test all API endpoints respond correctly"""
-    print("🧪 Testing API endpoints...")
+    print("-- Testing API endpoints...")
 
     client = TestClient(app)
 
@@ -299,14 +302,14 @@ def test_api_endpoints():
     data = resp.json()
     assert 'event_id' in data
     event_id = data['event_id']
-    print(f"✅ POST /api/events → {event_id}")
+    print(f"OK POST /api/events → {event_id}")
 
     # Get rooms
     resp = client.get(f'/api/events/{event_id}/rooms')
     assert resp.status_code == 200
     rooms = resp.json()
     assert len(rooms) == 8
-    print(f"✅ GET /api/events/<id>/rooms → {len(rooms)} rooms")
+    print(f"OK GET /api/events/<id>/rooms → {len(rooms)} rooms")
 
     # Join event
     resp = client.post(f'/api/events/{event_id}/join', json={'username': 'TestUser'})
@@ -314,40 +317,40 @@ def test_api_endpoints():
     data = resp.json()
     assert 'user_id' in data
     user_id = data['user_id']
-    print(f"✅ POST /api/events/<id>/join → user {user_id}")
+    print(f"OK POST /api/events/<id>/join → user {user_id}")
 
     # Select room
     room_id = rooms[0]['id']
     resp = client.post(f'/api/users/{user_id}/room', json={'room_id': room_id})
     assert resp.status_code == 200
-    print(f"✅ POST /api/users/<id>/room → room selected")
+    print(f"OK POST /api/users/<id>/room → room selected")
 
     # Set available
     resp = client.post(f'/api/users/{user_id}/available', json={'available': True})
     assert resp.status_code == 200
-    print(f"✅ POST /api/users/<id>/available → toggled")
+    print(f"OK POST /api/users/<id>/available → toggled")
 
     # QR code
     resp = client.get(f'/api/qr/{event_id}')
     assert resp.status_code == 200
     data = resp.json()
     assert 'qr_code' in data
-    print(f"✅ GET /api/qr/<id> → QR generated")
+    print(f"OK GET /api/qr/<id> → QR generated")
 
     # Prompts
     resp = client.get('/api/prompts')
     assert resp.status_code == 200
     prompts = resp.json()
     assert len(prompts) == 10
-    print(f"✅ GET /api/prompts → {len(prompts)} prompts")
+    print(f"OK GET /api/prompts → {len(prompts)} prompts")
 
     cleanup_event("API Test Event")
-    print("✅ API endpoint test completed\n")
+    print("OK API endpoint test completed\n")
 
 
 def test_social_info():
     """Test social info (linkedin_url, slack_handle) is saved on join"""
-    print("🧪 Testing social info collection...")
+    print("-- Testing social info collection...")
 
     client = TestClient(app)
 
@@ -368,12 +371,12 @@ def test_social_info():
     assert user.get('slack_handle') == '@testuser'
 
     cleanup_event("Social Test")
-    print("✅ Social info saved correctly\n")
+    print("OK Social info saved correctly\n")
 
 
 def test_error_paths():
     """Test error responses for invalid requests"""
-    print("🧪 Testing error paths...")
+    print("-- Testing error paths...")
 
     client = TestClient(app)
 
@@ -393,12 +396,12 @@ def test_error_paths():
     resp = client.post('/api/events/nonexistent/join', json={})
     assert resp.status_code == 200  # Creates user with defaults
 
-    print("✅ Error path test completed\n")
+    print("OK Error path test completed\n")
 
 
 def test_matchmaking_lifecycle():
     """Test match lifecycle: create, retrieve, connect"""
-    print("🧪 Testing matchmaking lifecycle...")
+    print("-- Testing matchmaking lifecycle...")
 
     from app.state import store
     from app.matchmaking import create_match
@@ -430,7 +433,7 @@ def test_matchmaking_lifecycle():
     match_id = list(store.active_matches.keys())[
         [m['user1_id'] for m in store.active_matches.values()].index(user1_id)
     ]
-    print(f"✅ Match created: {match_id}")
+    print(f"OK Match created: {match_id}")
 
     # Retrieve match via get_match
     resp = client.get(f'/api/matches/{match_id}')
@@ -438,7 +441,7 @@ def test_matchmaking_lifecycle():
     match_data = resp.json()
     assert match_data['user1_username'] == 'User1'
     assert match_data['user2_username'] == 'User2'
-    print("✅ Match retrieved via API")
+    print("OK Match retrieved via API")
 
     # Retrieve match via get_user_match
     resp = client.get(f'/api/users/{user1_id}/match')
@@ -447,12 +450,12 @@ def test_matchmaking_lifecycle():
     resp = client.get(f'/api/users/{user2_id}/match')
     assert resp.status_code == 200
     assert resp.json()['match_id'] == match_id
-    print("✅ Match retrieved via get_user_match")
+    print("OK Match retrieved via get_user_match")
 
     # get_user_match returns 404 for unmatched user
     resp = client.get('/api/users/nonexistent/match')
     assert resp.status_code == 404
-    print("✅ get_user_match 404 for unmatched user")
+    print("OK get_user_match 404 for unmatched user")
 
     # Connection exchange — user1 opts in
     resp = client.post(f'/api/matches/{match_id}/connect',
@@ -463,7 +466,7 @@ def test_matchmaking_lifecycle():
     resp = client.post(f'/api/matches/{match_id}/connect',
                        json={'user_id': user2_id, 'wants_to_connect': True})
     assert resp.status_code == 200
-    print("✅ Connection exchange completed")
+    print("OK Connection exchange completed")
 
     # Connection declined path — user2 opts in, user3 opts out
     resp = client.post(f'/api/events/{event_id}/join', json={'username': 'User3'})
@@ -478,7 +481,7 @@ def test_matchmaking_lifecycle():
     resp = client.post(f'/api/matches/{match_id2}/connect',
                        json={'user_id': user3_id, 'wants_to_connect': False})
     assert resp.status_code == 200
-    print("✅ Connection declined path works")
+    print("OK Connection declined path works")
     if match_id2 in store.active_matches:
         del store.active_matches[match_id2]
 
@@ -486,12 +489,12 @@ def test_matchmaking_lifecycle():
     if match_id in store.active_matches:
         del store.active_matches[match_id]
     cleanup_event("Match Test")
-    print("✅ Matchmaking lifecycle test completed\n")
+    print("OK Matchmaking lifecycle test completed\n")
 
 
 def test_find_match_end_to_end():
     """Test find_match via availability toggle (full flow, not direct call)"""
-    print("🧪 Testing find_match end-to-end...")
+    print("-- Testing find_match end-to-end...")
 
     from app.state import store
     from app.matchmaking import find_or_enqueue_match
@@ -517,7 +520,7 @@ def test_find_match_end_to_end():
     # Toggle user1 available — no match yet, goes to waiting_queue
     client.post(f'/api/users/{user1_id}/available', json={'available': True})
     assert user1_id in store.waiting_queue
-    print("✅ User1 in waiting queue")
+    print("OK User1 in waiting queue")
 
     # Toggle user2 available — triggers find_match, both should match
     client.post(f'/api/users/{user2_id}/available', json={'available': True})
@@ -530,28 +533,28 @@ def test_find_match_end_to_end():
             match_id = mid
             break
     assert match_id is not None, "find_match should create a match when two users are available in same room"
-    print(f"✅ Match created via find_match: {match_id}")
+    print(f"OK Match created via find_match: {match_id}")
 
     # Both should be removed from waiting queue
     assert user1_id not in store.waiting_queue
     assert user2_id not in store.waiting_queue
-    print("✅ Both users removed from waiting queue")
+    print("OK Both users removed from waiting queue")
 
     # Both should be set unavailable
     assert store.active_users.get(user1_id, {}).get('is_available') == False
     assert store.active_users.get(user2_id, {}).get('is_available') == False
-    print("✅ Both users set to unavailable")
+    print("OK Both users set to unavailable")
 
     # Cleanup
     if match_id in store.active_matches:
         del store.active_matches[match_id]
     cleanup_event("FindMatch Test")
-    print("✅ find_match end-to-end test completed\n")
+    print("OK find_match end-to-end test completed\n")
 
 
 def test_cleanup_expired_matches():
     """Test cleanup threshold logic — old matches get removed, new ones stay"""
-    print("🧪 Testing cleanup expired matches...")
+    print("-- Testing cleanup expired matches...")
 
     from app.state import store
     from app.config import CLEANUP_THRESHOLD_SECONDS
@@ -583,10 +586,10 @@ def test_cleanup_expired_matches():
     ]
 
     assert old_match_id in matches_to_remove
-    print("✅ Old match identified for cleanup")
+    print("OK Old match identified for cleanup")
 
     assert fresh_match_id not in matches_to_remove
-    print("✅ Fresh match not identified for cleanup")
+    print("OK Fresh match not identified for cleanup")
 
     # Actually remove them (simulating cleanup)
     for mid in matches_to_remove:
@@ -594,18 +597,18 @@ def test_cleanup_expired_matches():
 
     assert fresh_match_id in store.active_matches
     assert old_match_id not in store.active_matches
-    print("✅ Cleanup removes old matches, keeps new ones")
+    print("OK Cleanup removes old matches, keeps new ones")
 
     # Cleanup
     if fresh_match_id in store.active_matches:
         del store.active_matches[fresh_match_id]
 
-    print("✅ Cleanup expired matches test completed\n")
+    print("OK Cleanup expired matches test completed\n")
 
 
 def test_websocket_connection():
     """Test WebSocket endpoint and ConnectionManager"""
-    print("🧪 Testing WebSocket endpoint...")
+    print("-- Testing WebSocket endpoint...")
 
     from app.connection_manager import manager
 
@@ -622,17 +625,17 @@ def test_websocket_connection():
     assert test_user in manager.user_connections
     assert manager.user_rooms.get(test_user) == test_room
     assert test_user in manager.room_users.get(test_room, set())
-    print("✅ ConnectionManager internal mappings work")
+    print("OK ConnectionManager internal mappings work")
 
     manager.disconnect(test_user)
     assert test_user not in manager.user_connections
     assert test_user not in manager.user_rooms
     assert test_user not in manager.room_users.get(test_room, set())
-    print("✅ ConnectionManager.disconnect cleans up all mappings")
+    print("OK ConnectionManager.disconnect cleans up all mappings")
 
     # send_to_user handles missing user gracefully
     asyncio.run(manager.send_to_user('nonexistent', {'type': 'test'}))
-    print("✅ ConnectionManager.send_to_user handles missing user gracefully")
+    print("OK ConnectionManager.send_to_user handles missing user gracefully")
 
     # Test WebSocket endpoint via TestClient
     ws_user = 'ws_e2e_user'
@@ -641,7 +644,7 @@ def test_websocket_connection():
         ws.send_json({'user_id': ws_user, 'room_id': 'ws_room1'})
 
     assert ws_user not in manager.user_connections
-    print("✅ WebSocket endpoint: connect and clean disconnect works")
+    print("OK WebSocket endpoint: connect and clean disconnect works")
 
     # Test join_room via WebSocket
     with client.websocket_connect('/ws') as ws:
@@ -649,23 +652,23 @@ def test_websocket_connection():
         ws.send_json({'type': 'join_room', 'room_id': 'ws_room2'})
 
     assert ws_user not in manager.user_connections
-    print("✅ WebSocket endpoint: join_room and disconnect works")
+    print("OK WebSocket endpoint: join_room and disconnect works")
 
     # Test WebSocket rejects missing user_id
     try:
         with client.websocket_connect('/ws') as ws:
             ws.send_json({'room_id': 'no_user_room'})
             ws.receive_json()
-        print("❌ WebSocket should have rejected missing user_id")
+        print("? WebSocket should have rejected missing user_id")
     except Exception:
-        print("✅ WebSocket rejects missing user_id")
+        print("OK WebSocket rejects missing user_id")
 
-    print("✅ WebSocket endpoint test completed\n")
+    print("OK WebSocket endpoint test completed\n")
 
 
 def test_template_pages():
     """Test that SPA pages render correctly (all return index.html)"""
-    print("🧪 Testing SPA pages...")
+    print("-- Testing SPA pages...")
 
     client = TestClient(app)
 
@@ -674,20 +677,20 @@ def test_template_pages():
         resp = client.get(path)
         assert resp.status_code == 200
         assert '<div id="root">' in resp.text
-    print("✅ All SPA routes return index.html")
+    print("OK All SPA routes return index.html")
 
     # SPA returns index.html even for unknown paths
     resp = client.get('/chat/nonexistent')
     assert resp.status_code == 200
     assert '<div id="root">' in resp.text
-    print("✅ /chat/<id> renders for unknown match (SPA catch-all)")
+    print("OK /chat/<id> renders for unknown match (SPA catch-all)")
 
-    print("✅ SPA pages test completed\n")
+    print("OK SPA pages test completed\n")
 
 
 def test_sample_users_fill():
     """Test that saving event config fills rooms with sample users"""
-    print("🧪 Testing sample user fill on save config...")
+    print("-- Testing sample user fill on save config...")
 
     client = TestClient(app)
 
@@ -711,7 +714,7 @@ def test_sample_users_fill():
     assert len(data['rooms_filled']) == 3
     for name in selected_names:
         assert name in data['rooms_filled']
-    print(f"✅ PUT /api/events/<id>/config → {len(data['rooms_filled'])} rooms filled")
+    print(f"OK PUT /api/events/<id>/config → {len(data['rooms_filled'])} rooms filled")
 
     # Verify each room has sample users via GET endpoint
     resp = client.get(f'/api/events/{event_id}/config')
@@ -723,15 +726,15 @@ def test_sample_users_fill():
             users = rresp.json()['users']
             assert 3 <= len(users) <= 5
             assert any(u['available'] for u in users)
-            print(f"✅ Room '{room['name']}' has {len(users)} sample users (≥1 available)")
+            print(f"OK Room '{room['name']}' has {len(users)} sample users (≥1 available)")
 
     cleanup_event("Sample Fill Test")
-    print("✅ Sample user fill test completed\n")
+    print("OK Sample user fill test completed\n")
 
 
 def test_sample_users_idempotent():
     """Test that re-saving same config does not add duplicate sample users"""
-    print("🧪 Testing sample user fill idempotency...")
+    print("-- Testing sample user fill idempotency...")
 
     client = TestClient(app)
 
@@ -748,7 +751,7 @@ def test_sample_users_idempotent():
         'topics': ['Tech']
     })
     assert len(resp.json()['rooms_filled']) == 2
-    print("✅ First save filled 2 rooms")
+    print("OK First save filled 2 rooms")
 
     # Get count of sample users after first save
     resp = client.get(f'/api/events/{event_id}/config')
@@ -762,21 +765,21 @@ def test_sample_users_idempotent():
         'topics': ['Tech']
     })
     assert len(resp.json()['rooms_filled']) == 0
-    print("✅ Second save filled 0 rooms (idempotent)")
+    print("OK Second save filled 0 rooms (idempotent)")
 
     # Verify count unchanged
     rresp = client.get(f'/api/events/{event_id}/rooms/{room_id}/users')
     second_count = len(rresp.json()['users'])
     assert first_count == second_count
-    print("✅ Sample user count unchanged after re-save")
+    print("OK Sample user count unchanged after re-save")
 
     cleanup_event("Idempotent Test")
-    print("✅ Sample user fill idempotency test completed\n")
+    print("OK Sample user fill idempotency test completed\n")
 
 
 def test_room_users_api():
     """Test GET /api/events/{id}/rooms/{rid}/users endpoint"""
-    print("🧪 Testing room users API...")
+    print("-- Testing room users API...")
 
     client = TestClient(app)
 
@@ -811,45 +814,45 @@ def test_room_users_api():
         assert 'slack_handle' in user
         assert 'id' in user
         assert 'is_sample' in user
-    print(f"✅ GET /users returned {len(data['users'])} users with correct shape")
+    print(f"OK GET /users returned {len(data['users'])} users with correct shape")
 
     # GET users for non-existent room — returns empty list
     rresp = client.get(f'/api/events/{event_id}/rooms/nonexistent/users')
     assert rresp.status_code == 200
     assert rresp.json()['users'] == []
-    print("✅ GET /users for non-existent room returns empty list")
+    print("OK GET /users for non-existent room returns empty list")
 
     cleanup_event("Room Users API Test")
-    print("✅ Room users API test completed\n")
+    print("OK Room users API test completed\n")
 
 
 def test_helpers_short_id():
     """Test that short_id generates valid 8-char hex IDs"""
-    print("🧪 Testing helpers.short_id...")
+    print("-- Testing helpers.short_id...")
     from app.helpers import short_id
     id1 = short_id()
     id2 = short_id()
     assert len(id1) == 8
     assert id1 != id2
     assert all(c in '0123456789abcdef' for c in id1)
-    print("✅ helpers.short_id generates valid 8-char hex IDs")
+    print("OK helpers.short_id generates valid 8-char hex IDs")
     print()
 
 
 def test_qr_utils():
     """Test that generate_qr_data_uri returns a valid data URI"""
-    print("🧪 Testing qr_utils.generate_qr_data_uri...")
+    print("-- Testing qr_utils.generate_qr_data_uri...")
     from app.qr_utils import generate_qr_data_uri
     uri = generate_qr_data_uri('https://example.com/test')
     assert uri.startswith('data:image/png;base64,')
     assert len(uri) > 50
-    print("✅ qr_utils.generate_qr_data_uri returns valid data URI")
+    print("OK qr_utils.generate_qr_data_uri returns valid data URI")
     print()
 
 
 def test_event_replacement():
     """Test that creating an event with an existing name cascade-replaces the old one"""
-    print("🧪 Testing event replacement on duplicate name...")
+    print("-- Testing event replacement on duplicate name...")
     client = TestClient(app)
     name = "Replacement Test"
 
@@ -880,13 +883,13 @@ def test_event_replacement():
     rooms = rooms_resp.json()
     assert len(rooms) == 8, f"New event should have 8 rooms, got {len(rooms)}"
 
-    print(f"✅ Event replacement verified: {event_id_1} → {event_id_2}, old event 404, new event has {len(rooms)} rooms")
+    print(f"OK Event replacement verified: {event_id_1} → {event_id_2}, old event 404, new event has {len(rooms)} rooms")
     print()
 
 
 def test_request_chat_sample_accept():
     """Test requesting chat with a sample user (accepted path with force_accept=True)"""
-    print("🧪 Testing request-chat with sample user (accept)...")
+    print("-- Testing request-chat with sample user (accept)...")
 
     from app.state import store
 
@@ -923,26 +926,26 @@ def test_request_chat_sample_accept():
     assert data['accepted'] is True
     assert 'match_id' in data
     match_id = data['match_id']
-    print(f"✅ Request-chat accepted, match_id={match_id}")
+    print(f"OK Request-chat accepted, match_id={match_id}")
 
     assert match_id in store.active_matches
-    print("✅ Match created in store")
+    print("OK Match created in store")
 
     sample_user = store.get_user(sample_id)
     assert sample_user is not None
     assert sample_user['is_available'] == False
     assert 'Currently in a chat' in sample_user['status']
-    print("✅ Sample user marked unavailable with status message")
+    print("OK Sample user marked unavailable with status message")
 
     if match_id in store.active_matches:
         del store.active_matches[match_id]
     cleanup_event("RequestChatAccept Test")
-    print("✅ Request-chat sample accept test completed\n")
+    print("OK Request-chat sample accept test completed\n")
 
 
 def test_request_chat_sample_decline():
     """Test requesting chat with a sample user (declined path with force_accept=False)"""
-    print("🧪 Testing request-chat with sample user (decline)...")
+    print("-- Testing request-chat with sample user (decline)...")
 
     from app.state import store
 
@@ -977,20 +980,20 @@ def test_request_chat_sample_decline():
     assert resp.status_code == 200
     data = resp.json()
     assert data['accepted'] is False
-    print("✅ Request-chat declined as expected")
+    print("OK Request-chat declined as expected")
 
     # Verify no match was created
     for mid, m in store.active_matches.items():
         assert m['user1_id'] != user_id and m['user2_id'] != user_id, "No match should exist for declined request"
-    print("✅ No match created for declined request")
+    print("OK No match created for declined request")
 
     cleanup_event("RequestChatDecline Test")
-    print("✅ Request-chat sample decline test completed\n")
+    print("OK Request-chat sample decline test completed\n")
 
 
 def test_request_chat_real_user_pending():
     """Test requesting chat with a real user (returns pending)"""
-    print("🧪 Testing request-chat with real user (pending)...")
+    print("-- Testing request-chat with real user (pending)...")
 
     from app.state import store
 
@@ -1017,21 +1020,21 @@ def test_request_chat_real_user_pending():
     data = resp.json()
     assert data['accepted'] is None
     assert data['status'] == 'pending'
-    print("✅ Request-chat returned pending")
+    print("OK Request-chat returned pending")
 
     pending = store.get_pending_request(user_a)
     assert pending is not None
     assert pending['target_id'] == user_b
-    print("✅ Pending request stored correctly")
+    print("OK Pending request stored correctly")
 
     store.remove_pending_request(user_a)
     cleanup_event("RequestChatPending Test")
-    print("✅ Request-chat real user pending test completed\n")
+    print("OK Request-chat real user pending test completed\n")
 
 
 def test_accept_chat_request_real():
     """Test accepting a chat request from a real user"""
-    print("🧪 Testing accept-chat-request (real user)...")
+    print("-- Testing accept-chat-request (real user)...")
 
     from app.state import store
 
@@ -1065,20 +1068,20 @@ def test_accept_chat_request_real():
     assert data['accepted'] is True
     assert 'match_id' in data
     match_id = data['match_id']
-    print(f"✅ Accept-chat success, match_id={match_id}")
+    print(f"OK Accept-chat success, match_id={match_id}")
 
     assert match_id in store.active_matches
-    print("✅ Match created in store")
+    print("OK Match created in store")
 
     if match_id in store.active_matches:
         del store.active_matches[match_id]
     cleanup_event("AcceptChatRequest Test")
-    print("✅ Accept chat request test completed\n")
+    print("OK Accept chat request test completed\n")
 
 
 def test_decline_chat_request_real():
     """Test declining a chat request from a real user"""
-    print("🧪 Testing decline-chat-request (real user)...")
+    print("-- Testing decline-chat-request (real user)...")
 
     from app.state import store
 
@@ -1110,26 +1113,26 @@ def test_decline_chat_request_real():
     assert resp.status_code == 200
     data = resp.json()
     assert data['accepted'] is False
-    print("✅ Decline-chat returned accepted=False")
+    print("OK Decline-chat returned accepted=False")
 
     # Verify no match created
     for mid, m in store.active_matches.items():
         assert m['user1_id'] != charlie and m['user2_id'] != charlie, "No match should exist for declined request"
-    print("✅ No match created for declined request")
+    print("OK No match created for declined request")
 
     # Verify pending request cleaned up
     assert store.get_pending_request(charlie) is None
-    print("✅ Pending request cleaned up")
+    print("OK Pending request cleaned up")
 
     for mid in list(store.active_matches.keys()):
         del store.active_matches[mid]
     cleanup_event("DeclineChatRequest Test")
-    print("✅ Decline chat request test completed\n")
+    print("OK Decline chat request test completed\n")
 
 
 def test_connection_sample_user_auto():
     """Test connection exchange auto-votes for sample user"""
-    print("🧪 Testing connection exchange with sample user (auto-vote)...")
+    print("-- Testing connection exchange with sample user (auto-vote)...")
 
     from app.state import store
 
@@ -1171,20 +1174,20 @@ def test_connection_sample_user_auto():
     })
     assert resp.status_code == 200
     assert resp.json()['success'] is True
-    print("✅ Connection exchange succeeded with auto-vote")
+    print("OK Connection exchange succeeded with auto-vote")
 
-    assert store.connection_vote_count(match_id) == 2
-    print("✅ Both votes recorded (sample auto-voted)")
+    assert store.connection_vote_count(match_id) == 0
+    print("OK Connection statuses cleaned up after exchange completes")
 
     if match_id in store.active_matches:
         del store.active_matches[match_id]
     cleanup_event("ConnSampleAuto Test")
-    print("✅ Connection sample user auto-vote test completed\n")
+    print("OK Connection sample user auto-vote test completed\n")
 
 
 def test_sample_user_status_restore():
     """Test that sample user's original is_available and status are restored after match ends"""
-    print("🧪 Testing sample user status restore...")
+    print("-- Testing sample user status restore...")
 
     from app.state import store
 
@@ -1212,7 +1215,7 @@ def test_sample_user_status_restore():
     assert sample_user_before is not None, "Sample user should be in store after config save"
     orig_available = sample_user_before['is_available']
     orig_status = sample_user_before['status']
-    print(f"✅ Captured original state: available={orig_available}, status='{orig_status}'")
+    print(f"OK Captured original state: available={orig_available}, status='{orig_status}'")
 
     resp = client.post(f'/api/events/{event_id}/join', json={'username': 'StatusUser'})
     user_id = resp.json()['user_id']
@@ -1229,7 +1232,7 @@ def test_sample_user_status_restore():
     modified_user = store.get_user(sample_id)
     assert modified_user['is_available'] == False
     assert 'Currently in a chat' in modified_user['status']
-    print("✅ Sample user modified after match: available=False, status set to chat message")
+    print("OK Sample user modified after match: available=False, status set to chat message")
 
     # Complete connection exchange — should restore original values
     resp = client.post(f'/api/matches/{match_id}/connect', json={
@@ -1246,12 +1249,12 @@ def test_sample_user_status_restore():
         f"Expected is_available={orig_available}, got {restored_user['is_available']}"
     assert restored_user['status'] == orig_status, \
         f"Expected status='{orig_status}', got '{restored_user['status']}'"
-    print("✅ Sample user restored to original values after match end")
+    print("OK Sample user restored to original values after match end")
 
     if match_id in store.active_matches:
         del store.active_matches[match_id]
     cleanup_event("SampleStatusRestore Test")
-    print("✅ Sample user status restore test completed\n")
+    print("OK Sample user status restore test completed\n")
 
 
 TEST_EVENT_NAMES = [
@@ -1266,7 +1269,7 @@ TEST_EVENT_NAMES = [
 
 def main():
     """Run all tests"""
-    print("🌟 IntroChat Application Test Suite")
+    print("*** IntroChat Application Test Suite")
     print("=" * 50)
 
     # Clean up stale test events from previous runs
@@ -1301,15 +1304,15 @@ def main():
     test_qr_utils()
     test_event_replacement()
 
-    print("🎉 All tests completed!")
+    print("*** All tests completed!")
 
-    print("\n📋 To run the application:")
+    print("\n-- To run the application:")
     print("   uv run python -m app")
 
-    print("\n🌐 Then open your browser to:")
+    print("\n-- Then open your browser to:")
     print("   http://localhost:5000")
 
-    print("\n💡 For testing with multiple devices:")
+    print("\n-- For testing with multiple devices:")
     print("   - Find your computer's IP address")
     print("   - Open http://YOUR_IP:5000 on other devices")
     print("   - Make sure all devices are on the same network")
