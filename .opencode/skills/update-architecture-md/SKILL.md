@@ -39,11 +39,12 @@ This skill supports two invocation modes. **Explicit** (default, standalone): fo
 - **Tests** — per-file function descriptions with signature + one-line purpose (navigation map per test module)
 - **Maintenance Scripts** — utility scripts with purpose and exact run command
 - **Critical Implementation Details** — non-obvious runtime behavior: resource management, match expiry, WebSocket config, frontend module rules, demo mode guards
-- **Data flow** — describe the main data path through the system (processing pipeline, request lifecycle, or event flow) via a numbered flow, plus REST API Endpoints table (method, path, purpose) and WebSocket Events table (event name, direction, payload), plus SPA Serving (route, assets mount, catch-all handler)
+- **Data flow** — describe the main data path through the system (processing pipeline, request lifecycle, or event flow) via a numbered flow, plus REST API Endpoints table (method, path, purpose) and WebSocket Events table (event name, direction, payload)
+- **SPA Serving** — how the SPA is served: route, assets mount, catch-all handler — standalone section, not nested inside Data Flow
 - **Import structure and dependency graph** — how modules depend on each other
 - **Key design decisions** — include the *why*, not just the *what*. Technical rationale only
-- **Running instructions** — full technical startup sequence: environment setup, dependencies, configuration, commands
-- **Modifying instructions** — how to add modules, extend functionality, change providers or configuration
+- **Running the Application** — full technical startup sequence: environment setup, dependencies, configuration, commands
+- **Modifying the Architecture** — how to add modules, extend functionality, change providers or configuration
 - **Per-function detail** — every named function/class in every module (embedded inside its Module Description entry as `#### Functions` subsections) with signature and one-line purpose (navigation map, not a manual)
 
 **Optional sections** (include only if the project has them):
@@ -104,7 +105,7 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 ### WebSocket Events
 [Event name, direction, payload — authoritative event reference]
 
-### SPA Serving
+## SPA Serving
 [How the SPA is served: route, assets mount, catch-all handler]
 
 ## Import Structure
@@ -113,10 +114,10 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 ## Key Design Decisions
 [Technical rationale — why, not just what]
 
-## Running Instructions
+## Running the Application
 [Startup sequence: env, dependencies, config, commands]
 
-## Modifying Instructions
+## Modifying the Architecture
 [How to add modules, extend functionality, change configuration]
 
 <!-- FILL: optional-sections -->
@@ -288,8 +289,8 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 - [ ] Maintenance Scripts section lists each utility script with purpose and exact run command
 - [ ] Critical Implementation Details covers all non-obvious runtime behavior (match expiry, WS config, frontend module rules, demo mode)
 - [ ] Design decisions include the *why* (technical rationale only)
-- [ ] Running instructions cover full startup sequence (env, config, dependencies, commands)
-- [ ] Modifying instructions are accurate for the current codebase
+- [ ] Running the Application section covers full startup sequence (env, config, dependencies, commands)
+- [ ] Modifying the Architecture section is accurate for the current codebase
 - [ ] Every source file with functions has a per-function detail subsection
 - [ ] Function entries are one-line purpose only — no implementation logic
 - [ ] Missing descriptions are flagged with `⚠️` marker — never invent descriptions

@@ -1,6 +1,6 @@
 # Universal Project Best Practices
 
-> **Last verified:** 2026-06-11 10:30 EDT
+> **Last verified:** 2026-06-12 22:30 EDT
 
 > Derived from real-world debugging - applies to ALL projects
 
@@ -989,6 +989,139 @@ Dependency audit: lodash@4.17.21
 ```
 **Why it matters**: Dependencies are permanent liabilities — each must be scrutinized with a repeatable evaluation, not gut feel.
 
+### 7.33 Component Merge via Mode/Type Prop
+**Context**: Two UI components sharing 80%+ of layout but differing in specific content or behavior
+**Principle**: Instead of maintaining separate components (which drift apart over time), merge them with a `mode` or `variant` prop. Use conditional rendering only for the divergent parts — the shared layout renders identically across modes.
+**Example**: Removed `ExtendedView` component and merged its behavior into `ChattingView` with `mode='initial' | 'timed' | 'indefinite'`. The duration text block differs between modes, but the prompt card, next-prompt button, and overall card layout are shared:
+```tsx
+{mode === 'indefinite' ? (
+  <p>indefinite time to connect and chat</p>
+) : (
+  <p>{formatDuration(CONFIG.CHAT_DURATION)} to connect and chat</p>
+)}
+```
+**Why it matters**: Eliminates layout duplication, prevents drift between "identical" copies, reduces test surface.
+
+### 7.34 Build Production Dist for Backend-Served SPA
+**Context**: Frontend SPA built to `dist/` and served by a Python/backend server in production
+**Principle**: After any frontend change, rebuild the production bundle (`npm run build`). The dev server (`npm run dev`) serves from memory — only the `dist/` directory is served by the production backend. A stale `dist/` = stale JS bundles reaching users.
+**Example**:
+```bash
+cd frontend && npm run build
+uv run python -m app
+# Now http://localhost:5000 serves the updated SPA
+```
+**Why it matters**: Dev-only workflow (Vite dev server) masks stale production assets. Production server serves `dist/` — must be rebuilt every time.
+
+### 7.35 Shared Context for Cross-Page Resource Lifecycle
+**Context**: A resource (WebSocket, connection pool) that must survive route changes across multiple pages
+**Principle**: Place the resource in a shared context provider that persists across navigation. Each page connects on mount — but does NOT disconnect on unmount. The context owns lifecycle management; individual pages are just consumers that ensure the resource is active when needed.
+**Example**: PeoplePage, ChatPage, and ConnectPage all call `socket.connect(userId)` on mount with no cleanup. SocketContext provides a single persistent WebSocket that survives route changes:
+```tsx
+useEffect(() => {
+  if (user?.userId) socket.connect(user.userId);
+}, [user?.userId]);  // No cleanup — context manages persistence
+```
+**Why it matters**: Prevents connection loss during page transitions; avoids complex disconnect/reconnect logic on every navigation; consistent pattern across all pages.
+
+### 7.36 Unicode Encoding for Windows PowerShell
+**Context**: Running Python scripts on Windows that output emoji or Unicode characters (test headers, progress bars)
+**Principle**: Set `$env:PYTHONIOENCODING='utf-8'` before Python commands to prevent `UnicodeEncodeError: 'charmap' codec can't encode character`. The default Windows terminal encoding (cp1252) cannot encode characters outside its code page.
+**Example**:
+```powershell
+# ❌ UnicodeEncodeError: emoji in test output header
+uv run python tests/test_app.py
+
+# ✅ Works: forces UTF-8 encoding for Python stdout
+$env:PYTHONIOENCODING='utf-8'; uv run python tests/test_app.py
+```
+**Why it matters**: Test suites using Unicode in output (status icons, emoji section markers) fail silently on Windows without this. Cost: one env var per command.
+
+### 7.37 Functional Updater for Interval Timers
+**Context**: Using `setInterval` in React hooks (especially with fake timers in tests)
+**Principle**: Always use the functional updater form `(prev) => newValue` in `setInterval` callbacks. This ensures the timer always reads the latest state regardless of when the interval fires — critical when `vi.useFakeTimers()` runs intervals synchronously while real browsers run them asynchronously.
+**Example**:
+```tsx
+// ✅ Always reads latest count — works with both fake and real timers
+setCount((prev) => prev - 1);
+
+// ❌ Stale closure — count value is captured at interval creation
+setCount(count - 1);
+```
+**Why it matters**: Stale closure bugs in timers are notoriously hard to reproduce (only appear under specific timing conditions). The functional updater is immune by design.
+
+### 7.38 Production-Gated Security Features
+
+**Context**: CORS restrictions and rate-limiting middleware broke development testing — the TestClient doesn't have a real `request.client.host`, and rate limits throttle test POST requests. Gating behind `ENV=production` solved both.
+
+**Principle**: When adding security features (CORS restrictions, rate limiting, HTTPS-only cookies, Content Security Policy) that would interfere with development or testing, gate them behind an environment variable check (`ENV=production`). Never comment them out or toggle them manually — env var gating is deterministic, testable, and survives commits.
+
+**Example**:
+```python
+is_production = os.environ.get("ENV", "").lower() == "production"
+
+if is_production:
+    app.add_middleware(CORSMiddleware, allow_origins=["https://app.example.com"], ...)
+    app.add_middleware(RateLimitMiddleware, max_requests=30, window_seconds=60)
+```
+
+**Why it matters**: Dev and prod have different security needs. An unrestricted CORS policy is fine for `localhost`; the same policy in production is a vulnerability. Gating by env var keeps both environments correct without manual toggling.
+
+### 7.39 Post-Consolidation Import Audit
+
+**Context**: After moving `import random` from inside a function body to the top of the file, the duplicate import at the original location was not removed — the code compiled fine but carried dead baggage.
+
+**Principle**: After consolidating imports (moving function-scoped imports to module level, removing duplicate imports across files), run a targeted grep for the moved module name at the old locations to confirm no redundant copies survived. The Python import system silently ignores redundant imports — they won't cause errors, but they signal incomplete cleanup.
+
+**Example**:
+```bash
+# After moving import random from inside request_chat() to module top:
+grep -n "import random" app/routes_api.py
+# Expect: 1 match (top-level import only)
+# If 2nd match found at line 374 → dead import survived
+```
+
+**Why it matters**: Redundant imports are invisible to tests — they compile, they don't change behavior, and no linter catches them by default. They accumulate silently and erode code quality over time. A targeted grep after any import consolidation catches them immediately.
+
+### 7.40 Cross-Platform Encoding Defense
+
+**Context**: Test output on Windows PowerShell (CP1252 encoding) crashed on emoji characters. The same tests ran fine on macOS/Linux (UTF-8). Two-layer fix: replaced emoji with ASCII equivalents, added `sys.stdout.reconfigure` as fallback for remaining Unicode.
+
+**Principle**: In cross-platform projects, avoid non-ASCII characters (emoji, fancy Unicode symbols) in CLI output and test logs. Use pure ASCII equivalents: `OK`/`?` instead of ✅/❌, `--` instead of decorative icons, `***` instead of fancy headers. As a second line of defense, add `sys.stdout.reconfigure(encoding="utf-8", errors="replace")` at module level in all test files.
+
+**Example**:
+```python
+import sys
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+# Use ASCII output markers:
+print("OK test passed")
+print("? test missing")
+print("-- Starting tests")
+```
+
+**Why it matters**: A test suite that crashes on output encoding is worse than a failing test — it reports no results at all. Windows PowerShell defaults to CP1252, and emoji in test output is the #1 cause of encoding crashes on that platform. Preempting it with ASCII output + reconfigure fallback makes the test suite robust across all platforms.
+
+### 7.41 Import-Before-Use Guard
+
+**Context**: Added `sys.stdout.reconfigure(...)` to a test file but forgot to add `import sys` at the top — the test crashed with `NameError: name 'sys' is not defined`.
+
+**Principle**: When adding a code block that references any module, verify the `import` statement exists at the top of the file as the very next action — before writing the usage code. "Add usage first, add import when it breaks" is the wrong order. The correct order is: identify the needed module, confirm or add the import, then write the usage code.
+
+**Example**:
+```python
+# Step 1: Check/Add import (DO THIS FIRST)
+import sys
+
+# Step 2: Write usage
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+```
+
+**Why it matters**: This catches a class of bug that produces a hard crash (NameError at module load time) before any test runs — zero results returned. Adding the import before the usage is a zero-cost habit that prevents complete test-suite failures.
+
 ---
 
 ## 8. Automation & Process Design
@@ -1510,6 +1643,10 @@ Batch 2: SPECIFICATIONS.md (2 edits) → show diff → user approves → apply �
 20. **Preserve Manual, Regenerate Auto** — only regenerate content with a verifiable source of truth; preserve the rest
 21. **Log All Automated Diffs** — tag every automated change as `[diff]`, `[REMOVED]`, or `[MISSING]` for auditability
 22. **One Regex Across Languages** — use a single uniform header format + regex across Python, JS, HTML instead of per-language extraction
+23. **Merge via Mode Prop** — merge duplicate UI components with a mode/variant prop instead of maintaining separate views
+24. **Rebuild Dist for Production** — after any frontend change, rebuild `dist/` before running the production server (dev server serves from memory)
+25. **Shared Context for Persistence** — put cross-page resources (WebSocket) in a shared context; pages connect on mount without explicit disconnect
+26. **Functional Updater for Timers** — always use `(prev) => prev +/- 1` in setInterval to avoid stale closures with fake/async timers
 23. **Docs-First Analysis** — consult docs before raw codebase parsing; spot-check against 1-2 files for accuracy
 24. **Structured Walkthrough** — probe one dimension at a time with options; confirm skippable items upfront
 25. **Presence Check Over Re-Probe** — verify documents check coverage, don't re-analyze from scratch
@@ -1560,3 +1697,7 @@ Batch 2: SPECIFICATIONS.md (2 edits) → show diff → user approves → apply �
 70. **Structured Audit Over Vague Assessment** — replace subjective audit requests with concrete, enumerable checks; each must be yes/no answerable
 71. **Happy-Path-Only Coverage as Anti-Pattern** — flag test suites with zero edge-case tests; require at least one per feature
 72. **Dependency Audit Protocol** — evaluate each dependency against 5 checks (justification, size, transitive damage, version pinning, duplicate risk) before adding
+73. **Production-Gated Security** — gate security features behind env vars (`ENV=production`); never comment out
+74. **Post-Consolidation Import Audit** — after consolidating imports, grep the moved module name at old locations for surviving duplicates
+75. **Cross-Platform Encoding Defense** — avoid emoji in cross-platform test output; add `sys.stdout.reconfigure(encoding="utf-8", errors="replace")` as fallback
+76. **Import-Before-Use Guard** — verify the import exists before writing the usage code, not after

@@ -36,6 +36,7 @@ User-facing entry point for anyone discovering the project. Answers "What is it?
 
 ### What to Include
 - **Project description and tagline** — what the project is and why it exists, in one paragraph
+- **What is [Project Name]?** — one-paragraph description of what the project does and who it's for
 - **Feature list** — user-facing benefits, not technical implementation. Describe what users can do, not how it works.
 - **Quick start instructions** — install dependencies, run the app, minimum steps to get going
 - **How to use** — step-by-step for each user type (organizer, attendee). Show the workflow from their perspective.
@@ -62,7 +63,7 @@ User-facing entry point for anyone discovering the project. Answers "What is it?
 - **Technical details:** Maximum 2-3 paragraphs. Summarize the stack, don't document it.
 - **API endpoints:** One-line cross-reference only. All endpoint and WebSocket event details live in ARCHITECTURE.md.
 - **Privacy:** User-facing framing only ("we don't store messages"). Hard constraints and implementation-level rules go in SPECIFICATIONS.md.
-- **Running instructions:** Quick-start only — minimum steps for a user to get going. Full technical startup sequence (env vars, configuration, dependencies) goes in ARCHITECTURE.md.
+- **Running the Application:** Quick-start only — minimum steps for a user to get going. Full technical startup sequence (env vars, configuration, dependencies) goes in ARCHITECTURE.md.
 
 ---
 
@@ -85,8 +86,8 @@ Technical structure reference for the project. Answers "How is it built?", "What
 - **Data flow** — MUST include all API endpoints (method, path, purpose) and WebSocket events (event name, direction, payload). This is the authoritative data flow reference.
 - **Key design decisions** — why certain patterns were chosen. Must include the *why*, not just the *what*.
 - **Import structure and dependency graph** — how modules depend on each other, circular dependency prevention
-- **Running instructions** — technical startup sequence, env vars, configuration. Full detail lives here; README gets a condensed quick-start that links here.
-- **Modifying instructions** — how to add routes, events, extend functionality. The "if you need to add X, here's how" section.
+- **Running the Application** — technical startup sequence, env vars, configuration. Full detail lives here; README gets a condensed quick-start that links here.
+- **Modifying the Architecture** — how to add routes, events, extend functionality. The "if you need to add X, here's how" section.
 - **Critical implementation details** — match expiry logic, cleanup thread behavior, in-memory state management, default rooms, any non-obvious runtime behavior
 - **Per-function detail** — every function/class in every module with signature and one-line purpose (what it does for the system, not how it works internally). Data structure shapes with key-value descriptions; constants with values; table schemas with column types and constraints; initialization behavior (DOMContentLoaded wiring for UI state management). **This is a navigation map, not a manual** — implementation logic, parameters, return values, and edge cases belong in source docstrings/JSDoc.
 
@@ -130,7 +131,7 @@ Product specification and vision. Answers "Why does this exist?", "What problem 
 - **Target user personas** — who the product serves, why they benefit. Not user stories or acceptance criteria — archetypes.
 - **Feature priority and status** — what's implemented vs. planned, to guide what to build next
 - **Product constraints / Out of Scope** — what the product explicitly does NOT do and why. Honest boundaries prevent scope creep.
-- **Privacy and trust model** — user-facing framing of how privacy works, plus hard constraints (non-negotiable implementation-level rules).
+- **Privacy First** — user-facing framing of how privacy works, plus hard constraints (non-negotiable implementation-level rules).
 - **Problem-solution pairs** — why target users benefit from each feature
 - **Tech stack with rationale** — include a "Why?" column alongside each technology choice. Not detailed module descriptions.
 - **Sample user flow** — narrative story of a user experiencing the product. Readable by a non-technical evaluator.

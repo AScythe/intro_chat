@@ -4,7 +4,7 @@
 
 ---
 
-> **Last verified:** 2026-05-31 20:15 EDT
+> **Last verified:** 2026-06-11 21:49 EDT
 
 ## 💡 Problem  
 At hackathons, conferences, and meetups, introverts often feel overwhelmed by the pressure to "just go talk to people."  
@@ -21,15 +21,50 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 
 ## ✅ How It Works (Core Logic Flow)
 
-1. **User creates or joins an event** → receives an 8-character event code
-2. **Sets up their profile** — optionally enters a display name, LinkedIn URL, and/or Slack handle (stored but never shared without double opt-in). Also selects interests/topics from a chip-based selection to help others find conversation starters. If name is left blank, an anonymous `User_XXXXX` username is auto-generated.
-3. **Selects a room** (Main Hall, Table 1-5, Quiet Corner, Coffee Area) via dropdown
-4. **Browses nearby people and requests a chat** — sees who's in the same room, selects a person, and sends a chat request
-5. **Waits for acceptance** — the other person receives the request and accepts (or declines). Once accepted, both tap "I'm Ready to Chat!" and then "Start Chat - Both Ready!" to proceed
-6. **Match found!** → 60-second countdown → auto-redirect to chat page
-7. **30-second timed chat** with guided conversation prompts
-8. **Time's up** → option to extend the chat (one additional 30-second round) or end and proceed to connection exchange
-9. **Connection exchange** → navigated to a dedicated Connect page where both users independently choose Yes/No on a connection card. If both opt in, usernames are exchanged in real time via WebSocket; if either declines, the chat ends respectfully with a decline message
+### Standard Flow (Two Real Users Via WebSocket)
+
+1. **Create or join event** — User creates an event (receives 8-character code) or joins via code
+2. **Fill profile** — Optional display name, LinkedIn URL, Slack handle, and interest/topic chips. If name is blank, an anonymous `User_XXXXX` is auto-generated. All social info stored but never shared without double opt-in.
+3. **Select room** — Choose a room from the dropdown (Main Hall, Table 1-5, Quiet Corner, Coffee Area, or custom rooms). This calls `POST /api/users/{userId}/room` to assign the user to that room.
+4. **See nearby people** — PeoplePage fetches and displays all users in the selected room, split into available (clickable, cursor-pointer) and unavailable (not clickable). Each card shows name, status text, and availability.
+5. **Select a person** — Click an available person card to select them. The "Request chat" button becomes enabled.
+6. **Request chat** — Click "Request chat with {name}" button. For real users, the backend stores a pending request and sends a `chat_request` WebSocket event to the target user. The requester sees "Waiting for response..."
+7. **Accept or decline** — The target receives an `IncomingRequestView` with Accept/Decline buttons. Accepting calls `POST /api/users/{userId}/accept-request`, which creates the match and sends a `match_found` WS event to both users.
+8. **Match countdown** — Both users see a 60-second countdown before auto-redirect to the chat page.
+9. **Timed chat** — 30-second guided conversation with rotating prompts from a pool of 10.
+10. **Time's up** — Option to extend (timed additional round with conversation prompts), extend indefinitely (no time limit), or end and proceed to connection exchange.
+11. **Connection exchange** — Dedicated Connect page where both users independently choose Yes/No. If both opt in, usernames are exchanged in real time via WebSocket. If either declines, a decline message is shown.
+
+### Sample User Flow (Demo / Test / E2E — HTTP Only)
+
+This path is used when the selected person was pre-populated by the organizer's room configuration (`is_sample: true`). It avoids WebSocket dependency for deterministic testing.
+
+1. **Organizer creates event and configures rooms** — During `POST /api/events/{eventId}/config`, 3-5 random sample users are generated per selected room, stored in the database, and added to the in-memory store. Each gets `is_sample: 1`.
+2. **Real user joins the event**, fills profile, selects a room. Room assignment calls `POST /api/users/{userId}/room` so the user's `room_id` matches the sample users in that room.
+3. **Nearby people loaded** — The API returns both real and sample users. Only available users show a cursor-pointer class.
+4. **Select an available sample person** — Click their card (only clickable if `person.available` is true).
+5. **Request chat** — Click "Request chat with {name}". The frontend sets a ref guard (`isSampleRequestRef.current = true`) before any async work, so any incoming `match_found` WS event is ignored.
+6. **HTTP request with force_accept** — The backend receives `POST /api/users/{userId}/request-chat` with `force_accept: true` in the body. Since the target is a sample user and the requester is in the same room, it immediately:
+   - Creates a match record in the database (`persist_match`)
+   - Updates the in-memory match state (`update_match_state`)
+   - Marks the sample user as unavailable with a status like `"Currently in a chat, find directly in Main Hall"`
+   - Returns `{ accepted: true, match_id: "..." }` over HTTP
+7. **Acceptance view** — The frontend receives the HTTP response and transitions to `AcceptedView`, showing "{name} accepted!" with both parties' ready status.
+8. **Click "I'm Ready to Chat!"** — Sets `yourReady = true`. The "Start Chat" button remains disabled until both are ready.
+9. **Sample user simulates readiness** — After `SIMULATE_READY_DELAY_MS` (5 seconds), `theirReady` is set to `true` via `setTimeout`.
+10. **Both ready → "Start Chat"** — Button becomes enabled with text "Start Chat - Both Ready!". Clicking navigates to `/chat/{matchId}?event_id={eventId}`.
+11. **Chat page** — Shows guided conversation prompts. Sample topics like "What's one thing you're excited about this weekend?" are displayed.
+12. **Remaining flow** — Same as standard flow: timed chat → time's up → connection exchange.
+
+### Key Design Rules
+
+| Rule | Why |
+|------|-----|
+| Button `disabled` only when no person is selected | WS disconnected state does NOT disable the button; only `!selectedPerson` controls it |
+| `force_accept: true` for sample users | Makes the E2E test deterministic — avoids the 60%/40% random accept/decline |
+| Ref-based WS guard (`isSampleRequestRef`) | Set synchronously in `handleRequestChat` before any `await`, so `match_found` WS callback always reads the correct value |
+| `cancelRequest()` resets ALL request state | Sets `requestedPerson=null`, `personResponse=null`, `yourReady=false`, `theirReady=false` |
+| No try/catch in sample-user branch | `fetchJSON` throws on HTTP errors; unhandled rejection means `personResponse` is never set, view stays at `waitingResponse` |
 
 ---
 
@@ -138,7 +173,7 @@ The following are explicitly NOT implemented and should not be built unless the 
 >
 > Select: *"Hall 3"* → They're taken to a list of nearby people.
 >
-> They spot *CodeCalm_42* — sounds interesting! They tap the card and click *"Request 2-min chat"*. The request is sent.
+> They spot *CodeCalm_42* — sounds interesting! They tap the card and click *"Request chat"*. The request is sent.
 >
 > CodeCalm_42 accepts. Both tap *"I'm Ready to Chat!"* and then *"Start Chat - Both Ready!"* → 60-second match countdown begins.
 >

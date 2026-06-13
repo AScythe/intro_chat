@@ -1,7 +1,7 @@
 # Architecture - IntroChat
 ===================================================
 
-> **Last verified:** 2026-06-11 06:00 EDT
+> **Last verified:** 2026-06-12 EDT
 
 ## Project Structure
 
@@ -189,6 +189,8 @@ FastAPI app factory that initializes the server, mounts static files, registers 
 - All imports moved to top of file (no late imports)
 - Starts background cleanup thread via `start_cleanup_thread()`
 - On startup event: creates `data/` directory, calls `await init_db(DB_PATH)`
+- **CORS middleware:** Wide open (`allow_origins=["*"]`) in dev; restricted to `http://localhost:5000` when `ENV=production`
+- **Rate-limiting middleware:** Production-only — 30 POST requests per 60-second sliding window per client IP (returns 429 when exceeded)
 - **Run command:** `uv run python -m app`
 
 ### `app/state.py` (Shared State)
@@ -295,7 +297,7 @@ Extracted exception handlers for the FastAPI app — keeps `__init__.py` clean.
 ### `app/connection_service.py` (Connection Exchange)
 Connection-exchange logic extracted from `routes_api.py` — handles mutual-opt-in, broadcast, and declined-path scenarios.
 
-- `handle_connection_exchange(match_id, user_id, wants_to_connect, store, manager)` — checks match existence via `store.get_match()`, records vote via `store.set_connection_vote()`, broadcasts `connection_exchanged` or `connection_declined` when both users have voted
+- `handle_connection_exchange(match_id, user_id, wants_to_connect, store, manager)` — checks match existence via `store.get_match()`, records vote via `store.set_connection_vote()`, broadcasts `connection_exchanged` or `connection_declined` when both users have voted; removes match from store after declined path
 
 ### `app/websocket_handler.py` (WebSocket Handler)
 Real-time WebSocket message processing — accepts connections, manages room membership changes, and handles disconnection cleanup.
@@ -370,7 +372,7 @@ Daemon background thread that periodically checks for and removes expired matche
 - `start_cleanup_thread()` — creates and starts a daemon thread targeting `cleanup_expired_matches`, returns thread reference
 
 ### `app/__main__.py` (Entry Point)
-Application entry point that launches the Uvicorn ASGI server on 127.0.0.1:5000 with hot-reload enabled. Uses `HOST` and `PORT` from `app/config.py`.
+Application entry point that launches the Uvicorn ASGI server on 127.0.0.1:5000 with hot-reload enabled by default (controlled via `UVICORN_RELOAD` environment variable — set to `false` to disable). Uses `HOST` and `PORT` from `app/config.py`.
 
 ### `app/prompts.py` (Conversation Prompts)
 Static conversation prompt data — 10 icebreaker strings used by the API endpoint. Re-exported via `state.py` for backward compatibility.
@@ -430,7 +432,7 @@ Context and hook for managing a persistent WebSocket connection. Single persiste
 
 #### `frontend/src/hooks/useTimer.ts` (Timer Hooks)
 Hook providing extendable countdown timer with start/clear/extend callbacks.
-- `useChatTimer(duration, callbacks)` — extendable countdown with `start`, `clear`, `extend`, `getTimeLeft`
+- `useChatTimer(duration, callbacks)` — extendable countdown with `start`, `clear`, `extend` (restarts interval after expiry), `getTimeLeft`
 
 #### `frontend/src/hooks/useDemoSimulation.ts` (Demo Mode)
 Hook providing demo/simulation logic gated by `VITE_ENABLE_DEMO` feature flag. Renamed from `useDemoMode` to better reflect scope (5 methods, not just toggle). Returns `{ isDemo, addSampleUsers, addAllSampleUsers, simulatePersonResponse, simulateDelay, createDemoMatchId, isDemoMatch }`. Mock data (`SampleUserData`, `SAMPLE_USERS`, `RESPONSES`) imported from `types/api.ts` and `utils/demoData.ts`. No-ops when demo is disabled.
@@ -470,7 +472,7 @@ Conversation prompt display with fade transition. Receives prompt string as prop
 60-second countdown display shown after a match is found before navigating to chat. Shows number and "seconds" label. Auto-redirects via `navigate()` on expiry.
 
 ##### `frontend/src/components/ConnectionCard.tsx`
-Post-chat connection card with yes/no buttons for Slack connection exchange. Fires `onYes`/`onNo` callbacks.
+Post-chat connection card with yes/no buttons for Slack connection exchange. Fires `onYes`/`onNo` callbacks. Optional `disabled` prop disables both buttons.
 
 ##### `frontend/src/components/QRDisplay.tsx`
 QR code image display with event code shown below. Receives `qrCode`, `eventCode`, and optional `eventName` as props.
@@ -479,7 +481,7 @@ QR code image display with event code shown below. Receives `qrCode`, `eventCode
 Composite view components for the PeoplePage — `NearbyUsersView` (person card grid with request button), `WaitingResponseView` (cancel-able request state with person name), `AcceptedView` (ready signaling with mutual acceptance). Exports `PersonResponse` interface and all three view components.
 
 ##### `frontend/src/components/ChatPageViews.tsx`
-Composite view components for the ChatPage — `ErrorView` (error with back button), `ChatLoadingView` (loading skeleton with duration label), `ChattingView` (prompt card + next button), `TimeUpView` (extend/end options), `ExtendedView` (extended timer with end chat).
+Composite view components for the ChatPage — `ErrorView` (error with back button), `ChatLoadingView` (loading skeleton with duration label), `ChattingView` (prompt card + next button, `mode` prop for `initial`/`timed`/`indefinite`), `TimeUpView` (extend/end options, "Continue indefinitely" option). `ExtendedView` removed — merged into `ChattingView` via `mode` prop.
 
 #### Pages
 
@@ -496,10 +498,10 @@ Room selection — dropdown to choose a room, then navigates to people matching.
 Event organization page — manage rooms and topics with chip-based multi-select, add/remove controls, and save config. Uses `useChipSelection` hook for both rooms and topics (eliminated duplicate inline handlers). Features chip toggle, add custom room/topic input, save with validation and sample user fill.
 
 ##### `frontend/src/pages/PeoplePage.tsx`
-Nearby people matching — person cards, request/accept flow, match countdown. Features `NearbyUsersView` with `PersonCard` grid, `WaitingResponseView`, `AcceptedView` with ready signaling, `MatchCountdown` with 60s auto-redirect. WebSocket listener for `match_found`. Guard: redirects to `/room/:eventId` on direct access without navigation state. Uses `useDemoSimulation` for demo mode.
+Nearby people matching — person cards, request/accept flow, match countdown. Features `NearbyUsersView` with `PersonCard` grid, `WaitingResponseView`, `AcceptedView` with ready signaling, `MatchCountdown` with 60s auto-redirect. WebSocket lifecycle: connects on mount via `socket.connect(userId)`, guards `match_found` for sample-user requests. Guard: redirects to `/room/:eventId` on direct access without navigation state. Uses `useDemoSimulation` for demo mode.
 
 ##### `frontend/src/pages/ChatPage.tsx`
-Chat interface — timed conversation with prompts, timer, and extend options. Features loading card, chat card with `Timer` + `PromptCard`, time-up card with extend options, extended timer. Navigates to `/connect/:matchId` on "End chat and connect".
+Chat interface — timed conversation with prompts, timer, and extend options. Features loading card, chat card with `Timer` + `PromptCard`, time-up card with extend/continue-indefinitely options, extended timer and indefinite modes via `ChattingView` with `mode` prop. `ExtendedView` replaced by `ChattingView`. Navigates to `/connect/:matchId` on "End chat and connect".
 
 ##### `frontend/src/pages/ConnectPage.tsx`
 Post-chat connection exchange — `ConnectionCard` with yes/no, result view, and WebSocket subscriptions. Features `ConnectionCard` for Slack connection preference, `ResultView` for exchanged/declined outcome. WebSocket listeners for `connection_exchanged`/`connection_declined`. Demo mode simulates connection delay.
@@ -604,7 +606,11 @@ Tests for `generateRandomString` and `generateUsername` — default/custom lengt
 ### Maintenance Scripts
 
 #### `utility/cleanup_db.py`
-Database maintenance utility that cascade-deduplicates duplicate-named events (keeps earliest by `created_at`, removes all child data), deduplicates rows across all tables, and removes auto-generated test users (`User_*` prefix). Operates on both `data/introchat.db` and `data/e2e_test.db`. Run via `uv run python utility/cleanup_db.py`. Idempotent — safe to run multiple times.
+Database maintenance utility that cascade-deduplicates duplicate-named events (keeps earliest by `created_at`, removes all child data), deduplicates rows across all tables, removes auto-generated test users (`User_*` prefix), and optionally deletes specific events by ID. Operates on both `data/introchat.db` and `data/e2e_test.db`. Run via `uv run python utility/cleanup_db.py`. Idempotent — safe to run multiple times.
+
+**CLI flags:**
+- `--keep-event <EID>` — keep only the specified event, delete all others
+- `--delete-events <EID1> <EID2> ...` — delete specific events by ID with full cascade
 
 #### `agent_utility/filter_graph.py`
 Filters graphify-out/graph.json into type-specific sub-graphs — splits the combined JSON into separate code (`graph-code.json`) and document (`graph-document.json`) graphs.
@@ -628,7 +634,7 @@ Constant `CONVERSATION_PROMPTS` defined in `app/prompts.py` — safe to edit.
 
 ### WebSocket Configuration
 - **Development:** WebSocket endpoint at `/ws`, accepts all origins (FastAPI default)
-- **Production:** Add origin restrictions via FastAPI middlewares or WebSocket validator
+- **Production:** CORS restricted to `localhost:5000` + rate limiting (30 POST/min) — both gated by `ENV=production`
 
 ### Frontend Module Rules
 - Theme context (`useTheme.tsx`) lives in `context/` — not `hooks/` — because it provides React context, not just a hook
@@ -640,6 +646,7 @@ Constant `CONVERSATION_PROMPTS` defined in `app/prompts.py` — safe to edit.
 - Demo logic extracted to `useDemoSimulation` hook (renamed from `useDemoMode`), gated by `VITE_ENABLE_DEMO` env flag
 - Generic chip selection logic extracted to `useChipSelection` hook, used by `OrganizeEventPage.tsx`
 - Single persistent WebSocket in `SocketContext` — survives route changes
+- Chat request in `routes_api.py` re-hydrates sample users from DB into `active_users` if missing from in-memory store (e.g. after cleanup) before creating the match
 
 ---
 
@@ -758,7 +765,7 @@ cd frontend
 npm run dev        # Starts Vite on port 3000, proxies /api and /ws to backend
 ```
 
-> **Production:** Set `ENV=production` environment variable and configure CORS origins via FastAPI middlewares in `app/__init__.py`.
+> **Production:** Set `ENV=production` environment variable to enable CORS origin restrictions (`localhost:5000` only) and rate limiting (30 POST requests/min/IP) in `app/__init__.py`.
 
 ---
 

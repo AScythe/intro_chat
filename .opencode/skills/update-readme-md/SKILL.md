@@ -35,10 +35,11 @@ This skill supports two invocation modes. **Explicit** (default, standalone): fo
 
 **Universal sections** (present in every project's README.md):
 - **Project description and tagline** — what it is and why it exists, in one paragraph
+- **What is [Project Name]?** — one-paragraph description of what the project does and who it's for
 - **Feature list** — user-facing benefits, not technical internals
 - **Quick start instructions** — condensed: install dependencies, run the app, minimum steps to get going
 - **How to use** — step-by-step for each user type. Show the workflow from their perspective
-- **Tech stack** — high-level only: technology table (one-liner per entry, plus a simplified architecture diagram if applicable), max 2-3 paragraphs or a table
+- **Technical Details** — high-level only: technology table (one-liner per entry, plus a simplified architecture diagram if applicable), max 2-3 paragraphs or a table
 - **Testing instructions** — inline runnable commands for common test suites
 - **Deployment options** — platform(s) with build and start commands
 - **Privacy and security information** — user-facing summary: what data is collected, what is not, what users control
@@ -92,6 +93,9 @@ The skeleton below is used for every project's `README.md`. Markers like `<!-- F
 
 > **Last verified:** [date]
 
+## What is [Project Name]?
+[Brief one-paragraph description of what the project does and who it's for]
+
 ## Features
 [User-facing benefits, not technical internals]
 
@@ -101,7 +105,7 @@ The skeleton below is used for every project's `README.md`. Markers like `<!-- F
 ## How to Use
 [Step-by-step for each user type]
 
-## Tech Stack
+## Technical Details
 [High-level: technology table with one-liner per entry; optionally include a simplified architecture diagram]
 
 ## Testing
@@ -128,10 +132,14 @@ The skeleton below is used for every project's `README.md`. Markers like `<!-- F
 ## Why / Value Proposition
 [Problem-solution table or benefit bullets]
 
+<!-- FILL: optional-section-success-metrics -->
+
+<!-- FILL: optional-section-pitch -->
+
 <!-- FILL: optional-sections -->
 ```
 
-Optional sections (include only if applicable): Table of Contents, Shields/badges, Success Metrics / Pitch, Requirements (system dependencies, API keys), Pipeline stages.
+Optional sections (include only if applicable): Table of Contents, Shields/badges, Success Metrics (`## 📊 Success Metrics`), Pitch (`## 🎯 The Pitch`), Requirements (system dependencies, API keys), Pipeline stages.
 
 ---
 

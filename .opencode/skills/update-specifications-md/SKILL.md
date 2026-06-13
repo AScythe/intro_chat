@@ -37,7 +37,7 @@ This skill supports two invocation modes. **Explicit** (default, standalone): fo
 - **Solution description and pitch** — what the product does at a high level, why it solves the problem
 - **User journey / core logic flow** — numbered product-focused steps in plain language, each describing a distinct user-facing action, readable by a non-technical evaluator
 - **Feature descriptions** — with purpose and rationale: what each feature does and **why** it exists
-- **Privacy and trust model** — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section
+- **Privacy First** — user-facing table (identity, location, data, control) plus a "Hard Constraints" sub-section
 - **Product constraints / Out of Scope** — standalone section listing what the product explicitly does NOT do and why
 - **Tech stack with rationale** — Architecture Overview (2-6 lines describing frontend/backend/data model for stakeholders) plus a "Why?" column table for each technology, plus a Product Decisions table (decision + rationale)
 - **Product decisions and rationale** — why certain approaches were chosen (vision rationale, not technical trade-offs)
@@ -85,25 +85,30 @@ The skeleton below is used for every project's `SPECIFICATIONS.md`. Markers like
 
 > **Last verified:** [date]
 
-## Problem
+> **Emoji heads-up:** Section headings in this template use emoji prefixes as a visual convention (e.g., `## 💡 Problem`). These are entirely optional — replace or remove them for other projects.
+
+## 💡 Problem
 [What pain point exists, who experiences it, why it matters]
 
-## Solution
+## 🎯 Solution
 [What the product does at a high level, why it solves the problem]
 
-## How It Works
+## ✅ How It Works
 [Numbered steps in plain language — each step describes a distinct user-facing action, readable by a non-technical evaluator]
 
-## Features
+## Core Features
 [Feature descriptions with purpose and rationale]
 
-## Privacy & Trust Model
+## 🔒 Privacy First
 [User-facing table: identity, location, data, control — plus Hard Constraints sub-section]
 
-## Out of Scope
+## 🚫 Out of Scope
 [What the product explicitly does NOT do and why]
 
-## Tech Stack
+## 🎯 Why Users Love It
+[Problem-solution table: pain point → how the product solves it]
+
+## 🛠️ Tech Stack
 ### Architecture Overview
 [Brief description of frontend/backend/data model structure — 2-6 lines, no implementation detail]
 
@@ -113,13 +118,19 @@ The skeleton below is used for every project's `SPECIFICATIONS.md`. Markers like
 ### Product Decisions
 [Decision + rationale — vision rationale, not technical trade-offs]
 
-<!-- FILL: optional-sections -->
+<!-- FILL: optional-section-sample-user-flow -->
 
-## Final Pitch Line
+<!-- FILL: optional-section-why-users-will-love-it -->
+
+<!-- FILL: optional-section-bonus-features -->
+
+## 📣 Final Pitch Line
 [One-sentence closing callout]
+
+<!-- FILL: optional-section-demo-setup -->
 ```
 
-Optional sections (include only if applicable): Target user personas, Feature priority and status, Future enhancements / bonus features, Sample user flow (narrative), Value proposition / why users will love it, Final Pitch Line, Demo setup instructions.
+Optional sections (include only if applicable): Target user personas, Feature priority and status, Future enhancements / bonus features, Sample user flow (`<!-- FILL: optional-section-sample-user-flow -->`), Why users will love it (benefit bullets — `<!-- FILL: optional-section-why-users-will-love-it -->`), Bonus features (`<!-- FILL: optional-section-bonus-features -->`), Demo setup instructions (`<!-- FILL: optional-section-demo-setup -->`).
 
 ---
 

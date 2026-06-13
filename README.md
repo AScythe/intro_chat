@@ -35,7 +35,7 @@ Think of it as *Tinder for 30-second conversations* — but only when you're phy
 
 ---
 
-> **Last verified:** 2026-05-31 20:30 EDT
+> **Last verified:** 2026-06-12 18:00 EDT
 
 ## Features
 
@@ -88,6 +88,15 @@ uv run python -m app
 
 > **Note:** Always `cd ..` after navigating into `frontend/` to avoid path drift in the same shell session.
 
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ENV` | *(empty)* | Set to `production` to enable CORS origin restrictions (localhost:5000 only) and rate limiting (30 POST requests/min/IP) |
+| `HOST` | `127.0.0.1` | Server bind address |
+| `PORT` | `5000` | Server port |
+| `UVICORN_RELOAD` | `true` | Set to `false` to disable hot-reload |
+
 ---
 
 ## How to Use
@@ -115,14 +124,14 @@ uv run python -m app
 
 4. **Find a Chat Partner**
    - Browse nearby users in your room
-   - Tap a person to select them, then tap "Request 2-min chat"
+   - Tap a person to select them, then tap "Request chat with selected person"
    - Wait for them to accept — once both tap "Ready", a match countdown begins
    - After the countdown, you're automatically redirected to chat
 
 5. **Chat**
    - Use the conversation prompts to guide your timed chat
    - Timer runs for the configured duration (default: 30 seconds)
-   - When time's up, extend the chat or end it
+   - When time's up, extend for another 30 seconds, go indefinite, or end the chat
 
 6. **Connect (Optional)**
    - After the chat, each person independently decides whether to exchange usernames
