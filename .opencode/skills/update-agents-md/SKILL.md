@@ -47,6 +47,7 @@ This skill supports two invocation modes. **Explicit** (default, standalone): fo
 - **Documentation Structure table** — file-to-location map so agents know where each doc lives
 - **Documentation Discipline** — cross-referencing, description headers, executable sources of truth
 - **Tooling Rules** — behavioral rules for code index, knowledge graph, package manager
+- **Agent Behavioral Rules** — ALWAYS/NEVER rules organized by category (Pipeline, Model Loading, Configuration, Server Lifecycle)
 
 ### What NOT to Include
 
@@ -77,26 +78,23 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 
 > **Last updated:** [date]
 
-## Scope
-... → [ARCHITECTURE.md](ARCHITECTURE.md) | [SPECIFICATIONS.md](SPECIFICATIONS.md) | `.opencode/skills/<skill-name>/SKILL.md`
-
 ## Agentic Workflow Skills
 [Standard 9-phase table with Trigger column + 4 ordering rules]
 
 ## Skill Loading Priority
 [Priority chain, Pre-Task gate, ambiguous/multiple/no-match rules]
 
-## File Ownership
-| Location | Role | Agent Policy |
-|----------|------|--------------|
-<!-- FILL: file-ownership-rows -->
-<!-- BOILERPLATE: docs/PLAN_*.md, archive/, .opencode/skills/, opencode.json, .cocoindex_code/, graphify-out/ -->
-
 ## Codebase Exploration
 [Question-type decision table + pipeline + tool discipline]
 
 ## Process Discipline
 [Integrity | Execution | Hygiene]
+
+### File Ownership
+| Location | Role | Agent Policy |
+|----------|------|--------------|
+<!-- FILL: file-ownership-rows -->
+<!-- BOILERPLATE: docs/PLAN_*.md, archive/, .opencode/skills/, opencode.json, .cocoindex_code/, graphify-out/ -->
 
 ## Failure Triage
 [Classification table]
@@ -122,6 +120,10 @@ The skeleton below is used for every project's `AGENTS.md`. Markers like `<!-- F
 
 ## Tooling Rules
 <!-- FILL: tooling-section -->
+
+### Agent Behavioral Rules (project-specific)
+<!-- FILL: project-specific-rules -->
+Project-specific imperative rules (ALWAYS/NEVER) organized by category (Pipeline Modifications, Model Loading, Configuration, Server Lifecycle).
 ```
 
 ---

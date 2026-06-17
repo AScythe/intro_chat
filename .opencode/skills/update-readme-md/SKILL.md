@@ -147,7 +147,7 @@ Optional sections (include only if applicable): Table of Contents, Shields/badge
 
 - [ ] Run `graphify query_graph "readme / project overview"` — understand relationship context with app code, docs, and skills
 - [ ] Verify source code and project state are current
-- [ ] Read existing README.md — understand current documented state
+- [ ] Read existing README.md — locate the canonical README file and understand current documented state
 - [ ] Verify all setup instructions against actual environment
 - [ ] Determine invocation mode — if implicit, skip full codebase walk and accept scope from caller (diff context)
 
@@ -175,6 +175,7 @@ For each **What to Include** item: does it exist? Is it accurate?
 **Cross-reference checks:**
 - Does "How to Use" match actual app pages and navigation order? Map each step to a route/page — no skipped or merged steps
 - Do all features in the feature list still exist in the app? Verify each against actual user-facing functionality
+- Do auxiliary development scripts (`.bat`, `.sh`, etc.) that users might encounter have corresponding documentation in a troubleshooting or debugging section?
 
 ### Gate: User Confirmation
 

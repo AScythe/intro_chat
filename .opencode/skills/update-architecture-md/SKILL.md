@@ -43,8 +43,8 @@ This skill supports two invocation modes. **Explicit** (default, standalone): fo
 - **SPA Serving** — how the SPA is served: route, assets mount, catch-all handler — standalone section, not nested inside Data Flow
 - **Import structure and dependency graph** — how modules depend on each other
 - **Key design decisions** — include the *why*, not just the *what*. Technical rationale only
-- **Running the Application** — full technical startup sequence: environment setup, dependencies, configuration, commands
-- **Modifying the Architecture** — how to add modules, extend functionality, change providers or configuration
+- **Running Instructions** — full technical startup sequence: environment setup, dependencies, configuration, commands
+- **Modifying Instructions** — how to add modules, extend functionality, change providers or configuration
 - **Per-function detail** — every named function/class in every module (embedded inside its Module Description entry as `#### Functions` subsections) with signature and one-line purpose (navigation map, not a manual)
 
 **Optional sections** (include only if the project has them):
@@ -114,10 +114,10 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 ## Key Design Decisions
 [Technical rationale — why, not just what]
 
-## Running the Application
+## Running Instructions
 [Startup sequence: env, dependencies, config, commands]
 
-## Modifying the Architecture
+## Modifying Instructions
 [How to add modules, extend functionality, change configuration]
 
 <!-- FILL: optional-sections -->
@@ -125,7 +125,7 @@ The skeleton below is used for every project's `ARCHITECTURE.md`. Markers like `
 
 Optional sections (include only if applicable): sub-architecture reference links, pipeline stage diagrams.
 
-> **Note:** REST API Endpoints and WebSocket Events tables are NOT optional for server projects — they live inside the Data Flow section, not as separate optional sections.
+> **Note:** REST API Endpoints and WebSocket Events tables are required for user-facing web server projects only — internal subprocess servers (e.g., vLLM) don't need them. The tables live inside the Data Flow section, not as separate optional sections.
 
 ---
 
@@ -240,6 +240,8 @@ For every source file that contains functions/classes:
 - Is the project tree complete compared to actual filesystem listing? Compare every directory and file in the tree against actual filesystem entries — no phantom entries (documented but deleted) and no missing entries (exist but undocumented)
 - Are all numeric claims (file counts, page export counts, test file counts, etc.) verified against actual source? Cross-reference each number against the real codebase
 - Are cross-references between files in the tree and their documented descriptions accurate? Every file path in the tree must correspond to an actual existing file
+- For renamed files: have all references been updated across all sections (project tree, module descriptions, tests table)? A renamed file often leaves stale entries under its old name in multiple sections.
+- Are configuration-driven version constants verifiable against the source files they reference (e.g., YAML prompt files, JSON configs, TOML manifests)? Every version constant must have a corresponding entry in its referenced source.
 
 ### Gate: User Confirmation
 
@@ -255,6 +257,7 @@ Present proposed oldString→newString diffs to the user for approval before app
 
 **If ARCHITECTURE.md already exists (surgical update):**
 - For each universal section: compare against discovered data and update only what changed (file tree, module descriptions, data flow, import structure, etc.)
+- **Import structure:** Re-generate the import graph when dependencies change. For Python, scan `import`/`from` statements across source files or use the project's graph tool (e.g., `graphify`). For TypeScript/JavaScript, scan `import`/`require` statements.
 - For each optional section: add if applicable and missing, remove if no longer applicable, update if stale
 - Never rewrite the whole file — use targeted edits on changed sections only
 - Update the `> **Last verified:**` line to today's date (YYYY-MM-DD HH:MM TZ format) — always update, even if no other changes were needed
@@ -280,7 +283,7 @@ For each module entry that has functions extracted in Step 1.75, insert or repla
 
 **Content checks:**
 - [ ] File tree cross-referenced against actual filesystem entries — no missing or phantom entries
-- [ ] All numeric claims verified against actual source (file counts, export counts, test counts)
+- [ ] All numeric claims verified against actual source (file counts, export counts, test counts) — use `python -m pytest tests/ --collect-only` (Python) or equivalent for other languages to get exact test count
 - [ ] File tree is current and complete — all source directories and key files described
 - [ ] Data flow reflects the current system — numbered flow + REST API Endpoints table + WebSocket Events table — this is the authoritative reference
 - [ ] SPA Serving section documents how the SPA is served (route, assets mount, catch-all handler) — standalone section, not nested inside Data Flow

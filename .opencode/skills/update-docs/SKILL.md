@@ -72,7 +72,8 @@ Two invocation modes with fundamentally different detection strategies:
    | New feature, changed user journey, updated privacy, changed Out of Scope | `docs/SPECIFICATIONS.md` |
    | Design spec created/updated, color system, typography/motion changes, UI theme changes, frontend-design skill output | `docs/DESIGN_SPEC.md` |
     | Changed setup steps, new CLI command, new env var, new user-visible feature | `README.md` (project root) |
-   | Changed behavioral rules, new file ownership entry, updated commands | `AGENTS.md` |
+    | Changed behavioral rules, new file ownership entry, updated commands | `AGENTS.md` |
+    | Changed server lifecycle/hosting, new subprocess management patterns | `AGENTS.md` |
    | Changed tooling setup, new MCP server, changed env requirements | `refs/AGENT_SETUP.md` |
    | Recurring pattern, new debugging lesson, new skill methodology insight | `refs/PROJECT_BEST_PRACTICES.md` |
    | New document added, document scope/boundary change, doc structure change | `refs/DOCUMENT_GUIDELINES.md` |
