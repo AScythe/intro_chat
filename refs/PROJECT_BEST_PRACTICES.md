@@ -1620,6 +1620,10 @@ Batch 2: SPECIFICATIONS.md (2 edits) → show diff → user approves → apply �
 
 **Why it matters**: Documentation changes affect the developer/agent interface — even small wording changes can alter how tools are used. Per-batch approval prevents the "everything changed at once" surprise that breaks trust.
 
+## 13. vLLM
+
+Consolidated in [`docs/BATCH FILE AUTO SERVER START PLAN.md`](docs/BATCH FILE AUTO SERVER START PLAN.md) — single source of truth for all vLLM findings: memory budget formula, EngineCore crash debugging, CUDA context overhead, tuning heuristics, FlashInfer JIT, ZMQ port conflicts, and server debugging.
+
 ## Key Takeaways
 1. **Modular > Monolithic**
 2. **Config > Hardcode**
@@ -1682,6 +1686,154 @@ Batch 2: SPECIFICATIONS.md (2 edits) → show diff → user approves → apply �
 55. **Surgical Edits Over Rewrites** — replace targeted text, not whole files, when updating instruction documents
 56. **Three-Layer Verification** — grep removals, grep additions, read-test critical sections — each layer catches what others miss
 57. **Consistency Pass** — after cross-cutting changes, run a dedicated consistency pass across all affected files
+
+## 14. GPU Subprocess Lifecycle
+
+### 14.1 Batch-File Boundary for GPU Subprocess Isolation
+**Context**: vLLM engine crashed with `No available memory for the cache blocks` when spawned as a direct child of a pipeline process that had imported `torch` and loaded/unloaded 4 models. The same subprocess command worked when started from a separate terminal or batch file.
+
+**Principle**: On Windows WDDM, spawning a GPU-heavy subprocess (vLLM, training job) as a direct child of a process with an active CUDA context reduces the child's visible GPU memory budget. Insert an intermediate shell boundary (batch file, `cmd.exe`) to fully isolate the child's CUDA context view. This applies to any GPU subprocess that shows memory errors despite `nvidia-smi` reporting sufficient free VRAM.
+
+**Example**:
+```python
+# ❌ Direct subprocess — inherits parent's CUDA context, reduced GPU budget
+proc = subprocess.Popen(cmd, env=env)
+
+# ✅ Batch-file boundary — clean CUDA context
+proc = subprocess.Popen(["start_vllm.bat"], env=env)
+```
+The batch file (`start_vllm.bat`) launches a fresh Python process via `start "" /B python -m vllm.entrypoints.openai.api_server ...` — `cmd.exe` is the immediate child, not the Python process.
+
+**Why it matters**: The direct-subprocess crash is deterministic on Windows WDDM (16 GiB GPU) when the parent has imported torch. The batch-file boundary is a zero-cost fix that resolves it entirely.
+
+### 14.2 Cross-Process Shared Activity File for Subprocess Lifecycle
+**Context**: vLLM server needed to survive individual Python process exits and be shared across multiple orchestrator processes. The idle watchdog (7-min timeout) also needed cross-process coordination — a process-local `_last_activity_time` doesn't work when different processes manage the same server.
+
+**Principle**: When a long-lived subprocess (server, worker pool) is shared across multiple parent processes, use a file in `tempfile.gettempdir()/project_name/` as the cross-process coordination primitive. Each process writes a timestamp on activity, the watchdog reads the shared file instead of local state, and any process can detect stale orphans. Use last-writer-wins for concurrent writes (catch-and-ignore errors).
+
+**Example**:
+```python
+import os
+import tempfile
+import time
+
+_ACTIVITY_DIR = os.path.join(tempfile.gettempdir(), "taskai")
+_ACTIVITY_FILE = os.path.join(_ACTIVITY_DIR, "server_last_activity.txt")
+
+def _write_activity_timestamp() -> None:
+    os.makedirs(_ACTIVITY_DIR, exist_ok=True)
+    try:
+        with open(_ACTIVITY_FILE, "w") as f:
+            f.write(str(time.time()))
+    except OSError:
+        pass  # last-writer-wins
+
+def _read_activity_timestamp() -> float:
+    try:
+        with open(_ACTIVITY_FILE) as f:
+            return float(f.read().strip())
+    except (OSError, ValueError):
+        return 0.0
+```
+
+**Why it matters**: Process-local state cannot coordinate across OS process boundaries. Tempfiles are per-user, survive crashes, and need no cleanup — they're naturally ephemeral. The pattern extends to any multi-process shared resource lifecycle.
+
+### 14.3 Port-Based Process Killing with Self-Kill Guard
+**Context**: vLLM orphan detection needed to kill processes holding port 8000 before starting a new server. `netstat -ano` finds the PID, `taskkill /F /PID` kills it — but the guard against killing the current process's own PID is critical.
+
+**Principle**: When implementing port-based process cleanup, always include a `pid == os.getpid()` guard to prevent self-termination. The generic pattern: `netstat -ano` → parse `LISTENING` lines for target port → extract PID → skip own PID → `taskkill /F /PID`. This is a fallback when the managed process reference (`subprocess.Popen` object) is lost or stale.
+
+**Example**:
+```python
+import os
+import subprocess
+
+_PORT = 8000
+
+def _kill_process_on_port(port: int) -> None:
+    result = subprocess.run(
+        ["netstat", "-ano"], capture_output=True, text=True, timeout=10
+    )
+    for line in result.stdout.splitlines():
+        if "LISTENING" in line and f"127.0.0.1:{port}" in line:
+            pid = int(line.strip().split()[-1])
+            if pid == os.getpid():
+                continue  # ← CRITICAL: don't self-terminate
+            subprocess.run(
+                ["taskkill", "/F", "/PID", str(pid)],
+                capture_output=True, timeout=5,
+            )
+```
+
+**Why it matters**: Without the self-kill guard, a health check that connects to the port then runs cleanup could kill the checking process itself. Port-based kill is inherently imprecise — the guard limits the blast radius.
+
+### 14.4 Double-Check Locking with `_starting` Guard for Concurrent Auto-Start
+**Context**: `ensure_vllm_server()` needed to start vLLM on demand from multiple threads (and eventually multiple processes). Without a `_starting` guard, concurrent entries cause a thrashing cascade — each thread kills the other's booting server via orphan cleanup.
+
+**Principle**: When implementing auto-start for a shared resource, use a `_starting` boolean inside the same lock acquisition as the health check. The pattern: `lock → check healthy → check _starting → set _starting = True → unlock → start → lock → set _starting = False`. Never release the lock between checking for an existing resource and setting the starting flag — this creates a TOCTOU race.
+
+**Example**:
+```python
+_starting: bool = False
+_lock = threading.RLock()
+
+def ensure_server():
+    global _starting
+    with _lock:
+        if _is_healthy():
+            return
+        if _starting:
+            return
+        _starting = True
+    try:
+        start_server()  # Outside lock — startup may take minutes
+    finally:
+        with _lock:
+            _starting = False
+```
+
+**Why it matters**: Two patterns fail: (1) releasing the lock between checks creates a TOCTOU window where a healthy server gets killed; (2) no `_starting` flag at all causes all concurrent callers to start simultaneously, each killing the previous one's process. The double-check lock + flag pattern is the minimal correct solution.
+
+### 14.5 Stderr Streaming During Server Wait Loops
+**Context**: vLLM startup takes 60-600s. Without periodic stderr reads, a timeout produces zero diagnostics — the debugger sees "server did not become ready within 300s" with no clue why.
+
+**Principle**: In any wait-for-ready loop (server startup, test runner, batch job), periodically read the subprocess's stderr file every N attempts (e.g., every 60s) and log the progressively accumulated output. This transforms a silent timeout into a real-time diagnostic window showing model loading progress, tokenizer errors, or memory warnings.
+
+**Example**:
+```python
+def _wait_for_server(proc, stderr_path):
+    for attempt in range(1, max_retries + 1):
+        if proc.poll() is not None:
+            raise RuntimeError(f"Server exited with code {ret}")
+        if _is_healthy():
+            return
+        if attempt % 12 == 0:  # Every 60s with 5s delay
+            stderr = _read_stderr(stderr_path)
+            logger.info(f"Still waiting... stderr so far:\n{stderr[:2000]}")
+        time.sleep(5)
+```
+
+**Why it matters**: Without progressive stderr logging, diagnosing a failed server start requires: (1) noticing the timeout, (2) finding the stderr temp file before cleanup, (3) reading it. With streaming, the diagnostics arrive in the log automatically before the timeout fires. Highest-ROI debugging investment for server startup code.
+
+### 14.6 CUDA Cache Clearing Before GPU Subprocess Spawn
+**Context**: Starting vLLM as a subprocess from a parent that had loaded/unloaded multiple GPU models on the same GPU. Residual cached allocations in the parent process reduce the child's available GPU memory budget on Windows WDDM.
+
+**Principle**: Before spawning a GPU-intensive subprocess from a CUDA-using parent, call `gc.collect()` followed by `torch.cuda.empty_cache()` to free residual GPU memory. This is especially important on Windows WDDM where the parent's CUDA context affects the child's visible memory budget. This is a best-effort operation — wrap in try/except since torch may not be imported in all code paths.
+
+**Example**:
+```python
+def _free_parent_gpu_memory():
+    """Try to free GPU memory in parent before spawning child subprocess."""
+    try:
+        import gc
+        gc.collect()
+        import torch
+        torch.cuda.empty_cache()
+    except Exception:
+        pass
+```
+
+**Why it matters**: On Windows WDDM, the parent's torch state is not fully cleaned by model unload alone. Residual cached allocations occupy GPU pages visible to the child. A garbage collection + CUDA cache clear before spawn maximizes the child's available budget. On Linux (CUDA Linux), this matters less because subprocesses have independent GPU memory views.
 58. **Hand-off Checklist** — every stage needs a verifiable pre-exit checklist before declaring completion
 59. **Orchestrator for Convergent Paths** — when multiple pipeline paths share a final step, insert an orchestrator as single entry point
 60. **Granular Edits Within Batches** — one logical unit per edit call; each produces an independently reviewable diff
