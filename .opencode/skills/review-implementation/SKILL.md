@@ -12,7 +12,7 @@ description: 'Verify the completed implementation meets all success criteria —
 - Verify against plan or evaluation list — every criterion met
 - Sign off or route back to the appropriate prior skill
 - Archive plan on success
-- Auto-sync docs before running tests (Phase 0a) — docs updated before test suite verifies them
+- Auto-sync docs before running tests (Phase 1a) — docs updated before test suite verifies them
 
 ## Boundaries
 - **Find and fix** — inspect the codebase for issues; fix broken structural references, stale test assertions, and index staleness inline. Do not route backward for fixable issues found during review.
@@ -25,12 +25,20 @@ description: 'Verify the completed implementation meets all success criteria —
 - [ ] Confirm which prior skill produced the diff (implement-plan, improve-architecture, or modularize-and-clean)
 - [ ] Read the prior plan or evaluation list
 - [ ] Run baseline tests — all must pass before proceeding
-- [ ] Load and execute `update-docs` skill in **implicit mode** — auto-syncs docs from git diff delta (no user interaction)
-- [ ] Load and execute `rebuild-test-and-indexes` skill in **implicit mode** — delta structural sync → parallel test run → triage (max 3 cycles) → parallel conditional index rebuild
 
 ## Review Workflow
 
-### Phase 1: Inspect Changes
+After Phase 0 completes, execute the following automation steps in order before proceeding to manual review:
+
+### Phase 1a: Update Docs (Implicit)
+
+- [ ] Load and execute `update-docs` skill in **implicit mode** — auto-syncs docs from git diff delta (no user interaction)
+
+### Phase 1b: Rebuild Test and Indexes (Implicit)
+
+- [ ] Load and execute `rebuild-test-and-indexes` skill in **implicit mode** — delta structural sync → parallel test run → triage (max 3 cycles) → parallel conditional index rebuild
+
+### Phase 2: Inspect Changes
 **Purpose:** Establish what was changed, confirm it matches the expected pass type, load the right reference material, and verify scope — all before running any automated checks.
 
 #### Step 1: Confirm Pass Type
@@ -80,8 +88,8 @@ Run `git status` to list all modified, added, and deleted files. Flag:
 - **Commit message scan** — run `git log` on the branch. If any commit message is empty, "wip", "fix", or otherwise non-descriptive, flag it. Commit messages should state WHY, not just WHAT.
 - **File count check** — if more than 15 files changed, flag for review. Large file count often indicates scope creep.
 
-### Phase 2: Verify Execution
-**Purpose:** Run all automated checks and use codebase exploration to catch anything the implementation may have missed — before the manual audit in Phase 3.
+### Phase 3: Verify Execution
+**Purpose:** Run all automated checks and use codebase exploration to catch anything the implementation may have missed — before the manual audit in Phase 4.
 
 #### Step 1: Codebase Exploration
 **Purpose:** Verify the codebase reflects the intended changes — find code that should have been changed but wasn't, and confirm no stale patterns remain.
@@ -120,7 +128,7 @@ cd frontend && npx vitest run
 
 **Diff test count** — note count per suite before and after. Flag: tests removed without explanation (regression risk) or added without planned batch (scope creep). Report: *"Test count changed: [suite]: [N before] → [N after] ([+/-]N)"*
 
-#### Step 3: Test Health Audit
+#### Step 4: Test Health Audit
 **Purpose:** Beyond pass/fail, verify tests are structurally sound and not silently broken.
 
 Check for:
@@ -130,7 +138,7 @@ Check for:
 
 Flag any findings: *"Test health: [N issues found] — stale paths, misleading comments, coverage gaps."* Route back if structural issues would cause test failures. Report only (no fix) for cosmetic issues like stale comments. The implementer resolves these.
 
-#### Step 4: Run Build
+#### Step 5: Run Build
 **Purpose:** Confirm the production build succeeds after all changes.
 
 ```bash
@@ -138,7 +146,7 @@ cd frontend && npm run build
 ```
 Must succeed. On failure: list errors — do not fix here.
 
-#### Step 5: Run Lint and Typecheck
+#### Step 6: Run Lint and Typecheck
 **Purpose:** Confirm type safety and style compliance across all changed files.
 
 Exact commands:
@@ -149,7 +157,7 @@ cd frontend && npx tsc --noEmit
 
 Must pass. On failure: list files and issues — do not fix here.
 
-### Phase 3: Audit & Sign Off
+### Phase 4: Audit & Sign Off
 **Purpose:** Manually audit test quality and code properties, verify everything against the plan or evaluation list, then sign off or route back. Archive the plan as the final action on success.
 
 #### Step 1: Check Test Quality
@@ -217,7 +225,7 @@ If yes:
 - Move: `docs/PLAN_<date>_<NNN>.md` → `archive/plan/PLAN_<date>_<MMM>.md` (preserves original creation date, assigns global sequential archive number)
 - Confirm: "Plan archived as `archive/plan/PLAN_<date>_<MMM>.md`."
 
-### Phase 4: Save Session
+### Phase 5: Save Session
 **Purpose:** Capture the review conversation before handing off — ensures context is not lost across sessions.
 
 Only reached on successful sign-off.
@@ -225,12 +233,12 @@ Only reached on successful sign-off.
 **Steps:**
 1. Load the skill: `skill(name: "save-session")`
 2. Follow the save-session workflow (determine file, gate for new/append, format, write, rotate)
-3. After save completes, proceed to the update-docs step below
+3. After save completes, proceed to Phase 6 (Cross-Reference Verification)
 
-### Phase 5: Cross-Reference Verification
+### Phase 6: Cross-Reference Verification
 **Purpose:** Verify document link integrity — read-only, no edits.
 
-Only reached after Phase 4 Save Session completes.
+Only reached after Phase 5 Save Session completes.
 
 - [ ] All `See <DOC>.md` links between documents resolve to existing headings
 - [ ] No dead anchor references — every `#section-name` target exists in the target doc
@@ -238,13 +246,13 @@ Only reached after Phase 4 Save Session completes.
 - [ ] No stale redirects — `→ Redirect to <filename>` markers removed if target file no longer exists
 
 ## Hand-off
-- Phase 0a: Update-docs (implicit) — auto-synced docs via git diff delta
-- Phase 0b: Rebuild-test-and-indexes (implicit) — structural sync, parallel tests, parallel index rebuild
-- Phase 1: Diff reviewed, git status clean — only expected files touched
-- Phase 2: All tests pass (count compared), build succeeds, lint clean
-- Phase 3: Test quality verified, plan/evaluation criteria met, archive moved
-- Phase 4: Review session saved
-- Phase 5: Cross-reference verification passed — no dead links, no orphaned sections
+- Phase 1a: Update-docs (implicit) — auto-synced docs via git diff delta
+- Phase 1b: Rebuild-test-and-indexes (implicit) — structural sync, parallel tests, parallel index rebuild
+- Phase 2: Inspect Changes — diff reviewed, git status clean — only expected files touched
+- Phase 3: Verify Execution — all tests pass (count compared), build succeeds, lint clean
+- Phase 4: Audit & Sign Off — test quality verified, plan/evaluation criteria met, archive moved
+- Phase 5: Save Session — review session saved
+- Phase 6: Cross-Reference Verification — cross-reference verification passed, no dead links, no orphaned sections
 - Pass → route to modularize-and-clean (first pass) or improve-architecture (first pass) or improve-security (first pass). Fail → route back to the prior skill that produced the diff.
 
 ### Abort Paths
@@ -267,6 +275,6 @@ Verbal verification report: pass (all items implemented, all criteria met) or fa
 
 ### Next Step
 
-- **First pass — pass:** User invokes `modularize-and-clean`, `improve-architecture`, and `improve-security`. Phase 0 auto-steps (update-docs + rebuild-test-and-indexes) already completed.
-- **Clean-up/Architecture/Security pass — pass:** No further action needed. Phase 0 auto-steps already completed.
+- **First pass — pass:** User invokes `modularize-and-clean`, `improve-architecture`, and `improve-security`. Auto-steps (Phase 1a update-docs + Phase 1b rebuild-test-and-indexes) already completed.
+- **Clean-up/Architecture/Security pass — pass:** No further action needed. Auto-steps (Phase 1a update-docs + Phase 1b rebuild-test-and-indexes) already completed.
 - **Any fail:** User invokes the prior skill that produced the diff.

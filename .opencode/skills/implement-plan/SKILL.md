@@ -5,7 +5,7 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 ## What I do
 - Read the approved plan file (`docs/PLAN_*.md`) and verify all 8 gates pass
-- Split implementation into batches mapped to the plan's Task Breakdown
+- Execute pre-mapped batches from the plan's Batch Execution Order
 - For each batch: write test (TDD) → implement → flag changes → verify
 - Run full test suite + lint + audits after all batches
 - Hand off to review-implementation with all tests passing
@@ -18,42 +18,21 @@ description: 'Execute the approved plan following TDD in reviewable batches. Fla
 
 - [ ] Check for context continuity — see AGENTS.md §Session Continuity Check for trigger conditions. Load and execute the check logic from `save-session` Step 9 if needed.
 - [ ] Read the approved plan (docs/PLAN_*) — verify all 8 gates pass
+- [ ] Read the plan's Batch Execution Order — batches are pre-mapped from check-plan-readiness Phase 4
 - [ ] Run baseline tests — all must pass before any changes
 
 ## Implementation Workflow
 
-### Phase 1: Setup
-**Purpose:** Read docs, understand the full plan, establish blast radius, and map all batches before writing a single line of code.
+### Phase 1: Comprehend Plan
+**Purpose:** Understand the finalized plan — what's being built, in what order, and what each batch requires. Codebase validation and batch mapping are already complete (done by check-plan-readiness Phases 3-4). This phase is comprehension-only.
 
-#### Step 1: Read Docs
-**Purpose:** Understand constraints and scope boundaries before looking at code.
-
-- **`SPECIFICATIONS.md`**: "Out of Scope"
-- **`docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions only
-- **`docs/PLAN_*.md`**: Task Breakdown section (batches map 1:1)
-
-#### Step 2: Read Plan Fully
-**Purpose:** Understand the full plan — what's being built, in what order, and what each batch requires. Phase 0 confirmed gates passed; this step is about comprehension, not re-gating.
-
-- Read all sections of the plan, not just Task Breakdown
-- Map each test file to its plan task (1:1 to Task Breakdown items)
+- **Read `docs/SPECIFICATIONS.md`**: "Out of Scope" — confirm scope boundaries
+- **Read `docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions
+- **Read all sections of the plan** — focus on Task Breakdown and Batch Execution Order
+- **Map each test file to its plan task** — confirm 1:1 alignment with Task Breakdown items
 - If anything is unclear, use the `question` tool to ask — provide selectable `options` with `label` and `description` fields. Rely on the auto-added "Type your own answer" for free-form input
 
-#### Step 3: Codebase Exploration
-**Purpose:** Establish blast radius and locate all affected code before mapping batches — file paths alone are insufficient.
-
-Apply the tier-based pipeline from AGENTS.md §Codebase Exploration. Run broadly first, then narrow:
-
-- `graphify query_graph "<task scope>"` — mandatory blast-radius check; reveals relationship context that file paths alone won't show
-- `graphify path "X" "Y"` — trace relationship between two modules when data flow matters
-- `cocoindex-code_search` — find code by intent when plan's key terms may not match exact names
-- `ast_grep_search` — validate structural patterns and entry points across the affected scope
-
-#### Step 4: Map Batches
-**Purpose:** Translate the plan's Task Breakdown into a concrete, dependency-ordered execution sequence.
-
-- Identify all files to create, modify, or remove
-- Confirm order: dependencies must be implemented before dependents
+No codebase exploration or batch mapping — those are pre-computed in the plan file.
 
 ### Guiding Principles (reference — apply throughout all Phase 2 batches)
 
@@ -140,14 +119,16 @@ Before implementing any function or component, enumerate its edge cases. Write o
 
 **Per-batch TDD loop: test → implement → flag → verify.**
 
+Batches are pre-mapped in the plan's Batch Execution Order (from check-plan-readiness Phase 4). Execute them sequentially — dependencies are already ordered.
+
 For each batch in order:
 
-0. **Make one edit per logical change** — one function, one section, or one test case per edit call.
-1. **Write tests first (TDD)** — failing test → implement → make pass → refactor
-2. **Flag every changed line** — use the flags table below with a short reason
-3. **Update all test references in the same batch** — imports, mock setups, and assertions simultaneously. Source and tests are one unit.
-4. **Verify batch** — tests pass before starting the next batch.
-5. **Tighten assertions** — after batch passes, re-read. `assertIsNotNone` when you know the expected value is a false positive.
+1. **Make one edit per logical change** — one function, one section, or one test case per edit call.
+2. **Write tests first (TDD)** — failing test → implement → make pass → refactor
+3. **Flag every changed line** — use the flags table below with a short reason
+4. **Update all test references in the same batch** — imports, mock setups, and assertions simultaneously. Source and tests are one unit.
+5. **Verify batch** — tests pass before starting the next batch.
+6. **Tighten assertions** — after batch passes, re-read. `assertIsNotNone` when you know the expected value is a false positive.
 
 #### TDD First
 
@@ -253,7 +234,8 @@ Only reached after Phase 3 Verify completes successfully.
 3. After save completes, proceed to Hand-off below
 
 ## Hand-off
-- Phase 1: Plan verified (8 gates ✅), batches mapped to Task Breakdown
+- Phase 0: Plan verified (8 gates ✅), pre-mapped batches from check-plan-readiness
+- Phase 1: Plan comprehended, no ambiguities remain
 - Phase 2: All batches implemented with TDD + flags, verified per batch
 - Phase 3: Full test suite passes, lint clean, all audits passed
 - Phase 4: Implementation session saved

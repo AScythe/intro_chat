@@ -1,13 +1,13 @@
 ---
 name: rebuild-test-and-indexes
-description: 'Rebuild CocoIndex code index and Graphify knowledge graph. On explicit invocation does a full direct codebase scan to find and fix all stale/outdated/broken tests before rebuilding; when invoked as Phase 0 of review-implementation, uses git diff for delta updates. Use after any code change, or when the user says "rebuild test and indexes", "update tests", "reindex", or similar.'
+description: 'Rebuild CocoIndex code index and Graphify knowledge graph. On explicit invocation does a full direct codebase scan to find and fix all stale/outdated/broken tests before rebuilding; when invoked as Phase 1b of review-implementation, uses git diff for delta updates. Use after any code change, or when the user says "rebuild test and indexes", "update tests", "reindex", or similar.'
 ---
 
 ## Purpose
 
 Two invocation modes with fundamentally different detection strategies:
 
-| Aspect | Explicit (standalone) | Implicit (Phase 0 of review-implementation) |
+| Aspect | Explicit (standalone) | Implicit (Phase 1b of review-implementation) |
 |--------|----------------------|----------------------------------------------|
 | Detection | Full direct codebase scan — no git diff | git diff delta — only changed files |
 | Scope | ALL stale/outdated/broken test refs | Only structural refs related to changed files |
@@ -24,7 +24,7 @@ Two invocation modes with fundamentally different detection strategies:
 
 ## Phase 0: Prerequisites
 
-- [ ] Determine invocation mode — explicit (standalone "rebuild test and indexes") or implicit (Phase 0 of review-implementation)
+- [ ] Determine invocation mode — explicit (standalone "rebuild test and indexes") or implicit (Phase 1b of review-implementation)
 - [ ] Confirm `git` is available
 - [ ] Confirm `ccc` is installed (warn if not found — skip CocoIndex rebuild)
 - [ ] Confirm `graphify` is installed (warn if not found — skip Graphify rebuild)
@@ -89,9 +89,9 @@ For every mismatch found in Steps 1-4:
 
 Run in order. If any fails, proceed to Step 2 (triage). If all pass, skip to Phase 3.
 
-1. Backend tests: `uv run python tests/test_app.py`
-2. Agent guidelines: `uv run python tests/test_agent_guidelines.py`
-3. Frontend tests: `cd frontend ; npm test` (skip if node_modules/ not found)
+1. Backend tests: `python -m pytest` (discovers all Python tests)
+2. Frontend tests: `cd frontend && npm test` (skip if node_modules/ not found)
+3. Additional project-specific test suites (lint, typecheck, agent guidelines, etc.)
 
 #### Step 2: Triage & Iterate (max 3 cycles)
 
@@ -172,7 +172,7 @@ uv run python agent_utility/dedup_graph_nodes.py
 
 ---
 
-## Implicit Path (Phase 0 of review-implementation)
+## Implicit Path (Phase 1b of review-implementation)
 
 **Detection method:** git diff delta. Only files that changed in the current branch are relevant. We sync structural refs for changed files, run tests to confirm, triage failures (max 3 cycles), then rebuild indexes conditionally.
 
@@ -211,11 +211,10 @@ Run test suites concurrently:
 
 | Parallel call | Command |
 |---------------|---------|
-| 1 | `uv run python tests/test_app.py` |
-| 2 | `cd frontend ; npm test` (skip if node_modules/ not found) |
+| 1 | `python -m pytest` (discovers all Python tests) |
+| 2 | `cd frontend && npm test` (skip if node_modules/ not found) |
 
-Wait for both to complete. Then run agent guidelines test (depends on structural changes from backend test):
-- `uv run python tests/test_agent_guidelines.py`
+Wait for both to complete. Then run additional project-specific test suites (lint, typecheck, agent guidelines, etc.) sequentially.
 
 If all pass → proceed to Step 5 (Conditional Rebuild).
 If any fail → proceed to Step 4 (Triage).
@@ -279,4 +278,4 @@ Verbal report: audit/rebuild result + any warnings.
 
 ### Next Step
 - **Explicit path**: Done.
-- **Implicit path**: Return to `review-implementation` Phase 0 which continues with Codebase Exploration and the review workflow.
+- **Implicit path**: Return to `review-implementation` Phase 2 (Inspect Changes) and continue the review workflow.

@@ -9,13 +9,13 @@ description: 'Analyze session changes and sync all project documentation by dele
 - Update each doc in dependency order
 - Verify cross-reference integrity across all project docs
 - Route to push-to-git
-- **Auto-execute update-docs (implicit) on success** — when invoked from review-implementation Phase 0a
+- **Auto-execute update-docs (implicit) on success** — when invoked from review-implementation Phase 1a
 
 ## Purpose
 
 Two invocation modes with fundamentally different detection strategies:
 
-| Aspect | Explicit (standalone) | Implicit (Phase 0a of review-implementation) |
+| Aspect | Explicit (standalone) | Implicit (Phase 1a of review-implementation) |
 |--------|----------------------|----------------------------------------------|
 | Detection | Full codebase + session history | git diff delta |
 | Scope | ALL docs — full analysis | Only docs matching changed files |
@@ -23,7 +23,7 @@ Two invocation modes with fundamentally different detection strategies:
 | Proposal | Full per-doc proposals | Delta-only proposals via parallel sub-agents |
 | Approval | Serial per-doc review (full diff display) | No approval — auto-apply from proposals |
 | Apply | After approval per doc | Sequential apply by main agent (no user gate) |
-| Verify | Cross-reference integrity | Moved to review-implementation Phase 5 (read-only) |
+| Verify | Cross-reference integrity | Moved to review-implementation Phase 6 (read-only) |
 | Blocking | Yes — user must complete review | Non-blocking — failures warn but don't halt caller |
 
 ## Boundaries
@@ -49,7 +49,7 @@ Two invocation modes with fundamentally different detection strategies:
 
 ## Phase 0: Prerequisites
 
-- [ ] Determine invocation mode — explicit (standalone "sync docs") or implicit (Phase 0a of review-implementation)
+- [ ] Determine invocation mode — explicit (standalone "sync docs") or implicit (Phase 1a of review-implementation)
 - [ ] If explicit: review session changes — git diff, [FLAG] annotations, conversation history
 - [ ] Match changes against Doc Sync Triggers table
 - [ ] Read AGENTS.md doc sync triggers table
@@ -124,9 +124,9 @@ If a user rejected or modified a proposal, skip or adjust accordingly.
 
 ---
 
-## Implicit Path (Phase 0a of review-implementation)
+## Implicit Path (Phase 1a of review-implementation)
 
-**Detection method:** git diff delta — only files that changed. Determine which docs need updating by matching change types against Doc Sync Triggers. No full codebase scan. Used when auto-invoked by `review-implementation` Phase 0a.
+**Detection method:** git diff delta — only files that changed. Determine which docs need updating by matching change types against Doc Sync Triggers. No full codebase scan. Used when auto-invoked by `review-implementation` Phase 1a.
 
 **Trust boundary:** Caller ran baseline tests before invoking. Doc deltas are derived from the same git diff the implementer already tested — auto-apply is safe.
 
@@ -174,7 +174,7 @@ Collect all proposals. Main agent applies edits sequentially via `edit` tool. **
 ## Hand-off
 - Explicit mode: Phase 1 (Inventory) → Phase 2 (Propose via sub-agents) → Phase 3 (Review & Approve) → Phase 4 (Apply) → Phase 5 (Verify cross-references)
 - Implicit mode: Step 1 (Detect) → Step 2 (Match) → Step 3 (Propose & Apply — auto, no user gate) → Step 4 (Report)
-- Cross-reference verification moved to review-implementation Phase 5 (read-only)
+- Cross-reference verification moved to review-implementation Phase 6 (read-only)
 
 ### Abort Paths
 If interrupted mid-phase: record current state in a TODO or pending list, offer to resume at the same point when re-invoked. Do NOT commit partial work.
@@ -184,7 +184,7 @@ If interrupted mid-phase: record current state in a TODO or pending list, offer 
 ## Outputs & Triggers
 
 ### Output
-All applicable docs updated. Cross-references verified in explicit mode only (implicit mode cross-ref check handled by review-implementation Phase 5).
+All applicable docs updated. Cross-references verified in explicit mode only (implicit mode cross-ref check handled by review-implementation Phase 6).
 
 ### Exit Declaration
 - **Explicit mode:** State clearly: "**Documentation sync complete. All applicable syncs run, cross-references verified. Proceed to push-to-git? Say 'push' to trigger pushing the changes to git.**"
@@ -192,4 +192,4 @@ All applicable docs updated. Cross-references verified in explicit mode only (im
 
 ### Next Step
 - **Explicit mode:** User invokes `push-to-git` (Build mode — same mode, no switch needed).
-- **Implicit mode:** Control returns to `review-implementation` Phase 0 (proceeds to rebuild-test-and-indexes).
+- **Implicit mode:** Control returns to `review-implementation` — proceeds to Phase 1b (rebuild-test-and-indexes).

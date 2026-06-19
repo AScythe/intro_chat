@@ -1,18 +1,20 @@
 ---
 name: check-plan-readiness
-description: 'Create the finalized plan document from conversation context, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. Use after grill-and-refine or brainstorm and plan, or triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
+description: 'Create the finalized plan document from conversation context, validate it against the codebase, map concrete batches, verify it passes all gates, and save to docs/. If all pass, declare ready. If any fail, triage: minor gaps get a quick fix, significant gaps ask user interactively. Use after grill-and-refine or brainstorm and plan, or triggered when the user says "finalize the plan", "check plan readiness", "is the plan ready?", or similar.'
 ---
 
 ## What I do
 - Gather from upstream (brainstorm + grill)
 - Create `docs/PLAN_YYYY_MM_DD_XXX.md` with all sections populated
+- Validate plan assumptions against actual codebase (graphify, cocoindex, ast-grep)
+- Map Task Breakdown to concrete batch execution order (files, dependencies)
 - Verify against all 8 gates and append results
 - All pass → declare ready with file path. Fail → report and triage
 
-## Boundaries (gate-driven phase)
-- **Plan file writes only** — creates `docs/PLAN_*.md`
+## Boundaries (analysis + gate-driven phase)
+- **Plan file writes only** — creates and updates `docs/PLAN_*.md`
 - **No code writes**
-- **Presence check, not re-probe** — verify each criterion is present in the plan file
+- **Substantive validation** — Phase 3 explores the codebase to confirm assumptions; Phase 4 maps concrete batches; Gate 8 uses real exploration data
 - **Gate-driven** — no plan finalized until all 8 gates pass
 
 ## Phase 0: Prerequisites
@@ -89,7 +91,54 @@ Each task must be independently testable and map 1:1 to a batch:
 3. **Sequential numbering** across all phases (Task 1, Task 2, ...)
 4. **Phase headers** — use `#### Phase N: Name`
 
-### Phase 3: Verify Gates
+### Phase 3: Validate Against Codebase
+**Purpose:** Confirm the plan's task assumptions hold against the actual codebase. Unlike Phases 1-2 (conversation-only), this phase reads code and structure to validate every task before mapping batches.
+
+Read the same docs referenced in Phase 2, but now with a critical eye:
+- **`docs/SPECIFICATIONS.md`**: "Out of Scope" — confirm no planned task violates scope boundaries
+- **`docs/ARCHITECTURE.md`**: "Project Structure", "Import Structure", "Modifying Instructions", relevant module descriptions — confirm planned files fit existing structure
+- **Codebase (via exploration tools)**: validate each task's assumptions against actual code
+
+Apply the tier-based pipeline from AGENTS.md §Codebase Exploration:
+
+| Tier | When | Required steps |
+|------|------|---------------|
+| **Tier 1 — Tiny** | 1-2 exact files known, trivial change | Skip graphify. Read target files. |
+| **Tier 2 — Moderate** | Known area, 2-5 files | `graphify query_graph` (1 query) → `cocoindex-code_search` → `ast_grep_search` → Read |
+| **Tier 3 — Complex** | Unknown scope, multiple communities | Full Pipeline (graphify 3 variations × 2 sub-graphs → cocoindex-code → ast-grep → Read) |
+
+After exploration:
+- If the plan's assumptions match reality → proceed to Phase 4
+- If gaps are found → **update the plan document** (Task Breakdown, Files, or Architecture sections) to reflect reality, then proceed
+- If gaps are fundamental (wrong approach, missing files) → flag as a Gate 5 (Soundness) or Gate 8 (Community Coverage) issue and route to triage in Phase 6
+
+### Phase 4: Map Batches
+**Purpose:** Translate the plan's Task Breakdown into a concrete, dependency-ordered execution sequence and append it to the plan document.
+
+**Input:** Validated plan (from Phase 3) with confirmed task assumptions.
+
+For each task in the plan's Task Breakdown:
+1. **Identify exact files** to create, modify, or remove — use file paths, not descriptions
+2. **Identify test files** — one test file per task (can be new or existing)
+3. **Confirm dependency order** — tasks that depend on other tasks must come after them. If the plan's ordering is wrong, correct it.
+4. **Append the batch mapping** to the plan document under a new `##### Batch Execution Order` subsection in the Task Breakdown:
+
+```markdown
+#### Task Breakdown
+
+...existing tasks...
+
+##### Batch Execution Order
+
+| Batch | Task | Files to Create | Files to Modify | Files to Remove | Dependencies |
+|-------|------|----------------|-----------------|----------------|--------------|
+| 1 | Task 1: ... | - | `path/to/file.py` | - | None |
+| 2 | Task 2: ... | `path/to/new.py` | - | - | Batch 1 |
+```
+
+After mapping, proceed to Phase 5 (Verify Gates).
+
+### Phase 5: Verify Gates
 **Purpose:** Confirm the plan document is complete and sound before declaring it ready for implementation.
 
 **Presence check, not re-probe** — verify each criterion is present in the plan file. Exception: Gate 8 requires an active `graphify get_community` query to verify scope coverage — it cannot be satisfied by presence alone.
@@ -124,10 +173,10 @@ After checking all gates, append the results table:
 | Community Coverage | ✅ / ❌ | ... |
 ```
 
-### Phase 4: Triage Failures
+### Phase 6: Triage Failures
 **Purpose:** Resolve failed gates before proceeding — minor issues fixed in place, significant ones resolved interactively with the user.
 
-Only reached if one or more gates fail in Phase 3.
+Only reached via: (a) one or more gates fail in Phase 5, or (b) Phase 3 validation finds fundamental gaps (wrong approach, missing files).
 
 1. List which gates failed and why
 2. Assess severity:
@@ -143,8 +192,10 @@ Only reached if one or more gates fail in Phase 3.
 ## Hand-off
 - Phase 1: Inputs gathered from brainstorm + grill
 - Phase 2: Plan file created with all sections populated
-- Phase 3: All 8 gates checked, results appended
-- Phase 4: Failed gates triaged (minor: fixed in place; significant: resolved interactively)
+- Phase 3: Plan validated against codebase — assumptions confirmed (or gaps fixed in plan)
+- Phase 4: Batches mapped to concrete files and dependency order — appended to plan doc
+- Phase 5: All 8 gates checked, results appended
+- Phase 6: Failed gates triaged (minor: fixed in place; significant: resolved interactively)
 - Pass → route to implement-plan. Fail → triaged (minor: fixed; significant: route to grill-and-refine)
 
 ---
